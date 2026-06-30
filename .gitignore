@@ -1,0 +1,52 @@
+_site/
+.quarto/
+_freeze/
+
+# Quarto writes executed-figure output (matplotlib SVGs) to <doc>_files/.
+# Ignore those next to the SOURCES, but NOT the copies under docs/ — docs/ is
+# what GitHub Pages serves, so excluding them publishes decks with broken
+# images wherever a {python} cell draws a plot.
+*_files/
+!docs/**/*_files/
+.DS_Store
+.Rproj.user/
+.Rhistory
+__pycache__/
+*.pyc
+
+/.quarto/
+
+# Claude Code ephemeral
+.claude/scheduled_tasks.lock
+.claude/*.lock
+
+# ---------------------------------------------------------------------------
+# NOT FOR PUBLICATION.
+# This repo is PUBLIC and serves the site at ts-robinson.com/me324, so anything
+# committed below is readable by students -- including via the repo's history.
+# ---------------------------------------------------------------------------
+
+# Assessment. Never commit these.
+exams/
+quizzes/
+
+# Internal working documents.
+*.docx
+
+# Weeks 2-3, released day by day. To publish one: delete its line here, add the
+# file to `render:` in _quarto.yml, add it to the listing in lectures.qmd or the
+# table in labs.qmd, then re-render and commit.
+lectures/lecture-06-*
+lectures/lecture-07-*
+lectures/lecture-08-*
+lectures/lecture-09-*
+lectures/lecture-10-*
+lectures/lecture-11-*
+lectures/lecture-12-*
+labs/lab-06-*
+labs/lab-07-*
+labs/lab-08-*
+labs/lab-09-*
+labs/lab-10-*
+labs/lab-11-*
+labs/lab-12-*

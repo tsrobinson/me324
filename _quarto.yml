@@ -1,0 +1,88 @@
+project:
+  type: website
+  output-dir: docs
+  # Only released material is listed here. Weeks 2-3 (lectures 6-12, labs 6-12)
+  # exist on disk but are deliberately NOT rendered or published yet -- add the
+  # relevant lines below (and drop them from .gitignore) to release them.
+  render:
+    - index.qmd
+    - lectures.qmd
+    - labs.qmd
+    - readings.qmd
+    - lectures/lecture-01-what-is-ai.qmd
+    - lectures/lecture-02-deep-models-primer.qmd
+    - lectures/lecture-03-computational-graphs.qmd
+    - lectures/lecture-04-backpropagation.qmd
+    - lectures/lecture-05-feedforward.qmd
+    - labs/lab-01-setup-and-tensors.ipynb
+    - labs/lab-02-perceptron-numpy.ipynb
+    - labs/lab-03-value-forward.ipynb
+    - labs/lab-04-backprop-autograd.ipynb
+    - labs/lab-05-pytorch-feedforward.ipynb
+  preview:
+    port: 4200
+    browser: true
+
+# ---------------------------------------------------------------------------
+# Website (the GitHub Pages site). Pages render to HTML; the lecture decks in
+# lectures/*.qmd keep `format: revealjs` in their own front matter, so they
+# still build as slide decks and are linked from the Lectures page.
+# ---------------------------------------------------------------------------
+website:
+  title: "ME324 · AI & Deep Learning"
+  description: "LSE Summer School — a three-week intensive introduction to deep learning and modern AI."
+  # Project site under the tsrobinson.github.io user site, which carries the
+  # custom domain ts-robinson.com -- GitHub serves project repos owned by the
+  # same account at <custom-domain>/<repo>. Do NOT add a CNAME file to this
+  # repo: it inherits the domain, and a CNAME here would hijack the apex.
+  site-url: "https://ts-robinson.com/me324/"
+  repo-url: "https://github.com/tsrobinson/me324"
+  repo-actions: [source]
+  open-graph: true
+  navbar:
+    background: "#0E1A2B"
+    foreground: "#FBFAF6"
+    pinned: true
+    left:
+      - href: index.qmd
+        text: Home
+      - href: lectures.qmd
+        text: Lectures
+      - href: labs.qmd
+        text: Labs
+      - href: readings.qmd
+        text: Readings
+    right:
+      - icon: github
+        href: "https://github.com/tsrobinson/me324"
+        aria-label: GitHub repository
+  page-footer:
+    border: true
+    left: "ME324 · AI and Deep Learning · LSE Summer School"
+    center: "Dr Thomas Robinson · Lab instructor: Kaifang Zhou"
+    right: "Built with [Quarto](https://quarto.org)"
+
+# ---------------------------------------------------------------------------
+# Formats. `html` is first, so ordinary pages default to it. The revealjs block
+# is the original deck configuration, inherited by every lecture.
+# ---------------------------------------------------------------------------
+format:
+  html:
+    theme: [cosmo, assets/theme/site.scss]
+    toc: true
+    toc-depth: 3
+    code-copy: true
+    code-overflow: wrap
+    link-external-newwindow: true
+    smooth-scroll: true
+    anchor-sections: true
+    grid:
+      body-width: 960px
+
+# The lecture decks render as revealjs via lectures/_metadata.yml (keeps the
+# website pages HTML-only, so their output names don't collide on render).
+
+bibliography: refs.bib
+csl: https://www.zotero.org/styles/apa
+
+editor: source

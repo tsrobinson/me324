@@ -1,0 +1,1018 @@
+---
+title: "Computational graphs & the maths of AI"
+subtitle: "Lecture 3 — Three tools: linear algebra, calculus, and computation graphs"
+author: "Dr Thomas Robinson"
+date: "2026-08-05"
+date-format: long
+bibliography: ../refs.bib
+format: 
+  revealjs:
+    smaller: true
+---
+
+# Part 1 · Linear algebra {background-color="#0E1A2B"}
+
+## Why we need this
+
+A modern neural network operates on **tensors with millions of entries**. We need notation that scales — both for writing and for computing.
+
+::: {.card}
+Every layer of a neural network is essentially a *matmul* followed by an non-linear action function applied element-wise.
+:::
+
+**But we're social scientists 😨**
+
+* Matrices aren't that scary! Stacking survey into a data frame ($n$ rows, $k$ columns) gives you a matrix. 
+
+* We're largely dressing up familiar maths using new notation.
+
+
+## Scalars
+
+The smallest unit. Just numbers.
+
+$$
+1, \ 1.5, \ -0.001, \ \pi
+$$
+
+Combine them with arithmetic to make expressions:
+
+$$
+y = \big((2 \times 3) + 5\big) \times 7 = 77
+$$
+
+Or write the same thing as a **function**:
+
+$$
+y = f(x) = (2x + 5) \times 7
+$$
+
+::: {.card}
+A function is just a name for "input $x$, compute these steps, output $y$." 
+
+Functions can be **composed**, i.e. $f(x) = g(h(x))$ where $h(x) = 2x + 5$ and $g(z) = 7z$.
+
+**Composition is the whole idea behind a deep network.**
+:::
+
+## Vectors
+
+A 1-D ordered list of scalars. Two we'll keep using:
+
+$$
+\mathbf{a} = \begin{bmatrix} 1 \\ 2 \\ 3 \end{bmatrix}, \quad \mathbf{b} = \begin{bmatrix} 4 \\ 5 \\ 6 \end{bmatrix}
+$$
+
+::: {.columns}
+::: {.column width="50%"}
+**Addition / subtraction**: element-wise, requires **matching length**.
+
+$$
+\mathbf{a} + \mathbf{b} = \begin{bmatrix} 1+4 \\ 2+5 \\ 3+6 \end{bmatrix} = \begin{bmatrix} 5 \\ 7 \\ 9 \end{bmatrix}
+$$
+:::
+::: {.column width="50%"}
+**Scalar multiplication**: multiply every entry.
+
+$$
+3 \, \mathbf{a} = \begin{bmatrix} 3 \\ 6 \\ 9 \end{bmatrix}
+$$
+
+:::
+:::
+
+*A survey-stats example*
+
+Rescaling everyone's height from cm to m is scalar multiplication of the height column
+
+## Row vs column — and the transpose
+
+A vector can be a *column* $\begin{bmatrix} a_1 \\ a_2 \end{bmatrix}$ or a *row* $\begin{bmatrix} a_1 & a_2 \end{bmatrix}$.
+
+The **transpose** ($'$ or $^\mathsf{T}$) swaps them:
+
+$$
+\mathbf{a} = \begin{bmatrix} a_1 \\ a_2 \end{bmatrix} \ \Longleftrightarrow \ \mathbf{a}^\mathsf{T} = \begin{bmatrix} a_1 & a_2 \end{bmatrix}
+$$
+
+::: {.callout-note}
+The transpose is **only a re-orientation**. The numbers don't change. It exists so the operations later in this lecture line up dimension-wise.
+:::
+
+## Matrices
+
+A 2-D array of scalars. Two indices — row and column.
+
+$$
+\mathbf{A} = \begin{bmatrix} 1 & 2 & 3 \\ 4 & 5 & 6 \\ 7 & 8 & 9 \end{bmatrix}
+$$
+
+Addition is again element-wise:
+
+$$
+\begin{bmatrix} 1 & 2 \\ 3 & 4 \end{bmatrix} - \begin{bmatrix} 5 & 6 \\ 7 & 8 \end{bmatrix} = \begin{bmatrix} -4 & -4 \\ -4 & -4 \end{bmatrix}
+$$
+
+::: {.card}
+**A weight matrix in a neural network is just a 2-D table of numbers**, ordered by "which output node" and "which input feature".
+:::
+
+## Indexing a matrix
+
+[Row first, then column — always]{.eyebrow}
+
+We write $a_{ij}$ for the entry in **row $i$**, **column $j$**:
+
+$$
+\mathbf{A} = \begin{bmatrix}
+a_{11} & a_{12} & a_{13} \\
+a_{21} & a_{22} & a_{23} \\
+a_{31} & a_{32} & a_{33}
+\end{bmatrix}
+= \begin{bmatrix} 1 & 2 & 3 \\ 4 & 5 & 6 \\ 7 & 8 & 9 \end{bmatrix}
+$$
+
+::: {.columns}
+::: {.column width="34%"}
+[Single entries]{.pill}
+
+* $a_{12} = 2$
+* $a_{31} = 7$
+* $a_{23} = 6$
+:::
+::: {.column width="33%"}
+[A whole row]{.pill-blue}
+
+Fix $i = 2$:
+
+$\begin{bmatrix} 4 & 5 & 6 \end{bmatrix}$
+:::
+::: {.column width="33%"}
+[A whole column]{.pill-green}
+
+Fix $j = 2$:
+
+$\begin{bmatrix} 2 \\ 5 \\ 8 \end{bmatrix}$
+:::
+:::
+
+::: {.callout-warning appearance="simple"}
+$a_{12} = 2$ but $a_{21} = 4$ — **different entries**. Row always comes first, and this is the most common slip in the rest of this lecture.
+:::
+
+::: {.try-box}
+[Try]{.try-label}
+What is $a_{32}$? And what shape is column 3?
+:::
+
+::: {.fragment}
+::: {.reveal-box}
+[Answer]{.reveal-label}
+$a_{32} = 8$ — row 3, column 2. Column 3 is $\begin{bmatrix} 3 \\ 6 \\ 9 \end{bmatrix}$, a $3 \times 1$ column vector.
+:::
+:::
+
+## Indexing in maths vs. indexing in code
+
+::: {.columns}
+::: {.column width="50%"}
+[Maths starts at 1]{.pill-amber}
+
+$a_{11}$ is the **top-left** entry.
+
+$$
+\mathbf{A} = \begin{bmatrix} 1 & 2 & 3 \\ 4 & 5 & 6 \\ 7 & 8 & 9 \end{bmatrix}
+$$
+
+So $a_{23} = 6$.
+:::
+::: {.column width="50%"}
+[Python starts at 0]{.pill-blue}
+
+```python
+A[0, 0]   # 1   <- top-left
+A[1, 2]   # 6   <- same entry as a_23
+A[1]      # row 2:    [4, 5, 6]
+A[:, 1]   # column 2: [2, 5, 8]
+```
+:::
+:::
+
+::: {.callout-important}
+The **order is the same** — row, then column. Only the *starting number* differs: $a_{ij}$ is `A[i-1, j-1]`.
+
+You met this in yesterday's lab; you'll use it every day from here on.
+:::
+
+## Transposing a matrix
+
+Swap rows and columns:
+
+$$
+\mathbf{A} = \begin{bmatrix} a_{11} & a_{12} & a_{13} \\ a_{21} & a_{22} & a_{23} \end{bmatrix}, \quad
+\mathbf{A}^\mathsf{T} = \begin{bmatrix} a_{11} & a_{21} \\ a_{12} & a_{22} \\ a_{13} & a_{23} \end{bmatrix}
+$$
+
+::: {.try-box}
+[Try]{.try-label}
+What is $(\mathbf{A}^\mathsf{T})^\mathsf{T}$?
+:::
+
+::: {.fragment}
+::: {.reveal-box}
+[Answer]{.reveal-label}
+$\mathbf{A}$. Two transposes get you back where you started.
+:::
+:::
+
+## The dot product
+
+[The most important operation we'll see today]{.eyebrow}
+
+For two vectors $\mathbf{a}, \mathbf{b} \in \mathbb{R}^n$ (same length!):
+
+$$
+\mathbf{a} \cdot \mathbf{b} = \sum_{i=1}^n a_i b_i
+$$
+
+A **single number**. Sometimes written $\langle \mathbf{a}, \mathbf{b} \rangle$ or $\mathbf{a}^\mathsf{T} \mathbf{b}$.
+
+::: {.columns}
+::: {.column width="50%"}
+**Worked example.** Let $\mathbf{a} = \begin{bmatrix} 1 \\ 2 \\ 3 \end{bmatrix}$ and $\mathbf{b} = \begin{bmatrix} 4 \\ 5 \\ 6 \end{bmatrix}$.
+
+$$
+\mathbf{a} \cdot \mathbf{b} = (1)(4) + (2)(5) + (3)(6) = 4 + 10 + 18 = 32
+$$
+:::
+::: {.column width="50%"}
+**Why it matters.**
+
+A neuron's pre-activation is $\sum_i w_i x_i + b$. That sum is a **dot product** $\mathbf{w} \cdot \mathbf{x}$.
+
+* A weighted sum of survey responses is a dot product.
+* A weighted average is a normalised dot product.
+
+:::
+:::
+
+## Matrix multiplication
+
+Take $\mathbf{A} \in \mathbb{R}^{n \times k}$ and $\mathbf{B} \in \mathbb{R}^{k \times t}$. 
+
+The product $\mathbf{AB}$ is the $n \times t$ matrix whose entry $(i, j)$ is the **dot product of row $i$ of $\mathbf{A}$ and column $j$ of $\mathbf{B}$**:
+
+$$
+(\mathbf{AB})_{ij} = \sum_{\ell=1}^k A_{i\ell} \, B_{\ell j}
+$$
+
+::: {.card}
+**Dimension rule** (memorise this): the *inner* dimensions must match.
+
+$$
+(\underbrace{n \times k}_{\mathbf{A}}) \cdot (\underbrace{k \times t}_{\mathbf{B}}) \longrightarrow (n \times t)
+$$
+
+If they don't match, the product is *undefined*.
+:::
+
+## Matrix multiplication — worked example
+
+::: {.columns}
+::: {.column width="55%"}
+$$
+\mathbf{A} = \begin{bmatrix} 1 & 2 \\ 3 & 4 \end{bmatrix}, \quad \mathbf{B} = \begin{bmatrix} 5 & 6 \\ 7 & 8 \end{bmatrix}
+$$
+
+$$
+\mathbf{AB} = \begin{bmatrix}
+\underbrace{1 \cdot 5 + 2 \cdot 7}_{= 19} & \underbrace{1 \cdot 6 + 2 \cdot 8}_{= 22} \\
+\underbrace{3 \cdot 5 + 4 \cdot 7}_{= 43} & \underbrace{3 \cdot 6 + 4 \cdot 8}_{= 50}
+\end{bmatrix} = \begin{bmatrix} 19 & 22 \\ 43 & 50 \end{bmatrix}
+$$
+:::
+::: {.column width="45%"}
+**Two warnings.**
+
+* In general $\mathbf{AB} \neq \mathbf{BA}$. Order matters.
+* Dimensions must match, i.e. if $\mathbf{A} \in \mathbb{R}^{3 \times 2}$, $\mathbf{B} \in \mathbb{R}^{2 \times 4}$ → $\mathbf{AB}$ is $3 \times 4$. But $\mathbf{BA}$ is undefined.
+
+:::
+:::
+
+::: {.callout-tip}
+# $\mathbf{AB} \neq \mathbf{BA}$
+Compute $\mathbf{BA}$ for the above matrices by hand. You should get a different number than $\mathbf{AB}$. This mismatch is why we need transposes to keep things orderly.
+:::
+
+## Why a layer is a matrix product
+
+Yesterday: a hidden layer of three nodes, each computing $\sum_i w_i^{(h)} x_i + b^{(h)}$ for the same input $\mathbf{x}$.
+
+::: {.card}
+Stack the per-node weights into a matrix $\mathbf{W} \in \mathbb{R}^{h \times k}$ and biases into a vector $\mathbf{b} \in \mathbb{R}^{1 \times h}$. The entire layer's pre-activation is:
+
+$$
+\mathbf{x} \mathbf{W}^\mathsf{T} + \mathbf{b} \quad \in \mathbb{R}^{1 \times h}.
+$$
+
+The transpose makes the inner dimensions match: $(1 \times k) \cdot (k \times h) \to (1 \times h)$.
+
+I.e. One output per $h$ nodes
+:::
+
+## Why a transpose? — dimensional intuition
+
+Suppose $h = 2$ (two hidden nodes) and $k = 3$ (three input features).
+
+::: {.card}
+* Weights for node 1: $\begin{bmatrix} w_1^{(1)} & w_2^{(1)} & w_3^{(1)} \end{bmatrix}$
+* Weights for node 2: $\begin{bmatrix} w_1^{(2)} & w_2^{(2)} & w_3^{(2)} \end{bmatrix}$
+* Stack as $\mathbf{W} = \begin{bmatrix} w_1^{(1)} & w_2^{(1)} & w_3^{(1)} \\ w_1^{(2)} & w_2^{(2)} & w_3^{(2)} \end{bmatrix}$ — shape $(2 \times 3)$.
+
+To compute $\mathbf{x} \cdot \mathbf{W}^\mathsf{T}$ with $\mathbf{x}$ a row vector of length 3, we need $\mathbf{W}^\mathsf{T}$ of shape $(3 \times 2)$. 
+:::
+
+Put it together:
+
+::: {.card}
+$\mathbf{W}^\mathsf{T} = \begin{bmatrix} w_1^{(1)} & w_1^{(2)} \\
+w_2^{(1)} & w_2^{(2)} \\ w_3^{(1)} & w_3^{(2)} \end{bmatrix}$
+
+For a given $\mathbf{x} = \begin{bmatrix} x_1 & x_2 & x_3 \end{bmatrix}, \quad\mathbf{x}\cdot\mathbf{W}^\mathsf{T} = \begin{bmatrix} \big(x_1 w_1^{(1)} + x_2 w_2^{(1)} + x_3 w_3^{(1)}\big) & \big(x_1 w_1^{(2)} + x_2 w_2^{(2)} + x_3 w_3^{(2)}\big) \end{bmatrix}$
+
+So we get a two-length row vector output (one value per neuron).
+
+:::
+
+
+## Stop and check
+
+[<span class="pause-cue">Stop & check</span> — pair with a neighbour, 2 minutes]{.eyebrow}
+
+::: {.try-box}
+[Question: what happens if $\mathbf{X}$ is a dataframe (i.e. multiple observations)?]{.try-label}
+$\mathbf{W} \in \mathbb{R}^{50 \times 5}$ — a hidden layer of width 50 receiving 5 input features.
+$\mathbf{X} \in \mathbb{R}^{100 \times 5}$ — a dataset of 100 observations.
+
+**What is the shape of $\mathbf{X} \mathbf{W}^\mathsf{T}$? What does each row of it represent?**
+:::
+
+::: {.fragment}
+::: {.reveal-box}
+[Answer]{.reveal-label}
+$(100 \times 5) \cdot (5 \times 50) \to (100 \times 50)$.
+
+**Each row** = the 50 hidden-layer pre-activations for one observation.
+
+:::
+
+*Notice this is the forward pass logic of yesterday* 
+
+* But now, done simultaneously over every observation in one matmul!
+
+:::
+
+
+# Plenary · matrix products by hand {background-color="#0E1A2B"}
+
+## Plenary · matrix products by hand
+
+[<span class="pause-cue">≈ 20 min</span> · pen and paper, in pairs]{.eyebrow}
+
+::: {.card}
+[Five problems]{.eyebrow}
+
+For each, compute or say "undefined" (with a reason).
+
+1. $\begin{bmatrix} 1 & 2 \\ 3 & 4 \end{bmatrix} \begin{bmatrix} 5 \\ 6 \end{bmatrix} = \ ?$
+
+2. $\begin{bmatrix} 1 & 0 \\ 0 & 1 \end{bmatrix} \begin{bmatrix} 7 & 8 \\ 9 & 10 \end{bmatrix} = \ ?$
+
+3. $\begin{bmatrix} 1 & 2 & 3 \end{bmatrix} \begin{bmatrix} 4 \\ 5 \\ 6 \end{bmatrix} = \ ?$
+
+4. $\begin{bmatrix} 1 \\ 2 \\ 3 \end{bmatrix} \begin{bmatrix} 4 & 5 \end{bmatrix} = \ ?$
+
+5. $\begin{bmatrix} 1 & 2 \end{bmatrix} \begin{bmatrix} 3 \\ 4 \\ 5 \end{bmatrix} = \ ?$
+:::
+
+[Ten minutes. Then we'll discuss together.]{.muted}
+
+## Plenary · answers
+
+::: {.card}
+1. $\begin{bmatrix} 17 \\ 39 \end{bmatrix}$. A $(2 \times 2) \cdot (2 \times 1) \to (2 \times 1)$ matrix-vector product. Think of it as two dot products stacked.
+
+2. $\begin{bmatrix} 7 & 8 \\ 9 & 10 \end{bmatrix}$. The first matrix is the **identity**. Multiplying by it leaves the second matrix unchanged.
+
+3. $32$. A row × column dot product. Single number.
+
+4. $\begin{bmatrix} 4 & 5 \\ 8 & 10 \\ 12 & 15 \end{bmatrix}$. A *column × row* — the outer product. Gives a matrix, not a scalar.
+
+5. **Undefined**. Inner dimensions $2 \neq 3$ — can't do it.
+:::
+
+::: {.callout-tip}
+The most common error in deep learning code is a shape mismatch. PyTorch raises a clear error when this happens. Train your eye now — and you'll save hours later.
+:::
+
+# Part 2 · Differentiation {background-color="#0E1A2B"}
+
+## What we want — and why
+
+Tomorrow, for any parameter $w$ in our model, we will want to know:
+
+::: {.card}
+**If I *nudge* $w$ slightly, does the loss go up or down — and by how much?**
+:::
+
+This information is a **derivative**.
+
+::: {.callout-tip}
+# You'll have seen derivatives before. 
+
+We're going to re-introduce them with two restrictions:
+
+* We don't care about proofs!
+* We do care about computation — i.e. *getting a number out* given a function and a value of $x$.
+:::
+
+## The derivative — slope of a function
+
+For $y = f(x)$, the derivative $\dfrac{dy}{dx}$ is the **slope** of $f$ at point $x$.
+
+::: {.columns}
+::: {.column width="50%"}
+For $y = ax^b + c$ (where $a, b, c$ are scalars):
+$$
+\frac{dy}{dx} = b \cdot a \, x^{b-1}
+$$
+
+* Constants drop out (their derivative is zero).
+* $b = 1$: $y = ax + c \Rightarrow \frac{dy}{dx} = a$.
+* $b = 2$: $y = ax^2 + c \Rightarrow \frac{dy}{dx} = 2ax$.
+:::
+::: {.column width="50%"}
+::: {.card}
+**Worked example.**
+
+$y = 3x^2 + 5$.
+
+$\dfrac{dy}{dx} = 6x$.
+
+At $x = 1$: slope = 6.
+At $x = 2$: slope = 12.
+At $x = 0$: slope = 0 (local minimum!).
+:::
+:::
+:::
+
+## Seeing the slope
+
+[The same worked example, drawn: $y = 3x^2 + 5$]{.eyebrow}
+
+```{python}
+#| echo: false
+#| fig-width: 9
+#| fig-height: 3.9
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib_inline.backend_inline as backend_inline
+
+# SVG keeps the figure vector-sharp when the deck is projected.
+backend_inline.set_matplotlib_formats("svg")
+
+# ME324 deck palette (see assets/theme/me324.scss)
+INK, MUTED, RULE, PAPER = "#0E1A2B", "#5C6473", "#D7D2C5", "#FBFAF6"
+TANGENTS = {1: "#C9322B", 2: "#1A6FB4", 3: "#2F8F6C"}
+
+plt.rcParams.update({
+    "font.family": "sans-serif",
+    "font.sans-serif": ["Inter", "Helvetica Neue", "Arial", "DejaVu Sans"],
+    "text.color": INK, "axes.labelcolor": INK,
+    "xtick.color": MUTED, "ytick.color": MUTED, "axes.edgecolor": RULE,
+})
+
+f = lambda x: 3 * x**2 + 5
+df = lambda x: 6 * x
+
+fig, ax = plt.subplots(figsize=(9, 3.9))
+fig.patch.set_alpha(0)          # sit on the slide's own background
+ax.patch.set_alpha(0)
+
+xs = np.linspace(-0.7, 3.9, 400)
+ax.plot(xs, f(xs), color=INK, lw=2.4, zorder=3)
+ax.annotate(r"$y = 3x^2 + 5$", xy=(-0.55, 12), color=INK,
+            fontsize=13, fontweight="bold")
+
+for x0, colour in TANGENTS.items():
+    y0, m = f(x0), df(x0)
+    seg = np.array([x0 - 0.95, x0 + 0.95])
+    ax.plot(seg, y0 + m * (seg - x0), color=colour, lw=2.2, zorder=4)
+    ax.vlines(x0, 0, y0, color=colour, lw=1, ls=":", alpha=0.55, zorder=1)
+    ax.plot([x0], [y0], "o", color=colour, ms=9,
+            mec=PAPER, mew=2, zorder=5)           # 2px surface ring
+    # One direct label per tangent, so identity never rests on colour alone
+    # (and nothing collides with the axis tick labels).
+    ax.annotate(f"at $x = {x0}$\nslope = {m:.0f}", xy=(x0, y0), xytext=(-16, 12),
+                textcoords="offset points", color=colour,
+                fontsize=12, fontweight="bold", ha="right",
+                linespacing=1.35, zorder=6)
+
+ax.set_xlim(-0.7, 4.0)
+ax.set_ylim(0, 60)
+ax.set_xlabel("$x$", fontsize=12)
+ax.set_ylabel("$y$", fontsize=12)
+ax.grid(True, color=RULE, lw=0.8, alpha=0.5)
+ax.set_axisbelow(True)
+for side in ("top", "right"):
+    ax.spines[side].set_visible(False)
+plt.tight_layout()
+plt.show()
+```
+
+::: {.card}
+The tangent is the straight line that just *touches* the curve at that point. Its steepness **is** the derivative there — so $\frac{dy}{dx} = 6x$ is a formula for the slope at **every** $x$, not one number. Steeper curve → bigger derivative.
+:::
+
+## A small cheat-sheet
+
+::: {.columns}
+::: {.column width="50%"}
+**Power rule**
+: $\dfrac{d}{dx} x^n = n x^{n-1}$
+
+**Sum rule**
+: $\dfrac{d}{dx}(a + b) = \dfrac{da}{dx} + \dfrac{db}{dx}$
+
+**Constant rule**
+: $\dfrac{d}{dx} c = 0$
+:::
+::: {.column width="50%"}
+**Exponential**
+: $\dfrac{d}{dx} e^x = e^x$
+: $\dfrac{d}{dx} e^{f(x)} = f'(x) e^{f(x)}$
+
+**Natural log**
+: $\dfrac{d}{dx} \ln x = \dfrac{1}{x}$
+
+**Sigmoid (useful later)**
+: $\dfrac{d}{dx} \sigma(x) = \sigma(x)(1 - \sigma(x))$
+:::
+:::
+
+::: {.callout-note}
+You will not be asked to derive these. You **will** be asked to use them — both in this course and in the lab tomorrow.
+:::
+
+## A harder function
+
+What about $y = (2x + 3)^2$?
+
+You *could* expand to $y = 4x^2 + 12x + 9$ and apply the power rule: $\frac{dy}{dx} = 8x + 12$.
+
+::: {.card}
+But what if expanding is messy — or impossible? We need a **mechanical** rule that doesn't depend on cleverness.
+:::
+
+That rule is **the chain rule**.
+
+## The chain rule
+
+For $y = f(g(x))$ — a function inside a function — define $u = g(x)$ so $y = f(u)$. Then:
+
+$$
+\frac{dy}{dx} = \frac{dy}{du} \cdot \frac{du}{dx}
+$$
+
+::: {.columns}
+::: {.column width="55%"}
+**Worked example** — $y = (2x + 3)^2$.
+
+* Let $u = 2x + 3$. So $y = u^2$.
+* $\dfrac{dy}{du} = 2u$ (power rule on $u^2$).
+* $\dfrac{du}{dx} = 2$ (power rule on $2x + 3$).
+* $\dfrac{dy}{dx} = 2u \cdot 2 = 4(2x+3) = 8x + 12$. ✅
+
+Same answer, mechanically.
+:::
+::: {.column width="45%"}
+::: {.card}
+**The intuition.** A small change in $x$ propagates first through the inner function ($u$ changes a little) and then through the outer function ($y$ changes *because* $u$ changed). 
+
+We want to know what the change through $g$ *and* $f$ is so we **multiply the two rates together**.
+:::
+:::
+:::
+
+## The chain rule, generalised
+
+For $y = f_n( f_{n-1}( \cdots f_1(x) \cdots ))$ — a chain of $n$ functions:
+
+$$
+\frac{dy}{dx} = \frac{dy}{du_{n-1}} \cdot \frac{du_{n-1}}{du_{n-2}} \cdots \frac{du_1}{dx}
+$$
+
+::: {.card}
+**Each piece is a small, easy derivative.** Multiply them. Done.
+
+This is the deepest reason deep learning works: any reasonable composition of operations can be differentiated **one operation at a time**, then assembled.
+:::
+
+## A longer worked chain
+
+[Take a function with three nested operations:]{.eyebrow}
+
+$$
+y = \left( \tfrac{1}{n} (a - x)^2 \right)^{1/2}
+$$
+
+Decompose:
+* $u_2 = a - x$
+* $u_1 = u_2^2 = (a - x)^2$
+* $y = (u_1 / n)^{1/2}$
+
+Apply the chain rule:
+
+$$
+\frac{dy}{dx} = \underbrace{\frac{d}{du_1}\!\left[\left(\tfrac{u_1}{n}\right)^{1/2}\right]}_{\text{outer}} \cdot
+\underbrace{\frac{d}{du_2} [u_2^2]}_{\text{middle}} \cdot
+\underbrace{\frac{d}{dx} [a - x]}_{\text{inner}}
+$$
+
+Three small derivatives. We don't even need to expand $y$ to do this.
+
+## Partial derivatives & gradients
+
+For a function of several variables, e.g. $y = f(x_1, x_2) = 3 x_1^2 + 2 x_2 + 1$:
+
+::: {.columns}
+::: {.column width="50%"}
+Compute **partial derivatives** — treat the other vars as constants:
+$$
+\frac{\partial y}{\partial x_1} = 6 x_1, \qquad \frac{\partial y}{\partial x_2} = 2
+$$
+
+Collect them into a **gradient vector**:
+$$
+\nabla f = \begin{bmatrix} \frac{\partial y}{\partial x_1} \\ \frac{\partial y}{\partial x_2} \end{bmatrix} = \begin{bmatrix} 6 x_1 \\ 2 \end{bmatrix}
+$$
+:::
+::: {.column width="50%"}
+::: {.card}
+**Why we care.**
+
+For a neural network with millions of weights, the loss is a function $L(\mathbf{W})$ from "all the weights" to "a single number".
+
+The gradient $\nabla L$ is a vector of the same size as $\mathbf{W}$ — one entry per weight. It tells us, for *each* weight, how the loss changes.
+
+That is the thing we minimise tomorrow.
+:::
+:::
+:::
+
+# Activity · chain-rule exercises {background-color="#0E1A2B"}
+
+## Activity · chain rule
+
+[<span class="pause-cue">≈ 15 min</span> · pen and paper, in pairs]{.eyebrow}
+
+For each $y$, find $\dfrac{dy}{dx}$ — using the chain rule, *without* expanding.
+
+::: {.card}
+1. $y = (3x + 1)^4$
+
+2. $y = e^{2x + 5}$
+
+3. $y = \ln(x^2 + 1)$
+
+4. $y = \sigma(3x)$ where $\sigma(z) = \tfrac{1}{1 + e^{-z}}$
+
+5. $y = (a - x)^2$ — find $\dfrac{dy}{dx}$, treating $a$ as a constant.
+:::
+
+[Twelve minutes. We'll discuss the trickier ones.]{.muted}
+
+## Activity · answers
+
+::: {.card}
+1. $\dfrac{dy}{dx} = 4(3x+1)^3 \cdot 3 = 12(3x+1)^3$.
+
+2. $\dfrac{dy}{dx} = e^{2x+5} \cdot 2 = 2 e^{2x+5}$.
+
+3. $\dfrac{dy}{dx} = \dfrac{1}{x^2+1} \cdot 2x = \dfrac{2x}{x^2 + 1}$.
+
+4. $\dfrac{dy}{dx} = \sigma(3x)(1 - \sigma(3x)) \cdot 3$.
+
+5. $\dfrac{dy}{dx} = 2(a - x) \cdot (-1) = -2(a - x)$.
+:::
+
+::: {.callout-tip}
+Tomorrow we use exactly this pattern — repeatedly — to compute gradients across an entire neural network.
+:::
+
+# Part 3 · Computational graphs {background-color="#0E1A2B"}
+
+## A function as a picture
+
+Take $f(x) = 4(2x + 3) - 5$. It has:
+
+* **Values**: $x, 2, 3, 4, 5$.
+* **Operations**: $\times, +, -$.
+* **Order** (BIDMAS).
+
+Draw it as a graph — left-to-right, with operations as circles and values as boxes:
+
+```{dot}
+//| fig-height: 1.7
+digraph G {
+  rankdir="LR";
+  bgcolor="transparent";
+  node [fontname="Inter"];
+  x [shape=record]; two [shape=record label="2"]; three [shape=record label="3"];
+  four [shape=record label="4"]; five [shape=record label="5"];
+  m1 [shape=circle label="*" style=filled fillcolor="#F4F1EA"];
+  a [shape=record label="a"];
+  p  [shape=circle label="+" style=filled fillcolor="#F4F1EA"];
+  b [shape=record label="b"];
+  m2 [shape=circle label="*" style=filled fillcolor="#F4F1EA"];
+  c [shape=record label="c"];
+  s  [shape=circle label="-" style=filled fillcolor="#F4F1EA"];
+  y [shape=record];
+
+  x -> m1; two -> m1; m1 -> a; a -> p; three -> p; p -> b; b -> m2; four -> m2; m2 -> c; c -> s; five -> s; s -> y;
+}
+```
+
+::: {.card}
+A **computational graph** is just a flow chart for a calculation. Each node either holds a value or performs an operation. Edges show the order of operations.
+:::
+
+## The pieces — value nodes and operation nodes
+
+::: {.columns}
+::: {.column width="50%"}
+[Value nodes]{.pill-blue}
+
+* Contain **data** — scalars, vectors, matrices, or higher-dimensional tensors.
+* Will later also hold **gradients** (their slot for $\frac{\partial L}{\partial \cdot}$).
+* Drawn as boxes.
+
+```{dot}
+//| fig-height: 0.8
+digraph G { bgcolor="transparent"; node [fontname="Inter"];
+  x [shape=record label = "x | data = 0.0 | grad = 0.0"];
+}
+```
+:::
+::: {.column width="50%"}
+[Operation nodes]{.pill}
+
+* Apply a **function** to incoming values.
+* Arrows in = arguments. Arrow out = result.
+* Drawn as circles.
+
+```{dot}
+//| fig-height: 0.9
+digraph G { bgcolor="transparent"; node [fontname="Inter"];
+  mul [shape=circle label="*" style=filled fillcolor="#F4F1EA"];
+  plus [shape=circle label="+" style=filled fillcolor="#F4F1EA"];
+  pow [shape=circle label="**2" style=filled fillcolor="#F4F1EA"];
+}
+```
+:::
+:::
+
+## Acyclic — almost always
+
+We use **directed acyclic graphs** (DAGs) — no operation's output ever flows back to an *earlier* node.
+
+::: {.columns}
+::: {.column width="50%"}
+```{dot}
+//| fig-height: 1.2
+//| fig-width: 4
+digraph G { rankdir="LR"; bgcolor="transparent"; node [fontname="Inter"];
+  a -> b -> c -> d;
+}
+```
+[Acyclic — what we use]{.pill-green}
+:::
+::: {.column width="50%"}
+```{dot}
+//| fig-height: 1.2
+//| fig-width: 4
+digraph G { rankdir="LR"; bgcolor="transparent"; node [fontname="Inter"];
+  a -> b; b -> c; c -> a; c -> d;
+}
+```
+[Cyclic — pathological for plain neural nets]{.pill-amber}
+:::
+:::
+
+::: {.callout-note}
+**We *will* see cycles later** — recurrent networks on Day 9, where the same operation is reused across time steps. But each unrolled time-step is still a DAG.
+:::
+
+## You've maybe seen this picture before
+
+[Social-science graphs]{.eyebrow}
+
+::: {.columns}
+::: {.column width="55%"}
+A computational graph is structurally identical to:
+
+* A **causal DAG** in causal inference (cf. Judea Pearl's work).
+* A **factor graph** in probabilistic modelling.
+* A **dataflow diagram** in software engineering.
+* A **path diagram** in structural equation models.
+:::
+::: {.column width="45%"}
+::: {.card}
+**The shared idea:** a calculation is a *structure of operations on values*. 
+
+The structure itself carries information, by telling us what depends on what, what we can compute first, and what to differentiate with respect to what.
+:::
+:::
+:::
+
+## The perceptron as a graph
+
+Yesterday's linear perceptron $y = wx + b$ becomes:
+
+```{dot}
+//| fig-height: 2
+digraph G {
+  rankdir="LR";
+  bgcolor="transparent";
+  node [fontname="Inter"];
+  x [shape=record]; w [shape=record]; b [shape=record];
+  t [shape=circle label="*" style=filled fillcolor="#F4F1EA"];
+  p [shape=circle label="+" style=filled fillcolor="#F4F1EA"];
+  y [shape=record];
+  x -> t; w -> t;
+  t -> p; b -> p;
+  p -> y;
+}
+```
+
+(With an activation function $\sigma$ added between the `+` and the output, you'd insert one more node — same picture, one more step.)
+
+::: {.card}
+**Every node has a local derivative we can compute** — using the cheat-sheet from earlier. The chain rule will glue them.
+
+That's the move that makes the whole edifice work. Tomorrow we use it.
+:::
+
+## A network as a graph
+
+Yesterday's two-layer network was:
+$$
+\hat{y} = \sigma\Big( \sigma\big(\mathbf{x}\,\mathbf{W}^{(1)\mathsf T} + \mathbf{b}^{(1)}\big) \,\mathbf{w}^{(2)\mathsf T} + b^{(2)} \Big)
+$$
+
+[Build it one operation at a time — watch the node count]{.eyebrow}
+
+::: {.r-stack}
+
+::: {.fragment .fade-in-then-out}
+```{dot}
+//| fig-height: 2.0
+digraph G {
+  rankdir="LR"; bgcolor="transparent"; node [fontname="Inter"];
+  labelloc="b"; fontname="Inter"; fontsize=11; fontcolor="#5C6473";
+  label="1 operation · 3 nodes";
+  x [shape=record]; W1 [shape=record label="W₁ᵀ"];
+  m1 [shape=circle label="×" style=filled fillcolor="#F4F1EA"];
+  x -> m1; W1 -> m1;
+}
+```
+:::
+
+::: {.fragment .fade-in-then-out}
+```{dot}
+//| fig-height: 2.0
+digraph G {
+  rankdir="LR"; bgcolor="transparent"; node [fontname="Inter"];
+  labelloc="b"; fontname="Inter"; fontsize=11; fontcolor="#5C6473";
+  label="2 operations · 5 nodes — add the bias";
+  x [shape=record]; W1 [shape=record label="W₁ᵀ"]; b1 [shape=record label="b₁"];
+  m1 [shape=circle label="×" style=filled fillcolor="#F4F1EA"];
+  a1 [shape=circle label="+" style=filled fillcolor="#F4F1EA"];
+  x -> m1; W1 -> m1; m1 -> a1; b1 -> a1;
+}
+```
+:::
+
+::: {.fragment .fade-in-then-out}
+```{dot}
+//| fig-height: 2.0
+digraph G {
+  rankdir="LR"; bgcolor="transparent"; node [fontname="Inter"];
+  labelloc="b"; fontname="Inter"; fontsize=11; fontcolor="#5C6473";
+  label="3 operations · 6 nodes — that is ONE layer";
+  x [shape=record]; W1 [shape=record label="W₁ᵀ"]; b1 [shape=record label="b₁"];
+  m1 [shape=circle label="×" style=filled fillcolor="#F4F1EA"];
+  a1 [shape=circle label="+" style=filled fillcolor="#F4F1EA"];
+  s1 [shape=circle label=<&sigma;> style=filled fillcolor="#C9322B" fontcolor="#FBFAF6"];
+  x -> m1; W1 -> m1; m1 -> a1; b1 -> a1; a1 -> s1;
+}
+```
+:::
+
+::: {.fragment}
+```{dot}
+//| fig-height: 2.0
+digraph G {
+  rankdir="LR"; bgcolor="transparent"; node [fontname="Inter"];
+  labelloc="b"; fontname="Inter"; fontsize=11; fontcolor="#5C6473";
+  label="6 operations · 12 nodes — and that is only TWO layers";
+  x [shape=record]; W1 [shape=record label="W₁ᵀ"]; b1 [shape=record label="b₁"];
+  W2 [shape=record label="w₂ᵀ"]; b2 [shape=record label="b₂"];
+  m1 [shape=circle label="×" style=filled fillcolor="#F4F1EA"];
+  a1 [shape=circle label="+" style=filled fillcolor="#F4F1EA"];
+  s1 [shape=circle label=<&sigma;> style=filled fillcolor="#C9322B" fontcolor="#FBFAF6"];
+  m2 [shape=circle label="×" style=filled fillcolor="#F4F1EA"];
+  a2 [shape=circle label="+" style=filled fillcolor="#F4F1EA"];
+  s2 [shape=circle label=<&sigma;> style=filled fillcolor="#C9322B" fontcolor="#FBFAF6"];
+  y [shape=record label="ŷ"];
+  x -> m1; W1 -> m1; m1 -> a1; b1 -> a1; a1 -> s1;
+  s1 -> m2; W2 -> m2; m2 -> a2; b2 -> a2; a2 -> s2; s2 -> y;
+}
+```
+:::
+
+:::
+
+::: {.card}
+We **multiply, add, "squash"**, twice. What grows is the *tracking*: three operations per layer, and every one needs its own local derivative.
+
+In **Labs 3–4** you build exactly this, where every single arithmetic operation becomes a node in your `Value` graph. A tiny network makes a surprisingly big graph — and that is precisely why we let the computer walk it for us.
+:::
+
+## The two passes — preview of tomorrow
+
+::: {.columns}
+::: {.column width="50%"}
+[Forward pass]{.pill-blue}
+
+* Walk the graph **left-to-right**.
+* At each node, compute its output using the operation and incoming values.
+* Store the output (we'll need it).
+* End: a prediction.
+:::
+::: {.column width="50%"}
+[Backward pass]{.pill}
+
+* Walk the graph **right-to-left**.
+* At each node, compute $\dfrac{\partial L}{\partial \text{(this node)}}$ using the chain rule and local derivatives.
+* End: a gradient for every parameter.
+:::
+:::
+
+::: {.callout-tip}
+This is what frameworks (PyTorch, JAX, TensorFlow) automate. Tomorrow you'll write a tiny version of it yourself, in Python.
+:::
+
+## Take stock
+
+[<span class="pause-cue">Where you are at the end of Day 3</span>]{.eyebrow}
+
+::: {.card}
+You can now:
+
+1. Multiply matrices and check shapes by hand.
+2. Differentiate simple expressions, including with the chain rule.
+3. Draw any expression — from a simple polynomial to a two-layer network — as a directed acyclic graph.
+4. State what we still don't have: a **way to put loss into the graph and let gradients flow backwards**.
+:::
+
+::: {.callout-tip}
+You have all three tools. Tomorrow we put them together.
+:::
+
+# Lab brief · today's afternoon {background-color="#0E1A2B"}
+
+## Today's lab — 90 minutes
+
+[Goals]{.eyebrow}
+
+In Python (no PyTorch yet), build a small **computational graph library** from scratch.
+
+You will implement:
+
+1. A `Value` class that stores `data`, `grad`, and a list of "child" values.
+2. Methods `__add__`, `__mul__`, and `__pow__` that build a graph as you do arithmetic.
+3. A small test: write `c = a * b + 1` for `Value`s `a, b`, and verify the graph has the right structure.
+
+::: {.card}
+**Deliverable.** A working `Value` class. We will add gradient computation to it **tomorrow** — that step turns this library into a fully-working autodiff system.
+
+The pattern is Andrej Karpathy's `micrograd`. We are walking it deliberately.
+:::
+
+## See you tomorrow {background-color="#0E1A2B"}
+
+[Lecture 4 — *Backpropagation*]{.eyebrow}
+
+[<span class="muted">If you want a head start: skim Karpathy's *micrograd* GitHub README tonight. Don't read the implementation yet — we'll write it together tomorrow.</span>]{.smaller}

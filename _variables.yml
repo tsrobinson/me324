@@ -1,0 +1,9 @@
+# ---------------------------------------------------------------------------
+# Drives the "Open in Colab" and "Download .ipynb" links on the Labs page.
+# Must match site-url / repo-url in _quarto.yml. The repo has to be PUBLIC for
+# Colab and the raw .ipynb links to resolve.
+# ---------------------------------------------------------------------------
+github:
+  owner: "tsrobinson"
+  repo: "me324"
+  branch: "main"

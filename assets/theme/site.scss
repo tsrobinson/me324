@@ -1,0 +1,80 @@
+/*-- scss:defaults --*/
+// ME324 website theme — matches the slide-deck palette (assets/theme/me324.scss)
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=JetBrains+Mono:wght@400;500&display=swap');
+
+// palette
+$ink:      #0E1A2B;
+$paper:    #FBFAF6;
+$red:      #C9322B;
+$blue:     #1A6FB4;
+$teal:     #2F8F6C;
+$amber:    #C9852B;
+
+$primary:        $blue;
+$body-bg:        $paper;
+$body-color:     #1f2933;
+$link-color:     $blue;
+$link-hover-color: darken($blue, 12%);
+
+$font-family-sans-serif: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+$font-family-monospace:  "JetBrains Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+$headings-font-weight: 700;
+
+$border-radius: 0.6rem;
+
+/*-- scss:rules --*/
+
+h1, h2, h3, h4, .navbar-title { color: $ink; letter-spacing: -0.01em; }
+h2 { border-bottom: 2px solid rgba($ink, 0.08); padding-bottom: 0.3rem; margin-top: 2.2rem; }
+
+.navbar { font-weight: 600; box-shadow: 0 1px 0 rgba(0,0,0,0.15); }
+
+// emphasis serif for blockquotes / lead text
+blockquote, .lead { font-family: "Newsreader", Georgia, serif; }
+blockquote { border-left: 3px solid $red; color: #41505f; }
+
+a { text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+// ---- hero (home page) ----
+.hero {
+  background: linear-gradient(135deg, #0E1A2B 0%, #16263c 60%, #1d3350 100%);
+  color: $paper;
+  border-radius: $border-radius;
+  padding: 2.6rem 2.4rem;
+  margin: 0.5rem 0 2rem 0;
+  box-shadow: 0 10px 30px rgba(14,26,43,0.25);
+}
+.hero h1 { color: $paper; margin-top: 0; font-size: 2.3rem; }
+.hero .eyebrow { color: rgba(251,250,246,0.7); text-transform: uppercase; letter-spacing: 0.12em; font-size: 0.8rem; font-weight: 600; }
+.hero p { color: rgba(251,250,246,0.92); font-size: 1.12rem; max-width: 48rem; }
+
+// ---- big call-to-action buttons ----
+.cta { display: flex; flex-wrap: wrap; gap: 0.75rem; margin: 1.2rem 0 0.4rem; }
+.cta a.btn-cta {
+  display: inline-block; padding: 0.7rem 1.2rem; border-radius: $border-radius;
+  font-weight: 600; background: $red; color: $paper !important; text-decoration: none;
+  transition: transform 0.08s ease, box-shadow 0.12s ease;
+}
+.cta a.btn-cta:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(201,50,43,0.3); }
+.cta a.btn-cta.secondary { background: $blue; }
+.cta a.btn-cta.ghost { background: transparent; color: $paper !important; border: 1px solid rgba(251,250,246,0.4); }
+
+// ---- listing cards (Lectures page) ----
+.quarto-grid-item.card { border-radius: $border-radius; border: 1px solid rgba($ink,0.10); transition: transform 0.08s ease, box-shadow 0.12s ease; }
+.quarto-grid-item.card:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(14,26,43,0.12); }
+.quarto-grid-item .card-title { color: $ink; font-weight: 700; }
+
+// ---- labs table ----
+table { font-size: 0.95rem; }
+table thead th { background: $ink; color: $paper; }
+.labtag { font-family: $font-family-monospace; font-size: 0.78rem; padding: 0.1rem 0.45rem; border-radius: 0.4rem; }
+.labtag.easy { background: rgba($teal,0.15); color: darken($teal,10%); }
+.labtag.hard { background: rgba($red,0.13); color: darken($red,8%); }
+
+// ---- pills / week badges ----
+.week-pill { display:inline-block; background: rgba($blue,0.12); color: darken($blue,12%); font-weight:600; padding:0.15rem 0.6rem; border-radius:0.5rem; font-size:0.85rem; }
+
+// callouts a touch warmer
+div.callout { border-radius: $border-radius; }

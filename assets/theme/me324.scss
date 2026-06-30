@@ -1,0 +1,1552 @@
+/*-- scss:defaults --*/
+
+// =============================================================================
+// ME324 — AI & Deep Learning · custom RevealJS theme
+// A clean, contemporary academic look. Designed to stand apart from default
+// Beamer / Quarto white. Extend, do not replace, the white base theme.
+// =============================================================================
+
+// ---- Brand palette ---------------------------------------------------------
+// Anchored on a deep ink + muted LSE-adjacent red accent.
+$me-ink:        #0E1A2B;   // headings, body emphasis
+$me-body:       #1B2330;   // body text
+$me-muted:      #5C6473;   // captions, footers, secondary
+$me-rule:       #D7D2C5;   // hairline rules
+$me-surface:    #F4F1EA;   // warm parchment for cards/callouts
+$me-surface-2:  #ECE8DD;   // slightly deeper surface
+$me-paper:      #FBFAF6;   // slide background — off-white, warm
+$me-accent:     #C9322B;   // primary accent (LSE-adjacent red)
+$me-accent-2:   #1A6FB4;   // secondary accent (calm blue for data/links)
+$me-accent-3:   #2F8F6C;   // tertiary accent (positive/teal-green)
+$me-warn:       #C58A12;   // mustard for warnings / amber callout
+$me-code-bg:    #0E1A2B;   // code block background (matches ink)
+$me-code-fg:    #F2EFE7;   // code block foreground
+
+// ---- Syntax highlighting ---------------------------------------------------
+// `highlight-style: github-dark` (see lectures/_metadata.yml) is tuned for
+// GitHub's #24292e, which is both lighter and greyer than our #0E1A2B ink.
+// Against our background its palette sits too dark to project: comments come
+// out at #6a737d, a contrast ratio of 3.63:1 — below the 4.5:1 AA floor and
+// effectively invisible in a lit lecture theatre. Since these decks carry a lot
+// of their teaching *in* the code comments, that is the worst thing to lose.
+//
+// The values below are github-dark's hues lifted for our background. Every one
+// clears 7.6:1, and comments sit at 8.8:1 — legible, but still clearly
+// recessive against plain code at 15.2:1, so the visual hierarchy survives.
+// Applied in the `Syntax highlighting` block of scss:rules further down.
+$me-syn-comment:  #A9BACD;  // comments, docstrings, annotations   8.8:1
+$me-syn-keyword:  #FF9BAA;  // keywords, builtins, control flow    8.8:1
+$me-syn-string:   #B9DCFF;  // strings, chars, imports            12.3:1
+$me-syn-number:   #8FC7FF;  // numbers, constants                  9.8:1
+$me-syn-function: #CDB0FF;  // function names                      9.4:1
+$me-syn-variable: #FFC48C;  // variables                          11.3:1
+$me-syn-operator: #E8ECF1;  // operators, punctuation             14.7:1
+$me-syn-alert:    #FF8A80;  // alerts, errors, warnings            7.7:1
+
+// ---- Fonts -----------------------------------------------------------------
+// Loaded from Google Fonts via the @import below.
+$font-family-sans-serif: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !default;
+$font-family-serif:      "Newsreader", Georgia, "Times New Roman", serif !default;
+$font-family-monospace:  "JetBrains Mono", "Fira Code", Menlo, Consolas, monospace !default;
+
+// ---- RevealJS variable overrides ------------------------------------------
+// NOTE: Quarto does NOT read reveal.js's own kebab-case theme variables
+// ($main-font-size, $heading1-size, …). It defines its own `$presentation-*`
+// (and `$revealjs-*`) variables and maps those onto the --r-* custom
+// properties. Setting the reveal names here is a silent no-op — the deck
+// would fall back to Quarto's 40px root and 2.5em h1. Use the names below.
+$body-bg:               $me-paper !default;
+$body-color:            $me-body !default;
+$link-color:            $me-accent-2 !default;
+$link-color-hover:      darken($me-accent-2, 10%) !default;
+$selection-bg:          rgba($me-accent, 0.18) !default;
+$selection-color:       $me-ink !default;
+
+$code-block-font-size:  0.72em !default;
+$code-block-bg:         $me-code-bg !default;
+$code-color:            $me-accent !default;
+
+// Quarto-specific
+// Root type size for the 1280×760 canvas. Every deck sets `smaller: true`, so
+// body copy renders at 30px × 0.78 ≈ 23px of canvas — the size these decks
+// were written against.
+$presentation-font-size-root:       30px !default;
+$presentation-font-smaller:         0.78 !default;
+$presentation-line-height:          1.35 !default;
+
+$presentation-heading-font:         $font-family-sans-serif !default;
+$presentation-heading-color:        $me-ink !default;
+$presentation-heading-font-weight:  700 !default;
+$presentation-heading-line-height:  1.15 !default;
+$presentation-heading-letter-spacing: -0.015em !default;
+$presentation-heading-text-transform: none !default;
+$presentation-h1-text-shadow:       none !default;
+
+$presentation-h1-font-size:         2.1em !default;
+$presentation-h2-font-size:         1.55em !default;
+$presentation-h3-font-size:         1.20em !default;
+$presentation-h4-font-size:         1.05em !default;
+
+$presentation-block-margin:         14px !default;
+$callout-color-note:                $me-accent-2 !default;
+$callout-color-tip:                 $me-accent-3 !default;
+$callout-color-warning:             $me-warn !default;
+$callout-color-important:           $me-accent !default;
+$callout-color-caution:             $me-warn !default;
+
+
+/*-- scss:rules --*/
+
+// =============================================================================
+// Web fonts
+// =============================================================================
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Newsreader:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap');
+
+// =============================================================================
+// Global polish
+// =============================================================================
+.reveal {
+  font-feature-settings: "ss01", "cv11", "kern";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+// Soft, scarcely-perceptible dot grid on slide backgrounds
+.reveal .slides {
+  background-image:
+    radial-gradient(rgba(14,26,43,0.045) 1px, transparent 1px);
+  background-size: 28px 28px;
+  background-position: -1px -1px;
+}
+
+.reveal .slides > section,
+.reveal .slides > section > section {
+  text-align: left;
+  padding: 0;
+}
+
+// =============================================================================
+// Headings
+// =============================================================================
+.reveal h1,
+.reveal h2,
+.reveal h3,
+.reveal h4,
+.reveal h5 {
+  font-family: $font-family-sans-serif;
+  color: $me-ink;
+  text-transform: none;
+  letter-spacing: -0.015em;
+  margin-bottom: 0.5em;
+}
+
+// h2 (slide title) — accent rule + small caption above
+.reveal h2 {
+  position: relative;
+  padding-bottom: 0.25em;
+  margin: 0 0 0.6em 0;
+  border-bottom: 1px solid $me-rule;
+}
+
+.reveal h2::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  width: 64px;
+  height: 3px;
+  background: $me-accent;
+  border-radius: 2px;
+}
+
+// "Eyebrow" labels (e.g. small caption above a heading)
+.reveal .eyebrow {
+  display: inline-block;
+  font-size: 0.55em;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: $me-accent;
+  font-weight: 600;
+  margin-bottom: 0.4em;
+}
+
+// Maths inside an uppercased label must NOT be uppercased. KaTeX renders
+// variables as ordinary text, so `text-transform: uppercase` silently turns
+// $y = 3x^2$ into "Y = 3X²" — wrong, since case is meaningful in notation.
+// The letter-spacing reset matters too: tracking pushes symbols apart.
+.reveal .eyebrow .katex,
+.reveal .pill .katex,
+.reveal .pill-blue .katex,
+.reveal .pill-green .katex,
+.reveal .pill-amber .katex,
+.reveal .try-box .try-label .katex,
+.reveal .reveal-box .reveal-label .katex,
+.reveal .pause-cue .katex {
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+// =============================================================================
+// Title slide
+// =============================================================================
+// =============================================================================
+// Title slide — robust against Quarto's `center` class and nested author divs
+// =============================================================================
+#title-slide,
+.reveal #title-slide,
+.reveal section#title-slide {
+  // Force flex column layout that beats reveal.js's `.center` class.
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  align-items: flex-start !important;
+  text-align: left !important;
+
+  // Reserve top/bottom space for the absolutely-positioned eyebrow + footer.
+  padding: 13% 7% 11% 7% !important;
+  box-sizing: border-box !important;
+  height: 100% !important;
+  width: 100% !important;
+
+  // Cream/light title slide — same warm-paper background as main content,
+  // plus a subtle dot grid showing through. No coloured rectangle.
+  background: $me-paper !important;
+  color: $me-body !important;
+  overflow: hidden;
+}
+
+#title-slide .title,
+.reveal #title-slide .title {
+  color: $me-ink !important;
+  font-size: 2.6em !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.025em !important;
+  line-height: 1.05 !important;
+  margin: 0 0 0.25em 0 !important;
+  text-align: left !important;
+  width: 100%;
+  // Red accent rule to the left of the title
+  border-left: 5px solid $me-accent;
+  padding-left: 0.4em;
+}
+
+#title-slide .subtitle,
+.reveal #title-slide .subtitle,
+.reveal #title-slide p.subtitle {
+  color: $me-muted !important;
+  font-size: 1.05em !important;
+  font-weight: 400 !important;
+  margin: 0 0 1.5em 0.55em !important;
+  font-style: italic !important;
+  font-family: $font-family-serif !important;
+  text-align: left !important;
+  width: 100%;
+}
+
+// Author + date block — quarto wraps the author in 3 nested divs.
+// Strategy: wrappers stay as block layout with inherited size; only the
+// innermost text-bearing element sets the small font-size — so we don't
+// compound (0.5em × 0.5em × 0.5em = 0.125em).
+.reveal #title-slide .quarto-title-authors,
+.reveal #title-slide .quarto-title-author {
+  display: block !important;
+  text-align: left !important;
+  width: auto !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  font-size: inherit !important;
+}
+
+// Innermost text-bearing nodes — these get the small label styling
+.reveal #title-slide .quarto-title-author-name,
+.reveal #title-slide .author,
+.reveal #title-slide p.author,
+.reveal #title-slide p.date,
+.reveal #title-slide .date {
+  display: block !important;
+  text-align: left !important;
+  margin: 0 0 0 0.55em !important;
+  padding: 0 !important;
+  font-size: 0.5em !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.06em !important;
+  color: $me-muted !important;
+  font-family: $font-family-sans-serif !important;
+  font-style: normal !important;
+  line-height: 1.4;
+}
+
+// Spacing between author block and date
+.reveal #title-slide .quarto-title-authors {
+  margin-top: 0.6em !important;
+  margin-bottom: 0.1em !important;
+}
+
+.reveal #title-slide p.date,
+.reveal #title-slide .date {
+  margin-top: 0.3em !important;
+}
+
+// Fixed eyebrow label — top-left, sits in the padding zone
+#title-slide::before {
+  content: "ME324 · AI AND DEEP LEARNING";
+  position: absolute;
+  top: 5%;
+  left: 7%;
+  font-size: 0.55em;
+  letter-spacing: 0.22em;
+  font-weight: 600;
+  color: rgba($me-accent, 0.85);
+  font-family: $font-family-sans-serif;
+  pointer-events: none;
+  z-index: 2;
+}
+
+// Fixed footer label — bottom-left, sits in the padding zone
+#title-slide::after {
+  content: "LSE SUMMER SCHOOL · 2026";
+  position: absolute;
+  bottom: 5%;
+  left: 7%;
+  font-size: 0.5em;
+  letter-spacing: 0.22em;
+  font-weight: 500;
+  color: $me-muted;
+  font-family: $font-family-sans-serif;
+  pointer-events: none;
+  z-index: 2;
+}
+
+// =============================================================================
+// Section divider slides (level-1 #)
+// =============================================================================
+
+// Default H1 — on cream background, dark ink + red accent rule
+.reveal h1 {
+  font-size: 2.4em;
+  font-weight: 800;
+  color: $me-ink;
+  border-left: 5px solid $me-accent;
+  padding-left: 0.5em;
+  line-height: 1.1;
+  margin: 0.2em 0 0.6em 0;
+}
+
+// Level-1 section divider slides — title-only "cover" slides with their own background
+// (e.g. `# Part 1 · ... {background-color="#0E1A2B"}`). Quarto gives them
+// class="title-slide slide level1 center" and applies the background via
+// data-background-color, so the slide background is dark and the H1 must be light.
+.reveal section.title-slide.level1[data-background-color] {
+  // Reveal.js's `.center` class already vertically centres; we want left-aligned text
+  text-align: left;
+}
+
+.reveal section.title-slide.level1[data-background-color] h1 {
+  color: $me-paper;
+  border-left-color: $me-accent;
+  padding-left: 0.5em;
+  font-size: 2.6em;
+}
+
+// Inline timing chip inside an H1 — keep it small + muted, don't inherit H1 size
+.reveal h1 .timing,
+.reveal h2 .timing,
+.reveal h3 .timing {
+  font-size: 0.36em;
+  vertical-align: middle;
+  margin-left: 0.5em;
+  background: rgba($me-paper, 0.10);
+  color: rgba($me-paper, 0.75);
+  font-weight: 600;
+}
+
+// On light-background level-1 H1s (i.e. without data-background-color), keep timing
+// muted but on the warm surface palette
+.reveal section.title-slide.level1:not([data-background-color]) h1 .timing,
+.reveal h2 .timing,
+.reveal h3 .timing {
+  background: rgba($me-ink, 0.08);
+  color: $me-muted;
+}
+
+// =============================================================================
+// Paragraph + list rhythm
+// =============================================================================
+.reveal p {
+  line-height: 1.4;
+  margin: 0.4em 0;
+}
+
+.reveal li {
+  line-height: 1.35;
+  margin: 0.15em 0;
+}
+
+.reveal ul,
+.reveal ol {
+  margin: 0.3em 0 0.3em 1.1em;
+}
+
+.reveal ul li::marker {
+  color: $me-accent;
+}
+
+.reveal ol li::marker {
+  color: $me-accent-2;
+  font-weight: 600;
+}
+
+// =============================================================================
+// Strong / emphasis
+// =============================================================================
+.reveal strong,
+.reveal b {
+  color: $me-ink;
+  font-weight: 700;
+}
+
+.reveal em {
+  color: $me-accent;
+  font-style: italic;
+}
+
+// =============================================================================
+// Links
+// =============================================================================
+.reveal a {
+  color: $me-accent-2;
+  text-decoration: none;
+  border-bottom: 1px solid rgba($me-accent-2, 0.35);
+  transition: border-color 0.15s ease;
+}
+
+.reveal a:hover {
+  border-bottom-color: $me-accent-2;
+}
+
+// =============================================================================
+// Code
+// =============================================================================
+.reveal code {
+  font-family: $font-family-monospace;
+  color: $me-accent;
+  background: rgba($me-accent, 0.07);
+  padding: 0.05em 0.3em;
+  border-radius: 4px;
+  font-size: 0.85em;
+}
+
+.reveal pre {
+  background: $me-code-bg;
+  border-radius: 8px;
+  padding: 1em 1.2em;
+  box-shadow: 0 10px 30px -12px rgba(14,26,43,0.35);
+  border: none;
+  font-size: 0.78em;
+}
+
+.reveal pre code {
+  background: transparent;
+  color: $me-code-fg;
+  padding: 0;
+  font-size: inherit;
+  border-radius: 0;
+}
+
+// Quarto's highlight CSS ships `div.sourceCode { background-color: #24292e }`
+// — GitHub's own code background — which shows as a lighter slab behind our
+// rounded #0E1A2B `pre`. Make the wrapper transparent so only `pre` paints.
+.reveal div.sourceCode {
+  background-color: transparent;
+  border: none;
+}
+
+// THE ONE THAT MATTERS MOST.
+// Alongside the deck's github-dark inline styles, Quarto also links its own
+// *light* default stylesheet, site_libs/quarto-html/quarto-syntax-highlighting.css.
+// That file contains:
+//
+//     pre > code.sourceCode > span { color: #003B4F; }
+//
+// Every line of a highlighted block is wrapped in one of those `<span id="cb1-N">`
+// line elements, so this paints the whole line dark teal — 1.45:1 on our ink,
+// invisible. Tokens with their own class (keywords, strings, comments) escape it;
+// everything else — variable names, attribute access, function calls, i.e. the
+// bulk of a typical line — inherits it and vanishes.
+//
+// It wins because `pre > code.sourceCode > span` is (0,1,3), which out-specifies
+// the `.reveal pre code` (0,1,2) base colour set just above. Matching its shape
+// with `.reveal` in front gives (0,2,3) and takes it back.
+.reveal pre > code.sourceCode > span {
+  color: $me-code-fg;
+}
+
+// =============================================================================
+// Syntax highlighting
+// =============================================================================
+// Overrides the `github-dark` token colours with the brighter palette defined
+// in scss:defaults. Quarto injects its highlight CSS as an inline <style> that
+// comes *after* this compiled stylesheet, and `code span.co` has the same
+// specificity (0-1-2) as `.reveal pre code`, so a plain override would lose the
+// source-order tie-break. Qualifying with `pre code` gives 0-1-3 and wins
+// outright, whatever order the stylesheets land in.
+//
+// Only `color` is set, so github-dark's font-weight / text-decoration on the
+// alert, error and extension tokens survive untouched.
+
+.reveal pre code {
+  // comments, docstrings, annotations — the big win; was 3.63:1
+  span.co, span.an, span.cv, span.do, span.in, span.re { color: $me-syn-comment; }
+
+  // keywords, builtins, control flow, types, attributes, preprocessor
+  span.kw, span.bu, span.cf, span.dt, span.at, span.pp, span.ex { color: $me-syn-keyword; }
+
+  // strings, characters, imports
+  span.st, span.ch, span.ss, span.vs, span.im { color: $me-syn-string; }
+
+  // numbers and constants
+  span.dv, span.bn, span.fl, span.cn, span.sc { color: $me-syn-number; }
+
+  // function and other identifiers
+  span.fu, span.ot { color: $me-syn-function; }
+
+  // variables
+  span.va { color: $me-syn-variable; }
+
+  // operators and punctuation
+  span.op { color: $me-syn-operator; }
+
+  // alerts, errors, warnings
+  span.al, span.er, span.wa { color: $me-syn-alert; }
+}
+
+// =============================================================================
+// Math
+// =============================================================================
+.reveal .math {
+  color: $me-ink;
+}
+
+.reveal .math.display {
+  font-size: 0.95em;
+  margin: 0.5em 0;
+}
+
+// =============================================================================
+// Callouts (Quarto)
+// =============================================================================
+.reveal div.callout {
+  border-radius: 8px;
+  border: 1px solid $me-rule;
+  background: $me-surface;
+  margin: 0.6em 0;
+  box-shadow: 0 1px 0 rgba(14,26,43,0.04);
+}
+
+.reveal div.callout-note {
+  border-left: 4px solid $me-accent-2;
+}
+
+.reveal div.callout-tip {
+  border-left: 4px solid $me-accent-3;
+}
+
+.reveal div.callout-warning {
+  border-left: 4px solid $me-warn;
+}
+
+.reveal div.callout-important {
+  border-left: 4px solid $me-accent;
+}
+
+.reveal div.callout-caution {
+  border-left: 4px solid $me-warn;
+}
+
+.reveal div.callout-header {
+  font-weight: 600;
+  font-size: 0.85em;
+  letter-spacing: 0.02em;
+  background: rgba($me-ink, 0.03);
+}
+
+.reveal div.callout-body {
+  font-size: 0.9em;
+}
+
+// =============================================================================
+// Tables
+// =============================================================================
+.reveal table {
+  border-collapse: collapse;
+  font-size: 0.85em;
+  margin: 0.5em 0;
+}
+
+.reveal table th {
+  background: $me-ink;
+  color: $me-paper;
+  font-weight: 600;
+  text-align: left;
+  padding: 0.5em 0.8em;
+  border: none;
+}
+
+.reveal table td {
+  padding: 0.5em 0.8em;
+  border-bottom: 1px solid $me-rule;
+}
+
+.reveal table tr:nth-child(even) td {
+  background: rgba($me-surface, 0.5);
+}
+
+// =============================================================================
+// Blockquote
+// =============================================================================
+.reveal blockquote {
+  font-family: $font-family-serif;
+  font-style: italic;
+  font-size: 1.05em;
+  color: $me-ink;
+  border-left: 4px solid $me-accent;
+  padding: 0.4em 0 0.4em 1em;
+  background: transparent;
+  box-shadow: none;
+  width: auto;
+  margin: 0.5em 0;
+}
+
+// =============================================================================
+// Slide-number + progress
+// =============================================================================
+.reveal .slide-number {
+  font-family: $font-family-monospace;
+  font-size: 12px;
+  background: transparent;
+  color: $me-muted;
+  right: 18px;
+  bottom: 14px;
+}
+
+.reveal .progress {
+  color: $me-accent;
+  height: 3px;
+}
+
+// =============================================================================
+// Footer
+// =============================================================================
+.reveal .footer {
+  font-size: 0.45em;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: $me-muted;
+}
+
+// =============================================================================
+// Two-column layout helper
+// =============================================================================
+.reveal .columns {
+  display: flex;
+  gap: 1.5em;
+  align-items: flex-start;
+}
+
+// =============================================================================
+// Utility classes
+// =============================================================================
+.reveal .small  { font-size: 0.78em; }
+.reveal .xsmall { font-size: 0.62em; color: $me-muted; }
+.reveal .muted  { color: $me-muted; }
+.reveal .accent { color: $me-accent; }
+.reveal .accent-2 { color: $me-accent-2; }
+.reveal .accent-3 { color: $me-accent-3; }
+
+.reveal .card {
+  background: $me-surface;
+  border: 1px solid $me-rule;
+  border-radius: 8px;
+  padding: 0.8em 1em;
+  margin: 0.4em 0;
+}
+
+.reveal .pill {
+  display: inline-block;
+  padding: 0.15em 0.6em;
+  border-radius: 999px;
+  font-size: 0.6em;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+  text-transform: uppercase;
+  background: rgba($me-accent, 0.10);
+  color: $me-accent;
+}
+
+.reveal .pill-blue { background: rgba($me-accent-2, 0.10); color: $me-accent-2; }
+.reveal .pill-green { background: rgba($me-accent-3, 0.10); color: $me-accent-3; }
+.reveal .pill-amber { background: rgba($me-warn, 0.12); color: $me-warn; }
+
+// "Big stat" block — for emphasising a number or one-liner
+.reveal .bignum {
+  font-size: 3.2em;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  color: $me-accent;
+  line-height: 1;
+}
+
+// Quiet section break inside a slide
+.reveal hr {
+  border: none;
+  border-top: 1px solid $me-rule;
+  margin: 0.6em 0;
+}
+
+// =============================================================================
+// Structural slide types — break, plenary, transition
+// =============================================================================
+
+// Common: force these "cover" sections to fill the whole slide area so the
+// background gradient covers everything, not just a band around the heading.
+.reveal .slides section.transition,
+.reveal .slides section.plenary,
+.reveal .slides section.exercise,
+.reveal .slides section.break-slide {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0 !important;
+  transform: none !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  align-items: stretch !important;
+  padding: 8% 7% !important;
+  box-sizing: border-box !important;
+  overflow: hidden;
+}
+
+// "Transition" — the question/handoff slide between lectures.
+.reveal section.transition,
+.reveal section[data-state="transition"] {
+  background:
+    radial-gradient(circle at 85% 10%, rgba(201,50,43,0.18), transparent 55%),
+    radial-gradient(circle at -5% 115%, rgba(26,111,180,0.14), transparent 55%),
+    linear-gradient(140deg, $me-ink 0%, #142844 100%) !important;
+  color: $me-paper !important;
+}
+
+.reveal section.transition h1,
+.reveal section.transition h2,
+.reveal section.transition h3 {
+  color: $me-paper !important;
+  border: none !important;
+  text-align: left;
+  padding-left: 0 !important;
+}
+.reveal section.transition h1 {
+  font-size: 2.6em;
+  border-left: 5px solid $me-accent !important;
+  padding-left: 0.5em !important;
+}
+.reveal section.transition h2::after { display: none; }
+.reveal section.transition h2 { border-bottom: none !important; }
+.reveal section.transition p,
+.reveal section.transition li,
+.reveal section.transition strong {
+  color: rgba($me-paper, 0.95);
+}
+.reveal section.transition .eyebrow {
+  color: lighten($me-accent, 12%);
+}
+
+// "Break" — a calm slide with big centred text + clock
+.reveal section.break-slide {
+  background: linear-gradient(180deg, $me-surface 0%, $me-surface-2 100%) !important;
+  text-align: center !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+.reveal section.break-slide h1 {
+  font-size: 3.5em;
+  border-left: none !important;
+  padding-left: 0 !important;
+  text-align: center !important;
+  color: $me-ink !important;
+  margin: 0.3em 0 0.1em 0 !important;
+}
+.reveal section.break-slide h2 {
+  font-size: 2.4em;
+  border-bottom: none !important;
+  padding-bottom: 0 !important;
+  text-align: center !important;
+  color: $me-ink !important;
+  margin: 0.3em 0 0.4em 0 !important;
+}
+.reveal section.break-slide h2::after {
+  display: none !important;
+}
+.reveal section.break-slide p,
+.reveal section.break-slide .clock {
+  text-align: center !important;
+  font-size: 1.1em;
+  color: $me-muted;
+  font-family: $font-family-serif;
+  font-style: italic;
+}
+.reveal section.break-slide .clock {
+  font-family: $font-family-monospace;
+  font-size: 4.5em;
+  font-style: normal;
+  font-weight: 600;
+  color: $me-accent;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  margin: 0.15em 0;
+  display: block;
+}
+
+// "Exercise" / "Plenary" — solid dark navy (same as transition); the H1's blue
+// left rule visually distinguishes a plenary from a transition.
+.reveal section.plenary,
+.reveal section.exercise {
+  background:
+    radial-gradient(circle at 0% 100%, rgba(26,111,180,0.18), transparent 55%),
+    radial-gradient(circle at 100% 0%, rgba(255,255,255,0.04), transparent 50%),
+    linear-gradient(140deg, $me-ink 0%, #142844 100%) !important;
+  color: $me-paper !important;
+}
+.reveal section.plenary h1,
+.reveal section.exercise h1 {
+  color: $me-paper;
+  border-left-color: lighten($me-accent-2, 30%);
+}
+.reveal section.plenary h2,
+.reveal section.exercise h2 {
+  color: $me-paper;
+  border-bottom-color: rgba($me-paper, 0.25);
+}
+.reveal section.plenary h2::after,
+.reveal section.exercise h2::after {
+  background: lighten($me-accent-2, 30%);
+}
+.reveal section.plenary p,
+.reveal section.exercise p,
+.reveal section.plenary li,
+.reveal section.exercise li,
+.reveal section.plenary strong,
+.reveal section.exercise strong {
+  color: rgba($me-paper, 0.95);
+}
+.reveal section.plenary .card,
+.reveal section.exercise .card {
+  background: rgba($me-paper, 0.08);
+  border-color: rgba($me-paper, 0.15);
+  color: $me-paper;
+}
+.reveal section.plenary .eyebrow,
+.reveal section.exercise .eyebrow {
+  color: lighten($me-accent, 15%);
+}
+
+// =============================================================================
+// More utility classes for pacing
+// =============================================================================
+
+// Stop-and-check / pause marker — visible inline cue
+.reveal .pause-cue {
+  display: inline-block;
+  padding: 0.25em 0.7em;
+  border-radius: 4px;
+  background: rgba($me-warn, 0.15);
+  color: $me-warn;
+  font-size: 0.7em;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-family: $font-family-sans-serif;
+  margin-right: 0.4em;
+  line-height: 1.2;
+}
+
+// Timing chip — for showing how long a section takes
+.reveal .timing {
+  display: inline-block;
+  padding: 0.15em 0.55em;
+  border-radius: 4px;
+  background: rgba($me-ink, 0.08);
+  color: $me-muted;
+  font-size: 0.6em;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  font-family: $font-family-monospace;
+  line-height: 1.2;
+}
+
+// =============================================================================
+// Fix: prevent compound shrinking when chips/spans nest inside .eyebrow
+// (the common qmd pattern is `[<span class="pause-cue">…</span>]{.eyebrow}` —
+// that wraps the chip in <span class="eyebrow"><span class="pause-cue">…</span></span>
+// and the eyebrow's 0.55em compounds with the chip's own scale-down.)
+// Solution: when a chip is nested inside .eyebrow, *grow* it back to approximately
+// its intended natural size so it stays legible.
+// =============================================================================
+
+.reveal .eyebrow .pause-cue,
+.reveal .eyebrow .timing,
+.reveal .eyebrow .clock,
+.reveal .eyebrow .pill,
+.reveal .eyebrow .pill-blue,
+.reveal .eyebrow .pill-green,
+.reveal .eyebrow .pill-amber {
+  font-size: 1.2em;  // ~ counteracts the eyebrow's 0.55em scale-down
+  vertical-align: baseline;
+}
+
+// When the eyebrow itself wraps another eyebrow (also a common qmd accident),
+// stop the second one from re-shrinking
+.reveal .eyebrow .eyebrow {
+  font-size: 1em;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  color: inherit;
+  margin: 0;
+  display: inline;
+}
+
+// Same defence for .timing wrapped in .timing (happens when both bracket syntax + span)
+.reveal .timing .timing {
+  font-size: 1em;
+  padding: 0;
+  background: transparent;
+  display: inline;
+}
+
+// Same defence for .clock wrapped in .clock (the break-slide `[<span class="clock">15:00</span>]{.clock}` pattern).
+// Use !important so this beats the .break-slide .clock outer rule on specificity.
+.reveal .clock .clock,
+.reveal section.break-slide .clock .clock {
+  font-size: 1em !important;
+  padding: 0 !important;
+  background: transparent !important;
+  color: inherit !important;
+  display: inline !important;
+  font-family: inherit !important;
+  letter-spacing: inherit !important;
+  margin: 0 !important;
+}
+
+// =============================================================================
+// Cards, try-boxes, callouts inside dark cover slides (transition, plenary,
+// exercise) — give them a dark-friendly fill so text stays legible.
+// =============================================================================
+
+.reveal section.transition .card,
+.reveal section.plenary .card,
+.reveal section.exercise .card {
+  background: rgba($me-paper, 0.08);
+  border: 1px solid rgba($me-paper, 0.20);
+  color: $me-paper;
+}
+
+.reveal section.transition .card *,
+.reveal section.plenary .card *,
+.reveal section.exercise .card * {
+  color: $me-paper;
+}
+
+.reveal section.transition .try-box,
+.reveal section.plenary .try-box,
+.reveal section.exercise .try-box {
+  background: rgba(lighten($me-accent-2, 30%), 0.12);
+  border-left: 4px solid lighten($me-accent-2, 30%);
+}
+
+.reveal section.transition .try-box *,
+.reveal section.plenary .try-box *,
+.reveal section.exercise .try-box * {
+  color: $me-paper;
+}
+.reveal section.transition .try-box .try-label,
+.reveal section.plenary .try-box .try-label,
+.reveal section.exercise .try-box .try-label {
+  color: lighten($me-accent-2, 30%) !important;
+}
+
+.reveal section.transition .reveal-box,
+.reveal section.plenary .reveal-box,
+.reveal section.exercise .reveal-box {
+  background: rgba(lighten($me-accent-3, 20%), 0.12);
+  border-left: 4px solid lighten($me-accent-3, 20%);
+}
+.reveal section.transition .reveal-box *,
+.reveal section.plenary .reveal-box *,
+.reveal section.exercise .reveal-box * {
+  color: $me-paper;
+}
+.reveal section.transition .reveal-box .reveal-label,
+.reveal section.plenary .reveal-box .reveal-label,
+.reveal section.exercise .reveal-box .reveal-label {
+  color: lighten($me-accent-3, 20%) !important;
+}
+
+// Math inside cover slides should be light
+.reveal section.transition .math,
+.reveal section.plenary .math,
+.reveal section.exercise .math,
+.reveal section.transition .card .math,
+.reveal section.plenary .card .math,
+.reveal section.exercise .card .math {
+  color: $me-paper !important;
+}
+
+// Quarto `.callout-*` blocks inside cover slides — give them a dark-friendly fill
+.reveal section.transition div.callout,
+.reveal section.plenary div.callout,
+.reveal section.exercise div.callout {
+  background: rgba($me-paper, 0.08) !important;
+  border-color: rgba($me-paper, 0.20) !important;
+}
+.reveal section.transition div.callout *,
+.reveal section.plenary div.callout *,
+.reveal section.exercise div.callout * {
+  color: $me-paper !important;
+}
+.reveal section.transition div.callout-header,
+.reveal section.plenary div.callout-header,
+.reveal section.exercise div.callout-header {
+  background: rgba($me-paper, 0.06) !important;
+}
+
+// Keep the coloured left-border accent on each callout type
+.reveal section.transition div.callout-note,
+.reveal section.plenary div.callout-note,
+.reveal section.exercise div.callout-note {
+  border-left-color: lighten($me-accent-2, 30%) !important;
+}
+.reveal section.transition div.callout-tip,
+.reveal section.plenary div.callout-tip,
+.reveal section.exercise div.callout-tip {
+  border-left-color: lighten($me-accent-3, 20%) !important;
+}
+.reveal section.transition div.callout-warning,
+.reveal section.plenary div.callout-warning,
+.reveal section.exercise div.callout-warning {
+  border-left-color: lighten($me-warn, 15%) !important;
+}
+.reveal section.transition div.callout-important,
+.reveal section.plenary div.callout-important,
+.reveal section.exercise div.callout-important {
+  border-left-color: lighten($me-accent, 12%) !important;
+}
+
+// Math inside table headers — always light (th has dark bg)
+.reveal table th .math,
+.reveal table th * {
+  color: $me-paper !important;
+}
+
+// =============================================================================
+// Dark slides made dark by ATTRIBUTE rather than by class
+// =============================================================================
+// Everything above keys off `.transition / .plenary / .exercise`. But a plain
+//
+//     ## See you tomorrow {background-color="#0E1A2B"}
+//
+// carries none of those classes — it gets a `data-background-color` attribute,
+// and reveal adds `.has-dark-background` at runtime. So none of the dark
+// treatment fired on those slides, and the results were bad:
+//
+//   * body text stayed $me-body (#1B2330) on ink — 1.11:1, i.e. invisible;
+//   * callouts kept Quarto's pale fill, while reveal's own
+//     `section.has-dark-background h1…h6 { color:#fff }` turned any callout
+//     *title* white — white text on a white panel. (Lecture 6's "Optional
+//     reading before tomorrow" tip is the clearest case.)
+//
+// Six slides are affected today — the "See you tomorrow" closers in lectures
+// 4, 5, 6, 7, 9 and 11 — but this catches any future one automatically.
+//
+// `:not(.transition):not(.plenary):not(.exercise)` keeps this strictly
+// additive: the 84 existing cover slides are untouched and keep their gradient
+// treatment above. Values below are copied from that treatment so the two
+// kinds of dark slide look identical.
+
+$me-dark-attr:
+  ".reveal section.has-dark-background:not(.transition):not(.plenary):not(.exercise), " +
+  ".reveal section[data-background-color]:not(.transition):not(.plenary):not(.exercise)";
+
+#{$me-dark-attr} {
+  color: $me-paper;
+
+  p, li, strong, em, dt, dd { color: rgba($me-paper, 0.95); }
+  .eyebrow { color: lighten($me-accent, 12%); }
+  .muted, .xsmall, figcaption { color: rgba($me-paper, 0.70); }
+  .math { color: $me-paper !important; }
+
+  .card {
+    background: rgba($me-paper, 0.08);
+    border: 1px solid rgba($me-paper, 0.20);
+    color: $me-paper;
+    * { color: $me-paper; }
+  }
+
+  .try-box {
+    background: rgba(lighten($me-accent-2, 30%), 0.12);
+    border-left: 4px solid lighten($me-accent-2, 30%);
+    * { color: $me-paper; }
+    .try-label { color: lighten($me-accent-2, 30%) !important; }
+  }
+
+  .reveal-box {
+    background: rgba(lighten($me-accent-3, 20%), 0.12);
+    border-left: 4px solid lighten($me-accent-3, 20%);
+    * { color: $me-paper; }
+    .reveal-label { color: lighten($me-accent-3, 20%) !important; }
+  }
+
+  // The reported bug: a translucent fill instead of Quarto's pale panel, and
+  // everything inside it — body copy *and* the title heading — forced light.
+  div.callout {
+    background: rgba($me-paper, 0.08) !important;
+    border-color: rgba($me-paper, 0.20) !important;
+    * { color: $me-paper !important; }
+  }
+  div.callout-header,
+  div.callout-title,
+  div.callout-caption { background: rgba($me-paper, 0.06) !important; }
+
+  // Keep the coloured left-border accent that identifies each callout type
+  div.callout-note      { border-left-color: lighten($me-accent-2, 30%) !important; }
+  div.callout-tip       { border-left-color: lighten($me-accent-3, 20%) !important; }
+  div.callout-warning   { border-left-color: lighten($me-warn,      15%) !important; }
+  div.callout-important { border-left-color: lighten($me-accent,    12%) !important; }
+
+  // Insurance: a fenced code block inside a callout keeps its own palette
+  // rather than being flattened to $me-paper by the `*` rule above.
+  div.callout pre code { color: $me-code-fg !important; }
+}
+
+// Inline code on any dark slide.
+// The `.transition / .plenary / .exercise` classes only catch slides that opt
+// in by class; a plain `# Heading {background-color="#0E1A2B"}` gets none of
+// them, and its inline code keeps the default #C9322B — 3.31:1 on ink, i.e.
+// unreadable. Match reveal's own `data-background-color` attribute too, and
+// lift the colour to 8.6:1 so it survives a projector.
+.reveal section.transition code,
+.reveal section.plenary code,
+.reveal section.exercise code,
+.reveal section[data-background-color] code {
+  background: rgba($me-paper, 0.12);
+  color: #FF9B94;
+}
+
+// …but never restyle code that sits inside a `pre` block: those already paint
+// their own dark background, and the rule above would tint their inline spans.
+.reveal section.transition pre code,
+.reveal section.plenary pre code,
+.reveal section.exercise pre code,
+.reveal section[data-background-color] pre code {
+  background: transparent;
+  color: $me-code-fg;
+}
+
+// =============================================================================
+// Level-2 content slides with .transition / .plenary / .exercise
+// (i.e. NOT just an H1 cover): pin content to the top so longer content
+// doesn't overflow, with tight padding and a smaller base font.
+// =============================================================================
+.reveal section.transition:not(.title-slide),
+.reveal section.plenary:not(.title-slide),
+.reveal section.exercise:not(.title-slide) {
+  justify-content: flex-start !important;
+  padding: 3% 6% !important;
+  font-size: 0.78em;
+}
+
+.reveal section.transition:not(.title-slide) h2,
+.reveal section.plenary:not(.title-slide) h2,
+.reveal section.exercise:not(.title-slide) h2 {
+  font-size: 1.35em;
+  margin: 0 0 0.4em 0;
+  padding-bottom: 0.25em;
+}
+
+.reveal section.transition:not(.title-slide) .card,
+.reveal section.plenary:not(.title-slide) .card,
+.reveal section.exercise:not(.title-slide) .card {
+  margin: 0.3em 0;
+  padding: 0.55em 0.85em;
+}
+
+.reveal section.transition:not(.title-slide) p,
+.reveal section.plenary:not(.title-slide) p,
+.reveal section.exercise:not(.title-slide) p {
+  margin: 0.35em 0;
+}
+
+.reveal section.transition:not(.title-slide) .try-box,
+.reveal section.plenary:not(.title-slide) .try-box,
+.reveal section.exercise:not(.title-slide) .try-box,
+.reveal section.transition:not(.title-slide) .reveal-box,
+.reveal section.plenary:not(.title-slide) .reveal-box,
+.reveal section.exercise:not(.title-slide) .reveal-box {
+  margin: 0.35em 0;
+  padding: 0.55em 0.85em;
+}
+
+.reveal section.transition:not(.title-slide) table,
+.reveal section.plenary:not(.title-slide) table,
+.reveal section.exercise:not(.title-slide) table {
+  font-size: 0.85em;
+  margin: 0.3em 0;
+}
+.reveal section.transition:not(.title-slide) table td,
+.reveal section.plenary:not(.title-slide) table td,
+.reveal section.exercise:not(.title-slide) table td,
+.reveal section.transition:not(.title-slide) table th,
+.reveal section.plenary:not(.title-slide) table th,
+.reveal section.exercise:not(.title-slide) table th {
+  padding: 0.3em 0.6em;
+}
+
+.reveal section.transition:not(.title-slide) ul,
+.reveal section.plenary:not(.title-slide) ul,
+.reveal section.exercise:not(.title-slide) ul,
+.reveal section.transition:not(.title-slide) ol,
+.reveal section.plenary:not(.title-slide) ol,
+.reveal section.exercise:not(.title-slide) ol {
+  margin: 0.3em 0 0.3em 1em;
+}
+.reveal section.transition:not(.title-slide) li,
+.reveal section.plenary:not(.title-slide) li,
+.reveal section.exercise:not(.title-slide) li {
+  margin: 0.15em 0;
+  line-height: 1.35;
+}
+
+// On `.smaller` slides the base font is reduced for content-dense slides.
+// Use !important on the section font-size so quarto's reveal theme can't override.
+.reveal section.smaller,
+.reveal section[data-smaller="true"] {
+  font-size: 0.72em !important;
+}
+.reveal section.smaller h2,
+.reveal section[data-smaller="true"] h2 {
+  font-size: 1.25em !important;
+  margin-bottom: 0.4em !important;
+  padding-bottom: 0.2em !important;
+}
+.reveal section.smaller p,
+.reveal section[data-smaller="true"] p {
+  margin: 0.3em 0;
+  line-height: 1.3;
+}
+.reveal section.smaller li,
+.reveal section[data-smaller="true"] li {
+  line-height: 1.3;
+  margin: 0.08em 0;
+}
+.reveal section.smaller ul,
+.reveal section[data-smaller="true"] ul,
+.reveal section.smaller ol,
+.reveal section[data-smaller="true"] ol {
+  margin: 0.25em 0 0.25em 1em;
+}
+.reveal section.smaller .card,
+.reveal section[data-smaller="true"] .card {
+  padding: 0.55em 0.8em;
+  margin: 0.3em 0;
+}
+.reveal section.smaller div.callout,
+.reveal section[data-smaller="true"] div.callout {
+  margin: 0.3em 0;
+}
+.reveal section.smaller div.callout-body,
+.reveal section[data-smaller="true"] div.callout-body {
+  padding: 0.3em 0.7em;
+  font-size: 0.95em;
+}
+.reveal section.smaller div.callout-header,
+.reveal section[data-smaller="true"] div.callout-header {
+  padding: 0.25em 0.7em;
+}
+
+// Predict / try / discuss — coloured callout boxes within slides
+.reveal .try-box {
+  background: rgba($me-accent-2, 0.08);
+  border-left: 4px solid $me-accent-2;
+  padding: 0.7em 1em;
+  border-radius: 0 8px 8px 0;
+  margin: 0.5em 0;
+}
+.reveal .try-box .try-label {
+  display: block;
+  font-size: 0.62em;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: $me-accent-2;
+  margin-bottom: 0.3em;
+}
+
+.reveal .reveal-box {
+  background: rgba($me-accent-3, 0.10);
+  border-left: 4px solid $me-accent-3;
+  padding: 0.7em 1em;
+  border-radius: 0 8px 8px 0;
+  margin: 0.5em 0;
+}
+.reveal .reveal-box .reveal-label {
+  display: block;
+  font-size: 0.62em;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: $me-accent-3;
+  margin-bottom: 0.3em;
+}
+
+// "Today's plan" — visual schedule strip
+.reveal .schedule {
+  display: flex;
+  gap: 0.5em;
+  margin: 0.6em 0;
+  font-family: $font-family-monospace;
+  font-size: 0.62em;
+  align-items: stretch;
+}
+.reveal .schedule .slot {
+  flex: 1;
+  padding: 0.7em 0.6em;
+  background: $me-surface;
+  border: 1px solid $me-rule;
+  border-radius: 6px;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25em;
+}
+.reveal .schedule .slot p {
+  margin: 0;
+  font-size: 0.95em;
+  line-height: 1.3;
+  font-family: $font-family-sans-serif;
+}
+.reveal .schedule .slot p:first-child {
+  font-family: $font-family-monospace;
+  font-size: 0.85em;
+  font-weight: 700;
+  color: $me-accent;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.1em;
+}
+.reveal .schedule .slot strong {
+  display: block;
+  font-size: 1em;
+  color: $me-ink;
+  font-family: $font-family-sans-serif;
+}
+.reveal .schedule .slot em {
+  font-style: italic;
+  color: $me-accent-2;
+  font-weight: 600;
+}
+.reveal .schedule .slot.break {
+  background: rgba($me-warn, 0.12);
+  border-color: rgba($me-warn, 0.35);
+}
+.reveal .schedule .slot.plenary {
+  background: rgba($me-accent-2, 0.10);
+  border-color: rgba($me-accent-2, 0.35);
+}
+
+// =============================================================================
+// Horizontal timeline — used on the "A brief timeline" slide in L1
+// Structure:
+//   .timeline (flex row)
+//     .timeline-event (flex col: year / dot-rail / title / desc)
+//       .timeline-year   (mono, small, era colour)
+//       .timeline-rail   (relative — holds the dot + the connecting line)
+//         .timeline-dot
+//       .timeline-title
+//       .timeline-desc
+// The connecting line is on .timeline-rail::before, so it is automatically at the
+// same vertical position as the dot regardless of font scaling.
+// =============================================================================
+.reveal .timeline {
+  display: flex;
+  justify-content: space-between;
+  align-items: stretch;
+  width: 100%;
+  margin: 1.2em 0 0.8em 0;
+  padding: 0;
+  position: relative;
+}
+
+.reveal .timeline-event {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  text-align: center;
+  padding: 0 0.25em;
+  min-width: 0;
+}
+
+// Year — sits above the dot
+.reveal .timeline-year {
+  font-family: $font-family-monospace;
+  font-size: 0.75em;
+  font-weight: 700;
+  color: $me-accent;
+  letter-spacing: -0.01em;
+  margin-bottom: 0.5em;
+  white-space: nowrap;
+}
+
+// Dot row — a slim band that contains the dot AND the connecting line
+.reveal .timeline-dot {
+  width: 100%;
+  height: 18px;
+  position: relative;
+  margin: 0 0 0.7em 0;
+  z-index: 0;
+}
+
+// The connecting line — sits in the centre of the dot row
+.reveal .timeline-dot::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: -50%;
+  right: -50%;
+  height: 3px;
+  background: rgba($me-ink, 0.45);
+  transform: translateY(-50%);
+  z-index: 1;
+  border-radius: 2px;
+}
+
+// Hide the line going LEFT from the first event, RIGHT from the last
+.reveal .timeline-event:first-child .timeline-dot::before { left: 50%; }
+.reveal .timeline-event:last-child .timeline-dot::before { right: 50%; }
+
+// The dot itself — solid filled circle sitting on top of the line
+.reveal .timeline-dot::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 16px;
+  height: 16px;
+  background: $me-accent;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  // Subtle highlight ring
+  box-shadow:
+    0 0 0 3px $me-paper,
+    0 2px 6px rgba(14,26,43,0.25);
+  z-index: 2;
+}
+
+// Title under the dot
+.reveal .timeline-title {
+  font-size: 0.7em;
+  font-weight: 700;
+  color: $me-ink;
+  margin-bottom: 0.3em;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+// Short caption / description
+.reveal .timeline-desc {
+  font-size: 0.55em;
+  color: $me-muted;
+  line-height: 1.3;
+}
+
+// Quarto wraps content in <p> by default — strip its margins inside the timeline
+.reveal .timeline-year p,
+.reveal .timeline-title p,
+.reveal .timeline-desc p {
+  margin: 0 !important;
+  line-height: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+// Era-grouping variant — filled coloured dots by era (recolour the ::after disc)
+.reveal .timeline-event.era-foundations .timeline-year { color: $me-accent-2; }
+.reveal .timeline-event.era-foundations .timeline-dot::after { background: $me-accent-2; }
+
+.reveal .timeline-event.era-deep .timeline-year { color: $me-accent; }
+.reveal .timeline-event.era-deep .timeline-dot::after { background: $me-accent; }
+
+.reveal .timeline-event.era-modern .timeline-year { color: $me-accent-3; }
+.reveal .timeline-event.era-modern .timeline-dot::after { background: $me-accent-3; }
+
+// Era labels — show below the timeline as a small legend
+.reveal .timeline-eras {
+  display: flex;
+  justify-content: center;
+  gap: 1.5em;
+  margin-top: 1em;
+  font-size: 0.55em;
+  color: $me-muted;
+}
+
+// Slide-level layout: H2 stays at the top, timeline + legend get vertically
+// centred in the space below. Use `## A brief timeline {.timeline-slide}`.
+.reveal section.timeline-slide {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch;
+  height: 100% !important;
+}
+.reveal section.timeline-slide h2 {
+  flex: 0 0 auto;
+}
+.reveal section.timeline-slide .timeline {
+  margin-top: auto !important;
+  margin-bottom: 0 !important;
+}
+.reveal section.timeline-slide .timeline-eras {
+  margin-top: 1.2em !important;
+  margin-bottom: auto !important;
+}
+.reveal .timeline-eras .era-tag {
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+.reveal .timeline-eras .era-tag::before {
+  content: "";
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.reveal .timeline-eras .era-tag.era-foundations { color: $me-accent-2; }
+.reveal .timeline-eras .era-tag.era-deep { color: $me-accent; }
+.reveal .timeline-eras .era-tag.era-modern { color: $me-accent-3; }
+
+// =============================================================================
+// Print / PDF tweaks
+// =============================================================================
+@media print {
+  .reveal .slides {
+    background-image: none;
+  }
+}

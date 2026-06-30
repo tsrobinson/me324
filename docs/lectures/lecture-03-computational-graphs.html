@@ -1,0 +1,2641 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-html/tabby.min.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/light-border.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-html.min.css" rel="stylesheet" data-mode="light">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
+  <meta name="generator" content="quarto-1.5.57">
+
+  <meta name="author" content="Dr Thomas Robinson">
+  <meta name="dcterms.date" content="2026-08-05">
+  <title>ME324 · AI &amp; Deep Learning – Computational graphs &amp; the maths of AI</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+  <link rel="stylesheet" href="../site_libs/revealjs/dist/reset.css">
+  <link rel="stylesheet" href="../site_libs/revealjs/dist/reveal.css">
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+      vertical-align: middle;
+    }
+    /* CSS for syntax highlighting */
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+      }
+    pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+    div.sourceCode
+      { color: #e1e4e8; background-color: #24292e; }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span { color: #e1e4e8; } /* Normal */
+    code span.al { color: #ff5555; font-weight: bold; } /* Alert */
+    code span.an { color: #6a737d; } /* Annotation */
+    code span.at { color: #f97583; } /* Attribute */
+    code span.bn { color: #79b8ff; } /* BaseN */
+    code span.bu { color: #f97583; } /* BuiltIn */
+    code span.cf { color: #f97583; } /* ControlFlow */
+    code span.ch { color: #9ecbff; } /* Char */
+    code span.cn { color: #79b8ff; } /* Constant */
+    code span.co { color: #6a737d; } /* Comment */
+    code span.cv { color: #6a737d; } /* CommentVar */
+    code span.do { color: #6a737d; } /* Documentation */
+    code span.dt { color: #f97583; } /* DataType */
+    code span.dv { color: #79b8ff; } /* DecVal */
+    code span.er { color: #ff5555; text-decoration: underline; } /* Error */
+    code span.ex { color: #f97583; font-weight: bold; } /* Extension */
+    code span.fl { color: #79b8ff; } /* Float */
+    code span.fu { color: #b392f0; } /* Function */
+    code span.im { color: #9ecbff; } /* Import */
+    code span.in { color: #6a737d; } /* Information */
+    code span.kw { color: #f97583; } /* Keyword */
+    code span.op { color: #e1e4e8; } /* Operator */
+    code span.ot { color: #b392f0; } /* Other */
+    code span.pp { color: #f97583; } /* Preprocessor */
+    code span.re { color: #6a737d; } /* RegionMarker */
+    code span.sc { color: #79b8ff; } /* SpecialChar */
+    code span.ss { color: #9ecbff; } /* SpecialString */
+    code span.st { color: #9ecbff; } /* String */
+    code span.va { color: #ffab70; } /* Variable */
+    code span.vs { color: #9ecbff; } /* VerbatimString */
+    code span.wa { color: #ff5555; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="../site_libs/revealjs/dist/theme/quarto.css">
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
+  <link href="../site_libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
+  <link href="../site_libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
+  <link href="../site_libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
+  <link href="../site_libs/revealjs/plugin/quarto-support/footer.css" rel="stylesheet">
+  <style type="text/css">
+
+  .callout {
+    margin-top: 1em;
+    margin-bottom: 1em;  
+    border-radius: .25rem;
+  }
+
+  .callout.callout-style-simple { 
+    padding: 0em 0.5em;
+    border-left: solid #acacac .3rem;
+    border-right: solid 1px silver;
+    border-top: solid 1px silver;
+    border-bottom: solid 1px silver;
+    display: flex;
+  }
+
+  .callout.callout-style-default {
+    border-left: solid #acacac .3rem;
+    border-right: solid 1px silver;
+    border-top: solid 1px silver;
+    border-bottom: solid 1px silver;
+  }
+
+  .callout .callout-body-container {
+    flex-grow: 1;
+  }
+
+  .callout.callout-style-simple .callout-body {
+    font-size: 1rem;
+    font-weight: 400;
+  }
+
+  .callout.callout-style-default .callout-body {
+    font-size: 0.9rem;
+    font-weight: 400;
+  }
+
+  .callout.callout-titled.callout-style-simple .callout-body {
+    margin-top: 0.2em;
+  }
+
+  .callout:not(.callout-titled) .callout-body {
+      display: flex;
+  }
+
+  .callout:not(.no-icon).callout-titled.callout-style-simple .callout-content {
+    padding-left: 1.6em;
+  }
+
+  .callout.callout-titled .callout-header {
+    padding-top: 0.2em;
+    margin-bottom: -0.2em;
+  }
+
+  .callout.callout-titled .callout-title  p {
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+  }
+    
+  .callout.callout-titled.callout-style-simple .callout-content  p {
+    margin-top: 0;
+  }
+
+  .callout.callout-titled.callout-style-default .callout-content  p {
+    margin-top: 0.7em;
+  }
+
+  .callout.callout-style-simple div.callout-title {
+    border-bottom: none;
+    font-size: .9rem;
+    font-weight: 600;
+    opacity: 75%;
+  }
+
+  .callout.callout-style-default  div.callout-title {
+    border-bottom: none;
+    font-weight: 600;
+    opacity: 85%;
+    font-size: 0.9rem;
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+  }
+
+  .callout.callout-style-default div.callout-content {
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+  }
+
+  .callout.callout-style-simple .callout-icon::before {
+    height: 1rem;
+    width: 1rem;
+    display: inline-block;
+    content: "";
+    background-repeat: no-repeat;
+    background-size: 1rem 1rem;
+  }
+
+  .callout.callout-style-default .callout-icon::before {
+    height: 0.9rem;
+    width: 0.9rem;
+    display: inline-block;
+    content: "";
+    background-repeat: no-repeat;
+    background-size: 0.9rem 0.9rem;
+  }
+
+  .callout-title {
+    display: flex
+  }
+    
+  .callout-icon::before {
+    margin-top: 1rem;
+    padding-right: .5rem;
+  }
+
+  .callout.no-icon::before {
+    display: none !important;
+  }
+
+  .callout.callout-titled .callout-body > .callout-content > :last-child {
+    padding-bottom: 0.5rem;
+    margin-bottom: 0;
+  }
+
+  .callout.callout-titled .callout-icon::before {
+    margin-top: .5rem;
+    padding-right: .5rem;
+  }
+
+  .callout:not(.callout-titled) .callout-icon::before {
+    margin-top: 1rem;
+    padding-right: .5rem;
+  }
+
+  /* Callout Types */
+
+  div.callout-note {
+    border-left-color: #4582ec !important;
+  }
+
+  div.callout-note .callout-icon::before {
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAIKADAAQAAAABAAAAIAAAAACshmLzAAAEU0lEQVRYCcVXTWhcVRQ+586kSUMMxkyaElstCto2SIhitS5Ek8xUKV2poatCcVHtUlFQk8mbaaziwpWgglJwVaquitBOfhQXFlqlzSJpFSpIYyXNjBNiTCck7x2/8/LeNDOZxDuEkgOXe++553zfefee+/OYLOXFk3+1LLrRdiO81yNqZ6K9cG0P3MeFaMIQjXssE8Z1JzLO9ls20MBZX7oG8w9GxB0goaPrW5aNMp1yOZIa7Wv6o2ykpLtmAPs/vrG14Z+6d4jpbSKuhdcSyq9wGMPXjonwmESXrriLzFGOdDBLB8Y6MNYBu0dRokSygMA/mrun8MGFN3behm6VVAwg4WR3i6FvYK1T7MHo9BK7ydH+1uurECoouk5MPRyVSBrBHMYwVobG2aOXM07sWrn5qgB60rc6mcwIDJtQrnrEr44kmy+UO9r0u9O5/YbkS9juQckLed3DyW2XV/qWBBB3ptvI8EUY3I9p/67OW+g967TNr3Sotn3IuVlfMLVnsBwH4fsnebJvyGm5GeIUA3jljERmrv49SizPYuq+z7c2H/jlGC+Ghhupn/hcapqmcudB9jwJ/3jvnvu6vu5lVzF1fXyZuZZ7U8nRmVzytvT+H3kilYvH09mLWrQdwFSsFEsxFVs5fK7A0g8gMZjbif4ACpKbjv7gNGaD8bUrlk8x+KRflttr22JEMRUbTUwwDQScyzPgedQHZT0xnx7ujw2jfVfExwYHwOsDTjLdJ2ebmeQIlJ7neo41s/DrsL3kl+W2lWvAga0tR3zueGr6GL78M3ifH0rGXrBC2aAR8uYcIA5gwV8zIE8onoh8u0Fca/ciF7j1uOzEnqcIm59sEXoGc0+z6+H45V1CvAvHcD7THztu669cnp+L0okAeIc6zjbM/24LgGM1gZk7jnRu1aQWoU9sfUOuhrmtaPIO3YY1KLLWZaEO5TKUbMY5zx8W9UJ6elpLwKXbsaZ4EFl7B4bMtDv0iRipKoDQT2sNQI9b1utXFdYisi+wzZ/ri/1m7QfDgEuvgUUEIJPq3DhX/5DWNqIXDOweC2wvIR90Oq3lDpdMIgD2r0dXvGdsEW5H6x6HLRJYU7C69VefO1x8Gde1ZFSJLfWS1jbCnhtOPxmpfv2LXOA2Xk2tvnwKKPFuZ/oRmwBwqRQDcKNeVQkYcOjtWVBuM/JuYw5b6isojIkYxyYAFn5K7ZBF10fea52y8QltAg6jnMqNHFBmGkQ1j+U43HMi2xMar1Nv0zGsf1s8nUsmUtPOOrbFIR8bHFDMB5zL13Gmr/kGlCkUzedTzzmzsaJXhYawnA3UmARpiYj5ooJZiUoxFRtK3X6pgNPv+IZVPcnwbOl6f+aBaO1CNvPW9n9LmCp01nuSaTRF2YxHqZ8DYQT6WsXT+RD6eUztwYLZ8rM+rcPxamv1VQzFUkzFXvkiVrySGQgJNvXHJAxiU3/NwiC03rSf05VBaPtu/Z7/B8Yn/w7eguloAAAAAElFTkSuQmCC');
+  }
+
+  div.callout-note.callout-style-default .callout-title {
+    background-color: #dae6fb
+  }
+
+  div.callout-important {
+    border-left-color: #d9534f !important;
+  }
+
+  div.callout-important .callout-icon::before {
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAIKADAAQAAAABAAAAIAAAAACshmLzAAAEKklEQVRYCcVXTWhcVRS+575MJym48A+hSRFr00ySRQhURRfd2HYjk2SSTokuBCkU2o0LoSKKraKIBTcuFCoidGFD08nkBzdREbpQ1EDNIv8qSGMFUboImMSZd4/f9zJv8ibJMC8xJQfO3HPPPef7zrvvvnvviIkpC9nsw0UttFunbUhpFzFtarSd6WJkStVMw5xyVqYTvkwfzuf/5FgtkVoB0729j1rjXwThS7Vio+Mo6DNnvLfahoZ+i/o32lULuJ3NNiz7q6+pyAUkJaFF6JwaM2lUJlV0MlnQn5aTRbEu0SEqHUa0A4AdiGuB1kFXRfVyg5d87+Dg4DL6m2TLAub60ilj7A1Ec4odSAc8X95sHh7+ZRPCFo6Fnp7HfU/fBng/hi10CjCnWnJjsxvDNxWw0NfV6Rv5GgP3I3jGWXumdTD/3cbEOP2ZbOZp69yniG3FQ9z1jD7bnBu9Fc2tKGC2q+uAJOQHBDRiZX1x36o7fWBs7J9ownbtO+n0/qWkvW7UPIfc37WgT6ZGR++EOJyeQDSb9UB+DZ1G6DdLDzyS+b/kBCYGsYgJbSQHuThGKRcw5xdeQf8YdNHsc6ePXrlSYMBuSIAFTGAtQo+VuALo4BX83N190NWZWbynBjhOHsmNfFWLeL6v+ynsA58zDvvAC8j5PkbOcXCMg2PZFk3q8MjI7WAG/Dp9AwP7jdGBOOQkAvlFUB+irtm16I1Zw9YBcpGTGXYmk3kQIC/Cds55l+iMI3jqhjAuaoe+am2Jw5GT3Nbz3CkE12NavmzN5+erJW7046n/CH1RO/RVa8lBLozXk9uqykkGAyRXLWlLv5jyp4RFsG5vGVzpDLnIjTWgnRy2Rr+tDKvRc7Y8AyZq10jj8DqXdnIRNtFZb+t/ZRtXcDiVnzpqx8mPcDWxgARUqx0W1QB9MeUZiNrV4qP+Ehc+BpNgATsTX8ozYKL2NtFYAHc84fG7ndxUPr+AR/iQSns7uSUufAymwDOb2+NjK27lEFocm/EE2WpyIy/Hi66MWuMKJn8RvxIcj87IM5Vh9663ziW36kR0HNenXuxmfaD8JC7tfKbrhFr7LiZCrMjrzTeGx+PmkosrkNzW94ObzwocJ7A1HokLolY+AvkTiD/q1H0cN48c5EL8Crkttsa/AXQVDmutfyku0E7jShx49XqV3MFK8IryDhYVbj7Sj2P2eBxwcXoe8T8idsKKPRcnZw1b+slFTubwUwhktrfnAt7J++jwQtLZcm3sr9LQrjRzz6cfMv9aLvgmnAGvpoaGLxM4mAEaLV7iAzQ3oU0IvD5x9ix3yF2RAAuYAOO2f7PEFWCXZ4C9Pb2UsgDeVnFSpbFK7/IWu7TPTvBqzbGdCHOJQSxiEjt6IyZmxQyEJHv6xyQsYk//moVFsN2zP6fRImjfq7/n/wFDguUQFNEwugAAAABJRU5ErkJggg==');
+  }
+
+  div.callout-important.callout-style-default .callout-title {
+    background-color: #f7dddc
+  }
+
+  div.callout-warning {
+    border-left-color: #f0ad4e !important;
+  }
+
+  div.callout-warning .callout-icon::before {
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAIKADAAQAAAABAAAAIAAAAACshmLzAAAETklEQVRYCeVWW2gcVRg+58yaTUnizqbipZeX4uWhBEniBaoUX1Ioze52t7sRq6APio9V9MEaoWlVsFasRq0gltaAPuxms8lu0gcviE/FFOstVbSIxgcv6SU7EZqmdc7v9+9mJtNks51NTUH84ed889/PP+cmxP+d5FIbMJmNbpREu4WUkiTtCicKny0l1pIKmBzovF2S+hIJHX8iEu3hZJ5lNZGqyRrGSIQpq15AzF28jgpeY6yk6GVdrfFqdrD6Iw+QlB8g0YS2g7dyQmXM/IDhBhT0UCiRf59lfqmmDvzRt6kByV/m4JjtzuaujMUM2c5Z2d6JdKrRb3K2q6mA+oYVz8JnDdKPmmNthzkAk/lN63sYPgevrguc72aZX/L9C6x09GYyxBgCX4NlvyGUHOKELlm5rXeR1kchuChJt4SSwyddZRXgvwMGvYo4QSlk3/zkHD8UHxwVJA6zjZZqP8v8kK8OWLnIZtLyCAJagYC4rTGW/9Pqj92N/c+LUaAj27movwbi19tk/whRCIE7Q9vyI6yvRpftAKVTdUjOW40X3h5OXsKCdmFcx0xlLJoSuQngnrJe7Kcjm4OMq9FlC7CMmScQANuNvjfP3PjGXDBaUQmbp296S5L4DrpbrHN1T87ZVEZVCzg1FF0Ft+dKrlLukI+/c9ENo+TvlTDbYFvuKPtQ9+l052rXrgKoWkDAFnvh0wTOmYn8R5f4k/jN/fZiCM1tQx9jQQ4ANhqG4hiL0qIFTGViG9DKB7GYzgubnpofgYRwO+DFjh0Zin2m4b/97EDkXkc+f6xYAPX0KK2I/7fUQuwzuwo/L3AkcjugPNixC8cHf0FyPjWlItmLxWw4Ou9YsQCr5fijMGoD/zpdRy95HRysyXA74MWOnscpO4j2y3HAVisw85hX5+AFBRSHt4ShfLFkIMXTqyKFc46xdzQM6XbAi702a7sy04J0+feReMFKp5q9esYLCqAZYw/k14E/xcLLsFElaornTuJB0svMuJINy8xkIYuL+xPAlWRceH6+HX7THJ0djLUom46zREu7tTkxwmf/FdOZ/sh6Q8qvEAiHpm4PJ4a/doJe0gH1t+aHRgCzOvBvJedEK5OFE5jpm4AGP2a8Dxe3gGJ/pAutug9Gp6he92CsSsWBaEcxGx0FHytmIpuqGkOpldqNYQK8cSoXvd+xLxXADw0kf6UkJNFtdo5MOgaLjiQOQHcn+A6h5NuL2s0qsC2LOM75PcF3yr5STuBSAcGG+meA14K/CI21HcS4LBT6tv0QAh8Dr5l93AhZzG5ZJ4VxAqdZUEl9z7WJ4aN+svMvwHHL21UKTd1mqvChH7/Za5xzXBBKrUcB0TQ+Ulgkfbi/H/YT5EptrGzsEK7tR1B7ln9BBwckYfMiuSqklSznIuoIIOM42MQO+QnduCoFCI0bpkzjCjddHPN/F+2Yu+sd9bKNpVwHhbS3LluK/0zgfwD0xYI5dXuzlQAAAABJRU5ErkJggg==');
+  }
+
+  div.callout-warning.callout-style-default .callout-title {
+    background-color: #fcefdc
+  }
+
+  div.callout-tip {
+    border-left-color: #02b875 !important;
+  }
+
+  div.callout-tip .callout-icon::before {
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAIKADAAQAAAABAAAAIAAAAACshmLzAAADr0lEQVRYCe1XTWgTQRj9ZjZV8a9SPIkKgj8I1bMHsUWrqYLVg4Ue6v9BwZOxSYsIerFao7UiUryIqJcqgtpimhbBXoSCVxUFe9CTiogUrUp2Pt+3aUI2u5vdNh4dmMzOzHvvezuz8xNFM0mjnbXaNu1MvFWRXkXEyE6aYOYJpdW4IXuA4r0fo8qqSMDBU0v1HJUgVieAXxzCsdE/YJTdFcVIZQNMyhruOMJKXYFoLfIfIvVIMWdsrd+Rpd86ZmyzzjJmLStqRn0v8lzkb4rVIXvnpScOJuAn2ACC65FkPzEdEy4TPWRLJ2h7z4cArXzzaOdKlbOvKKX25Wl00jSnrwVxAg3o4dRxhO13RBSdNvH0xSARv3adTXbBdTf64IWO2vH0LT+cv4GR1DJt+DUItaQogeBX/chhbTBxEiZ6gftlDNXTrvT7co4ub5A6gp9HIcHvzTa46OS5fBeP87Qm0fQkr4FsYgVQ7Qg+ZayaDg9jhg1GkWj8RG6lkeSacrrHgDaxdoBiZPg+NXV/KifMuB6//JmYH4CntVEHy/keA6x4h4CU5oFy8GzrBS18cLJMXcljAKB6INjWsRcuZBWVaS3GDrqB7rdapVIeA+isQ57Eev9eCqzqOa81CY05VLd6SamW2wA2H3SiTbnbSxmzfp7WtKZkqy4mdyAlGx7ennghYf8voqp9cLSgKdqNfa6RdRsAAkPwRuJZNbpByn+RrJi1RXTwdi8RQF6ymDwGMAtZ6TVE+4uoKh+MYkcLsT0Hk8eAienbiGdjJHZTpmNjlbFJNKDVAp2fJlYju6IreQxQ08UJDNYdoLSl6AadO+fFuCQqVMB1NJwPm69T04Wv5WhfcWyfXQB+wXRs1pt+nCknRa0LVzSA/2B+a9+zQJadb7IyyV24YAxKp2Jqs3emZTuNnKxsah+uabKbMk7CbTgJx/zIgQYErIeTKRQ9yD9wxVof5YolPHqaWo7TD6tJlh7jQnK5z2n3+fGdggIOx2kaa2YI9QWarc5Ce1ipNWMKeSG4DysFF52KBmTNMmn5HqCFkwy34rDg05gDwgH3bBi+sgFhN/e8QvRn8kbamCOhgrZ9GJhFDgfcMHzFb6BAtjKpFhzTjwv1KCVuxHvCbsSiEz4CANnj84cwHdFXAbAOJ4LTSAawGWFn5tDhLMYz6nWeU2wJfIhmIJBefcd/A5FWQWGgrWzyORZ3Q6HuV+Jf0Bj+BTX69fm1zWgK7By1YTXchFDORywnfQ7GpzOo6S+qECrsx2ifVQAAAABJRU5ErkJggg==');
+  }
+
+  div.callout-tip.callout-style-default .callout-title {
+    background-color: #ccf1e3
+  }
+
+  div.callout-caution {
+    border-left-color: #fd7e14 !important;
+  }
+
+  div.callout-caution .callout-icon::before {
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAIKADAAQAAAABAAAAIAAAAACshmLzAAACV0lEQVRYCdVWzWoUQRCuqp2ICBLJXgITZL1EfQDBW/bkzUMUD7klD+ATSHBEfAIfQO+iXsWDxJsHL96EHAwhgzlkg8nBg25XWb0zIb0zs9muYYWkoKeru+vn664fBqElyZNuyh167NXJ8Ut8McjbmEraKHkd7uAnAFku+VWdb3reSmRV8PKSLfZ0Gjn3a6Xlcq9YGb6tADjn+lUfTXtVmaZ1KwBIvFI11rRXlWlatwIAAv2asaa9mlB9wwygiDX26qaw1yYPzFXg2N1GgG0FMF8Oj+VIx7E/03lHx8UhvYyNZLN7BwSPgekXXLribw7w5/c8EF+DBK5idvDVYtEEwMeYefjjLAdEyQ3M9nfOkgnPTEkYU+sxMq0BxNR6jExrAI31H1rzvLEfRIdgcv1XEdj6QTQAS2wtstEALLG1yEZ3QhH6oDX7ExBSFEkFINXH98NTrme5IOaaA7kIfiu2L8A3qhH9zRbukdCqdsA98TdElyeMe5BI8Rs2xHRIsoTSSVFfCFCWGPn9XHb4cdobRIWABNf0add9jakDjQJpJ1bTXOJXnnRXHRf+dNL1ZV1MBRCXhMbaHqGI1JkKIL7+i8uffuP6wVQAzO7+qVEbF6NbS0LJureYcWXUUhH66nLR5rYmva+2tjRFtojkM2aD76HEGAD3tPtKM309FJg5j/K682ywcWJ3PASCcycH/22u+Bh7Aa0ehM2Fu4z0SAE81HF9RkB21c5bEn4Dzw+/qNOyXr3DCTQDMBOdhi4nAgiFDGCinIa2owCEChUwD8qzd03PG+qdW/4fDzjUMcE1ZpIAAAAASUVORK5CYII=');
+  }
+
+  div.callout-caution.callout-style-default .callout-title {
+    background-color: #ffe5d0
+  }
+
+  </style>
+  <style type="text/css">
+    .reveal div.sourceCode {
+      margin: 0;
+      overflow: auto;
+    }
+    .reveal div.hanging-indent {
+      margin-left: 1em;
+      text-indent: -1em;
+    }
+    .reveal .slide:not(.center) {
+      height: 100%;
+    }
+    .reveal .slide.scrollable {
+      overflow-y: auto;
+    }
+    .reveal .footnotes {
+      height: 100%;
+      overflow-y: auto;
+    }
+    .reveal .slide .absolute {
+      position: absolute;
+      display: block;
+    }
+    .reveal .footnotes ol {
+      counter-reset: ol;
+      list-style-type: none; 
+      margin-left: 0;
+    }
+    .reveal .footnotes ol li:before {
+      counter-increment: ol;
+      content: counter(ol) ". "; 
+    }
+    .reveal .footnotes ol li > p:first-child {
+      display: inline-block;
+    }
+    .reveal .slide ul,
+    .reveal .slide ol {
+      margin-bottom: 0.5em;
+    }
+    .reveal .slide ul li,
+    .reveal .slide ol li {
+      margin-top: 0.4em;
+      margin-bottom: 0.2em;
+    }
+    .reveal .slide ul[role="tablist"] li {
+      margin-bottom: 0;
+    }
+    .reveal .slide ul li > *:first-child,
+    .reveal .slide ol li > *:first-child {
+      margin-block-start: 0;
+    }
+    .reveal .slide ul li > *:last-child,
+    .reveal .slide ol li > *:last-child {
+      margin-block-end: 0;
+    }
+    .reveal .slide .columns:nth-child(3) {
+      margin-block-start: 0.8em;
+    }
+    .reveal blockquote {
+      box-shadow: none;
+    }
+    .reveal .tippy-content>* {
+      margin-top: 0.2em;
+      margin-bottom: 0.7em;
+    }
+    .reveal .tippy-content>*:last-child {
+      margin-bottom: 0.2em;
+    }
+    .reveal .slide > img.stretch.quarto-figure-center,
+    .reveal .slide > img.r-stretch.quarto-figure-center {
+      display: block;
+      margin-left: auto;
+      margin-right: auto; 
+    }
+    .reveal .slide > img.stretch.quarto-figure-left,
+    .reveal .slide > img.r-stretch.quarto-figure-left  {
+      display: block;
+      margin-left: 0;
+      margin-right: auto; 
+    }
+    .reveal .slide > img.stretch.quarto-figure-right,
+    .reveal .slide > img.r-stretch.quarto-figure-right  {
+      display: block;
+      margin-left: auto;
+      margin-right: 0; 
+    }
+  </style>
+<meta property="og:title" content="Computational graphs &amp; the maths of AI – ME324 · AI &amp; Deep Learning">
+<meta property="og:description" content="Lecture 3 — Three tools: linear algebra, calculus, and computation graphs">
+<meta property="og:site_name" content="ME324 · AI &amp; Deep Learning">
+</head>
+<body class="quarto-light">
+  <div class="reveal">
+    <div class="slides">
+
+<section id="title-slide" class="quarto-title-block center">
+  <h1 class="title">Computational graphs &amp; the maths of AI</h1>
+  <p class="subtitle">Lecture 3 — Three tools: linear algebra, calculus, and computation graphs</p>
+
+<div class="quarto-title-authors">
+<div class="quarto-title-author">
+<div class="quarto-title-author-name">
+Dr Thomas Robinson 
+</div>
+</div>
+</div>
+
+  <p class="date">August 5, 2026</p>
+</section>
+<section>
+<section id="part-1-linear-algebra" class="title-slide slide level1 center" data-background-color="#0E1A2B">
+<h1>Part 1 · Linear algebra</h1>
+
+</section>
+<section id="why-we-need-this" class="slide level2">
+<h2>Why we need this</h2>
+<p>A modern neural network operates on <strong>tensors with millions of entries</strong>. We need notation that scales — both for writing and for computing.</p>
+<div class="card">
+<p>Every layer of a neural network is essentially a <em>matmul</em> followed by an non-linear action function applied element-wise.</p>
+</div>
+<p><strong>But we’re social scientists 😨</strong></p>
+<ul>
+<li><p>Matrices aren’t that scary! Stacking survey into a data frame (<span class="math inline">n</span> rows, <span class="math inline">k</span> columns) gives you a matrix.</p></li>
+<li><p>We’re largely dressing up familiar maths using new notation.</p></li>
+</ul>
+</section>
+<section id="scalars" class="slide level2">
+<h2>Scalars</h2>
+<p>The smallest unit. Just numbers.</p>
+<p><span class="math display">
+1, \ 1.5, \ -0.001, \ \pi
+</span></p>
+<p>Combine them with arithmetic to make expressions:</p>
+<p><span class="math display">
+y = \big((2 \times 3) + 5\big) \times 7 = 77
+</span></p>
+<p>Or write the same thing as a <strong>function</strong>:</p>
+<p><span class="math display">
+y = f(x) = (2x + 5) \times 7
+</span></p>
+<div class="card">
+<p>A function is just a name for “input <span class="math inline">x</span>, compute these steps, output <span class="math inline">y</span>.”</p>
+<p>Functions can be <strong>composed</strong>, i.e.&nbsp;<span class="math inline">f(x) = g(h(x))</span> where <span class="math inline">h(x) = 2x + 5</span> and <span class="math inline">g(z) = 7z</span>.</p>
+<p><strong>Composition is the whole idea behind a deep network.</strong></p>
+</div>
+</section>
+<section id="vectors" class="slide level2">
+<h2>Vectors</h2>
+<p>A 1-D ordered list of scalars. Two we’ll keep using:</p>
+<p><span class="math display">
+\mathbf{a} = \begin{bmatrix} 1 \\ 2 \\ 3 \end{bmatrix}, \quad \mathbf{b} = \begin{bmatrix} 4 \\ 5 \\ 6 \end{bmatrix}
+</span></p>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><strong>Addition / subtraction</strong>: element-wise, requires <strong>matching length</strong>.</p>
+<p><span class="math display">
+\mathbf{a} + \mathbf{b} = \begin{bmatrix} 1+4 \\ 2+5 \\ 3+6 \end{bmatrix} = \begin{bmatrix} 5 \\ 7 \\ 9 \end{bmatrix}
+</span></p>
+</div><div class="column" style="width:50%;">
+<p><strong>Scalar multiplication</strong>: multiply every entry.</p>
+<p><span class="math display">
+3 \, \mathbf{a} = \begin{bmatrix} 3 \\ 6 \\ 9 \end{bmatrix}
+</span></p>
+</div></div>
+<p><em>A survey-stats example</em></p>
+<p>Rescaling everyone’s height from cm to m is scalar multiplication of the height column</p>
+</section>
+<section id="row-vs-column-and-the-transpose" class="slide level2">
+<h2>Row vs column — and the transpose</h2>
+<p>A vector can be a <em>column</em> <span class="math inline">\begin{bmatrix} a_1 \\ a_2 \end{bmatrix}</span> or a <em>row</em> <span class="math inline">\begin{bmatrix} a_1 &amp; a_2 \end{bmatrix}</span>.</p>
+<p>The <strong>transpose</strong> (<span class="math inline">'</span> or <span class="math inline">^\mathsf{T}</span>) swaps them:</p>
+<p><span class="math display">
+\mathbf{a} = \begin{bmatrix} a_1 \\ a_2 \end{bmatrix} \ \Longleftrightarrow \ \mathbf{a}^\mathsf{T} = \begin{bmatrix} a_1 &amp; a_2 \end{bmatrix}
+</span></p>
+<div class="callout callout-note callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Note</strong></p>
+</div>
+<div class="callout-content">
+<p>The transpose is <strong>only a re-orientation</strong>. The numbers don’t change. It exists so the operations later in this lecture line up dimension-wise.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="matrices" class="slide level2">
+<h2>Matrices</h2>
+<p>A 2-D array of scalars. Two indices — row and column.</p>
+<p><span class="math display">
+\mathbf{A} = \begin{bmatrix} 1 &amp; 2 &amp; 3 \\ 4 &amp; 5 &amp; 6 \\ 7 &amp; 8 &amp; 9 \end{bmatrix}
+</span></p>
+<p>Addition is again element-wise:</p>
+<p><span class="math display">
+\begin{bmatrix} 1 &amp; 2 \\ 3 &amp; 4 \end{bmatrix} - \begin{bmatrix} 5 &amp; 6 \\ 7 &amp; 8 \end{bmatrix} = \begin{bmatrix} -4 &amp; -4 \\ -4 &amp; -4 \end{bmatrix}
+</span></p>
+<div class="card">
+<p><strong>A weight matrix in a neural network is just a 2-D table of numbers</strong>, ordered by “which output node” and “which input feature”.</p>
+</div>
+</section>
+<section id="indexing-a-matrix" class="slide level2">
+<h2>Indexing a matrix</h2>
+<p><span class="eyebrow">Row first, then column — always</span></p>
+<p>We write <span class="math inline">a_{ij}</span> for the entry in <strong>row <span class="math inline">i</span></strong>, <strong>column <span class="math inline">j</span></strong>:</p>
+<p><span class="math display">
+\mathbf{A} = \begin{bmatrix}
+a_{11} &amp; a_{12} &amp; a_{13} \\
+a_{21} &amp; a_{22} &amp; a_{23} \\
+a_{31} &amp; a_{32} &amp; a_{33}
+\end{bmatrix}
+= \begin{bmatrix} 1 &amp; 2 &amp; 3 \\ 4 &amp; 5 &amp; 6 \\ 7 &amp; 8 &amp; 9 \end{bmatrix}
+</span></p>
+<div class="columns">
+<div class="column" style="width:34%;">
+<p><span class="pill">Single entries</span></p>
+<ul>
+<li><span class="math inline">a_{12} = 2</span></li>
+<li><span class="math inline">a_{31} = 7</span></li>
+<li><span class="math inline">a_{23} = 6</span></li>
+</ul>
+</div><div class="column" style="width:33%;">
+<p><span class="pill-blue">A whole row</span></p>
+<p>Fix <span class="math inline">i = 2</span>:</p>
+<p><span class="math inline">\begin{bmatrix} 4 &amp; 5 &amp; 6 \end{bmatrix}</span></p>
+</div><div class="column" style="width:33%;">
+<p><span class="pill-green">A whole column</span></p>
+<p>Fix <span class="math inline">j = 2</span>:</p>
+<p><span class="math inline">\begin{bmatrix} 2 \\ 5 \\ 8 \end{bmatrix}</span></p>
+</div></div>
+<div class="callout callout-warning callout-style-simple">
+<div class="callout-body">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-content">
+<p><span class="math inline">a_{12} = 2</span> but <span class="math inline">a_{21} = 4</span> — <strong>different entries</strong>. Row always comes first, and this is the most common slip in the rest of this lecture.</p>
+</div>
+</div>
+</div>
+<div class="try-box">
+<p><span class="try-label">Try</span> What is <span class="math inline">a_{32}</span>? And what shape is column 3?</p>
+</div>
+<div class="fragment">
+<div class="reveal-box">
+<p><span class="reveal-label">Answer</span> <span class="math inline">a_{32} = 8</span> — row 3, column 2. Column 3 is <span class="math inline">\begin{bmatrix} 3 \\ 6 \\ 9 \end{bmatrix}</span>, a <span class="math inline">3 \times 1</span> column vector.</p>
+</div>
+</div>
+</section>
+<section id="indexing-in-maths-vs.-indexing-in-code" class="slide level2">
+<h2>Indexing in maths vs.&nbsp;indexing in code</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><span class="pill-amber">Maths starts at 1</span></p>
+<p><span class="math inline">a_{11}</span> is the <strong>top-left</strong> entry.</p>
+<p><span class="math display">
+\mathbf{A} = \begin{bmatrix} 1 &amp; 2 &amp; 3 \\ 4 &amp; 5 &amp; 6 \\ 7 &amp; 8 &amp; 9 \end{bmatrix}
+</span></p>
+<p>So <span class="math inline">a_{23} = 6</span>.</p>
+</div><div class="column" style="width:50%;">
+<p><span class="pill-blue">Python starts at 0</span></p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a aria-hidden="true" tabindex="-1"></a>A[<span class="dv">0</span>, <span class="dv">0</span>]   <span class="co"># 1   &lt;- top-left</span></span>
+<span id="cb1-2"><a aria-hidden="true" tabindex="-1"></a>A[<span class="dv">1</span>, <span class="dv">2</span>]   <span class="co"># 6   &lt;- same entry as a_23</span></span>
+<span id="cb1-3"><a aria-hidden="true" tabindex="-1"></a>A[<span class="dv">1</span>]      <span class="co"># row 2:    [4, 5, 6]</span></span>
+<span id="cb1-4"><a aria-hidden="true" tabindex="-1"></a>A[:, <span class="dv">1</span>]   <span class="co"># column 2: [2, 5, 8]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div></div>
+<div class="callout callout-important callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Important</strong></p>
+</div>
+<div class="callout-content">
+<p>The <strong>order is the same</strong> — row, then column. Only the <em>starting number</em> differs: <span class="math inline">a_{ij}</span> is <code>A[i-1, j-1]</code>.</p>
+<p>You met this in yesterday’s lab; you’ll use it every day from here on.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="transposing-a-matrix" class="slide level2">
+<h2>Transposing a matrix</h2>
+<p>Swap rows and columns:</p>
+<p><span class="math display">
+\mathbf{A} = \begin{bmatrix} a_{11} &amp; a_{12} &amp; a_{13} \\ a_{21} &amp; a_{22} &amp; a_{23} \end{bmatrix}, \quad
+\mathbf{A}^\mathsf{T} = \begin{bmatrix} a_{11} &amp; a_{21} \\ a_{12} &amp; a_{22} \\ a_{13} &amp; a_{23} \end{bmatrix}
+</span></p>
+<div class="try-box">
+<p><span class="try-label">Try</span> What is <span class="math inline">(\mathbf{A}^\mathsf{T})^\mathsf{T}</span>?</p>
+</div>
+<div class="fragment">
+<div class="reveal-box">
+<p><span class="reveal-label">Answer</span> <span class="math inline">\mathbf{A}</span>. Two transposes get you back where you started.</p>
+</div>
+</div>
+</section>
+<section id="the-dot-product" class="slide level2">
+<h2>The dot product</h2>
+<p><span class="eyebrow">The most important operation we’ll see today</span></p>
+<p>For two vectors <span class="math inline">\mathbf{a}, \mathbf{b} \in \mathbb{R}^n</span> (same length!):</p>
+<p><span class="math display">
+\mathbf{a} \cdot \mathbf{b} = \sum_{i=1}^n a_i b_i
+</span></p>
+<p>A <strong>single number</strong>. Sometimes written <span class="math inline">\langle \mathbf{a}, \mathbf{b} \rangle</span> or <span class="math inline">\mathbf{a}^\mathsf{T} \mathbf{b}</span>.</p>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><strong>Worked example.</strong> Let <span class="math inline">\mathbf{a} = \begin{bmatrix} 1 \\ 2 \\ 3 \end{bmatrix}</span> and <span class="math inline">\mathbf{b} = \begin{bmatrix} 4 \\ 5 \\ 6 \end{bmatrix}</span>.</p>
+<p><span class="math display">
+\mathbf{a} \cdot \mathbf{b} = (1)(4) + (2)(5) + (3)(6) = 4 + 10 + 18 = 32
+</span></p>
+</div><div class="column" style="width:50%;">
+<p><strong>Why it matters.</strong></p>
+<p>A neuron’s pre-activation is <span class="math inline">\sum_i w_i x_i + b</span>. That sum is a <strong>dot product</strong> <span class="math inline">\mathbf{w} \cdot \mathbf{x}</span>.</p>
+<ul>
+<li>A weighted sum of survey responses is a dot product.</li>
+<li>A weighted average is a normalised dot product.</li>
+</ul>
+</div></div>
+</section>
+<section id="matrix-multiplication" class="slide level2">
+<h2>Matrix multiplication</h2>
+<p>Take <span class="math inline">\mathbf{A} \in \mathbb{R}^{n \times k}</span> and <span class="math inline">\mathbf{B} \in \mathbb{R}^{k \times t}</span>.</p>
+<p>The product <span class="math inline">\mathbf{AB}</span> is the <span class="math inline">n \times t</span> matrix whose entry <span class="math inline">(i, j)</span> is the <strong>dot product of row <span class="math inline">i</span> of <span class="math inline">\mathbf{A}</span> and column <span class="math inline">j</span> of <span class="math inline">\mathbf{B}</span></strong>:</p>
+<p><span class="math display">
+(\mathbf{AB})_{ij} = \sum_{\ell=1}^k A_{i\ell} \, B_{\ell j}
+</span></p>
+<div class="card">
+<p><strong>Dimension rule</strong> (memorise this): the <em>inner</em> dimensions must match.</p>
+<p><span class="math display">
+(\underbrace{n \times k}_{\mathbf{A}}) \cdot (\underbrace{k \times t}_{\mathbf{B}}) \longrightarrow (n \times t)
+</span></p>
+<p>If they don’t match, the product is <em>undefined</em>.</p>
+</div>
+</section>
+<section id="matrix-multiplication-worked-example" class="slide level2">
+<h2>Matrix multiplication — worked example</h2>
+<div class="columns">
+<div class="column" style="width:55%;">
+<p><span class="math display">
+\mathbf{A} = \begin{bmatrix} 1 &amp; 2 \\ 3 &amp; 4 \end{bmatrix}, \quad \mathbf{B} = \begin{bmatrix} 5 &amp; 6 \\ 7 &amp; 8 \end{bmatrix}
+</span></p>
+<p><span class="math display">
+\mathbf{AB} = \begin{bmatrix}
+\underbrace{1 \cdot 5 + 2 \cdot 7}_{= 19} &amp; \underbrace{1 \cdot 6 + 2 \cdot 8}_{= 22} \\
+\underbrace{3 \cdot 5 + 4 \cdot 7}_{= 43} &amp; \underbrace{3 \cdot 6 + 4 \cdot 8}_{= 50}
+\end{bmatrix} = \begin{bmatrix} 19 &amp; 22 \\ 43 &amp; 50 \end{bmatrix}
+</span></p>
+</div><div class="column" style="width:45%;">
+<p><strong>Two warnings.</strong></p>
+<ul>
+<li>In general <span class="math inline">\mathbf{AB} \neq \mathbf{BA}</span>. Order matters.</li>
+<li>Dimensions must match, i.e.&nbsp;if <span class="math inline">\mathbf{A} \in \mathbb{R}^{3 \times 2}</span>, <span class="math inline">\mathbf{B} \in \mathbb{R}^{2 \times 4}</span> → <span class="math inline">\mathbf{AB}</span> is <span class="math inline">3 \times 4</span>. But <span class="math inline">\mathbf{BA}</span> is undefined.</li>
+</ul>
+</div></div>
+<div class="callout callout-tip callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong><span class="math inline">\mathbf{AB} \neq \mathbf{BA}</span></strong></p>
+</div>
+<div class="callout-content">
+<p>Compute <span class="math inline">\mathbf{BA}</span> for the above matrices by hand. You should get a different number than <span class="math inline">\mathbf{AB}</span>. This mismatch is why we need transposes to keep things orderly.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="why-a-layer-is-a-matrix-product" class="slide level2">
+<h2>Why a layer is a matrix product</h2>
+<p>Yesterday: a hidden layer of three nodes, each computing <span class="math inline">\sum_i w_i^{(h)} x_i + b^{(h)}</span> for the same input <span class="math inline">\mathbf{x}</span>.</p>
+<div class="card">
+<p>Stack the per-node weights into a matrix <span class="math inline">\mathbf{W} \in \mathbb{R}^{h \times k}</span> and biases into a vector <span class="math inline">\mathbf{b} \in \mathbb{R}^{1 \times h}</span>. The entire layer’s pre-activation is:</p>
+<p><span class="math display">
+\mathbf{x} \mathbf{W}^\mathsf{T} + \mathbf{b} \quad \in \mathbb{R}^{1 \times h}.
+</span></p>
+<p>The transpose makes the inner dimensions match: <span class="math inline">(1 \times k) \cdot (k \times h) \to (1 \times h)</span>.</p>
+<p>I.e. One output per <span class="math inline">h</span> nodes</p>
+</div>
+</section>
+<section id="why-a-transpose-dimensional-intuition" class="slide level2">
+<h2>Why a transpose? — dimensional intuition</h2>
+<p>Suppose <span class="math inline">h = 2</span> (two hidden nodes) and <span class="math inline">k = 3</span> (three input features).</p>
+<div class="card">
+<ul>
+<li>Weights for node 1: <span class="math inline">\begin{bmatrix} w_1^{(1)} &amp; w_2^{(1)} &amp; w_3^{(1)} \end{bmatrix}</span></li>
+<li>Weights for node 2: <span class="math inline">\begin{bmatrix} w_1^{(2)} &amp; w_2^{(2)} &amp; w_3^{(2)} \end{bmatrix}</span></li>
+<li>Stack as <span class="math inline">\mathbf{W} = \begin{bmatrix} w_1^{(1)} &amp; w_2^{(1)} &amp; w_3^{(1)} \\ w_1^{(2)} &amp; w_2^{(2)} &amp; w_3^{(2)} \end{bmatrix}</span> — shape <span class="math inline">(2 \times 3)</span>.</li>
+</ul>
+<p>To compute <span class="math inline">\mathbf{x} \cdot \mathbf{W}^\mathsf{T}</span> with <span class="math inline">\mathbf{x}</span> a row vector of length 3, we need <span class="math inline">\mathbf{W}^\mathsf{T}</span> of shape <span class="math inline">(3 \times 2)</span>.</p>
+</div>
+<p>Put it together:</p>
+<div class="card">
+<p><span class="math inline">\mathbf{W}^\mathsf{T} = \begin{bmatrix} w_1^{(1)} &amp; w_1^{(2)} \\
+w_2^{(1)} &amp; w_2^{(2)} \\ w_3^{(1)} &amp; w_3^{(2)} \end{bmatrix}</span></p>
+<p>For a given <span class="math inline">\mathbf{x} = \begin{bmatrix} x_1 &amp; x_2 &amp; x_3 \end{bmatrix}, \quad\mathbf{x}\cdot\mathbf{W}^\mathsf{T} = \begin{bmatrix} \big(x_1 w_1^{(1)} + x_2 w_2^{(1)} + x_3 w_3^{(1)}\big) &amp; \big(x_1 w_1^{(2)} + x_2 w_2^{(2)} + x_3 w_3^{(2)}\big) \end{bmatrix}</span></p>
+<p>So we get a two-length row vector output (one value per neuron).</p>
+</div>
+</section>
+<section id="stop-and-check" class="slide level2">
+<h2>Stop and check</h2>
+<p><span class="eyebrow"><span class="pause-cue">Stop &amp; check</span> — pair with a neighbour, 2 minutes</span></p>
+<div class="try-box">
+<p><span class="try-label">Question: what happens if <span class="math inline">\mathbf{X}</span> is a dataframe (i.e.&nbsp;multiple observations)?</span> <span class="math inline">\mathbf{W} \in \mathbb{R}^{50 \times 5}</span> — a hidden layer of width 50 receiving 5 input features. <span class="math inline">\mathbf{X} \in \mathbb{R}^{100 \times 5}</span> — a dataset of 100 observations.</p>
+<p><strong>What is the shape of <span class="math inline">\mathbf{X} \mathbf{W}^\mathsf{T}</span>? What does each row of it represent?</strong></p>
+</div>
+<div class="fragment">
+<div class="reveal-box">
+<p><span class="reveal-label">Answer</span> <span class="math inline">(100 \times 5) \cdot (5 \times 50) \to (100 \times 50)</span>.</p>
+<p><strong>Each row</strong> = the 50 hidden-layer pre-activations for one observation.</p>
+</div>
+<p><em>Notice this is the forward pass logic of yesterday</em></p>
+<ul>
+<li>But now, done simultaneously over every observation in one matmul!</li>
+</ul>
+</div>
+</section></section>
+<section>
+<section id="plenary-matrix-products-by-hand" class="title-slide slide level1 center" data-background-color="#0E1A2B">
+<h1>Plenary · matrix products by hand</h1>
+
+</section>
+<section id="plenary-matrix-products-by-hand-1" class="slide level2">
+<h2>Plenary · matrix products by hand</h2>
+<p><span class="eyebrow"><span class="pause-cue">≈ 20 min</span> · pen and paper, in pairs</span></p>
+<div class="card">
+<p><span class="eyebrow">Five problems</span></p>
+<p>For each, compute or say “undefined” (with a reason).</p>
+<ol type="1">
+<li><p><span class="math inline">\begin{bmatrix} 1 &amp; 2 \\ 3 &amp; 4 \end{bmatrix} \begin{bmatrix} 5 \\ 6 \end{bmatrix} = \ ?</span></p></li>
+<li><p><span class="math inline">\begin{bmatrix} 1 &amp; 0 \\ 0 &amp; 1 \end{bmatrix} \begin{bmatrix} 7 &amp; 8 \\ 9 &amp; 10 \end{bmatrix} = \ ?</span></p></li>
+<li><p><span class="math inline">\begin{bmatrix} 1 &amp; 2 &amp; 3 \end{bmatrix} \begin{bmatrix} 4 \\ 5 \\ 6 \end{bmatrix} = \ ?</span></p></li>
+<li><p><span class="math inline">\begin{bmatrix} 1 \\ 2 \\ 3 \end{bmatrix} \begin{bmatrix} 4 &amp; 5 \end{bmatrix} = \ ?</span></p></li>
+<li><p><span class="math inline">\begin{bmatrix} 1 &amp; 2 \end{bmatrix} \begin{bmatrix} 3 \\ 4 \\ 5 \end{bmatrix} = \ ?</span></p></li>
+</ol>
+</div>
+<p><span class="muted">Ten minutes. Then we’ll discuss together.</span></p>
+</section>
+<section id="plenary-answers" class="slide level2">
+<h2>Plenary · answers</h2>
+<div class="card">
+<ol type="1">
+<li><p><span class="math inline">\begin{bmatrix} 17 \\ 39 \end{bmatrix}</span>. A <span class="math inline">(2 \times 2) \cdot (2 \times 1) \to (2 \times 1)</span> matrix-vector product. Think of it as two dot products stacked.</p></li>
+<li><p><span class="math inline">\begin{bmatrix} 7 &amp; 8 \\ 9 &amp; 10 \end{bmatrix}</span>. The first matrix is the <strong>identity</strong>. Multiplying by it leaves the second matrix unchanged.</p></li>
+<li><p><span class="math inline">32</span>. A row × column dot product. Single number.</p></li>
+<li><p><span class="math inline">\begin{bmatrix} 4 &amp; 5 \\ 8 &amp; 10 \\ 12 &amp; 15 \end{bmatrix}</span>. A <em>column × row</em> — the outer product. Gives a matrix, not a scalar.</p></li>
+<li><p><strong>Undefined</strong>. Inner dimensions <span class="math inline">2 \neq 3</span> — can’t do it.</p></li>
+</ol>
+</div>
+<div class="callout callout-tip callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Tip</strong></p>
+</div>
+<div class="callout-content">
+<p>The most common error in deep learning code is a shape mismatch. PyTorch raises a clear error when this happens. Train your eye now — and you’ll save hours later.</p>
+</div>
+</div>
+</div>
+</section></section>
+<section>
+<section id="part-2-differentiation" class="title-slide slide level1 center" data-background-color="#0E1A2B">
+<h1>Part 2 · Differentiation</h1>
+
+</section>
+<section id="what-we-want-and-why" class="slide level2">
+<h2>What we want — and why</h2>
+<p>Tomorrow, for any parameter <span class="math inline">w</span> in our model, we will want to know:</p>
+<div class="card">
+<p><strong>If I <em>nudge</em> <span class="math inline">w</span> slightly, does the loss go up or down — and by how much?</strong></p>
+</div>
+<p>This information is a <strong>derivative</strong>.</p>
+<div class="callout callout-tip callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>You’ll have seen derivatives before.</strong></p>
+</div>
+<div class="callout-content">
+<p>We’re going to re-introduce them with two restrictions:</p>
+<ul>
+<li>We don’t care about proofs!</li>
+<li>We do care about computation — i.e.&nbsp;<em>getting a number out</em> given a function and a value of <span class="math inline">x</span>.</li>
+</ul>
+</div>
+</div>
+</div>
+</section>
+<section id="the-derivative-slope-of-a-function" class="slide level2">
+<h2>The derivative — slope of a function</h2>
+<p>For <span class="math inline">y = f(x)</span>, the derivative <span class="math inline">\dfrac{dy}{dx}</span> is the <strong>slope</strong> of <span class="math inline">f</span> at point <span class="math inline">x</span>.</p>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p>For <span class="math inline">y = ax^b + c</span> (where <span class="math inline">a, b, c</span> are scalars): <span class="math display">
+\frac{dy}{dx} = b \cdot a \, x^{b-1}
+</span></p>
+<ul>
+<li>Constants drop out (their derivative is zero).</li>
+<li><span class="math inline">b = 1</span>: <span class="math inline">y = ax + c \Rightarrow \frac{dy}{dx} = a</span>.</li>
+<li><span class="math inline">b = 2</span>: <span class="math inline">y = ax^2 + c \Rightarrow \frac{dy}{dx} = 2ax</span>.</li>
+</ul>
+</div><div class="column" style="width:50%;">
+<div class="card">
+<p><strong>Worked example.</strong></p>
+<p><span class="math inline">y = 3x^2 + 5</span>.</p>
+<p><span class="math inline">\dfrac{dy}{dx} = 6x</span>.</p>
+<p>At <span class="math inline">x = 1</span>: slope = 6. At <span class="math inline">x = 2</span>: slope = 12. At <span class="math inline">x = 0</span>: slope = 0 (local minimum!).</p>
+</div>
+</div></div>
+</section>
+<section id="seeing-the-slope" class="slide level2">
+<h2>Seeing the slope</h2>
+<p><span class="eyebrow">The same worked example, drawn: <span class="math inline">y = 3x^2 + 5</span></span></p>
+<div id="e34e6742" class="cell" data-fig-height="3.9" data-fig-width="9" data-execution_count="1">
+<div class="cell-output cell-output-display">
+<div>
+<figure>
+<p><img data-src="lecture-03-computational-graphs_files/figure-revealjs/cell-2-output-1.svg"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="card">
+<p>The tangent is the straight line that just <em>touches</em> the curve at that point. Its steepness <strong>is</strong> the derivative there — so <span class="math inline">\frac{dy}{dx} = 6x</span> is a formula for the slope at <strong>every</strong> <span class="math inline">x</span>, not one number. Steeper curve → bigger derivative.</p>
+</div>
+</section>
+<section id="a-small-cheat-sheet" class="slide level2">
+<h2>A small cheat-sheet</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<dl>
+<dt><strong>Power rule</strong></dt>
+<dd>
+<span class="math inline">\dfrac{d}{dx} x^n = n x^{n-1}</span>
+</dd>
+<dt><strong>Sum rule</strong></dt>
+<dd>
+<span class="math inline">\dfrac{d}{dx}(a + b) = \dfrac{da}{dx} + \dfrac{db}{dx}</span>
+</dd>
+<dt><strong>Constant rule</strong></dt>
+<dd>
+<span class="math inline">\dfrac{d}{dx} c = 0</span>
+</dd>
+</dl>
+</div><div class="column" style="width:50%;">
+<dl>
+<dt><strong>Exponential</strong></dt>
+<dd>
+<span class="math inline">\dfrac{d}{dx} e^x = e^x</span>
+</dd>
+<dd>
+<span class="math inline">\dfrac{d}{dx} e^{f(x)} = f'(x) e^{f(x)}</span>
+</dd>
+<dt><strong>Natural log</strong></dt>
+<dd>
+<span class="math inline">\dfrac{d}{dx} \ln x = \dfrac{1}{x}</span>
+</dd>
+<dt><strong>Sigmoid (useful later)</strong></dt>
+<dd>
+<span class="math inline">\dfrac{d}{dx} \sigma(x) = \sigma(x)(1 - \sigma(x))</span>
+</dd>
+</dl>
+</div></div>
+<div class="callout callout-note callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Note</strong></p>
+</div>
+<div class="callout-content">
+<p>You will not be asked to derive these. You <strong>will</strong> be asked to use them — both in this course and in the lab tomorrow.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="a-harder-function" class="slide level2">
+<h2>A harder function</h2>
+<p>What about <span class="math inline">y = (2x + 3)^2</span>?</p>
+<p>You <em>could</em> expand to <span class="math inline">y = 4x^2 + 12x + 9</span> and apply the power rule: <span class="math inline">\frac{dy}{dx} = 8x + 12</span>.</p>
+<div class="card">
+<p>But what if expanding is messy — or impossible? We need a <strong>mechanical</strong> rule that doesn’t depend on cleverness.</p>
+</div>
+<p>That rule is <strong>the chain rule</strong>.</p>
+</section>
+<section id="the-chain-rule" class="slide level2">
+<h2>The chain rule</h2>
+<p>For <span class="math inline">y = f(g(x))</span> — a function inside a function — define <span class="math inline">u = g(x)</span> so <span class="math inline">y = f(u)</span>. Then:</p>
+<p><span class="math display">
+\frac{dy}{dx} = \frac{dy}{du} \cdot \frac{du}{dx}
+</span></p>
+<div class="columns">
+<div class="column" style="width:55%;">
+<p><strong>Worked example</strong> — <span class="math inline">y = (2x + 3)^2</span>.</p>
+<ul>
+<li>Let <span class="math inline">u = 2x + 3</span>. So <span class="math inline">y = u^2</span>.</li>
+<li><span class="math inline">\dfrac{dy}{du} = 2u</span> (power rule on <span class="math inline">u^2</span>).</li>
+<li><span class="math inline">\dfrac{du}{dx} = 2</span> (power rule on <span class="math inline">2x + 3</span>).</li>
+<li><span class="math inline">\dfrac{dy}{dx} = 2u \cdot 2 = 4(2x+3) = 8x + 12</span>. ✅</li>
+</ul>
+<p>Same answer, mechanically.</p>
+</div><div class="column" style="width:45%;">
+<div class="card">
+<p><strong>The intuition.</strong> A small change in <span class="math inline">x</span> propagates first through the inner function (<span class="math inline">u</span> changes a little) and then through the outer function (<span class="math inline">y</span> changes <em>because</em> <span class="math inline">u</span> changed).</p>
+<p>We want to know what the change through <span class="math inline">g</span> <em>and</em> <span class="math inline">f</span> is so we <strong>multiply the two rates together</strong>.</p>
+</div>
+</div></div>
+</section>
+<section id="the-chain-rule-generalised" class="slide level2">
+<h2>The chain rule, generalised</h2>
+<p>For <span class="math inline">y = f_n( f_{n-1}( \cdots f_1(x) \cdots ))</span> — a chain of <span class="math inline">n</span> functions:</p>
+<p><span class="math display">
+\frac{dy}{dx} = \frac{dy}{du_{n-1}} \cdot \frac{du_{n-1}}{du_{n-2}} \cdots \frac{du_1}{dx}
+</span></p>
+<div class="card">
+<p><strong>Each piece is a small, easy derivative.</strong> Multiply them. Done.</p>
+<p>This is the deepest reason deep learning works: any reasonable composition of operations can be differentiated <strong>one operation at a time</strong>, then assembled.</p>
+</div>
+</section>
+<section id="a-longer-worked-chain" class="slide level2">
+<h2>A longer worked chain</h2>
+<p><span class="eyebrow">Take a function with three nested operations:</span></p>
+<p><span class="math display">
+y = \left( \tfrac{1}{n} (a - x)^2 \right)^{1/2}
+</span></p>
+<p>Decompose: * <span class="math inline">u_2 = a - x</span> * <span class="math inline">u_1 = u_2^2 = (a - x)^2</span> * <span class="math inline">y = (u_1 / n)^{1/2}</span></p>
+<p>Apply the chain rule:</p>
+<p><span class="math display">
+\frac{dy}{dx} = \underbrace{\frac{d}{du_1}\!\left[\left(\tfrac{u_1}{n}\right)^{1/2}\right]}_{\text{outer}} \cdot
+\underbrace{\frac{d}{du_2} [u_2^2]}_{\text{middle}} \cdot
+\underbrace{\frac{d}{dx} [a - x]}_{\text{inner}}
+</span></p>
+<p>Three small derivatives. We don’t even need to expand <span class="math inline">y</span> to do this.</p>
+</section>
+<section id="partial-derivatives-gradients" class="slide level2">
+<h2>Partial derivatives &amp; gradients</h2>
+<p>For a function of several variables, e.g.&nbsp;<span class="math inline">y = f(x_1, x_2) = 3 x_1^2 + 2 x_2 + 1</span>:</p>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p>Compute <strong>partial derivatives</strong> — treat the other vars as constants: <span class="math display">
+\frac{\partial y}{\partial x_1} = 6 x_1, \qquad \frac{\partial y}{\partial x_2} = 2
+</span></p>
+<p>Collect them into a <strong>gradient vector</strong>: <span class="math display">
+\nabla f = \begin{bmatrix} \frac{\partial y}{\partial x_1} \\ \frac{\partial y}{\partial x_2} \end{bmatrix} = \begin{bmatrix} 6 x_1 \\ 2 \end{bmatrix}
+</span></p>
+</div><div class="column" style="width:50%;">
+<div class="card">
+<p><strong>Why we care.</strong></p>
+<p>For a neural network with millions of weights, the loss is a function <span class="math inline">L(\mathbf{W})</span> from “all the weights” to “a single number”.</p>
+<p>The gradient <span class="math inline">\nabla L</span> is a vector of the same size as <span class="math inline">\mathbf{W}</span> — one entry per weight. It tells us, for <em>each</em> weight, how the loss changes.</p>
+<p>That is the thing we minimise tomorrow.</p>
+</div>
+</div></div>
+</section></section>
+<section>
+<section id="activity-chain-rule-exercises" class="title-slide slide level1 center" data-background-color="#0E1A2B">
+<h1>Activity · chain-rule exercises</h1>
+
+</section>
+<section id="activity-chain-rule" class="slide level2">
+<h2>Activity · chain rule</h2>
+<p><span class="eyebrow"><span class="pause-cue">≈ 15 min</span> · pen and paper, in pairs</span></p>
+<p>For each <span class="math inline">y</span>, find <span class="math inline">\dfrac{dy}{dx}</span> — using the chain rule, <em>without</em> expanding.</p>
+<div class="card">
+<ol type="1">
+<li><p><span class="math inline">y = (3x + 1)^4</span></p></li>
+<li><p><span class="math inline">y = e^{2x + 5}</span></p></li>
+<li><p><span class="math inline">y = \ln(x^2 + 1)</span></p></li>
+<li><p><span class="math inline">y = \sigma(3x)</span> where <span class="math inline">\sigma(z) = \tfrac{1}{1 + e^{-z}}</span></p></li>
+<li><p><span class="math inline">y = (a - x)^2</span> — find <span class="math inline">\dfrac{dy}{dx}</span>, treating <span class="math inline">a</span> as a constant.</p></li>
+</ol>
+</div>
+<p><span class="muted">Twelve minutes. We’ll discuss the trickier ones.</span></p>
+</section>
+<section id="activity-answers" class="slide level2">
+<h2>Activity · answers</h2>
+<div class="card">
+<ol type="1">
+<li><p><span class="math inline">\dfrac{dy}{dx} = 4(3x+1)^3 \cdot 3 = 12(3x+1)^3</span>.</p></li>
+<li><p><span class="math inline">\dfrac{dy}{dx} = e^{2x+5} \cdot 2 = 2 e^{2x+5}</span>.</p></li>
+<li><p><span class="math inline">\dfrac{dy}{dx} = \dfrac{1}{x^2+1} \cdot 2x = \dfrac{2x}{x^2 + 1}</span>.</p></li>
+<li><p><span class="math inline">\dfrac{dy}{dx} = \sigma(3x)(1 - \sigma(3x)) \cdot 3</span>.</p></li>
+<li><p><span class="math inline">\dfrac{dy}{dx} = 2(a - x) \cdot (-1) = -2(a - x)</span>.</p></li>
+</ol>
+</div>
+<div class="callout callout-tip callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Tip</strong></p>
+</div>
+<div class="callout-content">
+<p>Tomorrow we use exactly this pattern — repeatedly — to compute gradients across an entire neural network.</p>
+</div>
+</div>
+</div>
+</section></section>
+<section>
+<section id="part-3-computational-graphs" class="title-slide slide level1 center" data-background-color="#0E1A2B">
+<h1>Part 3 · Computational graphs</h1>
+
+</section>
+<section id="a-function-as-a-picture" class="slide level2">
+<h2>A function as a picture</h2>
+<p>Take <span class="math inline">f(x) = 4(2x + 3) - 5</span>. It has:</p>
+<ul>
+<li><strong>Values</strong>: <span class="math inline">x, 2, 3, 4, 5</span>.</li>
+<li><strong>Operations</strong>: <span class="math inline">\times, +, -</span>.</li>
+<li><strong>Order</strong> (BIDMAS).</li>
+</ul>
+<p>Draw it as a graph — left-to-right, with operations as circles and values as boxes:</p>
+<div class="cell" data-fig-height="1.7" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class=""><p></p>
+<div>
+<svg width="960" height="163" viewbox="0.00 0.00 710.00 184.00" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" style="; max-width: none; max-height: none; display: block; margin: auto auto auto auto">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 180)">
+<title>G</title>
+<!-- x -->
+<g id="node1" class="node">
+<title>x</title>
+<polygon fill="none" stroke="black" points="0,-139.5 0,-175.5 54,-175.5 54,-139.5 0,-139.5"></polygon>
+<text text-anchor="middle" x="27" y="-153.4" font-family="Inter" font-size="14.00">x</text>
+</g>
+<!-- m1 -->
+<g id="node6" class="node">
+<title>m1</title>
+<ellipse fill="#f4f1ea" stroke="black" cx="108" cy="-129.5" rx="18" ry="18"></ellipse>
+<text text-anchor="middle" x="108" y="-125.3" font-family="Inter" font-size="14.00">*</text>
+</g>
+<!-- x&#45;&gt;m1 -->
+<g id="edge1" class="edge">
+<title>x-&gt;m1</title>
+<path fill="none" stroke="black" d="M54.31,-148.18C62.95,-145.11 72.55,-141.71 81.16,-138.66"></path>
+<polygon fill="black" stroke="black" points="82.44,-141.92 90.7,-135.28 80.11,-135.32 82.44,-141.92"></polygon>
+</g>
+<!-- two -->
+<g id="node2" class="node">
+<title>two</title>
+<polygon fill="none" stroke="black" points="0,-84.5 0,-120.5 54,-120.5 54,-84.5 0,-84.5"></polygon>
+<text text-anchor="middle" x="27" y="-98.4" font-family="Inter" font-size="14.00">2</text>
+</g>
+<!-- two&#45;&gt;m1 -->
+<g id="edge2" class="edge">
+<title>two-&gt;m1</title>
+<path fill="none" stroke="black" d="M54.31,-111.49C62.95,-114.45 72.55,-117.73 81.16,-120.67"></path>
+<polygon fill="black" stroke="black" points="80.11,-124.01 90.7,-123.93 82.37,-117.38 80.11,-124.01"></polygon>
+</g>
+<!-- three -->
+<g id="node3" class="node">
+<title>three</title>
+<polygon fill="none" stroke="black" points="162,-56.5 162,-92.5 216,-92.5 216,-56.5 162,-56.5"></polygon>
+<text text-anchor="middle" x="189" y="-70.4" font-family="Inter" font-size="14.00">3</text>
+</g>
+<!-- p -->
+<g id="node8" class="node">
+<title>p</title>
+<ellipse fill="#f4f1ea" stroke="black" cx="270" cy="-101.5" rx="18" ry="18"></ellipse>
+<text text-anchor="middle" x="270" y="-97.3" font-family="Inter" font-size="14.00">+</text>
+</g>
+<!-- three&#45;&gt;p -->
+<g id="edge5" class="edge">
+<title>three-&gt;p</title>
+<path fill="none" stroke="black" d="M216.31,-83.49C224.95,-86.45 234.55,-89.73 243.16,-92.67"></path>
+<polygon fill="black" stroke="black" points="242.11,-96.01 252.7,-95.93 244.37,-89.38 242.11,-96.01"></polygon>
+</g>
+<!-- four -->
+<g id="node4" class="node">
+<title>four</title>
+<polygon fill="none" stroke="black" points="324,-28.5 324,-64.5 378,-64.5 378,-28.5 324,-28.5"></polygon>
+<text text-anchor="middle" x="351" y="-42.4" font-family="Inter" font-size="14.00">4</text>
+</g>
+<!-- m2 -->
+<g id="node10" class="node">
+<title>m2</title>
+<ellipse fill="#f4f1ea" stroke="black" cx="432" cy="-73.5" rx="18" ry="18"></ellipse>
+<text text-anchor="middle" x="432" y="-69.3" font-family="Inter" font-size="14.00">*</text>
+</g>
+<!-- four&#45;&gt;m2 -->
+<g id="edge8" class="edge">
+<title>four-&gt;m2</title>
+<path fill="none" stroke="black" d="M378.31,-55.49C386.95,-58.45 396.55,-61.73 405.16,-64.67"></path>
+<polygon fill="black" stroke="black" points="404.11,-68.01 414.7,-67.93 406.37,-61.38 404.11,-68.01"></polygon>
+</g>
+<!-- five -->
+<g id="node5" class="node">
+<title>five</title>
+<polygon fill="none" stroke="black" points="486,-0.5 486,-36.5 540,-36.5 540,-0.5 486,-0.5"></polygon>
+<text text-anchor="middle" x="513" y="-14.4" font-family="Inter" font-size="14.00">5</text>
+</g>
+<!-- s -->
+<g id="node12" class="node">
+<title>s</title>
+<ellipse fill="#f4f1ea" stroke="black" cx="594" cy="-45.5" rx="18" ry="18"></ellipse>
+<text text-anchor="middle" x="594" y="-41.3" font-family="Inter" font-size="14.00">-</text>
+</g>
+<!-- five&#45;&gt;s -->
+<g id="edge11" class="edge">
+<title>five-&gt;s</title>
+<path fill="none" stroke="black" d="M540.31,-27.49C548.95,-30.45 558.55,-33.73 567.16,-36.67"></path>
+<polygon fill="black" stroke="black" points="566.11,-40.01 576.7,-39.93 568.37,-33.38 566.11,-40.01"></polygon>
+</g>
+<!-- a -->
+<g id="node7" class="node">
+<title>a</title>
+<polygon fill="none" stroke="black" points="162,-111.5 162,-147.5 216,-147.5 216,-111.5 162,-111.5"></polygon>
+<text text-anchor="middle" x="189" y="-125.4" font-family="Inter" font-size="14.00">a</text>
+</g>
+<!-- m1&#45;&gt;a -->
+<g id="edge3" class="edge">
+<title>m1-&gt;a</title>
+<path fill="none" stroke="black" d="M126.14,-129.5C133.64,-129.5 142.75,-129.5 151.64,-129.5"></path>
+<polygon fill="black" stroke="black" points="151.87,-133 161.87,-129.5 151.87,-126 151.87,-133"></polygon>
+</g>
+<!-- a&#45;&gt;p -->
+<g id="edge4" class="edge">
+<title>a-&gt;p</title>
+<path fill="none" stroke="black" d="M216.31,-120.18C224.95,-117.11 234.55,-113.71 243.16,-110.66"></path>
+<polygon fill="black" stroke="black" points="244.44,-113.92 252.7,-107.28 242.11,-107.32 244.44,-113.92"></polygon>
+</g>
+<!-- b -->
+<g id="node9" class="node">
+<title>b</title>
+<polygon fill="none" stroke="black" points="324,-83.5 324,-119.5 378,-119.5 378,-83.5 324,-83.5"></polygon>
+<text text-anchor="middle" x="351" y="-97.4" font-family="Inter" font-size="14.00">b</text>
+</g>
+<!-- p&#45;&gt;b -->
+<g id="edge6" class="edge">
+<title>p-&gt;b</title>
+<path fill="none" stroke="black" d="M288.14,-101.5C295.64,-101.5 304.75,-101.5 313.64,-101.5"></path>
+<polygon fill="black" stroke="black" points="313.87,-105 323.87,-101.5 313.87,-98 313.87,-105"></polygon>
+</g>
+<!-- b&#45;&gt;m2 -->
+<g id="edge7" class="edge">
+<title>b-&gt;m2</title>
+<path fill="none" stroke="black" d="M378.31,-92.18C386.95,-89.11 396.55,-85.71 405.16,-82.66"></path>
+<polygon fill="black" stroke="black" points="406.44,-85.92 414.7,-79.28 404.11,-79.32 406.44,-85.92"></polygon>
+</g>
+<!-- c -->
+<g id="node11" class="node">
+<title>c</title>
+<polygon fill="none" stroke="black" points="486,-55.5 486,-91.5 540,-91.5 540,-55.5 486,-55.5"></polygon>
+<text text-anchor="middle" x="513" y="-69.4" font-family="Inter" font-size="14.00">c</text>
+</g>
+<!-- m2&#45;&gt;c -->
+<g id="edge9" class="edge">
+<title>m2-&gt;c</title>
+<path fill="none" stroke="black" d="M450.14,-73.5C457.64,-73.5 466.75,-73.5 475.64,-73.5"></path>
+<polygon fill="black" stroke="black" points="475.87,-77 485.87,-73.5 475.87,-70 475.87,-77"></polygon>
+</g>
+<!-- c&#45;&gt;s -->
+<g id="edge10" class="edge">
+<title>c-&gt;s</title>
+<path fill="none" stroke="black" d="M540.31,-64.18C548.95,-61.11 558.55,-57.71 567.16,-54.66"></path>
+<polygon fill="black" stroke="black" points="568.44,-57.92 576.7,-51.28 566.11,-51.32 568.44,-57.92"></polygon>
+</g>
+<!-- y -->
+<g id="node13" class="node">
+<title>y</title>
+<polygon fill="none" stroke="black" points="648,-27.5 648,-63.5 702,-63.5 702,-27.5 648,-27.5"></polygon>
+<text text-anchor="middle" x="675" y="-41.4" font-family="Inter" font-size="14.00">y</text>
+</g>
+<!-- s&#45;&gt;y -->
+<g id="edge12" class="edge">
+<title>s-&gt;y</title>
+<path fill="none" stroke="black" d="M612.14,-45.5C619.64,-45.5 628.75,-45.5 637.64,-45.5"></path>
+<polygon fill="black" stroke="black" points="637.87,-49 647.87,-45.5 637.87,-42 637.87,-49"></polygon>
+</g>
+</g>
+</svg>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+<div class="card">
+<p>A <strong>computational graph</strong> is just a flow chart for a calculation. Each node either holds a value or performs an operation. Edges show the order of operations.</p>
+</div>
+</section>
+<section id="the-pieces-value-nodes-and-operation-nodes" class="slide level2">
+<h2>The pieces — value nodes and operation nodes</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><span class="pill-blue">Value nodes</span></p>
+<ul>
+<li>Contain <strong>data</strong> — scalars, vectors, matrices, or higher-dimensional tensors.</li>
+<li>Will later also hold <strong>gradients</strong> (their slot for <span class="math inline">\frac{\partial L}{\partial \cdot}</span>).</li>
+<li>Drawn as boxes.</li>
+</ul>
+<div class="cell" data-fig-height="0.8" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class=""><p></p>
+<div>
+<svg width="960" height="77" viewbox="0.00 0.00 175.98 45.00" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" style="; max-width: none; max-height: none; display: block; margin: auto auto auto auto">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 41)">
+<title>G</title>
+<!-- x -->
+<g id="node1" class="node">
+<title>x</title>
+<polygon fill="none" stroke="black" points="0,-0.5 0,-36.5 167.98,-36.5 167.98,-0.5 0,-0.5"></polygon>
+<text text-anchor="middle" x="11.5" y="-14.3" font-family="Inter" font-size="14.00">x</text>
+<polyline fill="none" stroke="black" points="23,-0.5 23,-36.5 "></polyline>
+<text text-anchor="middle" x="58.86" y="-14.3" font-family="Inter" font-size="14.00">data = 0.0</text>
+<polyline fill="none" stroke="black" points="94.71,-0.5 94.71,-36.5 "></polyline>
+<text text-anchor="middle" x="131.35" y="-14.3" font-family="Inter" font-size="14.00">grad = 0.0</text>
+</g>
+</g>
+</svg>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+</div><div class="column" style="width:50%;">
+<p><span class="pill">Operation nodes</span></p>
+<ul>
+<li>Apply a <strong>function</strong> to incoming values.</li>
+<li>Arrows in = arguments. Arrow out = result.</li>
+<li>Drawn as circles.</li>
+</ul>
+<div class="cell" data-fig-height="0.9" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class=""><p></p>
+<div>
+<svg width="960" height="86" viewbox="0.00 0.00 167.52 59.04" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" style="; max-width: none; max-height: none; display: block; margin: auto auto auto auto">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 55.04)">
+<title>G</title>
+<!-- mul -->
+<g id="node1" class="node">
+<title>mul</title>
+<ellipse fill="#f4f1ea" stroke="black" cx="18" cy="-25.52" rx="18" ry="18"></ellipse>
+<text text-anchor="middle" x="18" y="-21.32" font-family="Inter" font-size="14.00">*</text>
+</g>
+<!-- plus -->
+<g id="node2" class="node">
+<title>plus</title>
+<ellipse fill="#f4f1ea" stroke="black" cx="72" cy="-25.52" rx="18" ry="18"></ellipse>
+<text text-anchor="middle" x="72" y="-21.32" font-family="Inter" font-size="14.00">+</text>
+</g>
+<!-- pow -->
+<g id="node3" class="node">
+<title>pow</title>
+<ellipse fill="#f4f1ea" stroke="black" cx="134" cy="-25.52" rx="25.54" ry="25.54"></ellipse>
+<text text-anchor="middle" x="134" y="-21.32" font-family="Inter" font-size="14.00">**2</text>
+</g>
+</g>
+</svg>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+</div></div>
+</section>
+<section id="acyclic-almost-always" class="slide level2">
+<h2>Acyclic — almost always</h2>
+<p>We use <strong>directed acyclic graphs</strong> (DAGs) — no operation’s output ever flows back to an <em>earlier</em> node.</p>
+<div class="columns">
+<div class="column" style="width:50%;">
+<div class="cell" data-fig-height="1.2" data-fig-width="4" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class=""><p></p>
+<div>
+<svg width="384" height="115" viewbox="0.00 0.00 332.00 44.00" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" style="; max-width: none; max-height: none; display: block; margin: auto auto auto auto">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 40)">
+<title>G</title>
+<!-- a -->
+<g id="node1" class="node">
+<title>a</title>
+<ellipse fill="none" stroke="black" cx="27" cy="-18" rx="27" ry="18"></ellipse>
+<text text-anchor="middle" x="27" y="-13.8" font-family="Inter" font-size="14.00">a</text>
+</g>
+<!-- b -->
+<g id="node2" class="node">
+<title>b</title>
+<ellipse fill="none" stroke="black" cx="117" cy="-18" rx="27" ry="18"></ellipse>
+<text text-anchor="middle" x="117" y="-13.8" font-family="Inter" font-size="14.00">b</text>
+</g>
+<!-- a&#45;&gt;b -->
+<g id="edge1" class="edge">
+<title>a-&gt;b</title>
+<path fill="none" stroke="black" d="M54.4,-18C62.39,-18 71.31,-18 79.82,-18"></path>
+<polygon fill="black" stroke="black" points="79.92,-21.5 89.92,-18 79.92,-14.5 79.92,-21.5"></polygon>
+</g>
+<!-- c -->
+<g id="node3" class="node">
+<title>c</title>
+<ellipse fill="none" stroke="black" cx="207" cy="-18" rx="27" ry="18"></ellipse>
+<text text-anchor="middle" x="207" y="-13.8" font-family="Inter" font-size="14.00">c</text>
+</g>
+<!-- b&#45;&gt;c -->
+<g id="edge2" class="edge">
+<title>b-&gt;c</title>
+<path fill="none" stroke="black" d="M144.4,-18C152.39,-18 161.31,-18 169.82,-18"></path>
+<polygon fill="black" stroke="black" points="169.92,-21.5 179.92,-18 169.92,-14.5 169.92,-21.5"></polygon>
+</g>
+<!-- d -->
+<g id="node4" class="node">
+<title>d</title>
+<ellipse fill="none" stroke="black" cx="297" cy="-18" rx="27" ry="18"></ellipse>
+<text text-anchor="middle" x="297" y="-13.8" font-family="Inter" font-size="14.00">d</text>
+</g>
+<!-- c&#45;&gt;d -->
+<g id="edge3" class="edge">
+<title>c-&gt;d</title>
+<path fill="none" stroke="black" d="M234.4,-18C242.39,-18 251.31,-18 259.82,-18"></path>
+<polygon fill="black" stroke="black" points="259.92,-21.5 269.92,-18 259.92,-14.5 259.92,-21.5"></polygon>
+</g>
+</g>
+</svg>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+<p><span class="pill-green">Acyclic — what we use</span></p>
+</div><div class="column" style="width:50%;">
+<div class="cell" data-fig-height="1.2" data-fig-width="4" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class=""><p></p>
+<div>
+<svg width="384" height="115" viewbox="0.00 0.00 332.00 67.00" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" style="; max-width: none; max-height: none; display: block; margin: auto auto auto auto">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 63)">
+<title>G</title>
+<!-- a -->
+<g id="node1" class="node">
+<title>a</title>
+<ellipse fill="none" stroke="black" cx="27" cy="-18" rx="27" ry="18"></ellipse>
+<text text-anchor="middle" x="27" y="-13.8" font-family="Inter" font-size="14.00">a</text>
+</g>
+<!-- b -->
+<g id="node2" class="node">
+<title>b</title>
+<ellipse fill="none" stroke="black" cx="117" cy="-41" rx="27" ry="18"></ellipse>
+<text text-anchor="middle" x="117" y="-36.8" font-family="Inter" font-size="14.00">b</text>
+</g>
+<!-- a&#45;&gt;b -->
+<g id="edge1" class="edge">
+<title>a-&gt;b</title>
+<path fill="none" stroke="black" d="M52.51,-24.41C61.57,-26.77 72.01,-29.5 81.78,-32.05"></path>
+<polygon fill="black" stroke="black" points="81.06,-35.49 91.62,-34.63 82.83,-28.71 81.06,-35.49"></polygon>
+</g>
+<!-- c -->
+<g id="node3" class="node">
+<title>c</title>
+<ellipse fill="none" stroke="black" cx="207" cy="-18" rx="27" ry="18"></ellipse>
+<text text-anchor="middle" x="207" y="-13.8" font-family="Inter" font-size="14.00">c</text>
+</g>
+<!-- b&#45;&gt;c -->
+<g id="edge2" class="edge">
+<title>b-&gt;c</title>
+<path fill="none" stroke="black" d="M142.51,-34.59C151.57,-32.23 162.01,-29.5 171.78,-26.95"></path>
+<polygon fill="black" stroke="black" points="172.83,-30.29 181.62,-24.37 171.06,-23.51 172.83,-30.29"></polygon>
+</g>
+<!-- c&#45;&gt;a -->
+<g id="edge3" class="edge">
+<title>c-&gt;a</title>
+<path fill="none" stroke="black" d="M180.08,-15.95C168.97,-15.17 155.86,-14.38 144,-14 120.01,-13.23 113.99,-13.23 90,-14 81.57,-14.27 72.5,-14.75 63.98,-15.28"></path>
+<polygon fill="black" stroke="black" points="63.67,-11.8 53.92,-15.95 64.13,-18.78 63.67,-11.8"></polygon>
+</g>
+<!-- d -->
+<g id="node4" class="node">
+<title>d</title>
+<ellipse fill="none" stroke="black" cx="297" cy="-18" rx="27" ry="18"></ellipse>
+<text text-anchor="middle" x="297" y="-13.8" font-family="Inter" font-size="14.00">d</text>
+</g>
+<!-- c&#45;&gt;d -->
+<g id="edge4" class="edge">
+<title>c-&gt;d</title>
+<path fill="none" stroke="black" d="M234.4,-18C242.39,-18 251.31,-18 259.82,-18"></path>
+<polygon fill="black" stroke="black" points="259.92,-21.5 269.92,-18 259.92,-14.5 259.92,-21.5"></polygon>
+</g>
+</g>
+</svg>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+<p><span class="pill-amber">Cyclic — pathological for plain neural nets</span></p>
+</div></div>
+<div class="callout callout-note callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Note</strong></p>
+</div>
+<div class="callout-content">
+<p><strong>We <em>will</em> see cycles later</strong> — recurrent networks on Day 9, where the same operation is reused across time steps. But each unrolled time-step is still a DAG.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="youve-maybe-seen-this-picture-before" class="slide level2">
+<h2>You’ve maybe seen this picture before</h2>
+<p><span class="eyebrow">Social-science graphs</span></p>
+<div class="columns">
+<div class="column" style="width:55%;">
+<p>A computational graph is structurally identical to:</p>
+<ul>
+<li>A <strong>causal DAG</strong> in causal inference (cf.&nbsp;Judea Pearl’s work).</li>
+<li>A <strong>factor graph</strong> in probabilistic modelling.</li>
+<li>A <strong>dataflow diagram</strong> in software engineering.</li>
+<li>A <strong>path diagram</strong> in structural equation models.</li>
+</ul>
+</div><div class="column" style="width:45%;">
+<div class="card">
+<p><strong>The shared idea:</strong> a calculation is a <em>structure of operations on values</em>.</p>
+<p>The structure itself carries information, by telling us what depends on what, what we can compute first, and what to differentiate with respect to what.</p>
+</div>
+</div></div>
+</section>
+<section id="the-perceptron-as-a-graph" class="slide level2">
+<h2>The perceptron as a graph</h2>
+<p>Yesterday’s linear perceptron <span class="math inline">y = wx + b</span> becomes:</p>
+<div class="cell" data-fig-height="2" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class=""><p></p>
+<div>
+<svg width="960" height="192" viewbox="0.00 0.00 314.00 127.00" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" style="; max-width: none; max-height: none; display: block; margin: auto auto auto auto">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 123)">
+<title>G</title>
+<!-- x -->
+<g id="node1" class="node">
+<title>x</title>
+<polygon fill="none" stroke="black" points="0,-82.5 0,-118.5 54,-118.5 54,-82.5 0,-82.5"></polygon>
+<text text-anchor="middle" x="27" y="-96.4" font-family="Inter" font-size="14.00">x</text>
+</g>
+<!-- t -->
+<g id="node4" class="node">
+<title>t</title>
+<ellipse fill="#f4f1ea" stroke="black" cx="117" cy="-73.5" rx="18" ry="18"></ellipse>
+<text text-anchor="middle" x="117" y="-69.3" font-family="Inter" font-size="14.00">*</text>
+</g>
+<!-- x&#45;&gt;t -->
+<g id="edge1" class="edge">
+<title>x-&gt;t</title>
+<path fill="none" stroke="black" d="M54.4,-92.4C65.64,-88.95 78.72,-84.94 89.92,-81.5"></path>
+<polygon fill="black" stroke="black" points="91.05,-84.82 99.58,-78.54 88.99,-78.12 91.05,-84.82"></polygon>
+</g>
+<!-- w -->
+<g id="node2" class="node">
+<title>w</title>
+<polygon fill="none" stroke="black" points="0,-27.5 0,-63.5 54,-63.5 54,-27.5 0,-27.5"></polygon>
+<text text-anchor="middle" x="27" y="-41.4" font-family="Inter" font-size="14.00">w</text>
+</g>
+<!-- w&#45;&gt;t -->
+<g id="edge2" class="edge">
+<title>w-&gt;t</title>
+<path fill="none" stroke="black" d="M54.4,-53.9C65.64,-57.48 78.72,-61.64 89.92,-65.2"></path>
+<polygon fill="black" stroke="black" points="88.99,-68.58 99.58,-68.28 91.11,-61.91 88.99,-68.58"></polygon>
+</g>
+<!-- b -->
+<g id="node3" class="node">
+<title>b</title>
+<polygon fill="none" stroke="black" points="90,-0.5 90,-36.5 144,-36.5 144,-0.5 90,-0.5"></polygon>
+<text text-anchor="middle" x="117" y="-14.4" font-family="Inter" font-size="14.00">b</text>
+</g>
+<!-- p -->
+<g id="node5" class="node">
+<title>p</title>
+<ellipse fill="#f4f1ea" stroke="black" cx="198" cy="-45.5" rx="18" ry="18"></ellipse>
+<text text-anchor="middle" x="198" y="-41.3" font-family="Inter" font-size="14.00">+</text>
+</g>
+<!-- b&#45;&gt;p -->
+<g id="edge4" class="edge">
+<title>b-&gt;p</title>
+<path fill="none" stroke="black" d="M144.31,-27.49C152.95,-30.45 162.55,-33.73 171.16,-36.67"></path>
+<polygon fill="black" stroke="black" points="170.11,-40.01 180.7,-39.93 172.37,-33.38 170.11,-40.01"></polygon>
+</g>
+<!-- t&#45;&gt;p -->
+<g id="edge3" class="edge">
+<title>t-&gt;p</title>
+<path fill="none" stroke="black" d="M134.37,-67.7C145.03,-63.92 159.17,-58.91 171.31,-54.61"></path>
+<polygon fill="black" stroke="black" points="172.67,-57.84 180.92,-51.2 170.33,-51.24 172.67,-57.84"></polygon>
+</g>
+<!-- y -->
+<g id="node6" class="node">
+<title>y</title>
+<polygon fill="none" stroke="black" points="252,-27.5 252,-63.5 306,-63.5 306,-27.5 252,-27.5"></polygon>
+<text text-anchor="middle" x="279" y="-41.4" font-family="Inter" font-size="14.00">y</text>
+</g>
+<!-- p&#45;&gt;y -->
+<g id="edge5" class="edge">
+<title>p-&gt;y</title>
+<path fill="none" stroke="black" d="M216.14,-45.5C223.64,-45.5 232.75,-45.5 241.64,-45.5"></path>
+<polygon fill="black" stroke="black" points="241.87,-49 251.87,-45.5 241.87,-42 241.87,-49"></polygon>
+</g>
+</g>
+</svg>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+<p>(With an activation function <span class="math inline">\sigma</span> added between the <code>+</code> and the output, you’d insert one more node — same picture, one more step.)</p>
+<div class="card">
+<p><strong>Every node has a local derivative we can compute</strong> — using the cheat-sheet from earlier. The chain rule will glue them.</p>
+<p>That’s the move that makes the whole edifice work. Tomorrow we use it.</p>
+</div>
+</section>
+<section id="a-network-as-a-graph" class="slide level2">
+<h2>A network as a graph</h2>
+<p>Yesterday’s two-layer network was: <span class="math display">
+\hat{y} = \sigma\Big( \sigma\big(\mathbf{x}\,\mathbf{W}^{(1)\mathsf T} + \mathbf{b}^{(1)}\big) \,\mathbf{w}^{(2)\mathsf T} + b^{(2)} \Big)
+</span></p>
+<p><span class="eyebrow">Build it one operation at a time — watch the node count</span></p>
+<div class="r-stack">
+<div class="fragment fade-in-then-out">
+<div class="cell" data-fig-height="2" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class=""><p></p>
+<div>
+<svg width="960" height="192" viewbox="0.00 0.00 134.00 121.20" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" style="; max-width: none; max-height: none; display: block; margin: auto auto auto auto">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 117.2)">
+<title>G</title>
+<text text-anchor="middle" x="63" y="-7.3" font-family="Inter" font-size="11.00" fill="#5c6473">1 operation · 3 nodes</text>
+<!-- x -->
+<g id="node1" class="node">
+<title>x</title>
+<polygon fill="none" stroke="black" points="0,-76.7 0,-112.7 54,-112.7 54,-76.7 0,-76.7"></polygon>
+<text text-anchor="middle" x="27" y="-90.6" font-family="Inter" font-size="14.00">x</text>
+</g>
+<!-- m1 -->
+<g id="node3" class="node">
+<title>m1</title>
+<ellipse fill="#f4f1ea" stroke="black" cx="108" cy="-66.7" rx="18" ry="18"></ellipse>
+<text text-anchor="middle" x="108" y="-62.5" font-family="Inter" font-size="14.00">×</text>
+</g>
+<!-- x&#45;&gt;m1 -->
+<g id="edge1" class="edge">
+<title>x-&gt;m1</title>
+<path fill="none" stroke="black" d="M54.31,-85.38C62.95,-82.31 72.55,-78.91 81.16,-75.86"></path>
+<polygon fill="black" stroke="black" points="82.44,-79.12 90.7,-72.48 80.11,-72.52 82.44,-79.12"></polygon>
+</g>
+<!-- W1 -->
+<g id="node2" class="node">
+<title>W1</title>
+<polygon fill="none" stroke="black" points="0,-21.7 0,-57.7 54,-57.7 54,-21.7 0,-21.7"></polygon>
+<text text-anchor="middle" x="27" y="-35.6" font-family="Inter" font-size="14.00">W₁ᵀ</text>
+</g>
+<!-- W1&#45;&gt;m1 -->
+<g id="edge2" class="edge">
+<title>W1-&gt;m1</title>
+<path fill="none" stroke="black" d="M54.31,-48.69C62.95,-51.65 72.55,-54.93 81.16,-57.87"></path>
+<polygon fill="black" stroke="black" points="80.11,-61.21 90.7,-61.13 82.37,-54.58 80.11,-61.21"></polygon>
+</g>
+</g>
+</svg>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+</div>
+<div class="fragment fade-in-then-out">
+<div class="cell" data-fig-height="2" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class=""><p></p>
+<div>
+<svg width="960" height="192" viewbox="0.00 0.00 224.00 148.20" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" style="; max-width: none; max-height: none; display: block; margin: auto auto auto auto">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 144.2)">
+<title>G</title>
+<text text-anchor="middle" x="108" y="-7.3" font-family="Inter" font-size="11.00" fill="#5c6473">2 operations · 5 nodes — add the bias</text>
+<!-- x -->
+<g id="node1" class="node">
+<title>x</title>
+<polygon fill="none" stroke="black" points="0,-103.7 0,-139.7 54,-139.7 54,-103.7 0,-103.7"></polygon>
+<text text-anchor="middle" x="27" y="-117.6" font-family="Inter" font-size="14.00">x</text>
+</g>
+<!-- m1 -->
+<g id="node4" class="node">
+<title>m1</title>
+<ellipse fill="#f4f1ea" stroke="black" cx="117" cy="-94.7" rx="18" ry="18"></ellipse>
+<text text-anchor="middle" x="117" y="-90.5" font-family="Inter" font-size="14.00">×</text>
+</g>
+<!-- x&#45;&gt;m1 -->
+<g id="edge1" class="edge">
+<title>x-&gt;m1</title>
+<path fill="none" stroke="black" d="M54.4,-113.6C65.64,-110.15 78.72,-106.14 89.92,-102.7"></path>
+<polygon fill="black" stroke="black" points="91.05,-106.02 99.58,-99.74 88.99,-99.32 91.05,-106.02"></polygon>
+</g>
+<!-- W1 -->
+<g id="node2" class="node">
+<title>W1</title>
+<polygon fill="none" stroke="black" points="0,-48.7 0,-84.7 54,-84.7 54,-48.7 0,-48.7"></polygon>
+<text text-anchor="middle" x="27" y="-62.6" font-family="Inter" font-size="14.00">W₁ᵀ</text>
+</g>
+<!-- W1&#45;&gt;m1 -->
+<g id="edge2" class="edge">
+<title>W1-&gt;m1</title>
+<path fill="none" stroke="black" d="M54.4,-75.1C65.64,-78.68 78.72,-82.84 89.92,-86.4"></path>
+<polygon fill="black" stroke="black" points="88.99,-89.78 99.58,-89.48 91.11,-83.11 88.99,-89.78"></polygon>
+</g>
+<!-- b1 -->
+<g id="node3" class="node">
+<title>b1</title>
+<polygon fill="none" stroke="black" points="90,-21.7 90,-57.7 144,-57.7 144,-21.7 90,-21.7"></polygon>
+<text text-anchor="middle" x="117" y="-35.6" font-family="Inter" font-size="14.00">b₁</text>
+</g>
+<!-- a1 -->
+<g id="node5" class="node">
+<title>a1</title>
+<ellipse fill="#f4f1ea" stroke="black" cx="198" cy="-66.7" rx="18" ry="18"></ellipse>
+<text text-anchor="middle" x="198" y="-62.5" font-family="Inter" font-size="14.00">+</text>
+</g>
+<!-- b1&#45;&gt;a1 -->
+<g id="edge4" class="edge">
+<title>b1-&gt;a1</title>
+<path fill="none" stroke="black" d="M144.31,-48.69C152.95,-51.65 162.55,-54.93 171.16,-57.87"></path>
+<polygon fill="black" stroke="black" points="170.11,-61.21 180.7,-61.13 172.37,-54.58 170.11,-61.21"></polygon>
+</g>
+<!-- m1&#45;&gt;a1 -->
+<g id="edge3" class="edge">
+<title>m1-&gt;a1</title>
+<path fill="none" stroke="black" d="M134.37,-88.9C145.03,-85.12 159.17,-80.11 171.31,-75.81"></path>
+<polygon fill="black" stroke="black" points="172.67,-79.04 180.92,-72.4 170.33,-72.44 172.67,-79.04"></polygon>
+</g>
+</g>
+</svg>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+</div>
+<div class="fragment fade-in-then-out">
+<div class="cell" data-fig-height="2" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class=""><p></p>
+<div>
+<svg width="960" height="192" viewbox="0.00 0.00 296.00 148.20" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" style="; max-width: none; max-height: none; display: block; margin: auto auto auto auto">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 144.2)">
+<title>G</title>
+<text text-anchor="middle" x="144" y="-7.3" font-family="Inter" font-size="11.00" fill="#5c6473">3 operations · 6 nodes — that is ONE layer</text>
+<!-- x -->
+<g id="node1" class="node">
+<title>x</title>
+<polygon fill="none" stroke="black" points="0,-103.7 0,-139.7 54,-139.7 54,-103.7 0,-103.7"></polygon>
+<text text-anchor="middle" x="27" y="-117.6" font-family="Inter" font-size="14.00">x</text>
+</g>
+<!-- m1 -->
+<g id="node4" class="node">
+<title>m1</title>
+<ellipse fill="#f4f1ea" stroke="black" cx="117" cy="-94.7" rx="18" ry="18"></ellipse>
+<text text-anchor="middle" x="117" y="-90.5" font-family="Inter" font-size="14.00">×</text>
+</g>
+<!-- x&#45;&gt;m1 -->
+<g id="edge1" class="edge">
+<title>x-&gt;m1</title>
+<path fill="none" stroke="black" d="M54.4,-113.6C65.64,-110.15 78.72,-106.14 89.92,-102.7"></path>
+<polygon fill="black" stroke="black" points="91.05,-106.02 99.58,-99.74 88.99,-99.32 91.05,-106.02"></polygon>
+</g>
+<!-- W1 -->
+<g id="node2" class="node">
+<title>W1</title>
+<polygon fill="none" stroke="black" points="0,-48.7 0,-84.7 54,-84.7 54,-48.7 0,-48.7"></polygon>
+<text text-anchor="middle" x="27" y="-62.6" font-family="Inter" font-size="14.00">W₁ᵀ</text>
+</g>
+<!-- W1&#45;&gt;m1 -->
+<g id="edge2" class="edge">
+<title>W1-&gt;m1</title>
+<path fill="none" stroke="black" d="M54.4,-75.1C65.64,-78.68 78.72,-82.84 89.92,-86.4"></path>
+<polygon fill="black" stroke="black" points="88.99,-89.78 99.58,-89.48 91.11,-83.11 88.99,-89.78"></polygon>
+</g>
+<!-- b1 -->
+<g id="node3" class="node">
+<title>b1</title>
+<polygon fill="none" stroke="black" points="90,-21.7 90,-57.7 144,-57.7 144,-21.7 90,-21.7"></polygon>
+<text text-anchor="middle" x="117" y="-35.6" font-family="Inter" font-size="14.00">b₁</text>
+</g>
+<!-- a1 -->
+<g id="node5" class="node">
+<title>a1</title>
+<ellipse fill="#f4f1ea" stroke="black" cx="198" cy="-66.7" rx="18" ry="18"></ellipse>
+<text text-anchor="middle" x="198" y="-62.5" font-family="Inter" font-size="14.00">+</text>
+</g>
+<!-- b1&#45;&gt;a1 -->
+<g id="edge4" class="edge">
+<title>b1-&gt;a1</title>
+<path fill="none" stroke="black" d="M144.31,-48.69C152.95,-51.65 162.55,-54.93 171.16,-57.87"></path>
+<polygon fill="black" stroke="black" points="170.11,-61.21 180.7,-61.13 172.37,-54.58 170.11,-61.21"></polygon>
+</g>
+<!-- m1&#45;&gt;a1 -->
+<g id="edge3" class="edge">
+<title>m1-&gt;a1</title>
+<path fill="none" stroke="black" d="M134.37,-88.9C145.03,-85.12 159.17,-80.11 171.31,-75.81"></path>
+<polygon fill="black" stroke="black" points="172.67,-79.04 180.92,-72.4 170.33,-72.44 172.67,-79.04"></polygon>
+</g>
+<!-- s1 -->
+<g id="node6" class="node">
+<title>s1</title>
+<ellipse fill="#c9322b" stroke="black" cx="270" cy="-66.7" rx="18" ry="18"></ellipse>
+<text text-anchor="start" x="266.5" y="-62.5" font-family="Inter" font-size="14.00" fill="#fbfaf6">σ</text>
+</g>
+<!-- a1&#45;&gt;s1 -->
+<g id="edge5" class="edge">
+<title>a1-&gt;s1</title>
+<path fill="none" stroke="black" d="M216.3,-66.7C224.02,-66.7 233.29,-66.7 241.89,-66.7"></path>
+<polygon fill="black" stroke="black" points="241.9,-70.2 251.9,-66.7 241.9,-63.2 241.9,-70.2"></polygon>
+</g>
+</g>
+</svg>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+</div>
+<div class="fragment">
+<div class="cell" data-fig-height="2" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class=""><p></p>
+<div>
+<svg width="960" height="192" viewbox="0.00 0.00 638.00 204.20" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" style="; max-width: none; max-height: none; display: block; margin: auto auto auto auto">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 200.2)">
+<title>G</title>
+<text text-anchor="middle" x="315" y="-7.3" font-family="Inter" font-size="11.00" fill="#5c6473">6 operations · 12 nodes — and that is only TWO layers</text>
+<!-- x -->
+<g id="node1" class="node">
+<title>x</title>
+<polygon fill="none" stroke="black" points="0,-159.7 0,-195.7 54,-195.7 54,-159.7 0,-159.7"></polygon>
+<text text-anchor="middle" x="27" y="-173.6" font-family="Inter" font-size="14.00">x</text>
+</g>
+<!-- m1 -->
+<g id="node6" class="node">
+<title>m1</title>
+<ellipse fill="#f4f1ea" stroke="black" cx="117" cy="-150.7" rx="18" ry="18"></ellipse>
+<text text-anchor="middle" x="117" y="-146.5" font-family="Inter" font-size="14.00">×</text>
+</g>
+<!-- x&#45;&gt;m1 -->
+<g id="edge1" class="edge">
+<title>x-&gt;m1</title>
+<path fill="none" stroke="black" d="M54.4,-169.6C65.64,-166.15 78.72,-162.14 89.92,-158.7"></path>
+<polygon fill="black" stroke="black" points="91.05,-162.02 99.58,-155.74 88.99,-155.32 91.05,-162.02"></polygon>
+</g>
+<!-- W1 -->
+<g id="node2" class="node">
+<title>W1</title>
+<polygon fill="none" stroke="black" points="0,-104.7 0,-140.7 54,-140.7 54,-104.7 0,-104.7"></polygon>
+<text text-anchor="middle" x="27" y="-118.6" font-family="Inter" font-size="14.00">W₁ᵀ</text>
+</g>
+<!-- W1&#45;&gt;m1 -->
+<g id="edge2" class="edge">
+<title>W1-&gt;m1</title>
+<path fill="none" stroke="black" d="M54.4,-131.1C65.64,-134.68 78.72,-138.84 89.92,-142.4"></path>
+<polygon fill="black" stroke="black" points="88.99,-145.78 99.58,-145.48 91.11,-139.11 88.99,-145.78"></polygon>
+</g>
+<!-- b1 -->
+<g id="node3" class="node">
+<title>b1</title>
+<polygon fill="none" stroke="black" points="90,-77.7 90,-113.7 144,-113.7 144,-77.7 90,-77.7"></polygon>
+<text text-anchor="middle" x="117" y="-91.6" font-family="Inter" font-size="14.00">b₁</text>
+</g>
+<!-- a1 -->
+<g id="node7" class="node">
+<title>a1</title>
+<ellipse fill="#f4f1ea" stroke="black" cx="198" cy="-122.7" rx="18" ry="18"></ellipse>
+<text text-anchor="middle" x="198" y="-118.5" font-family="Inter" font-size="14.00">+</text>
+</g>
+<!-- b1&#45;&gt;a1 -->
+<g id="edge4" class="edge">
+<title>b1-&gt;a1</title>
+<path fill="none" stroke="black" d="M144.31,-104.69C152.95,-107.65 162.55,-110.93 171.16,-113.87"></path>
+<polygon fill="black" stroke="black" points="170.11,-117.21 180.7,-117.13 172.37,-110.58 170.11,-117.21"></polygon>
+</g>
+<!-- W2 -->
+<g id="node4" class="node">
+<title>W2</title>
+<polygon fill="none" stroke="black" points="252,-49.7 252,-85.7 306,-85.7 306,-49.7 252,-49.7"></polygon>
+<text text-anchor="middle" x="279" y="-63.6" font-family="Inter" font-size="14.00">w₂ᵀ</text>
+</g>
+<!-- m2 -->
+<g id="node9" class="node">
+<title>m2</title>
+<ellipse fill="#f4f1ea" stroke="black" cx="369" cy="-94.7" rx="18" ry="18"></ellipse>
+<text text-anchor="middle" x="369" y="-90.5" font-family="Inter" font-size="14.00">×</text>
+</g>
+<!-- W2&#45;&gt;m2 -->
+<g id="edge7" class="edge">
+<title>W2-&gt;m2</title>
+<path fill="none" stroke="black" d="M306.4,-75.8C317.64,-79.25 330.72,-83.26 341.92,-86.7"></path>
+<polygon fill="black" stroke="black" points="340.99,-90.08 351.58,-89.66 343.05,-83.38 340.99,-90.08"></polygon>
+</g>
+<!-- b2 -->
+<g id="node5" class="node">
+<title>b2</title>
+<polygon fill="none" stroke="black" points="342,-21.7 342,-57.7 396,-57.7 396,-21.7 342,-21.7"></polygon>
+<text text-anchor="middle" x="369" y="-35.6" font-family="Inter" font-size="14.00">b₂</text>
+</g>
+<!-- a2 -->
+<g id="node10" class="node">
+<title>a2</title>
+<ellipse fill="#f4f1ea" stroke="black" cx="450" cy="-66.7" rx="18" ry="18"></ellipse>
+<text text-anchor="middle" x="450" y="-62.5" font-family="Inter" font-size="14.00">+</text>
+</g>
+<!-- b2&#45;&gt;a2 -->
+<g id="edge9" class="edge">
+<title>b2-&gt;a2</title>
+<path fill="none" stroke="black" d="M396.31,-48.69C404.95,-51.65 414.55,-54.93 423.16,-57.87"></path>
+<polygon fill="black" stroke="black" points="422.11,-61.21 432.7,-61.13 424.37,-54.58 422.11,-61.21"></polygon>
+</g>
+<!-- m1&#45;&gt;a1 -->
+<g id="edge3" class="edge">
+<title>m1-&gt;a1</title>
+<path fill="none" stroke="black" d="M134.37,-144.9C145.03,-141.12 159.17,-136.11 171.31,-131.81"></path>
+<polygon fill="black" stroke="black" points="172.67,-135.04 180.92,-128.4 170.33,-128.44 172.67,-135.04"></polygon>
+</g>
+<!-- s1 -->
+<g id="node8" class="node">
+<title>s1</title>
+<ellipse fill="#c9322b" stroke="black" cx="279" cy="-122.7" rx="18" ry="18"></ellipse>
+<text text-anchor="start" x="275.5" y="-118.5" font-family="Inter" font-size="14.00" fill="#fbfaf6">σ</text>
+</g>
+<!-- a1&#45;&gt;s1 -->
+<g id="edge5" class="edge">
+<title>a1-&gt;s1</title>
+<path fill="none" stroke="black" d="M216.14,-122.7C226.29,-122.7 239.37,-122.7 250.88,-122.7"></path>
+<polygon fill="black" stroke="black" points="250.89,-126.2 260.89,-122.7 250.89,-119.2 250.89,-126.2"></polygon>
+</g>
+<!-- s1&#45;&gt;m2 -->
+<g id="edge6" class="edge">
+<title>s1-&gt;m2</title>
+<path fill="none" stroke="black" d="M296.55,-117.43C309.34,-113.37 327.26,-107.66 341.96,-102.98"></path>
+<polygon fill="black" stroke="black" points="343.05,-106.31 351.52,-99.94 340.93,-99.64 343.05,-106.31"></polygon>
+</g>
+<!-- m2&#45;&gt;a2 -->
+<g id="edge8" class="edge">
+<title>m2-&gt;a2</title>
+<path fill="none" stroke="black" d="M386.37,-88.9C397.03,-85.12 411.17,-80.11 423.31,-75.81"></path>
+<polygon fill="black" stroke="black" points="424.67,-79.04 432.92,-72.4 422.33,-72.44 424.67,-79.04"></polygon>
+</g>
+<!-- s2 -->
+<g id="node11" class="node">
+<title>s2</title>
+<ellipse fill="#c9322b" stroke="black" cx="522" cy="-66.7" rx="18" ry="18"></ellipse>
+<text text-anchor="start" x="518.5" y="-62.5" font-family="Inter" font-size="14.00" fill="#fbfaf6">σ</text>
+</g>
+<!-- a2&#45;&gt;s2 -->
+<g id="edge10" class="edge">
+<title>a2-&gt;s2</title>
+<path fill="none" stroke="black" d="M468.3,-66.7C476.02,-66.7 485.29,-66.7 493.89,-66.7"></path>
+<polygon fill="black" stroke="black" points="493.9,-70.2 503.9,-66.7 493.9,-63.2 493.9,-70.2"></polygon>
+</g>
+<!-- y -->
+<g id="node12" class="node">
+<title>y</title>
+<polygon fill="none" stroke="black" points="576,-48.7 576,-84.7 630,-84.7 630,-48.7 576,-48.7"></polygon>
+<text text-anchor="middle" x="603" y="-62.6" font-family="Inter" font-size="14.00">ŷ</text>
+</g>
+<!-- s2&#45;&gt;y -->
+<g id="edge11" class="edge">
+<title>s2-&gt;y</title>
+<path fill="none" stroke="black" d="M540.14,-66.7C547.64,-66.7 556.75,-66.7 565.64,-66.7"></path>
+<polygon fill="black" stroke="black" points="565.87,-70.2 575.87,-66.7 565.87,-63.2 565.87,-70.2"></polygon>
+</g>
+</g>
+</svg>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="card">
+<p>We <strong>multiply, add, “squash”</strong>, twice. What grows is the <em>tracking</em>: three operations per layer, and every one needs its own local derivative.</p>
+<p>In <strong>Labs 3–4</strong> you build exactly this, where every single arithmetic operation becomes a node in your <code>Value</code> graph. A tiny network makes a surprisingly big graph — and that is precisely why we let the computer walk it for us.</p>
+</div>
+</section>
+<section id="the-two-passes-preview-of-tomorrow" class="slide level2">
+<h2>The two passes — preview of tomorrow</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><span class="pill-blue">Forward pass</span></p>
+<ul>
+<li>Walk the graph <strong>left-to-right</strong>.</li>
+<li>At each node, compute its output using the operation and incoming values.</li>
+<li>Store the output (we’ll need it).</li>
+<li>End: a prediction.</li>
+</ul>
+</div><div class="column" style="width:50%;">
+<p><span class="pill">Backward pass</span></p>
+<ul>
+<li>Walk the graph <strong>right-to-left</strong>.</li>
+<li>At each node, compute <span class="math inline">\dfrac{\partial L}{\partial \text{(this node)}}</span> using the chain rule and local derivatives.</li>
+<li>End: a gradient for every parameter.</li>
+</ul>
+</div></div>
+<div class="callout callout-tip callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Tip</strong></p>
+</div>
+<div class="callout-content">
+<p>This is what frameworks (PyTorch, JAX, TensorFlow) automate. Tomorrow you’ll write a tiny version of it yourself, in Python.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="take-stock" class="slide level2">
+<h2>Take stock</h2>
+<p><span class="eyebrow"><span class="pause-cue">Where you are at the end of Day 3</span></span></p>
+<div class="card">
+<p>You can now:</p>
+<ol type="1">
+<li>Multiply matrices and check shapes by hand.</li>
+<li>Differentiate simple expressions, including with the chain rule.</li>
+<li>Draw any expression — from a simple polynomial to a two-layer network — as a directed acyclic graph.</li>
+<li>State what we still don’t have: a <strong>way to put loss into the graph and let gradients flow backwards</strong>.</li>
+</ol>
+</div>
+<div class="callout callout-tip callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Tip</strong></p>
+</div>
+<div class="callout-content">
+<p>You have all three tools. Tomorrow we put them together.</p>
+</div>
+</div>
+</div>
+</section></section>
+<section>
+<section id="lab-brief-todays-afternoon" class="title-slide slide level1 center" data-background-color="#0E1A2B">
+<h1>Lab brief · today’s afternoon</h1>
+
+</section>
+<section id="todays-lab-90-minutes" class="slide level2">
+<h2>Today’s lab — 90 minutes</h2>
+<p><span class="eyebrow">Goals</span></p>
+<p>In Python (no PyTorch yet), build a small <strong>computational graph library</strong> from scratch.</p>
+<p>You will implement:</p>
+<ol type="1">
+<li>A <code>Value</code> class that stores <code>data</code>, <code>grad</code>, and a list of “child” values.</li>
+<li>Methods <code>__add__</code>, <code>__mul__</code>, and <code>__pow__</code> that build a graph as you do arithmetic.</li>
+<li>A small test: write <code>c = a * b + 1</code> for <code>Value</code>s <code>a, b</code>, and verify the graph has the right structure.</li>
+</ol>
+<div class="card">
+<p><strong>Deliverable.</strong> A working <code>Value</code> class. We will add gradient computation to it <strong>tomorrow</strong> — that step turns this library into a fully-working autodiff system.</p>
+<p>The pattern is Andrej Karpathy’s <code>micrograd</code>. We are walking it deliberately.</p>
+</div>
+</section>
+<section id="see-you-tomorrow" class="slide level2" data-background-color="#0E1A2B">
+<h2>See you tomorrow</h2>
+<p><span class="eyebrow">Lecture 4 — <em>Backpropagation</em></span></p>
+<p><span class="smaller"><span class="muted">If you want a head start: skim Karpathy’s <em>micrograd</em> GitHub README tonight. Don’t read the implementation yet — we’ll write it together tomorrow.</span></span></p>
+
+<div class="quarto-auto-generated-content">
+<div class="footer footer-default">
+<p>ME324 · AI and Deep Learning · LSE Summer School</p>
+</div>
+</div>
+</section></section>
+    </div>
+  </div>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script>
+  <script src="../site_libs/revealjs/dist/reveal.js"></script>
+  <!-- reveal.js plugins -->
+  <script src="../site_libs/revealjs/plugin/quarto-line-highlight/line-highlight.js"></script>
+  <script src="../site_libs/revealjs/plugin/pdf-export/pdfexport.js"></script>
+  <script src="../site_libs/revealjs/plugin/reveal-menu/menu.js"></script>
+  <script src="../site_libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
+  <script src="../site_libs/revealjs/plugin/quarto-support/support.js"></script>
+  
+
+  <script src="../site_libs/revealjs/plugin/notes/notes.js"></script>
+  <script src="../site_libs/revealjs/plugin/search/search.js"></script>
+  <script src="../site_libs/revealjs/plugin/zoom/zoom.js"></script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script>
+
+  <script>
+
+      // Full list of configuration options available at:
+      // https://revealjs.com/config/
+      Reveal.initialize({
+'controlsAuto': true,
+'previewLinksAuto': false,
+'pdfSeparateFragments': false,
+'autoAnimateEasing': "ease",
+'autoAnimateDuration': 1,
+'autoAnimateUnmatched': true,
+'menu': {"side":"right","useTextContentForMissingTitles":true,"markers":false,"loadIcons":false,"custom":[{"title":"Tools","icon":"<i class=\"fas fa-gear\"></i>","content":"<ul class=\"slide-menu-items\">\n<li class=\"slide-tool-item active\" data-item=\"0\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.fullscreen(event)\"><kbd>f</kbd> Fullscreen</a></li>\n<li class=\"slide-tool-item\" data-item=\"1\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.speakerMode(event)\"><kbd>s</kbd> Speaker View</a></li>\n<li class=\"slide-tool-item\" data-item=\"2\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.overview(event)\"><kbd>o</kbd> Slide Overview</a></li>\n<li class=\"slide-tool-item\" data-item=\"3\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.togglePdfExport(event)\"><kbd>e</kbd> PDF Export Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"4\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.keyboardHelp(event)\"><kbd>?</kbd> Keyboard Help</a></li>\n</ul>"}],"openButton":true,"width":"third"},
+'smaller': true,
+ 
+        // Display controls in the bottom right corner
+        controls: false,
+
+        // Help the user learn the controls by providing hints, for example by
+        // bouncing the down arrow when they first encounter a vertical slide
+        controlsTutorial: false,
+
+        // Determines where controls appear, "edges" or "bottom-right"
+        controlsLayout: 'edges',
+
+        // Visibility rule for backwards navigation arrows; "faded", "hidden"
+        // or "visible"
+        controlsBackArrows: 'faded',
+
+        // Display a presentation progress bar
+        progress: true,
+
+        // Display the page number of the current slide
+        slideNumber: 'c/t',
+
+        // 'all', 'print', or 'speaker'
+        showSlideNumber: 'all',
+
+        // Add the current slide number to the URL hash so that reloading the
+        // page/copying the URL will return you to the same slide
+        hash: true,
+
+        // Start with 1 for the hash rather than 0
+        hashOneBasedIndex: false,
+
+        // Flags if we should monitor the hash and change slides accordingly
+        respondToHashChanges: true,
+
+        // Push each slide change to the browser history
+        history: false,
+
+        // Enable keyboard shortcuts for navigation
+        keyboard: true,
+
+        // Enable the slide overview mode
+        overview: true,
+
+        // Disables the default reveal.js slide layout (scaling and centering)
+        // so that you can use custom CSS layout
+        disableLayout: false,
+
+        // Vertical centering of slides
+        center: false,
+
+        // Enables touch navigation on devices with touch input
+        touch: true,
+
+        // Loop the presentation
+        loop: false,
+
+        // Change the presentation direction to be RTL
+        rtl: false,
+
+        // see https://revealjs.com/vertical-slides/#navigation-mode
+        navigationMode: 'linear',
+
+        // Randomizes the order of slides each time the presentation loads
+        shuffle: false,
+
+        // Turns fragments on and off globally
+        fragments: true,
+
+        // Flags whether to include the current fragment in the URL,
+        // so that reloading brings you to the same fragment position
+        fragmentInURL: false,
+
+        // Flags if the presentation is running in an embedded mode,
+        // i.e. contained within a limited portion of the screen
+        embedded: false,
+
+        // Flags if we should show a help overlay when the questionmark
+        // key is pressed
+        help: true,
+
+        // Flags if it should be possible to pause the presentation (blackout)
+        pause: true,
+
+        // Flags if speaker notes should be visible to all viewers
+        showNotes: false,
+
+        // Global override for autoplaying embedded media (null/true/false)
+        autoPlayMedia: null,
+
+        // Global override for preloading lazy-loaded iframes (null/true/false)
+        preloadIframes: null,
+
+        // Number of milliseconds between automatically proceeding to the
+        // next slide, disabled when set to 0, this value can be overwritten
+        // by using a data-autoslide attribute on your slides
+        autoSlide: 0,
+
+        // Stop auto-sliding after user input
+        autoSlideStoppable: true,
+
+        // Use this method for navigation when auto-sliding
+        autoSlideMethod: null,
+
+        // Specify the average time in seconds that you think you will spend
+        // presenting each slide. This is used to show a pacing timer in the
+        // speaker view
+        defaultTiming: null,
+
+        // Enable slide navigation via mouse wheel
+        mouseWheel: false,
+
+        // The display mode that will be used to show slides
+        display: 'block',
+
+        // Hide cursor if inactive
+        hideInactiveCursor: true,
+
+        // Time before the cursor is hidden (in ms)
+        hideCursorTime: 5000,
+
+        // Opens links in an iframe preview overlay
+        previewLinks: false,
+
+        // Transition style (none/fade/slide/convex/concave/zoom)
+        transition: 'none',
+
+        // Transition speed (default/fast/slow)
+        transitionSpeed: 'default',
+
+        // Transition style for full page slide backgrounds
+        // (none/fade/slide/convex/concave/zoom)
+        backgroundTransition: 'none',
+
+        // Number of slides away from the current that are visible
+        viewDistance: 3,
+
+        // Number of slides away from the current that are visible on mobile
+        // devices. It is advisable to set this to a lower number than
+        // viewDistance in order to save resources.
+        mobileViewDistance: 2,
+
+        // The "normal" size of the presentation, aspect ratio will be preserved
+        // when the presentation is scaled to fit different resolutions. Can be
+        // specified using percentage units.
+        width: 1280,
+
+        height: 760,
+
+        // Factor of the display size that should remain empty around the content
+        margin: 4.0e-2,
+
+        // Bounds for smallest/largest possible scale to apply to content
+        minScale: 0.4,
+
+        maxScale: 1.6,
+
+        // reveal.js plugins
+        plugins: [QuartoLineHighlight, PdfExport, RevealMenu, QuartoSupport,
+
+          RevealNotes,
+          RevealSearch,
+          RevealZoom
+        ]
+      });
+    </script>
+    <!--
+      ME324 — shrink-to-fit safety net for lecture decks.
+
+      reveal.js scales the whole 1280×760 canvas to the window, but it does nothing
+      about a slide whose content is taller than that canvas: the overflow is simply
+      clipped (or, on `.plenary` / `.transition` covers, hidden outright). This pass
+      measures every slide once after layout settles and, for any that overflow,
+      steps the slide down — font-size and figure heights together — until it fits
+      in the space above the running footer.
+
+      Slides that already fit are left completely alone, so a deck keeps a single
+      consistent type size except where a slide genuinely needs the help.
+
+      Anything still overflowing at MIN_SCALE is listed in the browser console —
+      those slides have too much content and want splitting in the .qmd.
+    -->
+    <style>
+      /* Lay out every slide (not just the current one) so it can be measured.
+         `display: block` matches what reveal.js gives a `.present` slide; the
+         theme's cover slides declare `display: flex !important` and so keep theirs.
+         Off-screen slides are already `opacity: 0`, so nothing becomes visible.
+         Note reveal.js *also* sets `display: none` inline on slides outside its
+         view distance — the script clears that separately, since no stylesheet
+         rule can win against an inline style. */
+      .reveal.me-fit-measuring .slides > section,
+      .reveal.me-fit-measuring .slides > section > section {
+        display: block;
+      }
+    </style>
+    <script>
+      (function () {
+        var MIN_SCALE = 0.55; // hard floor — below this, text stops being readable
+        var STEP = 0.98; // multiplicative creep per iteration
+        var MAX_ITER = 40;
+        var TOLERANCE = 2; // px of slack before we call a slide "overflowing"
+
+        function leafSections(slidesEl) {
+          return Array.prototype.filter.call(
+            slidesEl.querySelectorAll("section"),
+            function (s) {
+              return !s.querySelector("section"); // skip vertical-stack wrappers
+            }
+          );
+        }
+
+        function label(section) {
+          var h = section.querySelector("h1, h2, h3");
+          return (h ? h.textContent : section.id || "(untitled)").trim();
+        }
+
+        // How tall is this slide's content, really?
+        //
+        // `scrollHeight` is no use here: reveal.js gives every slide an explicit
+        // `height: 760px`, so a slide reports the full canvas whether it holds two
+        // bullets or twenty. Measure the bottom edge of the lowest child instead.
+        // Child rects come back in viewport pixels (the canvas is transform-scaled)
+        // whereas padding is in canvas pixels, hence the divide-then-add.
+        function contentHeight(section, canvasScale) {
+          var top = section.getBoundingClientRect().top;
+          var lowest = top;
+
+          Array.prototype.forEach.call(section.children, function (child) {
+            var r = child.getBoundingClientRect();
+            if (!r.height && !r.width) return; // skip anything not rendered
+            if (r.bottom > lowest) lowest = r.bottom;
+          });
+
+          var padBottom = parseFloat(getComputedStyle(section).paddingBottom) || 0;
+          return (lowest - top) / canvasScale + padBottom;
+        }
+
+        // Figures don't scale with font-size, so a slide dominated by a tall image
+        // can't be fixed by type alone. Cap them by the same factor as the text.
+        // `offsetHeight` is used rather than a client rect because it is already in
+        // canvas pixels, which is what the max-height we set needs to be in.
+        function figuresIn(section) {
+          return Array.prototype.map.call(
+            section.querySelectorAll("img, video, iframe"),
+            function (el) {
+              el.style.removeProperty("max-height");
+              return { el: el, height: el.offsetHeight };
+            }
+          );
+        }
+
+        function applyScale(section, figures, naturalFontPx, scale) {
+          section.style.setProperty(
+            "font-size",
+            (naturalFontPx * scale).toFixed(2) + "px",
+            "important"
+          );
+          figures.forEach(function (f) {
+            if (f.height > 0) {
+              f.el.style.setProperty(
+                "max-height",
+                (f.height * scale).toFixed(2) + "px",
+                "important"
+              );
+            }
+          });
+        }
+
+        // The running footer is painted over the slide, not inside it, so the last
+        // line of a full-height slide would collide with it. Work out how much of
+        // the canvas the footer covers, in canvas pixels.
+        function footerReserve(slidesEl, canvasScale) {
+          var footer = document.querySelector(".reveal .footer");
+          if (!footer || !footer.offsetHeight) return 0;
+
+          var overlap =
+            slidesEl.getBoundingClientRect().bottom -
+            footer.getBoundingClientRect().top;
+          return Math.max(0, overlap / canvasScale) + 6; // + breathing room
+        }
+
+        function fitAll() {
+          var revealEl = document.querySelector(".reveal");
+          var slidesEl = document.querySelector(".reveal .slides");
+          if (!revealEl || !slidesEl || !slidesEl.offsetHeight) return;
+
+          var canvasScale =
+            slidesEl.getBoundingClientRect().height / slidesEl.offsetHeight;
+          if (!canvasScale) return;
+
+          var available = slidesEl.offsetHeight - footerReserve(slidesEl, canvasScale);
+          if (!(available > 0)) return;
+
+          // --- force layout on every slide, including hidden ones ----------------
+          revealEl.classList.add("me-fit-measuring");
+          var allSections = Array.prototype.slice.call(
+            slidesEl.querySelectorAll("section")
+          );
+          var savedDisplay = allSections.map(function (s) {
+            var prev = s.style.display;
+            s.style.display = ""; // drop reveal's inline `display: none`
+            return prev;
+          });
+
+          var floored = [];
+
+          leafSections(slidesEl).forEach(function (section) {
+            // Always start from the slide's natural size so repeat passes are
+            // idempotent rather than compounding.
+            section.style.removeProperty("font-size");
+            var figures = figuresIn(section);
+            var naturalFontPx = parseFloat(getComputedStyle(section).fontSize);
+            if (!naturalFontPx) return;
+
+            if (contentHeight(section, canvasScale) <= available + TOLERANCE) {
+              delete section.dataset.meFitScale;
+              return;
+            }
+
+            var scale = 1;
+            for (var i = 0; i < MAX_ITER; i++) {
+              // Aim straight at the required ratio, then creep down — text reflow
+              // means height isn't perfectly linear in the scale factor.
+              var current = contentHeight(section, canvasScale);
+              scale = Math.max(
+                MIN_SCALE,
+                Math.min(scale * STEP, (available / current) * scale)
+              );
+              applyScale(section, figures, naturalFontPx, scale);
+              if (contentHeight(section, canvasScale) <= available + TOLERANCE) break;
+              if (scale <= MIN_SCALE) break;
+            }
+
+            section.dataset.meFitScale = scale.toFixed(3);
+            if (contentHeight(section, canvasScale) > available + TOLERANCE) {
+              floored.push(label(section));
+            }
+          });
+
+          // --- put reveal's own visibility bookkeeping back ----------------------
+          allSections.forEach(function (s, i) {
+            s.style.display = savedDisplay[i];
+          });
+          revealEl.classList.remove("me-fit-measuring");
+
+          if (floored.length && window.console) {
+            console.warn(
+              "[ME324] " +
+                floored.length +
+                " slide(s) still overflow at the minimum type size — consider " +
+                "splitting them:\n  • " +
+                floored.join("\n  • ")
+            );
+          }
+        }
+
+        // Wait for the things that change content height: web fonts, MathJax, and
+        // any images that haven't decoded yet.
+        function whenSettled(done) {
+          var waits = [];
+
+          if (document.fonts && document.fonts.ready) waits.push(document.fonts.ready);
+
+          if (window.MathJax && window.MathJax.startup && window.MathJax.startup.promise) {
+            waits.push(window.MathJax.startup.promise);
+          }
+
+          Array.prototype.forEach.call(document.images, function (img) {
+            if (img.complete) return;
+            waits.push(
+              new Promise(function (resolve) {
+                img.addEventListener("load", resolve, { once: true });
+                img.addEventListener("error", resolve, { once: true });
+              })
+            );
+          });
+
+          // Never block the deck on a hung asset.
+          var timeout = new Promise(function (resolve) {
+            setTimeout(resolve, 5000);
+          });
+
+          Promise.race([Promise.all(waits).catch(function () {}), timeout]).then(
+            function () {
+              requestAnimationFrame(function () {
+                requestAnimationFrame(done);
+              });
+            }
+          );
+        }
+
+        // The first pass is also a warm-up: it is what forces off-screen slides to
+        // lay out for the first time, which is what pulls in the web-font weights
+        // and finishes any deferred MathJax work they contain. Those land *after*
+        // we've measured, so a slide can grow by a line or two behind our back.
+        // fitAll() resets before it measures, so re-running it simply corrects.
+        function fitRepeatedly() {
+          fitAll();
+          whenSettled(function () {
+            fitAll();
+            setTimeout(fitAll, 1500);
+          });
+        }
+
+        function start() {
+          if (!window.Reveal) return;
+          if (Reveal.isReady && Reveal.isReady()) {
+            whenSettled(fitRepeatedly);
+          } else {
+            Reveal.on("ready", function () {
+              whenSettled(fitRepeatedly);
+            });
+          }
+        }
+
+        if (document.readyState === "complete") {
+          start();
+        } else {
+          window.addEventListener("load", start);
+        }
+      })();
+    </script>
+    <script id="quarto-html-after-body" type="application/javascript">
+    window.document.addEventListener("DOMContentLoaded", function (event) {
+      const toggleBodyColorMode = (bsSheetEl) => {
+        const mode = bsSheetEl.getAttribute("data-mode");
+        const bodyEl = window.document.querySelector("body");
+        if (mode === "dark") {
+          bodyEl.classList.add("quarto-dark");
+          bodyEl.classList.remove("quarto-light");
+        } else {
+          bodyEl.classList.add("quarto-light");
+          bodyEl.classList.remove("quarto-dark");
+        }
+      }
+      const toggleBodyColorPrimary = () => {
+        const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+        if (bsSheetEl) {
+          toggleBodyColorMode(bsSheetEl);
+        }
+      }
+      toggleBodyColorPrimary();  
+      const tabsets =  window.document.querySelectorAll(".panel-tabset-tabby")
+      tabsets.forEach(function(tabset) {
+        const tabby = new Tabby('#' + tabset.id);
+      });
+      const isCodeAnnotation = (el) => {
+        for (const clz of el.classList) {
+          if (clz.startsWith('code-annotation-')) {                     
+            return true;
+          }
+        }
+        return false;
+      }
+      const onCopySuccess = function(e) {
+        // button target
+        const button = e.trigger;
+        // don't keep focus
+        button.blur();
+        // flash "checked"
+        button.classList.add('code-copy-button-checked');
+        var currentTitle = button.getAttribute("title");
+        button.setAttribute("title", "Copied!");
+        let tooltip;
+        if (window.bootstrap) {
+          button.setAttribute("data-bs-toggle", "tooltip");
+          button.setAttribute("data-bs-placement", "left");
+          button.setAttribute("data-bs-title", "Copied!");
+          tooltip = new bootstrap.Tooltip(button, 
+            { trigger: "manual", 
+              customClass: "code-copy-button-tooltip",
+              offset: [0, -8]});
+          tooltip.show();    
+        }
+        setTimeout(function() {
+          if (tooltip) {
+            tooltip.hide();
+            button.removeAttribute("data-bs-title");
+            button.removeAttribute("data-bs-toggle");
+            button.removeAttribute("data-bs-placement");
+          }
+          button.setAttribute("title", currentTitle);
+          button.classList.remove('code-copy-button-checked');
+        }, 1000);
+        // clear code selection
+        e.clearSelection();
+      }
+      const getTextToCopy = function(trigger) {
+          const codeEl = trigger.previousElementSibling.cloneNode(true);
+          for (const childEl of codeEl.children) {
+            if (isCodeAnnotation(childEl)) {
+              childEl.remove();
+            }
+          }
+          return codeEl.innerText;
+      }
+      const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+        text: getTextToCopy
+      });
+      clipboard.on('success', onCopySuccess);
+      if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+        // For code content inside modals, clipBoardJS needs to be initialized with a container option
+        // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+        const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+          text: getTextToCopy,
+          container: window.document.getElementById('quarto-embedded-source-code-modal')
+        });
+        clipboardModal.on('success', onCopySuccess);
+      }
+        var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+        var mailtoRegex = new RegExp(/^mailto:/);
+          var filterRegex = new RegExp("https:\/\/ts-robinson\.com\/me324\/");
+        var isInternal = (href) => {
+            return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+        }
+        // Inspect non-navigation links and adorn them if external
+     	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+        for (var i=0; i<links.length; i++) {
+          const link = links[i];
+          if (!isInternal(link.href)) {
+            // undo the damage that might have been done by quarto-nav.js in the case of
+            // links that we want to consider external
+            if (link.dataset.originalHref !== undefined) {
+              link.href = link.dataset.originalHref;
+            }
+          }
+        }
+      function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+        const config = {
+          allowHTML: true,
+          maxWidth: 500,
+          delay: 100,
+          arrow: false,
+          appendTo: function(el) {
+              return el.closest('section.slide') || el.parentElement;
+          },
+          interactive: true,
+          interactiveBorder: 10,
+          theme: 'light-border',
+          placement: 'bottom-start',
+        };
+        if (contentFn) {
+          config.content = contentFn;
+        }
+        if (onTriggerFn) {
+          config.onTrigger = onTriggerFn;
+        }
+        if (onUntriggerFn) {
+          config.onUntrigger = onUntriggerFn;
+        }
+          config['offset'] = [0,0];
+          config['maxWidth'] = 700;
+        window.tippy(el, config); 
+      }
+      const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+      for (var i=0; i<noterefs.length; i++) {
+        const ref = noterefs[i];
+        tippyHover(ref, function() {
+          // use id or data attribute instead here
+          let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+          try { href = new URL(href).hash; } catch {}
+          const id = href.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note) {
+            return note.innerHTML;
+          } else {
+            return "";
+          }
+        });
+      }
+      const findCites = (el) => {
+        const parentEl = el.parentElement;
+        if (parentEl) {
+          const cites = parentEl.dataset.cites;
+          if (cites) {
+            return {
+              el,
+              cites: cites.split(' ')
+            };
+          } else {
+            return findCites(el.parentElement)
+          }
+        } else {
+          return undefined;
+        }
+      };
+      var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+      for (var i=0; i<bibliorefs.length; i++) {
+        const ref = bibliorefs[i];
+        const citeInfo = findCites(ref);
+        if (citeInfo) {
+          tippyHover(citeInfo.el, function() {
+            var popup = window.document.createElement('div');
+            citeInfo.cites.forEach(function(cite) {
+              var citeDiv = window.document.createElement('div');
+              citeDiv.classList.add('hanging-indent');
+              citeDiv.classList.add('csl-entry');
+              var biblioDiv = window.document.getElementById('ref-' + cite);
+              if (biblioDiv) {
+                citeDiv.innerHTML = biblioDiv.innerHTML;
+              }
+              popup.appendChild(citeDiv);
+            });
+            return popup.innerHTML;
+          });
+        }
+      }
+    });
+    </script>
+    
+
+</body></html>

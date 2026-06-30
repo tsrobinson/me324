@@ -1,0 +1,8 @@
+# Applies to every notebook in labs/ when rendered into the website.
+# We render the notebooks to readable HTML pages WITHOUT executing them
+# (they download data, install packages, and contain TODO cells), so the
+# site shows the code cleanly. Students actually run them in Colab.
+execute:
+  enabled: false
+toc: true
+toc-depth: 2

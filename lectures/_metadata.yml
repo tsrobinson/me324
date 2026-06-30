@@ -1,0 +1,36 @@
+# Shared configuration for every lecture deck in lectures/.
+# Each lecture's own front matter sets `format: revealjs`, which selects this
+# config (and keeps the deck rendering as slides, not an HTML page).
+format:
+  revealjs:
+    theme: [white, ../assets/theme/me324.scss]
+    slide-number: c/t
+    progress: true
+    history: false
+    transition: none
+    background-transition: none
+    incremental: false
+    smaller: false
+    center: false
+    auto-stretch: false
+    code-line-numbers: false
+    code-copy: true
+    highlight-style: github-dark
+    chalkboard: false
+    menu:
+      side: right
+      width: third
+    width: 1280
+    height: 760
+    margin: 0.04
+    minScale: 0.4
+    maxScale: 1.6
+    footer: "ME324 · AI and Deep Learning · LSE Summer School"
+    # Reveal's bundled MathJax is pinned to 2.7.0 on cdnjs, whose TeX webfonts
+    # don't resolve — MathJax silently falls back to STIX, which renders
+    # stretchy glyphs (\underbrace, big delimiters) as broken segments. KaTeX
+    # ships its own fonts, so it renders correctly and typesets much faster.
+    html-math-method: katex
+    # Shrinks any slide whose content is taller than the 1280×760 canvas, so
+    # dense slides fit instead of being clipped. See the file for details.
+    include-after-body: ../assets/js/fit-slides.html

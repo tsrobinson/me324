@@ -1,0 +1,42 @@
+---
+title: "Lectures"
+subtitle: "Twelve 3-hour sessions, Monday–Thursday across three weeks."
+page-layout: full
+listing:
+  id: lecture-listing
+  # Listed explicitly rather than globbed: only released decks are rendered
+  # (see `render:` in _quarto.yml), and a glob would advertise unbuilt ones.
+  # Add each deck here as you release it.
+  contents:
+    - "lectures/lecture-01-what-is-ai.qmd"
+    - "lectures/lecture-02-deep-models-primer.qmd"
+    - "lectures/lecture-03-computational-graphs.qmd"
+    - "lectures/lecture-04-backpropagation.qmd"
+    - "lectures/lecture-05-feedforward.qmd"
+  type: grid
+  grid-columns: 3
+  sort: "date"
+  sort-ui: false
+  filter-ui: false
+  fields: [title, subtitle, date]
+  date-format: "ddd D MMM YYYY"
+---
+
+Each card opens the slide deck in your browser. Inside a deck: **→ / ←** to move,
+**F** for full-screen, **M** for the slide menu, **O** for an overview of all slides,
+and **?** for the full list of shortcuts.
+
+::: {#lecture-listing}
+:::
+
+::: {.callout-note appearance="simple"}
+**Weeks 2 and 3 are not posted yet.** Decks go up as we reach them, so what you see here
+is always the current state of the course. The full twelve-lecture outline is on the
+[home page](index.qmd), and the [reading list](readings.qmd) covers all three weeks if you
+want to read ahead.
+:::
+
+::: {.callout-tip}
+The decks are the primary study resource for the **final exam** — they pair every formula
+with a worked numerical example. Re-read them rather than re-watching anything.
+:::

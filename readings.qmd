@@ -1,0 +1,282 @@
+---
+title: "Reading list"
+subtitle: "ME324 — AI and Deep Learning · LSE Summer School"
+author: "Dr Thomas Robinson"
+date: "2026-08-03"
+date-format: long
+toc-title: "Jump to a day"
+---
+
+## How to use this list
+
+The **lecture slides and lab notebooks are the main reading** for this course —
+everything you are examined on is in them. The items below are *optional*
+supplementary reading: textbook chapters and published articles for the days you
+want to go deeper. **Nothing here is required.**
+
+Each day lists **textbook chapters** (with the chapter title, so you can find
+them in any edition) and **articles** (the original papers and applied
+social-science work). Pick the textbook that suits you — you do not need all of
+them. A free, runnable video/tutorial companion for each day is collected in the
+[appendix](#free-online-companions) and is *not* part of this reading list.
+
+### If you want a single book to follow
+
+We don't teach from a textbook, but if you want one spine alongside the slides:
+
+- **Concepts (free):** Prince, *Understanding Deep Learning* — the closest match
+  to this course, and the only one covering our whole arc (incl. variational
+  autoencoders, diffusion, and ethics).
+- **Code (the recommended text):** Raff, *Inside Deep Learning* — PyTorch-first,
+  light on maths.
+- **Runnable chapters:** Zhang et al., *Dive into Deep Learning* — every chapter
+  is executable PyTorch; closest to the labs.
+
+### The books referenced below
+
+| Short name | Full reference | Access |
+|---|---|---|
+| **Raff** | Raff, E. (2022). *Inside Deep Learning: Math, Algorithms, Models.* Manning. | Recommended text |
+| **Burkov** | Burkov, A. (2020). *Machine Learning Engineering.* True Positive Inc. | Recommended text · <http://www.mlebook.com/> |
+| **Prince** | Prince, S. J. D. (2023). *Understanding Deep Learning.* MIT Press. | Free PDF · <https://udlbook.github.io/udlbook/> |
+| **d2l** | Zhang, A., Lipton, Z. C., Li, M., & Smola, A. J. (2023). *Dive into Deep Learning.* Cambridge University Press. | Free · <https://d2l.ai/> |
+| **Goodfellow** | Goodfellow, I., Bengio, Y., & Courville, A. (2016). *Deep Learning.* MIT Press. | Free · <https://www.deeplearningbook.org/> |
+| **Nielsen** | Nielsen, M. (2015). *Neural Networks and Deep Learning.* Determination Press. | Free · <http://neuralnetworksanddeeplearning.com/> |
+
+> **Note on the recommended texts.** *Raff* is the best day-to-day companion but
+> does **not** cover variational autoencoders, diffusion, or word embeddings
+> (Days 7–8) — use *Prince* there. *Burkov* is an ML-engineering / lifecycle
+> book; it fits Day 5 (training and evaluation discipline) and Day 12
+> (deployment, monitoring), not the architecture days.
+
+---
+
+# Week 1 — Foundations
+
+## Day 1 · What do we mean by "AI"? {#day-1}
+
+*Mon 03 Aug*
+
+**Textbook chapters**
+
+- Goodfellow, Ch. 1, "Introduction."
+- Prince, Ch. 1, "Introduction."
+- Raff, Ch. 1, "The mechanics of learning" (§1.1).
+
+**Articles & books**
+
+- LeCun, Y., Bengio, Y., & Hinton, G. (2015). Deep learning. *Nature*, 521(7553), 436–444.
+- Mitchell, M. (2019). *Artificial Intelligence: A Guide for Thinking Humans.* Farrar, Straus and Giroux. (Introductory chapters.)
+
+## Day 2 · Deep models — a primer {#day-2}
+
+*Tue 04 Aug — perceptron → MLP, the forward pass, why non-linearity matters*
+
+**Textbook chapters**
+
+- Raff, Ch. 2, "Fully connected networks."
+- Prince, Ch. 3, "Shallow neural networks," and Ch. 4, "Deep neural networks."
+- d2l, Ch. 5, "Multilayer Perceptrons."
+- Goodfellow, Ch. 6, "Deep Feedforward Networks."
+- Nielsen, Ch. 1, "Using neural networks to recognize handwritten digits," and Ch. 4, "A visual proof that neural nets can compute any function."
+
+## Day 3 · Computational graphs & the maths of AI {#day-3}
+
+*Wed 05 Aug — linear algebra, differentiation, the chain rule, graphs*
+
+**Textbook chapters**
+
+- d2l, Ch. 2, "Preliminaries" (linear algebra, calculus, automatic differentiation).
+- Goodfellow, Ch. 2, "Linear Algebra," and Ch. 4, "Numerical Computation."
+- Raff, Ch. 1, "The mechanics of learning."
+
+## Day 4 · Backpropagation {#day-4}
+
+*Thu 06 Aug — loss, gradients, the backward pass, gradient descent, Adam*
+
+**Textbook chapters**
+
+- Nielsen, Ch. 2, "How the backpropagation algorithm works."
+- Prince, Ch. 5, "Loss functions"; Ch. 6, "Fitting models"; Ch. 7, "Gradients and initialization."
+- Goodfellow, Ch. 6, "Deep Feedforward Networks" (§6.5, back-propagation), and Ch. 8, "Optimization for Training Deep Models."
+- Raff, Ch. 1, "The mechanics of learning."
+
+**Articles**
+
+- Rumelhart, D. E., Hinton, G. E., & Williams, R. J. (1986). Learning representations by back-propagating errors. *Nature*, 323(6088), 533–536.
+- Kingma, D. P., & Ba, J. (2015). Adam: A method for stochastic optimization. *International Conference on Learning Representations* (arXiv:1412.6980).
+
+## Day 5 · Feed-forward networks in PyTorch {#day-5}
+
+*Mon 10 Aug — tensors, the training loop, activations, dropout, batch-norm, overfitting*
+
+**Textbook chapters**
+
+- Raff, Ch. 5, "Modern training techniques" (optimisers, normalisation, learning rate); Ch. 2, "Fully connected networks."
+- Burkov, Ch. 5, "Supervised Model Training (Part 1)"; Ch. 6, "Supervised Model Training (Part 2)"; Ch. 7, "Model Evaluation."
+- Prince, Ch. 8, "Measuring performance"; Ch. 9, "Regularization"; Ch. 11, "Residual networks" (batch normalisation).
+- Goodfellow, Ch. 7, "Regularization for Deep Learning"; Ch. 8, "Optimization for Training Deep Models"; Ch. 11, "Practical Methodology."
+- Nielsen, Ch. 3, "Improving the way neural networks learn."
+
+**Articles**
+
+- Hegre, H., et al. (2022). *Forecasting Fatalities.* (Working paper / VIEWS project report.) — the worked civil-war forecasting example.
+- Ioffe, S., & Szegedy, C. (2015). Batch normalization: Accelerating deep network training by reducing internal covariate shift. *International Conference on Machine Learning*, 448–456.
+
+# Week 2 — Vision & generation
+
+## Day 6 · Classifying images (CNNs) {#day-6}
+
+*Tue 11 Aug — images as tensors, convolution, kernels, pooling, AlexNet*
+
+**Textbook chapters**
+
+- Raff, Ch. 3, "Convolutional neural networks."
+- Prince, Ch. 10, "Convolutional networks."
+- d2l, Ch. 7, "Convolutional Neural Networks," and Ch. 8, "Modern Convolutional Neural Networks" (LeNet, AlexNet).
+- Goodfellow, Ch. 9, "Convolutional Networks."
+
+**Articles**
+
+- Krizhevsky, A., Sutskever, I., & Hinton, G. E. (2012). ImageNet classification with deep convolutional neural networks. *Advances in Neural Information Processing Systems*, 25.
+- Torres, M., & Cantú, F. (2022). Learning to see: Convolutional neural networks for the analysis of social science data. *Political Analysis*, 30(1), 113–131.
+- Torres, M. (2024). A framework for the unsupervised and semi-supervised analysis of visual frames. *Political Analysis*, 32(2), 199–220.
+- Biscione, V., & Bowers, J. S. (2021). Convolutional neural networks are not invariant to translation, but they can learn to be. *Journal of Machine Learning Research*, 22(229), 1–28.
+- Buolamwini, J., & Gebru, T. (2018). Gender shades: Intersectional accuracy disparities in commercial gender classification. *Proceedings of Machine Learning Research* (FAccT), 81, 1–15.
+
+## Day 7 · Generating images — autoencoders, VAEs, diffusion {#day-7}
+
+*Wed 12 Aug — the autoencoder trick, the VAE, a glance at diffusion, MIDAS*
+
+**Textbook chapters**
+
+- Prince, Ch. 17, "Variational autoencoders," and Ch. 18, "Diffusion models" (also Ch. 14, "Unsupervised learning," and Ch. 15, "Generative Adversarial Networks"). *Raff and Burkov do not cover VAEs or diffusion.*
+- Raff, Ch. 7, "Autoencoding and self-supervision" (incl. denoising autoencoders), and Ch. 9, "Generative adversarial networks."
+- Goodfellow, Ch. 14, "Autoencoders."
+
+**Articles**
+
+- Kingma, D. P., & Welling, M. (2014). Auto-encoding variational Bayes. *International Conference on Learning Representations* (arXiv:1312.6114).
+- Ho, J., Jain, A., & Abbeel, P. (2020). Denoising diffusion probabilistic models. *Advances in Neural Information Processing Systems*, 33, 6840–6851.
+- Goodfellow, I., et al. (2014). Generative adversarial nets. *Advances in Neural Information Processing Systems*, 27.
+- Lall, R., & Robinson, T. (2022). The MIDAS touch: Accurate and scalable missing-data imputation with deep learning. *Political Analysis*, 30(2), 179–196.
+- Lall, R., & Robinson, T. (2023). Efficient multiple imputation for diverse data in Python and R: MIDASpy and rMIDAS. *Journal of Statistical Software*, 107, 1–38.
+
+## Day 8 · Text-gen 1/4 — embeddings & character models {#day-8}
+
+*Thu 13 Aug — text as data, embeddings, the bigram language model*
+
+**Textbook chapters**
+
+- d2l, Ch. 15, "Natural Language Processing: Pretraining" (word2vec, embeddings).
+- Goodfellow, Ch. 15, "Representation Learning" (§15.4, distributed representations).
+
+**Articles**
+
+- Mikolov, T., Sutskever, I., Chen, K., Corrado, G., & Dean, J. (2013). Distributed representations of words and phrases and their compositionality. *Advances in Neural Information Processing Systems*, 26.
+- Rodriguez, P. L., & Spirling, A. (2022). Word embeddings: What works, what doesn't, and how to tell the difference for applied research. *Journal of Politics*, 84(1), 101–115.
+- Garg, N., Schiebinger, L., Jurafsky, D., & Zou, J. (2018). Word embeddings quantify 100 years of gender and ethnic stereotypes. *Proceedings of the National Academy of Sciences*, 115(16), E3635–E3644.
+- Bolukbasi, T., Chang, K.-W., Zou, J., Saligrama, V., & Kalai, A. (2016). Man is to computer programmer as woman is to homemaker? Debiasing word embeddings. *Advances in Neural Information Processing Systems*, 29.
+
+# Week 3 — Text generation & ethics
+
+## Day 9 · Text-gen 2/4 — recurrent networks {#day-9}
+
+*Mon 17 Aug — recurrence, the hidden state, vanishing gradients, LSTM/GRU*
+
+**Textbook chapters**
+
+- Raff, Ch. 4, "Recurrent neural networks."
+- d2l, Ch. 9, "Recurrent Neural Networks," and Ch. 10, "Modern Recurrent Neural Networks" (LSTM, GRU).
+- Goodfellow, Ch. 10, "Sequence Modeling: Recurrent and Recursive Nets."
+
+**Articles**
+
+- Hochreiter, S., & Schmidhuber, J. (1997). Long short-term memory. *Neural Computation*, 9(8), 1735–1780.
+- Cho, K., et al. (2014). Learning phrase representations using RNN encoder–decoder for statistical machine translation. *Conference on Empirical Methods in Natural Language Processing* (arXiv:1406.1078).
+- Bahdanau, D., Cho, K., & Bengio, Y. (2015). Neural machine translation by jointly learning to align and translate. *International Conference on Learning Representations* (arXiv:1409.0473).
+- Hegre, H., et al. (2022). *Forecasting Fatalities.* — conflict events as a sequence over time.
+
+## Day 10 · Text-gen 3/4 — attention & transformers {#day-10}
+
+*Tue 18 Aug — attention, the transformer block, scaling, a tiny GPT*
+
+**Textbook chapters**
+
+- Prince, Ch. 12, "Transformers."
+- Raff, Ch. 10, "Attention mechanisms," and Ch. 12, "Network design alternatives to RNNs" (transformers).
+- d2l, Ch. 11, "Attention Mechanisms and Transformers."
+
+**Articles**
+
+- Vaswani, A., et al. (2017). Attention is all you need. *Advances in Neural Information Processing Systems*, 30. (Read the abstract, Fig. 1, and §3.1–3.2.)
+- Kaplan, J., et al. (2020). Scaling laws for neural language models. arXiv:2001.08361.
+- Hoffmann, J., et al. (2022). Training compute-optimal large language models (Chinchilla). *Advances in Neural Information Processing Systems*, 35 (arXiv:2203.15556).
+- Argyle, L. P., et al. (2023). Out of one, many: Using language models to simulate human samples. *Political Analysis*, 31(3), 337–351.
+- Bender, E. M., Gebru, T., McMillan-Major, A., & Shmitchell, S. (2021). On the dangers of stochastic parrots: Can language models be too big? *ACM Conference on Fairness, Accountability, and Transparency* (FAccT), 610–623.
+
+## Day 11 · Text-gen 4/4 — tokenisation & sampling {#day-11}
+
+*Wed 19 Aug — byte-pair encoding, sampling strategies, the post-training pipeline*
+
+*Tokenisation and sampling are not covered well by the textbooks; this day is
+articles-led.*
+
+**Articles**
+
+- Sennrich, R., Haddow, B., & Birch, A. (2016). Neural machine translation of rare words with subword units. *Proceedings of the Association for Computational Linguistics* (arXiv:1508.07909).
+- Radford, A., et al. (2019). Language models are unsupervised multitask learners. *OpenAI technical report.* (Byte-level BPE.)
+- Holtzman, A., Buys, J., Du, L., Forbes, M., & Choi, Y. (2020). The curious case of neural text degeneration. *International Conference on Learning Representations* (arXiv:1904.09751). (Top-p / nucleus sampling.)
+- Petrov, A., La Malfa, E., Torr, P., & Bibi, A. (2023). Language model tokenizers introduce unfairness between languages. *Advances in Neural Information Processing Systems*, 36 (arXiv:2305.15425).
+- Ouyang, L., et al. (2022). Training language models to follow instructions with human feedback (InstructGPT). *Advances in Neural Information Processing Systems*, 35 (arXiv:2203.02155).
+- Rafailov, R., et al. (2023). Direct preference optimization: Your language model is secretly a reward model. *Advances in Neural Information Processing Systems*, 36 (arXiv:2305.18290).
+- Bai, Y., et al. (2022). Constitutional AI: Harmlessness from AI feedback. arXiv:2212.08073.
+- Lewis, P., et al. (2020). Retrieval-augmented generation for knowledge-intensive NLP tasks. *Advances in Neural Information Processing Systems*, 33 (arXiv:2005.11401).
+
+## Day 12 · Ethics, limitations, course recap {#day-12}
+
+*Thu 20 Aug*
+
+**Textbook chapters**
+
+- Prince, Ch. 21, "Deep learning and ethics."
+
+**Articles**
+
+- Bender, E. M., Gebru, T., McMillan-Major, A., & Shmitchell, S. (2021). On the dangers of stochastic parrots: Can language models be too big? *FAccT*, 610–623.
+- Buolamwini, J., & Gebru, T. (2018). Gender shades. *Proceedings of Machine Learning Research* (FAccT), 81, 1–15.
+- Obermeyer, Z., Powers, B., Vogeli, C., & Mullainathan, S. (2019). Dissecting racial bias in an algorithm used to manage the health of populations. *Science*, 366(6464), 447–453.
+- Chouldechova, A. (2017). Fair prediction with disparate impact: A study of bias in recidivism prediction instruments. *Big Data*, 5(2), 153–163.
+- Angwin, J., Larson, J., Mattu, S., & Kirchner, L. (2016). Machine bias. *ProPublica*, 23 May 2016.
+- Carlini, N., et al. (2021). Extracting training data from large language models. *USENIX Security Symposium*, 2633–2650.
+- Spirling, A. (2023). Why open-source generative AI models are an ethical way forward for science. *Nature*, 616(7957), 413.
+
+**Books (breadth)**
+
+- Eubanks, V. (2018). *Automating Inequality: How High-Tech Tools Profile, Police, and Punish the Poor.* St. Martin's Press. (The Allegheny Family Screening Tool — the plenary case.)
+- Crawford, K. (2021). *Atlas of AI.* Yale University Press.
+- Russell, S. (2019). *Human Compatible: Artificial Intelligence and the Problem of Control.* Viking.
+- Mitchell, M. (2019). *Artificial Intelligence: A Guide for Thinking Humans.* Farrar, Straus and Giroux.
+
+---
+
+## Appendix — free online companions (not part of the reading list) {#free-online-companions}
+
+These are videos, tutorials, and explainer posts that map directly onto each
+day's lab. They are **not** part of the formal reading list above — they are
+listed here only as optional, free study aids.
+
+| Day | Companion |
+|---|---|
+| 1 | Altman, *The Intelligence Age* (essay) — <https://ia.samaltman.com/> |
+| 2 | 3Blue1Brown, *But what is a neural network?* — <https://www.youtube.com/watch?v=aircAruvnKk> |
+| 3 | 3Blue1Brown, *Essence of Linear Algebra* / *Essence of Calculus* — <https://www.3blue1brown.com/> · Karpathy, *micrograd* repo — <https://github.com/karpathy/micrograd> |
+| 4 | Karpathy, *Building micrograd* — <https://www.youtube.com/watch?v=VMj-3S1tku0> · 3Blue1Brown, backpropagation (ch. 3–4) |
+| 5 | PyTorch, *Learn the Basics* — <https://pytorch.org/tutorials/beginner/basics/intro.html> |
+| 6 | Stanford CS231n, *Convolutional Networks* notes — <https://cs231n.github.io/convolutional-networks/> |
+| 7 | Weng, *From Autoencoder to Beta-VAE* and *What are Diffusion Models?* — <https://lilianweng.github.io/> |
+| 8 | Karpathy, *Building makemore* (part 1) — <https://www.youtube.com/watch?v=PaCmpygFfXo> · Alammar, *The Illustrated Word2vec* — <https://jalammar.github.io/illustrated-word2vec/> |
+| 9 | Karpathy, *The Unreasonable Effectiveness of RNNs* — <https://karpathy.github.io/2015/05/21/rnn-effectiveness/> · Olah, *Understanding LSTM Networks* — <https://colah.github.io/posts/2015-08-Understanding-LSTMs/> |
+| 10 | Alammar, *The Illustrated Transformer* — <https://jalammar.github.io/illustrated-transformer/> · Karpathy, *Let's build GPT* — <https://www.youtube.com/watch?v=kCc8FmEb1nY> · `nanoGPT` — <https://github.com/karpathy/nanoGPT> |
+| 11 | Karpathy, *Let's build the GPT Tokenizer* — <https://www.youtube.com/watch?v=zduSFxRajkE> · Hugging Face, *Summary of the tokenizers* — <https://huggingface.co/docs/transformers/tokenizer_summary> |
+| 12 | Karpathy, *Neural Networks: Zero to Hero* — <https://karpathy.ai/zero-to-hero.html> · Distill.pub — <https://distill.pub/> |

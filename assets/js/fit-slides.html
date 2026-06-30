@@ -1,0 +1,256 @@
+<!--
+  ME324 — shrink-to-fit safety net for lecture decks.
+
+  reveal.js scales the whole 1280×760 canvas to the window, but it does nothing
+  about a slide whose content is taller than that canvas: the overflow is simply
+  clipped (or, on `.plenary` / `.transition` covers, hidden outright). This pass
+  measures every slide once after layout settles and, for any that overflow,
+  steps the slide down — font-size and figure heights together — until it fits
+  in the space above the running footer.
+
+  Slides that already fit are left completely alone, so a deck keeps a single
+  consistent type size except where a slide genuinely needs the help.
+
+  Anything still overflowing at MIN_SCALE is listed in the browser console —
+  those slides have too much content and want splitting in the .qmd.
+-->
+<style>
+  /* Lay out every slide (not just the current one) so it can be measured.
+     `display: block` matches what reveal.js gives a `.present` slide; the
+     theme's cover slides declare `display: flex !important` and so keep theirs.
+     Off-screen slides are already `opacity: 0`, so nothing becomes visible.
+     Note reveal.js *also* sets `display: none` inline on slides outside its
+     view distance — the script clears that separately, since no stylesheet
+     rule can win against an inline style. */
+  .reveal.me-fit-measuring .slides > section,
+  .reveal.me-fit-measuring .slides > section > section {
+    display: block;
+  }
+</style>
+<script>
+  (function () {
+    var MIN_SCALE = 0.55; // hard floor — below this, text stops being readable
+    var STEP = 0.98; // multiplicative creep per iteration
+    var MAX_ITER = 40;
+    var TOLERANCE = 2; // px of slack before we call a slide "overflowing"
+
+    function leafSections(slidesEl) {
+      return Array.prototype.filter.call(
+        slidesEl.querySelectorAll("section"),
+        function (s) {
+          return !s.querySelector("section"); // skip vertical-stack wrappers
+        }
+      );
+    }
+
+    function label(section) {
+      var h = section.querySelector("h1, h2, h3");
+      return (h ? h.textContent : section.id || "(untitled)").trim();
+    }
+
+    // How tall is this slide's content, really?
+    //
+    // `scrollHeight` is no use here: reveal.js gives every slide an explicit
+    // `height: 760px`, so a slide reports the full canvas whether it holds two
+    // bullets or twenty. Measure the bottom edge of the lowest child instead.
+    // Child rects come back in viewport pixels (the canvas is transform-scaled)
+    // whereas padding is in canvas pixels, hence the divide-then-add.
+    function contentHeight(section, canvasScale) {
+      var top = section.getBoundingClientRect().top;
+      var lowest = top;
+
+      Array.prototype.forEach.call(section.children, function (child) {
+        var r = child.getBoundingClientRect();
+        if (!r.height && !r.width) return; // skip anything not rendered
+        if (r.bottom > lowest) lowest = r.bottom;
+      });
+
+      var padBottom = parseFloat(getComputedStyle(section).paddingBottom) || 0;
+      return (lowest - top) / canvasScale + padBottom;
+    }
+
+    // Figures don't scale with font-size, so a slide dominated by a tall image
+    // can't be fixed by type alone. Cap them by the same factor as the text.
+    // `offsetHeight` is used rather than a client rect because it is already in
+    // canvas pixels, which is what the max-height we set needs to be in.
+    function figuresIn(section) {
+      return Array.prototype.map.call(
+        section.querySelectorAll("img, video, iframe"),
+        function (el) {
+          el.style.removeProperty("max-height");
+          return { el: el, height: el.offsetHeight };
+        }
+      );
+    }
+
+    function applyScale(section, figures, naturalFontPx, scale) {
+      section.style.setProperty(
+        "font-size",
+        (naturalFontPx * scale).toFixed(2) + "px",
+        "important"
+      );
+      figures.forEach(function (f) {
+        if (f.height > 0) {
+          f.el.style.setProperty(
+            "max-height",
+            (f.height * scale).toFixed(2) + "px",
+            "important"
+          );
+        }
+      });
+    }
+
+    // The running footer is painted over the slide, not inside it, so the last
+    // line of a full-height slide would collide with it. Work out how much of
+    // the canvas the footer covers, in canvas pixels.
+    function footerReserve(slidesEl, canvasScale) {
+      var footer = document.querySelector(".reveal .footer");
+      if (!footer || !footer.offsetHeight) return 0;
+
+      var overlap =
+        slidesEl.getBoundingClientRect().bottom -
+        footer.getBoundingClientRect().top;
+      return Math.max(0, overlap / canvasScale) + 6; // + breathing room
+    }
+
+    function fitAll() {
+      var revealEl = document.querySelector(".reveal");
+      var slidesEl = document.querySelector(".reveal .slides");
+      if (!revealEl || !slidesEl || !slidesEl.offsetHeight) return;
+
+      var canvasScale =
+        slidesEl.getBoundingClientRect().height / slidesEl.offsetHeight;
+      if (!canvasScale) return;
+
+      var available = slidesEl.offsetHeight - footerReserve(slidesEl, canvasScale);
+      if (!(available > 0)) return;
+
+      // --- force layout on every slide, including hidden ones ----------------
+      revealEl.classList.add("me-fit-measuring");
+      var allSections = Array.prototype.slice.call(
+        slidesEl.querySelectorAll("section")
+      );
+      var savedDisplay = allSections.map(function (s) {
+        var prev = s.style.display;
+        s.style.display = ""; // drop reveal's inline `display: none`
+        return prev;
+      });
+
+      var floored = [];
+
+      leafSections(slidesEl).forEach(function (section) {
+        // Always start from the slide's natural size so repeat passes are
+        // idempotent rather than compounding.
+        section.style.removeProperty("font-size");
+        var figures = figuresIn(section);
+        var naturalFontPx = parseFloat(getComputedStyle(section).fontSize);
+        if (!naturalFontPx) return;
+
+        if (contentHeight(section, canvasScale) <= available + TOLERANCE) {
+          delete section.dataset.meFitScale;
+          return;
+        }
+
+        var scale = 1;
+        for (var i = 0; i < MAX_ITER; i++) {
+          // Aim straight at the required ratio, then creep down — text reflow
+          // means height isn't perfectly linear in the scale factor.
+          var current = contentHeight(section, canvasScale);
+          scale = Math.max(
+            MIN_SCALE,
+            Math.min(scale * STEP, (available / current) * scale)
+          );
+          applyScale(section, figures, naturalFontPx, scale);
+          if (contentHeight(section, canvasScale) <= available + TOLERANCE) break;
+          if (scale <= MIN_SCALE) break;
+        }
+
+        section.dataset.meFitScale = scale.toFixed(3);
+        if (contentHeight(section, canvasScale) > available + TOLERANCE) {
+          floored.push(label(section));
+        }
+      });
+
+      // --- put reveal's own visibility bookkeeping back ----------------------
+      allSections.forEach(function (s, i) {
+        s.style.display = savedDisplay[i];
+      });
+      revealEl.classList.remove("me-fit-measuring");
+
+      if (floored.length && window.console) {
+        console.warn(
+          "[ME324] " +
+            floored.length +
+            " slide(s) still overflow at the minimum type size — consider " +
+            "splitting them:\n  • " +
+            floored.join("\n  • ")
+        );
+      }
+    }
+
+    // Wait for the things that change content height: web fonts, MathJax, and
+    // any images that haven't decoded yet.
+    function whenSettled(done) {
+      var waits = [];
+
+      if (document.fonts && document.fonts.ready) waits.push(document.fonts.ready);
+
+      if (window.MathJax && window.MathJax.startup && window.MathJax.startup.promise) {
+        waits.push(window.MathJax.startup.promise);
+      }
+
+      Array.prototype.forEach.call(document.images, function (img) {
+        if (img.complete) return;
+        waits.push(
+          new Promise(function (resolve) {
+            img.addEventListener("load", resolve, { once: true });
+            img.addEventListener("error", resolve, { once: true });
+          })
+        );
+      });
+
+      // Never block the deck on a hung asset.
+      var timeout = new Promise(function (resolve) {
+        setTimeout(resolve, 5000);
+      });
+
+      Promise.race([Promise.all(waits).catch(function () {}), timeout]).then(
+        function () {
+          requestAnimationFrame(function () {
+            requestAnimationFrame(done);
+          });
+        }
+      );
+    }
+
+    // The first pass is also a warm-up: it is what forces off-screen slides to
+    // lay out for the first time, which is what pulls in the web-font weights
+    // and finishes any deferred MathJax work they contain. Those land *after*
+    // we've measured, so a slide can grow by a line or two behind our back.
+    // fitAll() resets before it measures, so re-running it simply corrects.
+    function fitRepeatedly() {
+      fitAll();
+      whenSettled(function () {
+        fitAll();
+        setTimeout(fitAll, 1500);
+      });
+    }
+
+    function start() {
+      if (!window.Reveal) return;
+      if (Reveal.isReady && Reveal.isReady()) {
+        whenSettled(fitRepeatedly);
+      } else {
+        Reveal.on("ready", function () {
+          whenSettled(fitRepeatedly);
+        });
+      }
+    }
+
+    if (document.readyState === "complete") {
+      start();
+    } else {
+      window.addEventListener("load", start);
+    }
+  })();
+</script>

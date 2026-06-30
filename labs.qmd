@@ -1,0 +1,42 @@
+---
+title: "Labs"
+subtitle: "Twelve 90-minute computer workshops. Each one builds on the last."
+page-layout: full
+---
+
+The labs are a single project assembled over three weeks: each day reuses the previous
+day's code, ending in a transformer language model you build yourself.
+
+Each lab is a guided walkthrough with `# TODO` cells for you to fill in, and worked
+solutions at the very bottom. Don't scroll to the solutions until you've had a real go —
+the point is the struggle, not the finished cell.
+
+**To run a lab:** click **Open in Colab** (recommended — free GPU for the later labs), or
+**view** the read-only page here, or download the **.ipynb**. The first cell of every lab
+sets things up; just run top to bottom.
+
+| # | Lab | Run it |
+|:--:|:--|:--|
+| **1** | **Setup, tensors & probing an LLM**<br>Get into Colab, meet PyTorch tensors, and poke a real chatbot. | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/{{< var github.owner >}}/{{< var github.repo >}}/blob/{{< var github.branch >}}/labs/lab-01-setup-and-tensors.ipynb)<br>[view](labs/lab-01-setup-and-tensors.html) · [.ipynb](https://github.com/{{< var github.owner >}}/{{< var github.repo >}}/raw/{{< var github.branch >}}/labs/lab-01-setup-and-tensors.ipynb) |
+| **2** | **A neuron by hand (NumPy)**<br>Build a perceptron and a 2-layer net from scratch; compare to logistic regression. | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/{{< var github.owner >}}/{{< var github.repo >}}/blob/{{< var github.branch >}}/labs/lab-02-perceptron-numpy.ipynb)<br>[view](labs/lab-02-perceptron-numpy.html) · [.ipynb](https://github.com/{{< var github.owner >}}/{{< var github.repo >}}/raw/{{< var github.branch >}}/labs/lab-02-perceptron-numpy.ipynb) |
+| **3** | **Build the `Value` autograd engine**<br>Implement the forward pass of a micrograd-style computation graph. | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/{{< var github.owner >}}/{{< var github.repo >}}/blob/{{< var github.branch >}}/labs/lab-03-value-forward.ipynb)<br>[view](labs/lab-03-value-forward.html) · [.ipynb](https://github.com/{{< var github.owner >}}/{{< var github.repo >}}/raw/{{< var github.branch >}}/labs/lab-03-value-forward.ipynb) |
+| **4** | **Backprop & training by hand**<br>Add `backward()`, grad-check it, and train a tiny net with your own autograd. | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/{{< var github.owner >}}/{{< var github.repo >}}/blob/{{< var github.branch >}}/labs/lab-04-backprop-autograd.ipynb)<br>[view](labs/lab-04-backprop-autograd.html) · [.ipynb](https://github.com/{{< var github.owner >}}/{{< var github.repo >}}/raw/{{< var github.branch >}}/labs/lab-04-backprop-autograd.ipynb) |
+| **5** | **Feed-forward networks in PyTorch**<br>Rebuild yesterday's net with `nn.Module`, autograd, and an optimizer. | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/{{< var github.owner >}}/{{< var github.repo >}}/blob/{{< var github.branch >}}/labs/lab-05-pytorch-feedforward.ipynb)<br>[view](labs/lab-05-pytorch-feedforward.html) · [.ipynb](https://github.com/{{< var github.owner >}}/{{< var github.repo >}}/raw/{{< var github.branch >}}/labs/lab-05-pytorch-feedforward.ipynb) |
+
+
+: {.striped .hover tbl-colwidths="[6,50,44]"}
+
+::: {.callout-note appearance="simple"}
+**Labs 6–12 are not posted yet.** Each one goes up on the day we run it. Because every lab
+reuses the previous day's code, there's nothing to gain from racing ahead — but do go back
+and finish anything you left half-done.
+:::
+
+## The capstone {#capstone}
+
+Lab 11 ends with the payoff of the whole course: **Andrej Karpathy's
+[pure-Python microGPT](https://gist.github.com/karpathy/8627fe009c40f57531cb18360106ce95)**,
+a complete GPT in ~200 lines with no PyTorch — running entirely on the `Value` autograd
+class you wrote back in Labs 3–4. The lab maps every part of the gist back to the lab where
+you first built it.
+

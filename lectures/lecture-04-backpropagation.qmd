@@ -1,0 +1,1082 @@
+---
+title: "Backpropagation"
+subtitle: "Lecture 4 — Turning a wrong network into a right one"
+author: "Dr Thomas Robinson"
+date: "2026-08-06"
+date-format: long
+bibliography: ../refs.bib
+format: 
+  revealjs:
+    smaller: true
+---
+
+# Part 1 · Loss & the goal {background-color="#0E1A2B"}
+
+## Where we are — and what we still need
+
+::: {.columns}
+::: {.column width="50%"}
+[We have]{.pill-green}
+
+* A **forward pass**: take input $\mathbf{x}$, push it through the graph, get prediction $\hat{y}$.
+* A **structure** — the computational graph — we can walk in either direction.
+* A **local-derivative cheat-sheet** for every operation.
+:::
+::: {.column width="50%"}
+[We don't have]{.pill-amber}
+
+* A way to **say how wrong** $\hat{y}$ is, compared to the true $y$.
+* A way to **propagate that wrongness backwards** to update each parameter.
+
+*Today's job!*
+:::
+:::
+
+## The loss — quantifying "wrongness"
+
+For a prediction $\hat{y}$ and truth $y$, the **loss** $L(\hat{y}, y)$ is a function whose value is:
+
+* **Zero** if the prediction is perfect.
+* **Large and positive** if the prediction is far from the truth.
+* **Differentiable** in $\hat{y}$.
+
+::: {.columns}
+::: {.column width="50%"}
+For continuous outcomes (e.g. a regression):
+
+$$
+L(\hat{y}, y) = (\hat{y} - y)^2
+$$
+
+i.e. the **squared error**.
+:::
+::: {.column width="50%"}
+For binary outcomes (e.g. classify spam vs not):
+
+$$
+L(\hat{y}, y) = -\big(y \ln \hat{y} + (1-y) \ln (1-\hat{y})\big)
+$$
+
+i.e. the **binary cross-entropy**.
+:::
+:::
+
+(We'll come back to think about categorical outcomes later!)
+
+## What those two losses actually punish
+
+[Same formulas as the last slide — now read the numbers]{.eyebrow}
+
+::: {.columns}
+::: {.column width="42%"}
+[Squared error]{.pill-blue}
+
+Squared error chases the *big* misses first, and is easily dominated by outliers.
+
+  * E.g. being out by **4** is **sixteen** times worse than being out by 1.
+
+
+:::
+::: {.column width="58%"}
+[Cross-entropy · true label $y = 1$]{.pill}
+
+| model says $\hat{y}$ | $L = -\ln \hat{y}$ | |
+|---|---|---|
+| 0.9 | 0.11 | confident, right |
+| 0.5 | 0.69 | no idea |
+| 0.1 | 2.30 | confident, **wrong** |
+| 0.01 | 4.61 | very confident, very wrong |
+:::
+:::
+
+::: {.reveal-box}
+[Cross-entropy punishes **confident errors** harder than uncertain ones]{.reveal-label}
+ 
+ 
+When $y = 1$, the penalty grows without limit as $\hat{y} \to 0$ (i.e. $0.01, 0.001, 0.00001$ etc.) -- and vice versa when $y = 0$ and $\hat{y} \to 1$.
+
+A model that "hedges its bets" when it doesn't know will score better than one that guesses boldly.
+
+That is a *design choice*, baked into a formula and we can alter it, if we want.
+
+:::
+
+## What *is* a predicted probability?
+
+[One number, quietly doing two different jobs]{.eyebrow}
+
+Your model says $\hat{y} = 0.7$ for one voter. Two readings — both standard, both defensible:
+
+::: {.columns}
+::: {.column width="50%"}
+[A claim about the world]{.pill-blue}
+
+*"Among voters who look like this one, 70% turn out."*
+
+A **frequency**, in a reference class. The randomness is out there in the world.
+
+Even a perfect model could not sharpen this.
+
+[Aleatoric — irreducible]{.xsmall}
+:::
+::: {.column width="50%"}
+[A claim about the model]{.pill-amber}
+
+*"I am 70% confident this voter turns out."*
+
+A **degree of belief**. This voter votes or doesn't — there is no 0.7 about *them*.
+
+Better features or more data could sharpen it.
+
+[Epistemic — reducible]{.xsmall}
+:::
+:::
+
+::: {.reveal-box}
+[The awkward bit]{.reveal-label}
+**The loss cannot tell these apart.** Cross-entropy just sees a number in $(0,1)$; it is minimised, in expectation, by the *true conditional probability* $P(y = 1 \mid \mathbf{x})$.
+
+So the maths is doing the first thing. We almost always *talk* as if it were the second.
+:::
+
+## Why the duality matters when you write up
+
+::: {.columns}
+::: {.column width="50%"}
+[$\hat{y} = 0.5$ means two opposite things]{.pill-amber}
+
+* *"Genuinely a coin flip."* → stop collecting data; you have hit the ceiling.
+* *"I have no idea."* → collect more data; the ceiling is higher than this.
+
+**The number alone will not tell you which.**
+:::
+::: {.column width="50%"}
+[$\hat{y}$ comes with no error bar]{.pill}
+
+$0.7$ from a model trained on 50 cases and $0.7$ from one trained on 50 million look **identical**.
+
+The output is a point estimate of a probability — not a probability *distribution* over that estimate.
+:::
+:::
+
+::: {.card}
+[What you *can* check]{.eyebrow}
+
+**Calibration.** Take every case where the model said ≈0.7. Did about 70% of them turn out?
+
+That tests the *frequency* reading, across a group. It says nothing about whether 0.7 was the right belief for any **one** voter — and that is usually the claim a reader cares about.
+:::
+
+::: {.callout-warning appearance="simple"}
+Be precise in your write-up about which reading you mean. "The model is 70% confident" and "70% of such voters turn out" are different sentences, and only one of them is what you fitted.
+:::
+
+## A worked turnout example, by the numbers
+
+[Back to yesterday's turnout problem]{.eyebrow}
+
+Suppose one voter has $x = 1$, true outcome $y = 2$ (a fictional "turnout score"). Our (very wrong) model is a single **linear** neuron with $w = 0$, $b = 0$.
+
+::: {.card}
+**Forward pass:**
+
+* $z = wx + b = (0 \cdot 1) + 0 = 0$.
+* Loss: $L = (z - y)^2 = (0 - 2)^2 = 4$.
+
+(Here $z$ is our prediction $\hat{y}$ — for a single linear neuron they're the same thing.)
+:::
+
+::: {.try-box}
+[Question]{.try-label}
+**Should we increase $w$ or decrease $w$ to reduce the loss?**
+
+:::
+
+::: {.fragment}
+::: {.reveal-box}
+[Answer]{.reveal-label}
+**Increase $w$.** If $w$ were 2 (true relationship), our prediction would be $z = 2$, and loss would be 0.
+
+So the question becomes: how can an *algorithm* know that?
+:::
+:::
+
+## Why not just try every value?
+
+[The honest question from the last slide]{.eyebrow}
+
+::: {.columns}
+::: {.column width="50%"}
+[Guess and check]{.pill-amber}
+
+Try 100 values of $w$, keep the best.
+
+* 1 parameter → 100 forward passes.
+* 2 parameters → 100² = 10,000.
+* 10 parameters → $100^{10}$.
+
+Hopeless past a handful of parameters.
+:::
+::: {.column width="50%"}
+[Numerical differentiation]{.pill-amber}
+
+Nudge each parameter and see what happens:
+
+$$
+\frac{\partial L}{\partial w} \approx \frac{L(w + h) - L(w)}{h}
+$$
+
+* Needs **one forward pass per parameter**.
+* Approximate — and sensitive to the choice of $h$.
+:::
+:::
+
+::: {.reveal-box}
+[What we want]{.reveal-label}
+
+For a model with $k$ parameters:
+
+* Minimum number of passes (i.e. not $k$)
+* An exact measure of the change in loss for a change in the parameter
+
+It turns out, even with $k \gt 1\text{ million}$, we can do this with just *two* passes!
+:::
+
+
+## What we want to compute
+
+[The gradient of the loss with respect to each parameter]{.eyebrow}
+
+For each weight $w$ and bias $b$, we want:
+$$
+\frac{\partial L}{\partial w}, \qquad \frac{\partial L}{\partial b}
+$$
+
+::: {.card}
+A negative $\frac{\partial L}{\partial w}$ means: "increase $w$ to reduce $L$."
+
+A positive $\frac{\partial L}{\partial w}$ means: "decrease $w$ to reduce $L$."
+
+The **size** of the partial tells us how strongly the loss responds — i.e. how big a step we can take.
+:::
+
+Computing this from the *full expression* of $L$ is painful, but...
+
+* Using the chain rule, applied node-by-node, we can make it mechanically easy to compute
+
+## Adding loss to the graph
+
+Take our linear perceptron $z = wx + b$, and append loss nodes for $L = (z - y)^2$:
+
+```{dot}
+//| fig-height: 2.2
+digraph G {
+  rankdir="LR"; bgcolor="transparent"; node [fontname="Inter"];
+  x [shape=record]; w [shape=record]; b [shape=record]; ytrue [shape=record label="y"];
+  mul [shape=circle label="*" style=filled fillcolor="#F4F1EA"];
+  a [shape=record label="a"];
+  add [shape=circle label="+" style=filled fillcolor="#F4F1EA"];
+  z [shape=record label="z"];
+  sub [shape=circle label="-" style=filled fillcolor="#F4F1EA"];
+  d [shape=record label="d"];
+  sq [shape=circle label="**2" style=filled fillcolor="#F4F1EA"];
+  L [shape=record label="L" style=filled fillcolor="#C9322B" fontcolor="#FBFAF6"];
+
+  x -> mul; w -> mul; mul -> a;
+  a -> add; b -> add; add -> z;
+  z -> sub; ytrue -> sub; sub -> d;
+  d -> sq; sq -> L;
+}
+```
+
+::: {.card}
+[Name the nodes]{.eyebrow}
+
+Reading the graph left to right, each circle is one operation with its own output:
+
+* $a = wx$ — multiply the weight by the input
+* $z = a + b$ — add the bias
+* $d = z - y$ — subtract the truth
+* $L = d^2$ — square the error
+:::
+
+::: {.card}
+**The loss is just another node** in the graph. Now there's a single scalar at the end — the perfect target for reverse-mode autodiff.
+:::
+
+## Backwards through the graph — one step at a time
+
+We want $\frac{\partial L}{\partial w}$. 
+
+Walking the graph **right to left**, we apply the chain rule one node at a time.
+
+Starting at $L$: $\frac{\partial L}{\partial L} = 1$ (every node's gradient w.r.t. itself is 1).
+
+::: {.card}
+**The squared step.** $L = d^2$ so $\frac{\partial L}{\partial d} = 2d$.
+
+We got this using only the *local derivative* of `**2` — independent of everything else.
+:::
+
+We can continue this back through each node using only the local derivative at each step
+
+* The chain rule *accumulates* the result
+
+## The full backward walk
+
+[Working backwards through the linear perceptron + squared-error loss]{.eyebrow}
+
+::: {.card}
+$$
+\begin{aligned}
+\frac{\partial L}{\partial L} &= 1 \\[2pt]
+\frac{\partial L}{\partial d} &= 2d &  & & \quad (\text{derivative of } d^2) \\[2pt]
+\frac{\partial L}{\partial z} &= \frac{\partial L}{\partial d} \cdot \frac{\partial d}{\partial z} &= \frac{\partial L}{\partial d} \cdot 1 &= 2d & \quad (d = z - y) \\[2pt]
+\frac{\partial L}{\partial a} &= \frac{\partial L}{\partial z} \cdot \frac{\partial z}{\partial a} &= \frac{\partial L}{\partial z} \cdot 1 &= 2d & \quad (z = a + b) \\[2pt]
+\frac{\partial L}{\partial w} &= \frac{\partial L}{\partial a} \cdot \frac{\partial a}{\partial w} &= \frac{\partial L}{\partial a} \cdot x &= 2d \cdot x & \quad (a = w \cdot x) \\[2pt]
+\frac{\partial L}{\partial b} &= \frac{\partial L}{\partial z} \cdot \frac{\partial z}{\partial b} &= \frac{\partial L}{\partial z} \cdot 1 &= 2d
+\end{aligned}
+$$
+:::
+
+::: {.callout-tip}
+**Every step uses only:** the local operation's derivative + the gradient flowing in from the right. That's why this scales — each node only "talks" to its neighbours.
+:::
+
+## With concrete numbers
+
+Plug in our turnout example: $x = 1, y = 2, w = b = 0$.
+
+Forward: $a = 0, z = 0, d = -2, L = 4$.
+
+::: {.card}
+[Backward]{.eyebrow}
+
+$$
+\frac{\partial L}{\partial w} = 2d \cdot x = 2(-2)(1) = -4
+$$
+
+$$
+\frac{\partial L}{\partial b} = 2d = -4
+$$
+:::
+
+::: {.reveal-box}
+[The signal]{.reveal-label}
+**$\frac{\partial L}{\partial w} = -4 < 0$** — so increasing $w$ will *decrease* the loss. Just what we hoped.
+
+The algorithm found this **without** trying every value 😎
+:::
+
+## Stop and check — what about an activation function?
+
+[<span class="pause-cue">Stop & check</span>]{.eyebrow}
+
+::: {.try-box}
+[Try it yourself (look at the derivatives cheatsheet!)]{.try-label}
+Suppose we wrap the linear output in a **sigmoid** activation: $z = \sigma(wx + b)$ where $\sigma(u) = 1/(1+e^{-u})$.
+
+**What single thing changes in the backward walk?**
+:::
+
+::: {.fragment}
+::: {.reveal-box}
+[Answer]{.reveal-label}
+Exactly one local derivative changes. At the $\sigma$ node:
+$$
+\frac{\partial z}{\partial \text{(pre-activation)}} = \sigma'(u) = \sigma(u)(1 - \sigma(u))
+$$
+— a value between 0 and 0.25. That extra factor gets multiplied into the chain wherever the gradient flows back through the activation.
+
+Everything else is unchanged. **The whole algorithm is robust to swapping in any operation we can differentiate.**
+:::
+:::
+
+## Branches: when a value flows into more than one operation
+
+In real networks, the same value gets used in multiple downstream operations.
+
+```{dot}
+//| fig-height: 1.6
+digraph G {
+  rankdir="LR"; bgcolor="transparent"; node [fontname="Inter"];
+  x [shape=record];
+  m1 [shape=circle label="*2" style=filled fillcolor="#F4F1EA"];
+  m2 [shape=circle label="*4" style=filled fillcolor="#F4F1EA"];
+  a [shape=record label="a"]; c [shape=record label="c"]; p [shape=circle label="+" style=filled fillcolor="#F4F1EA"];
+  out [shape=record label="d"];
+  x -> m1; x -> m2;
+  m1 -> a; m2 -> c;
+  a -> p; c -> p; p -> out;
+}
+```
+
+::: {.card}
+**Branching rule.** When a value $x$ goes to *multiple* downstream nodes, its gradient is the **sum** of contributions from each branch:
+
+$$
+\frac{\partial d}{\partial x} = \underbrace{\frac{\partial d}{\partial a} \cdot \frac{\partial a}{\partial x}}_{\text{top branch}} + \underbrace{\frac{\partial d}{\partial c} \cdot \frac{\partial c}{\partial x}}_{\text{bottom branch}}
+$$
+
+This is the only extra rule beyond the chain rule. Everything else is bookkeeping.
+:::
+
+::: {.card}
+[With numbers]{.eyebrow}
+
+Here the branches are $a = 2x$ and $c = 4x$, and $d = a + c$. So the local derivatives are $\frac{\partial a}{\partial x} = 2$, $\frac{\partial c}{\partial x} = 4$, and $\frac{\partial d}{\partial a} = \frac{\partial d}{\partial c} = 1$. Summing the two branches:
+
+$$
+\frac{\partial d}{\partial x} = \underbrace{1 \cdot 2}_{\text{top}} + \underbrace{1 \cdot 4}_{\text{bottom}} = 6
+$$
+:::
+
+## Backpropagation
+
+::: {.reveal-box}
+[Sending loss gradients from right to left]{.reveal-label}
+
+We walk backwards through a graph, applying the chain rule at every node, and reading off $\frac{\partial L}{\partial w}$ — without ever expanding the full expression of $L$.
+
+This is called reverse-mode automatic differentiation — or, more normally, *backpropagation*.
+
+It is the **single algorithm** that powers every modern neural network. It was published by Rumelhart, Hinton & Williams in 1986 [@rumelhart1986learning].
+
+* Scales linearly with the size of the graph (i.e. number of parameters)
+* Works for arbitrary architectures (including vision models, LLMs, etc.)
+* Is *not* approximate — the gradients are exact.
+
+:::
+
+[We will use backpropagation every single day for the rest of the course.]{.muted}
+
+:::
+
+# Plenary · backward pass by hand {background-color="#0E1A2B"}
+
+## Plenary · backward pass by hand
+
+[<span class="pause-cue">≈ 20 min</span> · pen and paper, in pairs]{.eyebrow}
+
+::: {.card}
+[The graph]{.eyebrow}
+
+$$
+y = (3x + 2)(x - 1) \quad \text{with } x = 4.
+$$
+
+Break it into operations:
+
+* $a = 3x$
+* $b = a + 2$
+* $c = x - 1$
+* $y = b \cdot c$
+
+[Compute, step by step:]{.eyebrow}
+
+1. Forward: values of $a, b, c, y$.
+2. Backward: $\dfrac{\partial y}{\partial b}, \dfrac{\partial y}{\partial c}, \dfrac{\partial y}{\partial a}, \dfrac{\partial y}{\partial x}$.
+3. Sanity check: differentiate $y = (3x+2)(x-1)$ algebraically and evaluate at $x = 4$. Do you get the same number?
+:::
+
+
+## Plenary · answers
+
+::: {.card}
+[Forward]{.eyebrow}
+
+$a = 12,\ b = 14,\ c = 3,\ y = 42$.
+:::
+
+::: {.card}
+[Backward]{.eyebrow}
+
+$\dfrac{\partial y}{\partial y} = 1$.
+
+$\dfrac{\partial y}{\partial b} = c = 3$ (since $y = b \cdot c$).
+
+$\dfrac{\partial y}{\partial c} = b = 14$.
+
+$\dfrac{\partial y}{\partial a} = \dfrac{\partial y}{\partial b} \cdot 1 = 3$.
+
+**$x$ flows into two branches** — through $a$ and through $c$:
+
+$\dfrac{\partial y}{\partial x} = \dfrac{\partial y}{\partial a} \cdot 3 + \dfrac{\partial y}{\partial c} \cdot 1 = 3 \cdot 3 + 14 \cdot 1 = 23$.
+:::
+
+::: {.card}
+[Sanity check]{.eyebrow}
+
+$y = (3x+2)(x-1) = 3x^2 - x - 2$. $\dfrac{dy}{dx} = 6x - 1 = 23$ at $x = 4$. ✅
+:::
+
+# Part 2 · The algorithm in full {background-color="#0E1A2B"}
+
+## Three steps, repeated
+
+For any parametric model, training is:
+
+::: {.columns}
+::: {.column width="33%"}
+[1. Measure]{.pill-blue}
+
+Compute the **loss** on a training example (or batch of examples).
+
+* Forward pass through the graph.
+:::
+::: {.column width="33%"}
+[2. Differentiate]{.pill}
+
+Compute $\nabla L$ — the gradient of the loss w.r.t. every parameter.
+
+* Backward pass through the graph.
+:::
+::: {.column width="33%"}
+[3. Update]{.pill-green}
+
+Step each parameter in the direction that **reduces** $L$.
+
+* Gradient descent.
+:::
+:::
+
+::: {.card}
+**Repeat thousands of times.** That's deep learning.
+:::
+
+## Reminder: forward and backward
+
+::: {.columns}
+::: {.column width="50%"}
+[Forward pass]{.pill-blue}
+
+Walk graph **left → right**.
+
+For each node:
+
+* Compute its output from its inputs.
+* **Store** the output (we need it for backward).
+
+End: a scalar loss.
+:::
+::: {.column width="50%"}
+[Backward pass]{.pill}
+
+Walk graph **right → left**.
+
+For each node:
+
+* Read the gradient flowing in from the right.
+* Multiply by the local derivative (chain rule).
+* Send the result to upstream nodes.
+
+End: $\nabla L$ for every parameter.
+:::
+:::
+
+::: {.callout-tip}
+Notice that the forward pass stores values; the backward pass reads them. This memory cost is why GPUs need a lot of RAM during training.
+:::
+
+## The update — gradient descent
+
+For each parameter $\theta$, do:
+$$
+\theta \leftarrow \theta - \lambda \frac{\partial L}{\partial \theta}
+$$
+
+* $\lambda$ — the **learning rate** — controls step size.
+* Negative gradient direction → loss decreases.
+* Repeat for every parameter.
+
+::: {.try-box}
+[Back to our turnout example]{.try-label}
+$w = 0$, $b = 0$, $x = 1$, $y = 2$. 
+
+After the backward pass, we had $\frac{\partial L}{\partial w} = -4$ and $\frac{\partial L}{\partial b} = -4$. With $\lambda = 0.1$, **what are $w$ and $b$ after one step?**
+:::
+
+::: {.fragment}
+::: {.reveal-box}
+[Answer]{.reveal-label}
+$w_\text{new} = 0 - 0.1 \cdot (-4) = 0.4$. $b_\text{new} = 0 - 0.1 \cdot (-4) = 0.4$.
+
+Forward pass with new parameters: $z = 0.4 + 0.4 = 0.8 \Rightarrow L = (0.8 - 2)^2 = 1.44$.
+
+The loss fell from 4 to 1.44. *In one step.*
+:::
+:::
+
+## Several steps of gradient descent
+
+[Same example, repeated]{.eyebrow}
+
+| step | $w$ | $b$ | $z = wx + b$ | $L$ |
+|---|---|---|---|---|
+| 0 | 0.00 | 0.00 | 0.00 | 4.00 |
+| 1 | 0.40 | 0.40 | 0.80 | 1.44 |
+| 2 | 0.64 | 0.64 | 1.28 | 0.52 |
+| 3 | 0.78 | 0.78 | 1.57 | 0.19 |
+| 4 | 0.87 | 0.87 | 1.74 | 0.07 |
+| 5 | 0.92 | 0.92 | 1.84 | 0.02 |
+
+::: {.card}
+The loss falls after each step, simply repeating the same forward/backward/update sequence.
+
+Notice that the loss reduction decreases per epoch -- suggesting we are approaching some limit (in this case we should hit zero exactly!)
+:::
+
+## The same descent, as a picture
+
+[$w$ and $b$ start equal and get the same gradient, so they move together — one axis shows both]{.eyebrow}
+
+```{python}
+#| echo: false
+#| fig-width: 9
+#| fig-height: 3.6
+#| fig-align: center
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib_inline.backend_inline as backend_inline
+
+backend_inline.set_matplotlib_formats("svg")
+
+INK, MUTED, RULE, PAPER = "#0E1A2B", "#5C6473", "#D7D2C5", "#FBFAF6"
+ACCENT, BLUE = "#C9322B", "#1A6FB4"
+
+plt.rcParams.update({
+    "font.family": "sans-serif",
+    "font.sans-serif": ["Inter", "Helvetica Neue", "Arial", "DejaVu Sans"],
+    "text.color": INK, "axes.labelcolor": INK,
+    "xtick.color": MUTED, "ytick.color": MUTED, "axes.edgecolor": RULE,
+})
+
+# x = 1, y = 2, b tied to w  =>  prediction z = 2w and loss L = (2w - 2)^2
+loss = lambda w: (2 * w - 2) ** 2
+ws = [0.0]
+for _ in range(5):                      # w <- w - 0.1 * dL/dw,  dL/dw = 4(w-1)
+    ws.append(ws[-1] - 0.1 * 4 * (ws[-1] - 1))
+
+fig, ax = plt.subplots(figsize=(9, 3.6))
+fig.patch.set_alpha(0)
+ax.patch.set_alpha(0)
+
+grid = np.linspace(-0.35, 2.0, 400)
+ax.plot(grid, loss(grid), color=INK, lw=2.4, zorder=2)
+
+for i, (a, bb) in enumerate(zip(ws, ws[1:])):
+    ax.annotate("", xy=(bb, loss(bb)), xytext=(a, loss(a)),
+                arrowprops=dict(arrowstyle="->", color=ACCENT, lw=1.8,
+                                shrinkA=6, shrinkB=6), zorder=3)
+ax.plot(ws, [loss(w) for w in ws], "o", color=ACCENT, ms=9,
+        mec=PAPER, mew=2, zorder=4)
+
+ax.annotate("start\n$w = 0$, $L = 4$", xy=(ws[0], loss(ws[0])), xytext=(16, 24),
+            textcoords="offset points", color=ACCENT, fontsize=11.5,
+            fontweight="bold", ha="left", va="bottom", linespacing=1.35)
+ax.plot([1], [0], "o", color=BLUE, ms=10, mec=PAPER, mew=2, zorder=4)
+ax.annotate("minimum\nw = 1, L = 0", xy=(1, 0), xytext=(12, 18),
+            textcoords="offset points", color=BLUE, fontsize=11.5,
+            fontweight="bold", linespacing=1.35)
+
+ax.set_xlim(-0.35, 2.0)
+ax.set_ylim(-0.35, 6.2)
+ax.set_xlabel("$w$", fontsize=12)
+ax.set_ylabel("loss $L$", fontsize=12)
+ax.grid(True, color=RULE, lw=0.8, alpha=0.5)
+ax.set_axisbelow(True)
+for side in ("top", "right"):
+    ax.spines[side].set_visible(False)
+plt.tight_layout()
+plt.show()
+```
+
+::: {.card}
+Each arrow is one **forward → backward → update** cycle. The gradient tells us which way is downhill *and* how steep it is, so the steps are large where the curve is steep and shrink as we approach the bottom.
+:::
+
+## The learning rate — the one toggle you always tune
+
+```{python}
+#| echo: false
+#| fig-width: 9
+#| fig-height: 3.5
+#| fig-align: center
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib_inline.backend_inline as backend_inline
+
+backend_inline.set_matplotlib_formats("svg")
+
+INK, MUTED, RULE, PAPER = "#0E1A2B", "#5C6473", "#D7D2C5", "#FBFAF6"
+
+plt.rcParams.update({
+    "font.family": "sans-serif",
+    "font.sans-serif": ["Inter", "Helvetica Neue", "Arial", "DejaVu Sans"],
+    "text.color": INK, "axes.labelcolor": INK,
+    "xtick.color": MUTED, "ytick.color": MUTED, "axes.edgecolor": RULE,
+})
+
+loss = lambda w: (2 * w - 2) ** 2
+
+def run(lam, steps=12):
+    w, out = 0.0, [(0, loss(0.0))]
+    for s in range(1, steps + 1):
+        w = w - lam * 4 * (w - 1)
+        out.append((s, loss(w)))
+    return zip(*out)
+
+RUNS = [
+    (0.02, "#C58A12", "too small — still crawling"),
+    (0.10, "#2F8F6C", "about right — converges fast"),
+    (0.55, "#C9322B", "too big — overshoots, then diverges"),
+]
+
+fig, ax = plt.subplots(figsize=(9, 3.5))
+fig.patch.set_alpha(0)
+ax.patch.set_alpha(0)
+
+for lam, colour, note in RUNS:
+    steps, losses = run(lam)
+    ax.plot(steps, losses, color=colour, lw=2.2, marker="o", ms=6,
+            mec=PAPER, mew=1.5, zorder=3,
+            label=f"$\\lambda$ = {lam} — {note}")
+
+ax.set_ylim(0, 12)
+ax.set_xlim(-0.4, 12.4)
+ax.set_xlabel("training step", fontsize=12)
+ax.set_ylabel("loss $L$", fontsize=12)
+ax.grid(True, color=RULE, lw=0.8, alpha=0.5)
+ax.set_axisbelow(True)
+for side in ("top", "right"):
+    ax.spines[side].set_visible(False)
+leg = ax.legend(frameon=False, loc="upper right", fontsize=11.5, ncol=1,
+                handlelength=1.6, labelspacing=0.35)
+for text, (_, colour, _) in zip(leg.get_texts(), RUNS):
+    text.set_color(colour)
+plt.tight_layout()
+plt.show()
+```
+
+::: {.callout-warning appearance="simple"}
+The red line leaves the top of the chart and never comes back. **A diverging loss is almost always the learning rate.** It's the first thing to halve when training blows up.
+:::
+
+## Does gradient descent always work?
+
+::: {.columns}
+::: {.column width="50%"}
+[Our example was easy]{.pill-blue}
+
+A single linear neuron with squared error gives a **convex** loss -- it's "bowl-shaped" with a single minima. 
+
+* Hence, if you move downhill from anywhere and you reach *the* minimum.
+
+:::
+::: {.column width="50%"}
+[Real networks are not]{.pill-amber}
+
+By stacking layers and using non-linear activations, the surface becomes **non-convex**
+
+  * There could be many *local* minima
+  * Lots of  *saddle points* (flat in some directions, sloped in others).
+
+There is no guarantee you find the global minimum. In general, you don't.
+
+:::
+:::
+
+::: {.reveal-box}
+[Why we do it anyway]{.reveal-label}
+Empirically, for large networks, descending to local minima tends to be **good enough**. 
+
+  * But this is an empirical observation, not a mathematical theorem.
+
+Deep learning is therefore **experimental**: it works far better than anyone could prove it should!
+
+:::
+
+## A (slightly) more realistic example
+
+Suppose we have two observations — $(x = 1, y = 2)$ and $(x = 3, y = 6)$ — what should we do?
+
+::: {.columns}
+::: {.column width="50%"}
+[Stochastic gradient descent (SGD)]{.pill}
+
+Update parameters using **one example at a time**.
+
+* Cheap per step.
+* Updates are **noisy** — but the noise averages out.
+* For our two-example case: alternate between the two; the model converges to $w = 2, b = 0$.
+:::
+::: {.column width="50%"}
+[Full-batch gradient descent]{.pill-blue}
+
+Compute the gradient by **averaging** over all training examples, then take one step.
+
+* Smoother
+* Memory-hungry for large datasets.
+* Only **one slow step per epoch** — slower to converge.
+:::
+:::
+
+## Mini-batch gradient descent — the modern default
+
+::: {.card}
+Compute the gradient on a **small batch** (say, 32 examples), then average, then make an update.
+
+* Less noisy than single-example SGD.
+* Memory-feasible even on huge datasets.
+* Plays well with GPU parallelism (one batch = one matmul).
+
+This is what every modern training script does.
+:::
+
+::: {.callout-note}
+**Vocabulary check.** "SGD" in modern practice usually means mini-batch SGD — even though strictly speaking the original SGD used one example at a time.
+:::
+
+## Some essential training vocabulary
+
+::: {.columns}
+::: {.column width="50%"}
+**Training set**
+: Data used to compute updates.
+
+**Validation set**
+: Data used to **tune** hyperparameters (e.g. $\lambda$) and detect overfitting.
+
+**Test set**
+: Used **once**, at the very end, to estimate generalisation.
+:::
+::: {.column width="50%"}
+**Step (or iteration)**
+: One parameter update.
+
+**Epoch**
+: One complete pass over the training set.
+*With mini-batches of size 32 and 10,000 examples, an epoch is ~313 steps.*
+
+**Convergence**
+: Loss stops decreasing meaningfully.
+:::
+:::
+
+::: {.callout-warning}
+# A common bug
+As with "regular" ML, we must not *leak* validation/test data into training. If you do, the model **looks** great, but collapses out of sample.
+:::
+
+# Activity · one step of gradient descent {background-color="#0E1A2B"}
+
+## Activity · one step of gradient descent
+
+[<span class="pause-cue">≈ 15 min</span> · pen and paper, in pairs]{.eyebrow}
+
+::: {.card}
+[The model and one observation]{.eyebrow}
+
+A linear perceptron:
+$$ z = wx + b, \quad L = (z - y)^2. $$
+
+Current parameters: $w = 0.5, b = 0.1$.
+Example: $x = 2, y = 3$.
+Learning rate $\lambda = 0.1$.
+
+[Compute]{.eyebrow}
+
+1. The forward pass: both $z$, and then $L$.
+2. Backward pass: $\frac{\partial L}{\partial w}$ and $\frac{\partial L}{\partial b}$.
+3. Update new $w$ and new $b$ values.
+4. **Forward pass with these new parameters** to confirm the loss has fallen.
+:::
+
+## Activity · answer
+
+::: {.card}
+[Forward]{.eyebrow}
+
+$z = 0.5 \times 2 + 0.1 = 1.1$.
+$d = z - y = 1.1 - 3 = -1.9$.
+$L = (-1.9)^2 = 3.61$.
+:::
+
+::: {.card}
+[Backward]{.eyebrow}
+
+$\frac{\partial L}{\partial w} = 2d \cdot x = 2(-1.9)(2) = -7.6$.
+$\frac{\partial L}{\partial b} = 2d = -3.8$.
+:::
+
+::: {.card}
+[Update with $\lambda = 0.1$]{.eyebrow}
+
+$w \leftarrow 0.5 - 0.1(-7.6) = 1.26$.
+$b \leftarrow 0.1 - 0.1(-3.8) = 0.48$.
+
+[Re-forward]{.eyebrow}
+
+$z = 1.26(2) + 0.48 = 3.0$ → $L = (3.0 - 3)^2 = 0$.
+
+We hit the target *in one step* — because the loss is quadratic and we happened to land exactly. In real problems, expect dozens to thousands of steps.
+:::
+
+# Part 3 · Optimisers and the loop {background-color="#0E1A2B"}
+
+## Plain SGD has limits
+
+::: {.columns}
+::: {.column width="50%"}
+[Problems]{.pill-amber}
+
+* Fixed learning rate $\lambda$ — too big, you overshoot; too small, you crawl.
+* All parameters get the same step size — even when some need to move faster.
+* Noisy steps can oscillate near minima.
+:::
+::: {.column width="50%"}
+[The modern fix]{.pill-green}
+
+*Adaptive* optimisers adjust $\lambda$ per parameter — most often using **Adam** [@kingma2014adam] and its sibling **AdamW**.
+
+We'll use these in every PyTorch model from Day 5.
+
+  * They are a good default for most DL projects
+  
+:::
+:::
+
+## Adam, in one slide
+
+[For each parameter $\theta$, on each step:]{.eyebrow}
+
+::: {.card}
+1. Compute the gradient $g_t = \nabla_\theta L$.
+2. Maintain two moving averages:
+   * $m_t \approx$ recent average of $g$ (the **momentum**).
+   * $v_t \approx$ recent average of $g^2$ (the **second moment**).
+3. Update:
+$$
+\theta \leftarrow \theta - \lambda \cdot \frac{m_t}{\sqrt{v_t} + \epsilon}
+$$
+:::
+
+::: {.callout-note}
+The point isn't the formula — it's that the update is **adaptive per parameter**. Parameters with large recent gradients get smaller scaled steps; parameters with small gradients get relatively larger ones.
+
+In practice, **default to Adam with $\lambda = 10^{-3}$** for most projects. We'll do exactly that next week.
+:::
+
+## The training loop — preview of next week
+
+```{python}
+#| eval: false
+#| echo: true
+for epoch in range(num_epochs):
+    for x_batch, y_batch in train_loader:
+        optimizer.zero_grad()              # clear last step's gradients
+        y_pred = model(x_batch)            # forward pass
+        loss   = loss_fn(y_pred, y_batch)  # measure
+        loss.backward()                    # backward pass — fills .grad on parameters
+        optimizer.step()                   # update parameters
+```
+
+::: {.card}
+Every PyTorch training script you'll ever read or write looks like this. **Five lines.** Everything else is detail on:
+
+* What `model` is (the architecture).
+* What `loss_fn` is.
+* What `optimizer` is.
+
+We spend the next eight lectures filling in those three blanks.
+:::
+
+## A practical reminder — zero the gradients
+
+::: {.card}
+**Critical detail:** PyTorch *accumulates* gradients across `loss.backward()` calls by default. 
+
+You must call `optimizer.zero_grad()` at the start of every step, or your gradients will be the sum of all previous steps' gradients!!
+
+This is a very common bug in PyTorch code.
+:::
+
+::: {.callout-warning}
+# Enormous gradients are a tell-tale sign
+
+**Check whether you're zeroing them**. It is almost always this.
+:::
+
+## Where this leaves us
+
+[<span class="pause-cue">Stop & take stock</span>]{.eyebrow}
+
+::: {.card}
+You can now:
+
+1. **Define a loss** — squared error or binary cross-entropy.
+2. Run a **forward pass** through a small computational graph.
+3. Run a **backward pass** and read off gradients for every parameter.
+4. Take a **gradient descent step** and confirm the loss falls.
+5. Name the three components of any training loop: model, loss, optimiser.
+
+**You understand the algorithm that runs every neural network.**
+
+Three weeks ago this would have been a black box. Today you can write it.
+:::
+
+## A connection to social science
+
+[An aside on a piece of work you can read]{.eyebrow}
+
+::: {.columns}
+::: {.column width="55%"}
+**MIDAS** [@lall2022midas] is a missing-data imputation method built on a *denoising autoencoder* trained with backprop and Adam.
+
+* It's used in political science / development economics for surveys with missing entries.
+* The core algorithm — forward pass, loss, backward pass, update — is the same as today's.
+:::
+::: {.column width="45%"}
+::: {.card}
+The deep-learning idea you just learned is **applicable** to social-science problems, not just to ImageNet. We come back to MIDAS on Day 7.
+:::
+:::
+:::
+
+# Lab brief · today's afternoon {background-color="#0E1A2B"}
+
+## Today's lab — 90 minutes
+
+[Goals]{.eyebrow}
+
+Take yesterday's `Value` graph library and add **gradients**.
+
+You will implement:
+
+1. A `grad` attribute on each `Value`, initialised to 0.
+2. For each operation (`+`, `*`, `**`), a `_backward` hook that:
+   * Reads the gradient flowing in.
+   * Computes the local derivative.
+   * Adds the contribution to each child's `grad`.
+3. A `backward()` method on the final node that walks the graph in **reverse topological order**, calling each `_backward`.
+
+::: {.card}
+**Deliverable.** A working autodifferentiation library, in <100 lines of Python.
+
+You'll then use it to train a tiny one-layer model on a small dataset — and watch the loss fall.
+
+This is **Karpathy's micrograd**. We've walked it deliberately.
+:::
+
+## See you next week {background-color="#0E1A2B"}
+
+[Lecture 5 — *Feed-forward networks in PyTorch* — Monday 10 August]{.eyebrow}
+
+::: {.callout-tip}
+# **Over the weekend:**
+
+* Well done! Week 1 is the steepest part of the whole course
+* If you're curious, watch [Karpathy's *Building micrograd*](https://www.youtube.com/watch?v=VMj-3S1tku0) -- it walks through the exact lab you just did.
+* Optional: install PyTorch locally if you want to run things outside Colab. Setup notes are on Moodle.
+
+:::

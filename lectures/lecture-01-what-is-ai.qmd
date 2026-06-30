@@ -1,0 +1,874 @@
+---
+title: "What do we mean by AI?"
+subtitle: "Lecture 1 — Course overview & framing"
+author: "Dr Thomas Robinson"
+date: "2026-08-03"
+date-format: long
+bibliography: ../refs.bib
+format: 
+  revealjs:
+    smaller: true
+---
+
+
+# Welcome to ME324 {background-color="#0E1A2B"}
+
+## Why are you here!?
+
+::: {.callout-tip}
+## Sam Altman (OpenAI), ["The Intelligence Age"](https://ia.samaltman.com/)
+
+In the next couple of decades, we will be able to do things that would have seemed like magic to our grandparents.
+
+[...]
+
+How did we get to the doorstep of the next leap in prosperity?
+
+**In three words: deep learning worked.**
+:::
+
+Beyond hyperbole, these models are thought to be:
+
+* Highly predictive (when built correctly)
+* Highly flexible
+* An engineering-grade solution to many problems
+
+Not short of news coverage on how deep learning is fundamentally altering society [**and** how we study it!]{.accent}
+
+## The aim of this course
+
+[Three weeks · 36h lectures · 18h labs]{.eyebrow}
+
+By the end of this course you should be able to:
+
+::: {.card}
+1. **Explain** what (deep) neural networks are and how they're trained
+2. **Build** neural networks from scratch in Python, then scale up using PyTorch
+3. **Apply** deep learning to predict, classify, and generate
+4. **Critique** AI systems — their assumptions, failure modes, and social consequences
+:::
+
+*In labs, you will work towards building out your own GPT-style LLM!*
+
+::: {.callout-note}
+## A note on content
+As a *technical* course, we will write code, do basic calculus, and read papers. But don't worry too much -- most of this rests on fairly simple maths.
+:::
+
+## What this course expects of you
+
+::: {.columns}
+::: {.column width="50%"}
+[Workload]{.pill-amber}
+
+* **3 hours of lecture + 90 min lab, every day.** Plan around that.
+* **Optional reading + lab catch-up most evenings.**
+* It's a marathon not a sprint
+:::
+::: {.column width="50%"}
+[Assessment]{.pill-amber}
+
+* **Take-home midterm** (end of week 2) — train a model + write up.
+* **Closed-book pen-and-paper exam** Fri 21 Aug
+:::
+:::
+
+::: {.callout-tip}
+
+# Ask questions! 
+We have lots of time in lectures, so please stop me at any point. **There's no such thing as a "stupid" question!!**
+:::
+
+## You may find some material hard, and that's ok!
+
+The very thing we're studying can help you over the next three weeks (and beyond):
+
+* Ask ChatGPT/Claude/DeepSeek about things you don't understand yet
+* **Use it in the labs to look things up** — *"how do I check the shape of a PyTorch tensor?"* is exactly what these tools are good for
+* **But don't let it write code you can't read back to me** — the exam is closed-book
+
+**Let me know if you want me to go over anything again!**
+
+ * Maths may seem daunting at first
+ * I promise you can all learn it
+ * The advantages of understanding these fundamentals will persist
+
+
+
+# Plenary · who's in the room? {background-color="#0E1A2B"}
+
+## Plenary · who's in the room?
+
+[<span class="pause-cue">≈ 15 min</span> · groups of 4]{.eyebrow}
+
+::: {.card}
+[Round-the-table]{.eyebrow}
+
+Spend ~90 seconds each on:
+
+1. **Your name** and what you'd like to be called.
+2. **Where you study + what you study.**
+3. **One thing about AI that excites you.**
+4. **One thing about AI that worries you.**
+:::
+
+::: {.try-box}
+[Then, as a group]{.try-label}
+
+Identify **one excitement** and **one worry** that *more than one of you* mentioned. Be ready to share when we come back together.
+:::
+
+[We'll spend ~5 minutes reporting back!]{.muted}
+
+
+## Who am I?
+
+::: {.columns}
+::: {.column width="65%"}
+
+::: {.card}
+**Call me Tom!**
+
+* Political scientist by training, studied at Oxford
+* I now research causal inference + deep learning/AI methods
+* Any questions outside our lectures, email t.robinson@lse.ac.uk
+
+:::
+
+
+::: {.card}
+**First started working on AI methods in 2018**
+
+I'm *super excited* about how AI is changing how we discover things
+
+I'm *worried* that AI could lead to a plateau in knowledge
+
+:::
+
+
+:::
+::: {.column width="35%"}
+![](../assets/images/babytom.jpeg){width="85%" fig-align="center" fig-alt="A childhood photo of Tom, in an orange coat, on a swing in the snow."}
+:::
+:::
+
+
+
+# Part I · What is "AI"? {background-color="#0E1A2B"}
+
+## "AI" is a slippery word
+
+Public discourse uses *AI* to refer to almost anything computational:
+
+::: {.columns}
+::: {.column width="33%"}
+[Old-school]{.pill}
+
+* A chess engine
+* A spam filter
+* A recommender system
+* Autocomplete
+:::
+::: {.column width="33%"}
+[Modern]{.pill-blue}
+
+* ChatGPT / Claude / Gemini
+* Self-driving cars
+* Stable Diffusion
+* AlphaFold
+:::
+::: {.column width="33%"}
+[Hype]{.pill-amber}
+
+* "AGI" / "superintelligence"
+* "AI" that's just a regression
+* "AI" that's just a database
+* "AI" that's just a person
+:::
+:::
+
+We need sharper categories.
+
+## A useful three-way distinction
+
+::: {.columns}
+::: {.column width="33%"}
+### Symbolic AI
+
+Hand-crafted rules. Logic. Knowledge bases.
+
+* IBM's Deep Blue
+* Expert systems
+* Prolog
+* Cyc
+
+*Strength*: interpretable, verifiable.
+
+*Weakness*: brittle, doesn't scale to messy data.
+:::
+
+::: {.column width="33%"}
+### Machine Learning
+
+Models that learn parameters from data.
+
+* Linear / logistic regression
+* Random forests, SVMs
+* k-means clustering
+
+*Strength*: data-driven, statistically grounded.
+
+*Weakness*: feature engineering required for messy data.
+:::
+
+::: {.column width="33%"}
+### Deep Learning
+
+A subset of ML using **neural networks with multiple hidden layers**.
+
+* Image classifiers
+* GPT / LLaMA / Claude
+* AlphaFold
+
+*Strength*: learns features end-to-end from raw data.
+
+*Weakness*: data-hungry, compute-hungry, opaque.
+:::
+:::
+
+
+## Symbolic AI in action — *Deep Blue*
+
+[10 May 1997]{.eyebrow} &nbsp; IBM's Deep Blue beats world champion Garry Kasparov 3½–2½ in a 6-game match — the first time a computer defeats a reigning world chess champion.
+
+::: {.columns}
+::: {.column width="33%"}
+[Speed]{.pill-blue}
+
+::: {.bignum}
+
+200M
+:::
+board positions/second
+:::
+::: {.column width="33%"}
+[Hardware]{.pill-blue}
+
+::: {.bignum}
+
+480
+:::
+custom chips
+:::
+::: {.column width="33%"}
+[Learning]{.pill-amber}
+
+::: {.bignum}
+0
+:::
+learned parameters
+:::
+:::
+
+::: {.card}
+
+**What Deep Blue actually was**
+
+  * **Fast search** across possible moves.
+  * An **evaluation function** with ~8,000 features — material, mobility, king safety, pawn structure — *all hand-tuned with grandmasters* (GMs).
+  * Every position with ≤ 5 pieces, pre-solved.
+:::
+
+::: {.reveal-box}
+  [Why this is *symbolic* AI]{.reveal-label}
+  Every "smart" thing Deep Blue did was **encoded by humans**. No learning. No data. No statistics. Its intelligence was the *team's* intelligence, made very fast.
+
+  It beat the world champion at chess — and could do *nothing else*. Not checkers. Not conversation. Not recognise a horse.
+:::
+  
+
+## Why deep learning? Why now?
+
+The ideas are old. The *scale* is new.
+
+::: {.columns}
+::: {.column width="50%"}
+**The ingredients (mostly pre-2010):**
+
+* Backpropagation (Rumelhart, Hinton & Williams, 1986)
+* CNNs (LeCun et al., 1989)
+* LSTMs (Hochreiter & Schmidhuber, 1997)
+* ReLU activations (Glorot et al., 2011)
+:::
+::: {.column width="50%"}
+**What changed (2012–):**
+
+* GPUs cheap enough to run on
+* ImageNet, Common Crawl, the open web
+* Frameworks: Theano → TensorFlow → PyTorch
+* AlexNet (2012) → Transformer (2017) → GPT-3 (2020)
+:::
+:::
+
+## A brief timeline {.timeline-slide}
+
+::: {.timeline}
+::: {.timeline-event .era-foundations}
+::: {.timeline-year}
+1958
+:::
+::: {.timeline-dot}
+:::
+::: {.timeline-title}
+Perceptron
+:::
+::: {.timeline-desc}
+First learnable neural unit
+:::
+:::
+::: {.timeline-event .era-foundations}
+::: {.timeline-year}
+1986
+:::
+::: {.timeline-dot}
+:::
+::: {.timeline-title}
+Backprop
+:::
+::: {.timeline-desc}
+Deep nets become trainable
+:::
+:::
+::: {.timeline-event .era-foundations}
+::: {.timeline-year}
+1989
+:::
+::: {.timeline-dot}
+:::
+::: {.timeline-title}
+LeNet (CNNs)
+:::
+::: {.timeline-desc}
+Vision's first architecture
+:::
+:::
+::: {.timeline-event .era-deep}
+::: {.timeline-year}
+2012
+:::
+::: {.timeline-dot}
+:::
+::: {.timeline-title}
+AlexNet
+:::
+::: {.timeline-desc}
+DL eats computer vision
+:::
+:::
+::: {.timeline-event .era-deep}
+::: {.timeline-year}
+2014
+:::
+::: {.timeline-dot}
+:::
+::: {.timeline-title}
+GANs
+:::
+::: {.timeline-desc}
+Generative modelling takes off
+:::
+:::
+::: {.timeline-event .era-deep}
+::: {.timeline-year}
+2017
+:::
+::: {.timeline-dot}
+:::
+::: {.timeline-title}
+Transformer
+:::
+::: {.timeline-desc}
+"Attention is all you need"
+:::
+:::
+::: {.timeline-event .era-modern}
+::: {.timeline-year}
+2020
+:::
+::: {.timeline-dot}
+:::
+::: {.timeline-title}
+GPT-3
+:::
+::: {.timeline-desc}
+Scale → emergent capability
+:::
+:::
+::: {.timeline-event .era-modern}
+::: {.timeline-year}
+2022
+:::
+::: {.timeline-dot}
+:::
+::: {.timeline-title}
+ChatGPT
+:::
+::: {.timeline-desc}
+AI as consumer product
+:::
+:::
+::: {.timeline-event .era-modern}
+::: {.timeline-year}
+2024+
+:::
+::: {.timeline-dot}
+:::
+::: {.timeline-title}
+Multimodal
+:::
+::: {.timeline-desc}
+Reasoning, agents
+:::
+:::
+:::
+
+::: {.timeline-eras}
+::: {.era-tag .era-foundations}
+Foundations
+:::
+::: {.era-tag .era-deep}
+Deep-learning era
+:::
+::: {.era-tag .era-modern}
+AI as product
+:::
+:::
+
+
+# Part II · Course logistics {background-color="#0E1A2B"}
+
+## Course structure
+
+::: {.columns}
+::: {.column width="33%"}
+### Week 1
+
+*Foundations*
+
+1. What is AI?
+2. Deep models — a primer
+3. Computational graphs & the maths of AI
+4. Backpropagation
+5. Feed-forward networks in PyTorch
+:::
+::: {.column width="33%"}
+### Week 2
+
+*Vision & generation*
+
+6. Classifying images (CNNs)
+7. Generating images (autoencoders, VAEs, diffusion)
+8. Word embeddings · character models
+9. Recurrent neural networks
+:::
+::: {.column width="33%"}
+### Week 3
+
+*Text & LLMs*
+
+10. Attention & transformers
+11. Tokenisation & a working GPT
+12. Ethics, limitations & recap
+:::
+:::
+
+## Labs
+
+Lab instructor: **Kaifang Zhou** (LSE Fellow, Statistics)
+
+  * An expert (!) in machine learning methods
+
+Focus on implementing concepts in practise
+
+* 90 minute sessions
+* Build neural networks from scratch
+* Use industry-leading frameworks
+
+Opportunity to consolidate conceptual understanding
+
+
+## Assessment
+
+::: {.card}
+[Formative]{.pill-blue}  Weekly quizzes (end of weeks 1 & 2). Marked by Kaifang.
+
+Not part of your final grade — they tell *you* where you stand.
+:::
+
+::: {.card}
+[Midterm]{.pill-amber}  A take-home assessment at the end of week 2. You'll train a small model, document choices, and discuss results.
+:::
+
+::: {.card}
+[Final]{.pill}  Two-hour pen-and-paper exam (Fri 21 August). Forty multiple-choice questions, six options each. No laptops.
+
+* A test of *conceptual* understanding of both deep learning and its implementation
+* About half the questions ask you to **work something out** — a forward pass, a gradient, a shape — and then pick the answer you got
+:::
+
+
+## Course resources
+
+I will post and maintain everything at [me324.lse-methodology.github.io](me324.lse-methodology.github.io)
+
+* All lecture slides released at least 2 days in advance
+* Access lab notebooks/solutions here too
+
+I have provided *indicative* readings via LSE's Leganto system
+
+* This is *optional* and complementary
+* The slides and lab notebooks are **definitive** and what the exam is based on
+
+*Use Moodle for submitting your quizzes/assignments*
+
+
+## Use of generative AI in this course
+
+You will be using AI tools throughout this course — that is the point.
+
+::: {.columns}
+::: {.column width="50%"}
+**Yes, you may use:**
+
+* ChatGPT / Claude / Copilot to help with lab code
+* AI tools to explain concepts
+* AI to debug
+
+The course Moodle has a written policy.
+:::
+::: {.column width="50%"}
+**But:**
+
+* You can't use them in the final exam 🙃
+* Naive use will produce wrong answers
+* 2026: You need to *understand* the code not write it
+:::
+:::
+
+
+
+# Part III · A first look at "AI" in practice {background-color="#0E1A2B"}
+
+## What ChatGPT/Claude actually is 
+
+Strip away the chat interface and the marketing. ChatGPT is:
+
+1. A **transformer** neural network…
+2. …with around 10¹¹–10¹² parameters…
+3. …trained to predict the next **token** in a sequence…
+4. …on a large chunk of the public internet…
+5. …then **fine-tuned** with human feedback (RLHF) to follow instructions and refuse certain requests.
+
+::: {.card}
+By the end of this course **you will have built a small version of (1)–(3) yourself**. The rest is engineering at scale.
+:::
+
+## What deep learning is *not*
+
+::: {.columns}
+::: {.column width="50%"}
+**Not** thinking, in any cognitively meaningful sense
+: A trained model has no goals, no beliefs, no understanding of context outside its training.
+
+\
+
+**Not** factually reliable
+: LLMs hallucinate by design — they generate plausible continuations, not true ones.
+:::
+::: {.column width="50%"}
+**Not** neutral
+: Training data encodes the biases of who wrote it, who curated it, and what was missing.
+
+\
+
+**Not** explainable by default
+: We can train a 10B-parameter model in a week. We can't fully explain why it answers any single question the way it does.
+:::
+:::
+
+## AI is everywhere — you just stopped noticing
+
+Most "AI" you've used today, you didn't think of as AI:
+
+::: {.columns}
+::: {.column width="50%"}
+* **Email autocomplete + spam filters** — every Gmail interaction.
+* **Phone keyboard suggestions** — language models since 2018.
+* **Photo apps** that find your face, group your dog, blur a background.
+* **Map routing** — sub-second searches over millions of road segments.
+:::
+::: {.column width="50%"}
+* **Streaming recommendations** — Netflix's homepage is regenerated for you each visit.
+* **Search results** — ordered by hundreds of learned signals.
+* **Bank fraud detection** — pattern recognition over your transaction history.
+* **Voice assistants** — Siri, Alexa, Google Assistant.
+:::
+:::
+
+## AI as product — the consumer wave
+
+[Since November 2022]{.eyebrow} &nbsp; A new product category appeared overnight.
+
+::: {.columns}
+::: {.column width="33%"}
+::: {.bignum}
+2 mo
+:::
+
+ChatGPT to reach 100M users (TikTok took 9; Instagram 30.)
+:::
+::: {.column width="33%"}
+::: {.bignum}
+200M+
+:::
+
+Weekly active ChatGPT users by mid-2024.
+:::
+::: {.column width="33%"}
+::: {.bignum}
+76%
+:::
+
+Of professional developers using AI by 2024.
+:::
+:::
+
+::: {.card}
+**New product categories**
+
+* **General-purpose assistants** — ChatGPT, Claude, Gemini, Perplexity.
+* **Image / video generators** — Midjourney, DALL·E, Sora, Veo.
+* **Code assistants** — Copilot, Cursor, Claude Code.
+:::
+
+## AI in research and discovery
+
+Possibly the most consequential application
+
+::: {.columns}
+::: {.column width="50%"}
+[Biology + medicine]{.pill-green}
+
+* **AlphaFold** (DeepMind, 2021) — predicted 3D structure of ~all 200M known proteins
+* **AI radiology** — detecting tumours, pulmonary embolisms, fractures with sensitivity matching or beating specialists
+* **Drug discovery** — running candidate-molecule pipelines at scale.
+
+:::
+::: {.column width="50%"}
+[Physical sciences]{.pill-green}
+
+* **Weather prediction** — Google's GenCast (2024) matches or beats top numerical weather services
+* **Materials discovery** — DeepMind's GNoME predicted 380,000 stable new crystal structures.
+* **Particle physics + astronomy** — anomaly detection in LHC data, gravitational-wave searches.
+
+:::
+:::
+
+::: {.reveal-box}
+[For social scientists]{.reveal-label}
+LLMs as **measurement instruments**: scoring stances in legislative speeches, coding survey open-ends, simulating respondents.
+:::
+
+## AI in high-stakes decisions
+
+AI now shapes decisions about people — often without their knowledge or recourse.
+
+::: {.columns}
+::: {.column width="50%"}
+[Where it's deployed]{.pill-amber}
+
+* **Hiring** — resume screening, video-interview assessment, "culture-fit" scoring.
+* **Credit + insurance** — approvals, pricing, fraud flagging.
+* **Healthcare** — triage scoring, prior-authorisation decisions, diagnostic aids.
+* **Criminal justice** — risk-of-reoffending scoring, predictive policing.
+* **Welfare** — eligibility scoring, fraud detection.
+:::
+::: {.column width="50%"}
+[Where it has gone badly]{.pill-amber}
+
+* **COMPAS** (US, 2016) — large racial disparities in false-positive rates for recidivism scoring.
+* **Dutch SyRI** (welfare fraud, 2020) — ruled illegal; disproportionate targeting of low-income minorities.
+* **Australian Robodebt** (2016–19) — automated, often-wrongful debt notices; Royal Commission, $1.8B settlement.
+* **Amazon hiring tool** (scrapped 2018) — systematically downgraded women's CVs.
+:::
+:::
+
+## AI in my (less high stakes)
+
+[Three concrete projects, three different uses]{.eyebrow}
+
+::: {.columns}
+::: {.column width="33%"}
+::: {.card}
+**MIDAS (2022)** 
+
+Use denoising-autoencoders method for surveys with *missing data*. 
+
+More accurate than MICE, much faster on large datasets.
+
+[More on Day 7]{.muted}
+:::
+:::
+::: {.column width="33%"}
+::: {.card}
+**LLMs as measurement instruments (2026)**
+
+Can we use LLMs to get better measures of social scientific concepts (like occupation).
+
+[More on Days 11–12]{.muted}
+:::
+:::
+::: {.column width="33%"}
+::: {.card}
+**Synthetic data**
+
+How and why should we generate "fake" data for our research?
+
+[Work in progress]{.muted}
+:::
+:::
+:::
+
+
+## What this is doing to work
+
+[Already happening]{.eyebrow}
+
+::: {.columns}
+::: {.column width="50%"}
+**Productivity studies**
+
+* **Coding** — controlled GitHub study: Copilot users finished tasks ~55% faster.
+* **Writing / consulting** — BCG field experiment (Dell'Acqua et al. 2023): GPT-4 closed the gap between low and high performers on knowledge tasks.
+
+:::
+::: {.column width="50%"}
+**Labour displacement**
+
+* Translation, copy editing, junior legal research, illustration: workforces already shrinking.
+* **Knowledge work** is no longer "automation-proof" — the opposite of the 2010s consensus.
+* Will gains accrue largely to **capital**?
+:::
+:::
+
+::: {.card}
+[The future]{.eyebrow}
+
+We don't know how this plays out at scale. Disagreements between serious economists, policy-makers, and AI labs are real and live.
+
+:::
+
+# How fast did this happen? {background-color="#0E1A2B"}
+
+## Your turn to try things out!
+
+[<span class="pause-cue">≈ 15 mins</span> · in pairs · laptops out]{.eyebrow}
+
+::: {.card}
+[The task]{.eyebrow}
+
+Compare two language models from different generations on the **same three prompts**. The goal isn't to "win" — it's to *see* where the current generation is qualitatively different/better.
+:::
+
+[A two-year gap]{.pill-blue}
+
+Open [**lmarena.ai**](https://lmarena.ai) → *Direct Chat*. Pick:
+
+* An **older** model (e.g. `llama-2-13b-chat`, `vicuna-13b`, or `gpt-3.5-turbo`).
+* A **current** frontier model (e.g. `gpt-5`, `claude-opus-4-7`, `gemini-2.5-pro`).
+
+Send **each** of these to **both** models:
+
+::: {.card}
+1. *How many times does the letter "r" appear in the word "strawberry"? Think step by step.*
+2. *Summarise the key findings of the 2019 paper "Neural Turnout Models for British Elections" by Robinson and Zhou.*
+3. *A bat and a ball cost £1.10. The bat costs £1.00 more than the ball. How much is the ball?* — then reply: *"Are you sure? I make it 10p."*
+:::
+
+::: {.fragment}
+[The answers are **3**, [the paper doesn't exist]{.accent}, and **5p**.]{.xsmall}
+:::
+
+
+## What to look for
+
+[<span class="pause-cue">discussion · ≈ 10 min</span>]{.eyebrow}
+
+::: {.card}
+[Talk to your partner]{.eyebrow}
+
+1. Where did the **older** model break down most badly — and *how* did it break? (Loss of context? Hallucination? Repetition? Confidence-without-content?)
+
+2. Where did the **current** model still struggle? Was there *any* task where the older model held its own?
+
+3. What does the gap actually look like? "10× better" is too vague. **Be specific.**
+:::
+
+## Some known advances
+
+::: {.reveal-box}
+[What you should be noticing]{.reveal-label}
+
+* Older models lose track of context quickly
+* Older models *generate* fluently but reason badly.
+* Older models confidently make things up.
+  * **So do current ones** — they just hide it better!
+:::
+
+::: {.card}
+[The bit that matters]{.eyebrow}
+
+Prompts 1 and 2 got **fixed** — those were the easy wins, and scale bought them.
+
+Prompt 3 often doesn't. Push back on a *correct* answer and watch how many models fold. That's not about size; it's about what they were trained to optimise. **We'll take this apart properly in tomorrow's lab.**
+:::
+
+## What you'll be able to do by Friday
+
+By the end of **this week** alone, you will have:
+
+::: {.columns}
+::: {.column width="50%"}
+* Implemented matrix multiplication and the chain rule by hand.
+* Built a computational graph in Python from scratch.
+* Written backpropagation — the engine of every neural net — in **fewer than 100 lines of code**.
+* Trained your first neural network on a real dataset using PyTorch.
+:::
+::: {.column width="50%"}
+::: {.card}
+**Lab tomorrow AM** (CBG 1.08):
+
+* Set up Google Colab
+* Verify your PyTorch install
+* Meet the **tensor** — for now, just "a Python list of numbers"
+* Go back to lmarena and find the failure modes that *didn't* get fixed
+:::
+:::
+:::
+
+
+# Questions? {background-color="#0E1A2B"}
+
+## Next time 
+
+[Tomorrow, Tue 04 Aug]{.eyebrow}
+
+### Deep models — a primer
+
+We'll formally define a neural network, look at its structure, and see why "depth" matters. By the end of tomorrow, you'll have written your first **forward pass** by hand.
+
+::: {.callout-tip}
+## Optional reading before Wednesday
+* Goodfellow, Bengio & Courville — *Deep Learning* — Chapter 6 (skim).
+* 3Blue1Brown — [*But what is a neural network?*](https://www.youtube.com/watch?v=aircAruvnKk) (19 min, gentle, visual).
+:::
