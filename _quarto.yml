@@ -1,6 +1,11 @@
 project:
   type: website
   output-dir: docs
+  # GitHub Pages runs Jekyll unless docs/.nojekyll exists, and `quarto render`
+  # wipes the output dir -- taking .nojekyll with it -- on every build. Recreate
+  # it after each render so it can never go missing from a published commit.
+  post-render:
+    - touch docs/.nojekyll
   # Only released material is listed here. Weeks 2-3 (lectures 6-12, labs 6-12)
   # exist on disk but are deliberately NOT rendered or published yet -- add the
   # relevant lines below (and drop them from .gitignore) to release them.
