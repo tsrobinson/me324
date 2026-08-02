@@ -1,6 +1,6 @@
 ---
 title: "Lectures"
-subtitle: "Twelve 3-hour sessions, Monday–Thursday across three weeks."
+subtitle: "Twelve 3-hour sessions"
 page-layout: full
 listing:
   id: lecture-listing
@@ -30,13 +30,10 @@ and **?** for the full list of shortcuts.
 :::
 
 ::: {.callout-note appearance="simple"}
-**Weeks 2 and 3 are not posted yet.** Decks go up as we reach them, so what you see here
-is always the current state of the course. The full twelve-lecture outline is on the
-[home page](index.qmd), and the [reading list](readings.qmd) covers all three weeks if you
-want to read ahead.
+**Weeks 2 and 3 are not posted yet.** Week 2 will be uploaded by the end of Week 1 etc. The full twelve-lecture outline is on the
+[home page](index.qmd), and the [reading list](readings.qmd) covers all three weeks if you want to read ahead.
 :::
 
 ::: {.callout-tip}
-The decks are the primary study resource for the **final exam** — they pair every formula
-with a worked numerical example. Re-read them rather than re-watching anything.
+The decks are the primary study resource for the **final exam**.
 :::
