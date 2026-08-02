@@ -79,10 +79,31 @@ a:hover { text-decoration: underline; text-underline-offset: 0.15em; }
   overflow: hidden;
   line-height: 0;                       // kills the descender gap under the img
 }
+// The source painting is 2:1, which is far too tall here -- it pushed the
+// buttons below the fold on a laptop. Rather than re-cut the file, crop in CSS
+// to a wide band: one asset, no quality loss, and the band can differ by
+// breakpoint. object-position keeps the crop centred on the network, whose
+// nodes sit between 17% and 63% of the image height; a 4:1 band is 50% of the
+// height, so the whole network survives with a little air above and below.
 .site-banner img {
   width: 100%;
-  height: auto;
   display: block;
+  aspect-ratio: 4 / 1;
+  object-fit: cover;
+  // With `cover`, a 2:1 image in a 4:1 box overflows by exactly one box-height,
+  // so the Y offset is halved: 30% here shows the band from 15% to 65% of the
+  // painting. The network sits at 17%-63%, so it clears both edges by 2%.
+  // (40% would show 20%-70% and shave the top row of nodes.)
+  object-position: 50% 30%;
+  // Extreme-short-window guard only. Keep it generous: anything tighter starts
+  // cropping into the network, and the layout already fits a 1280x750 laptop.
+  max-height: 40vh;
+}
+
+// Narrow screens: a 4:1 sliver of a wide painting is barely visible, so show a
+// squarer band. The fronds at the edges are lost to the width anyway.
+@media (max-width: 767px) {
+  .site-banner img { aspect-ratio: 2 / 1; max-height: 30vh; }
 }
 
 // ---- hero text block ----
@@ -92,16 +113,17 @@ a:hover { text-decoration: underline; text-underline-offset: 0.15em; }
   background: $cream;
   color: $ink;
   border-radius: 0 0 $border-radius $border-radius;
-  padding: 2.2rem 2.4rem 2.4rem;
+  padding: 1.7rem 2.4rem 1.9rem;   // trimmed so the buttons clear the fold
   margin: 0 0 2.6rem 0;
 }
 // On a page without the banner above it, the hero rounds all four corners.
 .hero:first-child { border-radius: $border-radius; margin-top: 0.4rem; }
 .hero h1 {
   color: $ink;
-  margin-top: 0.2rem;
-  font-size: 2.6rem;
-  line-height: 1.15;
+  margin-top: 0.15rem;
+  margin-bottom: 0.7rem;
+  font-size: 2.4rem;
+  line-height: 1.12;
 }
 .hero .eyebrow {
   color: rgba($ink, 0.74);        // 0.62 fell just under 4.5:1 on cream
@@ -113,13 +135,14 @@ a:hover { text-decoration: underline; text-underline-offset: 0.15em; }
 }
 .hero p {
   color: rgba($ink, 0.86);
-  font-size: 1.14rem;
-  line-height: 1.6;
-  max-width: 46rem;
+  font-size: 1.08rem;
+  line-height: 1.55;
+  max-width: 44rem;
+  margin-bottom: 0;
 }
 
 // ---- call-to-action buttons ----
-.cta { display: flex; flex-wrap: wrap; gap: 0.7rem; margin: 1.5rem 0 0.2rem; }
+.cta { display: flex; flex-wrap: wrap; gap: 0.7rem; margin: 1.2rem 0 0; }
 .cta a.btn-cta {
   display: inline-block;
   padding: 0.68rem 1.25rem;
