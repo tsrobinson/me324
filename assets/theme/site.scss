@@ -1,80 +1,197 @@
 /*-- scss:defaults --*/
-// ME324 website theme — matches the slide-deck palette (assets/theme/me324.scss)
+// ME324 website theme.
+//
+// The palette is sampled directly from the hero banner (a Matisse-style
+// cut-out painting), so the whole site reads as one piece with it. Headings
+// are set in a serif on purpose: it is the single biggest thing keeping the
+// site from looking like developer documentation.
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=JetBrains+Mono:wght@400;500&display=swap');
 
-// palette
-$ink:      #0E1A2B;
-$paper:    #FBFAF6;
-$red:      #C9322B;
-$blue:     #1A6FB4;
-$teal:     #2F8F6C;
-$amber:    #C9852B;
+// palette — sampled from assets/images/hero-banner.webp
+$cream:    #EFE2C7;   // the banner's paper
+$paper:    #FBF7EC;   // page background, a shade lighter than the banner
+$cobalt:   #183D87;   // the big blue waves
+$forest:   #396545;   // the green fronds
+$orange:   #E16E26;   // the coral
+$gold:     #E2B049;   // the small yellow nodes
+$ink:      #1B1B1A;   // the painting's black — warm, not blue-black
+// The banner's orange is lovely but light: as text on cream it only reaches
+// 3.0:1. This burnt variant hits 4.95:1, so links stay legible. The pure
+// orange is still used as a *background*, with dark text on it (5.3:1).
+$orange-deep: #AD5118;
 
-$primary:        $blue;
-$body-bg:        $paper;
-$body-color:     #1f2933;
-$link-color:     $blue;
-$link-hover-color: darken($blue, 12%);
+// legacy aliases, so older rules keep working
+$blue: $cobalt;
+$teal: $forest;
+$red:  $orange;
+$amber: $gold;
+
+$primary:          $cobalt;
+$body-bg:          $paper;
+$body-color:       #2E2A24;      // warm dark grey, not #1f2933
+$link-color:       $cobalt;
+$link-hover-color: $orange-deep;
 
 $font-family-sans-serif: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 $font-family-monospace:  "JetBrains Mono", "SFMono-Regular", Menlo, Consolas, monospace;
-$headings-font-weight: 700;
+$headings-font-family:   "Newsreader", Georgia, "Times New Roman", serif;
+$headings-font-weight:   600;
 
-$border-radius: 0.6rem;
+$border-radius: 0.85rem;
 
 /*-- scss:rules --*/
 
-h1, h2, h3, h4, .navbar-title { color: $ink; letter-spacing: -0.01em; }
-h2 { border-bottom: 2px solid rgba($ink, 0.08); padding-bottom: 0.3rem; margin-top: 2.2rem; }
+h1, h2, h3, h4, h5 {
+  font-family: $headings-font-family;
+  color: $ink;
+  letter-spacing: -0.005em;
+}
+h1 { font-weight: 600; }
+h2 {
+  border-bottom: 1px solid rgba($ink, 0.10);
+  padding-bottom: 0.35rem;
+  margin-top: 2.4rem;
+}
 
-.navbar { font-weight: 600; box-shadow: 0 1px 0 rgba(0,0,0,0.15); }
+// The navbar title is the one heading that stays sans — it sits in a tight
+// bar where the serif's thin strokes get lost.
+.navbar-title { font-family: $font-family-sans-serif; font-weight: 600; }
+.navbar { font-weight: 500; box-shadow: none; border-bottom: 1px solid rgba($ink, 0.10); }
 
-// emphasis serif for blockquotes / lead text
-blockquote, .lead { font-family: "Newsreader", Georgia, serif; }
-blockquote { border-left: 3px solid $red; color: #41505f; }
+blockquote, .lead { font-family: $headings-font-family; }
+blockquote {
+  border-left: 3px solid $orange;
+  color: #4A443B;
+  font-size: 1.05rem;
+}
 
 a { text-decoration: none; }
-a:hover { text-decoration: underline; }
+a:hover { text-decoration: underline; text-underline-offset: 0.15em; }
 
-// ---- hero (home page) ----
-.hero {
-  background: linear-gradient(135deg, #0E1A2B 0%, #16263c 60%, #1d3350 100%);
-  color: $paper;
-  border-radius: $border-radius;
-  padding: 2.6rem 2.4rem;
-  margin: 0.5rem 0 2rem 0;
-  box-shadow: 0 10px 30px rgba(14,26,43,0.25);
+// ---- hero banner (home page) ----
+// The banner's paper and the hero's background are the same cream, so the two
+// are joined into one object -- rounded at the outer corners only, flush at the
+// seam. No drop shadow: the cut-outs are flat art and shadows fight them.
+.site-banner {
+  margin: 0.4rem 0 0;
+  border-radius: $border-radius $border-radius 0 0;
+  overflow: hidden;
+  line-height: 0;                       // kills the descender gap under the img
 }
-.hero h1 { color: $paper; margin-top: 0; font-size: 2.3rem; }
-.hero .eyebrow { color: rgba(251,250,246,0.7); text-transform: uppercase; letter-spacing: 0.12em; font-size: 0.8rem; font-weight: 600; }
-.hero p { color: rgba(251,250,246,0.92); font-size: 1.12rem; max-width: 48rem; }
+.site-banner img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
 
-// ---- big call-to-action buttons ----
-.cta { display: flex; flex-wrap: wrap; gap: 0.75rem; margin: 1.2rem 0 0.4rem; }
+// ---- hero text block ----
+// Previously a dark navy gradient. Now it sits on the banner's own cream, so
+// the picture and the words read as a single object.
+.hero {
+  background: $cream;
+  color: $ink;
+  border-radius: 0 0 $border-radius $border-radius;
+  padding: 2.2rem 2.4rem 2.4rem;
+  margin: 0 0 2.6rem 0;
+}
+// On a page without the banner above it, the hero rounds all four corners.
+.hero:first-child { border-radius: $border-radius; margin-top: 0.4rem; }
+.hero h1 {
+  color: $ink;
+  margin-top: 0.2rem;
+  font-size: 2.6rem;
+  line-height: 1.15;
+}
+.hero .eyebrow {
+  color: rgba($ink, 0.74);        // 0.62 fell just under 4.5:1 on cream
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.76rem;
+  font-weight: 600;
+  font-family: $font-family-sans-serif;
+}
+.hero p {
+  color: rgba($ink, 0.86);
+  font-size: 1.14rem;
+  line-height: 1.6;
+  max-width: 46rem;
+}
+
+// ---- call-to-action buttons ----
+.cta { display: flex; flex-wrap: wrap; gap: 0.7rem; margin: 1.5rem 0 0.2rem; }
 .cta a.btn-cta {
-  display: inline-block; padding: 0.7rem 1.2rem; border-radius: $border-radius;
-  font-weight: 600; background: $red; color: $paper !important; text-decoration: none;
+  display: inline-block;
+  padding: 0.68rem 1.25rem;
+  border-radius: 2rem;                  // pill shapes echo the cut-out forms
+  font-weight: 600;
+  background: $orange;
+  color: $ink !important;         // dark on orange = 5.3:1; cream on it = 3.0:1
+  text-decoration: none;
   transition: transform 0.08s ease, box-shadow 0.12s ease;
 }
-.cta a.btn-cta:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(201,50,43,0.3); }
-.cta a.btn-cta.secondary { background: $blue; }
-.cta a.btn-cta.ghost { background: transparent; color: $paper !important; border: 1px solid rgba(251,250,246,0.4); }
+.cta a.btn-cta:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba($orange, 0.35); text-decoration: none; }
+// Cobalt is dark, so this one takes cream text -- the $ink above would be
+// near-invisible on it (1.6:1).
+.cta a.btn-cta.secondary { background: $cobalt; color: $paper !important; }
+.cta a.btn-cta.secondary:hover { box-shadow: 0 6px 16px rgba($cobalt, 0.32); }
+.cta a.btn-cta.ghost {
+  background: transparent;
+  color: $ink !important;
+  border: 1.5px solid rgba($ink, 0.28);
+}
+.cta a.btn-cta.ghost:hover { background: rgba($ink, 0.05); box-shadow: none; }
 
 // ---- listing cards (Lectures page) ----
-.quarto-grid-item.card { border-radius: $border-radius; border: 1px solid rgba($ink,0.10); transition: transform 0.08s ease, box-shadow 0.12s ease; }
-.quarto-grid-item.card:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(14,26,43,0.12); }
-.quarto-grid-item .card-title { color: $ink; font-weight: 700; }
+.quarto-grid-item.card {
+  border-radius: $border-radius;
+  border: 1px solid rgba($ink, 0.10);
+  background: #FFFDF8;
+  transition: transform 0.08s ease, box-shadow 0.12s ease;
+}
+.quarto-grid-item.card:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba($ink, 0.11); }
+.quarto-grid-item .card-title { font-family: $headings-font-family; color: $ink; font-weight: 600; }
 
 // ---- labs table ----
+// Bootstrap 5 paints cell backgrounds through --bs-table-* custom properties and
+// an inset box-shadow, so setting `background` on th/tr does nothing. Drive the
+// variables instead, and keep the header light rather than a heavy dark bar.
 table { font-size: 0.95rem; }
-table thead th { background: $ink; color: $paper; }
+.table {
+  --bs-table-striped-bg: #{rgba($cream, 0.55)};
+  --bs-table-hover-bg:   #{rgba($gold, 0.16)};
+}
+table thead th {
+  font-family: $font-family-sans-serif;
+  font-weight: 600;
+  color: $ink;
+  border-bottom: 2px solid rgba($cobalt, 0.45);
+}
 .labtag { font-family: $font-family-monospace; font-size: 0.78rem; padding: 0.1rem 0.45rem; border-radius: 0.4rem; }
-.labtag.easy { background: rgba($teal,0.15); color: darken($teal,10%); }
-.labtag.hard { background: rgba($red,0.13); color: darken($red,8%); }
+.labtag.easy { background: rgba($forest, 0.16); color: darken($forest, 8%); }
+.labtag.hard { background: rgba($orange, 0.18); color: darken($orange, 14%); }
 
 // ---- pills / week badges ----
-.week-pill { display:inline-block; background: rgba($blue,0.12); color: darken($blue,12%); font-weight:600; padding:0.15rem 0.6rem; border-radius:0.5rem; font-size:0.85rem; }
+.week-pill {
+  display: inline-block;
+  background: rgba($cobalt, 0.11);
+  color: $cobalt;
+  font-family: $font-family-sans-serif;
+  font-weight: 600;
+  padding: 0.15rem 0.7rem;
+  border-radius: 2rem;
+  font-size: 0.82rem;
+}
 
-// callouts a touch warmer
+// ---- callouts ----
 div.callout { border-radius: $border-radius; }
+
+// ---- footer ----
+.nav-footer { background: $cream; border-top: 1px solid rgba($ink, 0.10); color: rgba($ink, 0.75); }
+
+// ---- small screens ----
+@media (max-width: 575px) {
+  .hero { padding: 1.5rem 1.3rem 1.7rem; }
+  .hero h1 { font-size: 2rem; }
+  .cta a.btn-cta { width: 100%; text-align: center; }
+}

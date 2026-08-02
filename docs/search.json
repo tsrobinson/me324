@@ -490,230 +490,6 @@
     "text": "See you tomorrow\nLecture 3 — Computational graphs & the maths of AI\nOptional pre-reading tonight: 3Blue1Brown, Essence of Linear Algebra chapters 1–3 (≈30 min). The intuitions there will save you a lot of grief tomorrow.\n\n\n\nME324 · AI and Deep Learning · LSE Summer School"
   },
   {
-    "objectID": "lectures/lecture-01-what-is-ai.html#why-are-you-here",
-    "href": "lectures/lecture-01-what-is-ai.html#why-are-you-here",
-    "title": "What do we mean by AI?",
-    "section": "Why are you here!?",
-    "text": "Why are you here!?\n\n\n\n\n\n\nSam Altman (OpenAI), “The Intelligence Age”\n\n\nIn the next couple of decades, we will be able to do things that would have seemed like magic to our grandparents.\n[…]\nHow did we get to the doorstep of the next leap in prosperity?\nIn three words: deep learning worked.\n\n\n\nBeyond hyperbole, these models are thought to be:\n\nHighly predictive (when built correctly)\nHighly flexible\nAn engineering-grade solution to many problems\n\nNot short of news coverage on how deep learning is fundamentally altering society and how we study it!"
-  },
-  {
-    "objectID": "lectures/lecture-01-what-is-ai.html#the-aim-of-this-course",
-    "href": "lectures/lecture-01-what-is-ai.html#the-aim-of-this-course",
-    "title": "What do we mean by AI?",
-    "section": "The aim of this course",
-    "text": "The aim of this course\nThree weeks · 36h lectures · 18h labs\nBy the end of this course you should be able to:\n\n\nExplain what (deep) neural networks are and how they’re trained\nBuild neural networks from scratch in Python, then scale up using PyTorch\nApply deep learning to predict, classify, and generate\nCritique AI systems — their assumptions, failure modes, and social consequences\n\n\nIn labs, you will work towards building out your own GPT-style LLM!\n\n\n\n\n\n\nA note on content\n\n\nAs a technical course, we will write code, do basic calculus, and read papers. But don’t worry too much – most of this rests on fairly simple maths."
-  },
-  {
-    "objectID": "lectures/lecture-01-what-is-ai.html#what-this-course-expects-of-you",
-    "href": "lectures/lecture-01-what-is-ai.html#what-this-course-expects-of-you",
-    "title": "What do we mean by AI?",
-    "section": "What this course expects of you",
-    "text": "What this course expects of you\n\n\nWorkload\n\n3 hours of lecture + 90 min lab, every day. Plan around that.\nOptional reading + lab catch-up most evenings.\nIt’s a marathon not a sprint\n\n\nAssessment\n\nTake-home midterm (end of week 2) — train a model + write up.\nClosed-book pen-and-paper exam Fri 21 Aug\n\n\n\n\n\n\n\n\nAsk questions!\n\n\nWe have lots of time in lectures, so please stop me at any point. There’s no such thing as a “stupid” question!!"
-  },
-  {
-    "objectID": "lectures/lecture-01-what-is-ai.html#you-may-find-some-material-hard-and-thats-ok",
-    "href": "lectures/lecture-01-what-is-ai.html#you-may-find-some-material-hard-and-thats-ok",
-    "title": "What do we mean by AI?",
-    "section": "You may find some material hard, and that’s ok!",
-    "text": "You may find some material hard, and that’s ok!\nThe very thing we’re studying can help you over the next three weeks (and beyond):\n\nAsk ChatGPT/Claude/DeepSeek about things you don’t understand yet\nUse it in the labs to look things up — “how do I check the shape of a PyTorch tensor?” is exactly what these tools are good for\nBut don’t let it write code you can’t read back to me — the exam is closed-book\n\nLet me know if you want me to go over anything again!\n\nMaths may seem daunting at first\nI promise you can all learn it\nThe advantages of understanding these fundamentals will persist"
-  },
-  {
-    "objectID": "lectures/lecture-01-what-is-ai.html#plenary-whos-in-the-room-1",
-    "href": "lectures/lecture-01-what-is-ai.html#plenary-whos-in-the-room-1",
-    "title": "What do we mean by AI?",
-    "section": "Plenary · who’s in the room?",
-    "text": "Plenary · who’s in the room?\n≈ 15 min · groups of 4\n\nRound-the-table\nSpend ~90 seconds each on:\n\nYour name and what you’d like to be called.\nWhere you study + what you study.\nOne thing about AI that excites you.\nOne thing about AI that worries you.\n\n\n\nThen, as a group\nIdentify one excitement and one worry that more than one of you mentioned. Be ready to share when we come back together.\n\nWe’ll spend ~5 minutes reporting back!"
-  },
-  {
-    "objectID": "lectures/lecture-01-what-is-ai.html#who-am-i",
-    "href": "lectures/lecture-01-what-is-ai.html#who-am-i",
-    "title": "What do we mean by AI?",
-    "section": "Who am I?",
-    "text": "Who am I?\n\n\n\nCall me Tom!\n\nPolitical scientist by training, studied at Oxford\nI now research causal inference + deep learning/AI methods\nAny questions outside our lectures, email t.robinson@lse.ac.uk\n\n\n\nFirst started working on AI methods in 2018\nI’m super excited about how AI is changing how we discover things\nI’m worried that AI could lead to a plateau in knowledge"
-  },
-  {
-    "objectID": "lectures/lecture-01-what-is-ai.html#ai-is-a-slippery-word",
-    "href": "lectures/lecture-01-what-is-ai.html#ai-is-a-slippery-word",
-    "title": "What do we mean by AI?",
-    "section": "“AI” is a slippery word",
-    "text": "“AI” is a slippery word\nPublic discourse uses AI to refer to almost anything computational:\n\n\nOld-school\n\nA chess engine\nA spam filter\nA recommender system\nAutocomplete\n\n\nModern\n\nChatGPT / Claude / Gemini\nSelf-driving cars\nStable Diffusion\nAlphaFold\n\n\nHype\n\n“AGI” / “superintelligence”\n“AI” that’s just a regression\n“AI” that’s just a database\n“AI” that’s just a person\n\n\nWe need sharper categories."
-  },
-  {
-    "objectID": "lectures/lecture-01-what-is-ai.html#a-useful-three-way-distinction",
-    "href": "lectures/lecture-01-what-is-ai.html#a-useful-three-way-distinction",
-    "title": "What do we mean by AI?",
-    "section": "A useful three-way distinction",
-    "text": "A useful three-way distinction\n\n\nSymbolic AI\nHand-crafted rules. Logic. Knowledge bases.\n\nIBM’s Deep Blue\nExpert systems\nProlog\nCyc\n\nStrength: interpretable, verifiable.\nWeakness: brittle, doesn’t scale to messy data.\n\nMachine Learning\nModels that learn parameters from data.\n\nLinear / logistic regression\nRandom forests, SVMs\nk-means clustering\n\nStrength: data-driven, statistically grounded.\nWeakness: feature engineering required for messy data.\n\nDeep Learning\nA subset of ML using neural networks with multiple hidden layers.\n\nImage classifiers\nGPT / LLaMA / Claude\nAlphaFold\n\nStrength: learns features end-to-end from raw data.\nWeakness: data-hungry, compute-hungry, opaque."
-  },
-  {
-    "objectID": "lectures/lecture-01-what-is-ai.html#symbolic-ai-in-action-deep-blue",
-    "href": "lectures/lecture-01-what-is-ai.html#symbolic-ai-in-action-deep-blue",
-    "title": "What do we mean by AI?",
-    "section": "Symbolic AI in action — Deep Blue",
-    "text": "Symbolic AI in action — Deep Blue\n10 May 1997   IBM’s Deep Blue beats world champion Garry Kasparov 3½–2½ in a 6-game match — the first time a computer defeats a reigning world chess champion.\n\n\nSpeed\n\n200M\n\nboard positions/second\n\nHardware\n\n480\n\ncustom chips\n\nLearning\n\n0\n\nlearned parameters\n\n\nWhat Deep Blue actually was\n\nFast search across possible moves.\nAn evaluation function with ~8,000 features — material, mobility, king safety, pawn structure — all hand-tuned with grandmasters (GMs).\nEvery position with ≤ 5 pieces, pre-solved.\n\n\n\nWhy this is symbolic AI Every “smart” thing Deep Blue did was encoded by humans. No learning. No data. No statistics. Its intelligence was the team’s intelligence, made very fast.\nIt beat the world champion at chess — and could do nothing else. Not checkers. Not conversation. Not recognise a horse."
-  },
-  {
-    "objectID": "lectures/lecture-01-what-is-ai.html#why-deep-learning-why-now",
-    "href": "lectures/lecture-01-what-is-ai.html#why-deep-learning-why-now",
-    "title": "What do we mean by AI?",
-    "section": "Why deep learning? Why now?",
-    "text": "Why deep learning? Why now?\nThe ideas are old. The scale is new.\n\n\nThe ingredients (mostly pre-2010):\n\nBackpropagation (Rumelhart, Hinton & Williams, 1986)\nCNNs (LeCun et al., 1989)\nLSTMs (Hochreiter & Schmidhuber, 1997)\nReLU activations (Glorot et al., 2011)\n\n\nWhat changed (2012–):\n\nGPUs cheap enough to run on\nImageNet, Common Crawl, the open web\nFrameworks: Theano → TensorFlow → PyTorch\nAlexNet (2012) → Transformer (2017) → GPT-3 (2020)"
-  },
-  {
-    "objectID": "lectures/lecture-01-what-is-ai.html#a-brief-timeline",
-    "href": "lectures/lecture-01-what-is-ai.html#a-brief-timeline",
-    "title": "What do we mean by AI?",
-    "section": "A brief timeline",
-    "text": "A brief timeline\n\n\n\n1958\n\n\n\n\n\nPerceptron\n\n\nFirst learnable neural unit\n\n\n\n\n1986\n\n\n\n\n\nBackprop\n\n\nDeep nets become trainable\n\n\n\n\n1989\n\n\n\n\n\nLeNet (CNNs)\n\n\nVision’s first architecture\n\n\n\n\n2012\n\n\n\n\n\nAlexNet\n\n\nDL eats computer vision\n\n\n\n\n2014\n\n\n\n\n\nGANs\n\n\nGenerative modelling takes off\n\n\n\n\n2017\n\n\n\n\n\nTransformer\n\n\n“Attention is all you need”\n\n\n\n\n2020\n\n\n\n\n\nGPT-3\n\n\nScale → emergent capability\n\n\n\n\n2022\n\n\n\n\n\nChatGPT\n\n\nAI as consumer product\n\n\n\n\n2024+\n\n\n\n\n\nMultimodal\n\n\nReasoning, agents\n\n\n\n\n\nFoundations\n\n\nDeep-learning era\n\n\nAI as product"
-  },
-  {
-    "objectID": "lectures/lecture-01-what-is-ai.html#course-structure",
-    "href": "lectures/lecture-01-what-is-ai.html#course-structure",
-    "title": "What do we mean by AI?",
-    "section": "Course structure",
-    "text": "Course structure\n\n\nWeek 1\nFoundations\n\nWhat is AI?\nDeep models — a primer\nComputational graphs & the maths of AI\nBackpropagation\nFeed-forward networks in PyTorch\n\n\nWeek 2\nVision & generation\n\nClassifying images (CNNs)\nGenerating images (autoencoders, VAEs, diffusion)\nWord embeddings · character models\nRecurrent neural networks\n\n\nWeek 3\nText & LLMs\n\nAttention & transformers\nTokenisation & a working GPT\nEthics, limitations & recap"
-  },
-  {
-    "objectID": "lectures/lecture-01-what-is-ai.html#labs",
-    "href": "lectures/lecture-01-what-is-ai.html#labs",
-    "title": "What do we mean by AI?",
-    "section": "Labs",
-    "text": "Labs\nLab instructor: Kaifang Zhou (LSE Fellow, Statistics)\n\nAn expert (!) in machine learning methods\n\nFocus on implementing concepts in practise\n\n90 minute sessions\nBuild neural networks from scratch\nUse industry-leading frameworks\n\nOpportunity to consolidate conceptual understanding"
-  },
-  {
-    "objectID": "lectures/lecture-01-what-is-ai.html#assessment",
-    "href": "lectures/lecture-01-what-is-ai.html#assessment",
-    "title": "What do we mean by AI?",
-    "section": "Assessment",
-    "text": "Assessment\n\nFormative Weekly quizzes (end of weeks 1 & 2). Marked by Kaifang.\nNot part of your final grade — they tell you where you stand.\n\n\nMidterm A take-home assessment at the end of week 2. You’ll train a small model, document choices, and discuss results.\n\n\nFinal Two-hour pen-and-paper exam (Fri 21 August). Forty multiple-choice questions, six options each. No laptops.\n\nA test of conceptual understanding of both deep learning and its implementation\nAbout half the questions ask you to work something out — a forward pass, a gradient, a shape — and then pick the answer you got"
-  },
-  {
-    "objectID": "lectures/lecture-01-what-is-ai.html#course-resources",
-    "href": "lectures/lecture-01-what-is-ai.html#course-resources",
-    "title": "What do we mean by AI?",
-    "section": "Course resources",
-    "text": "Course resources\nI will post and maintain everything at me324.lse-methodology.github.io\n\nAll lecture slides released at least 2 days in advance\nAccess lab notebooks/solutions here too\n\nI have provided indicative readings via LSE’s Leganto system\n\nThis is optional and complementary\nThe slides and lab notebooks are definitive and what the exam is based on\n\nUse Moodle for submitting your quizzes/assignments"
-  },
-  {
-    "objectID": "lectures/lecture-01-what-is-ai.html#use-of-generative-ai-in-this-course",
-    "href": "lectures/lecture-01-what-is-ai.html#use-of-generative-ai-in-this-course",
-    "title": "What do we mean by AI?",
-    "section": "Use of generative AI in this course",
-    "text": "Use of generative AI in this course\nYou will be using AI tools throughout this course — that is the point.\n\n\nYes, you may use:\n\nChatGPT / Claude / Copilot to help with lab code\nAI tools to explain concepts\nAI to debug\n\nThe course Moodle has a written policy.\n\nBut:\n\nYou can’t use them in the final exam 🙃\nNaive use will produce wrong answers\n2026: You need to understand the code not write it"
-  },
-  {
-    "objectID": "lectures/lecture-01-what-is-ai.html#what-chatgptclaude-actually-is",
-    "href": "lectures/lecture-01-what-is-ai.html#what-chatgptclaude-actually-is",
-    "title": "What do we mean by AI?",
-    "section": "What ChatGPT/Claude actually is",
-    "text": "What ChatGPT/Claude actually is\nStrip away the chat interface and the marketing. ChatGPT is:\n\nA transformer neural network…\n…with around 10¹¹–10¹² parameters…\n…trained to predict the next token in a sequence…\n…on a large chunk of the public internet…\n…then fine-tuned with human feedback (RLHF) to follow instructions and refuse certain requests.\n\n\nBy the end of this course you will have built a small version of (1)–(3) yourself. The rest is engineering at scale."
-  },
-  {
-    "objectID": "lectures/lecture-01-what-is-ai.html#what-deep-learning-is-not",
-    "href": "lectures/lecture-01-what-is-ai.html#what-deep-learning-is-not",
-    "title": "What do we mean by AI?",
-    "section": "What deep learning is not",
-    "text": "What deep learning is not\n\n\n\nNot thinking, in any cognitively meaningful sense\n\nA trained model has no goals, no beliefs, no understanding of context outside its training.\n\n\n\n\n\nNot factually reliable\n\nLLMs hallucinate by design — they generate plausible continuations, not true ones.\n\n\n\n\nNot neutral\n\nTraining data encodes the biases of who wrote it, who curated it, and what was missing.\n\n\n\n\n\nNot explainable by default\n\nWe can train a 10B-parameter model in a week. We can’t fully explain why it answers any single question the way it does."
-  },
-  {
-    "objectID": "lectures/lecture-01-what-is-ai.html#ai-is-everywhere-you-just-stopped-noticing",
-    "href": "lectures/lecture-01-what-is-ai.html#ai-is-everywhere-you-just-stopped-noticing",
-    "title": "What do we mean by AI?",
-    "section": "AI is everywhere — you just stopped noticing",
-    "text": "AI is everywhere — you just stopped noticing\nMost “AI” you’ve used today, you didn’t think of as AI:\n\n\n\nEmail autocomplete + spam filters — every Gmail interaction.\nPhone keyboard suggestions — language models since 2018.\nPhoto apps that find your face, group your dog, blur a background.\nMap routing — sub-second searches over millions of road segments.\n\n\n\nStreaming recommendations — Netflix’s homepage is regenerated for you each visit.\nSearch results — ordered by hundreds of learned signals.\nBank fraud detection — pattern recognition over your transaction history.\nVoice assistants — Siri, Alexa, Google Assistant."
-  },
-  {
-    "objectID": "lectures/lecture-01-what-is-ai.html#ai-as-product-the-consumer-wave",
-    "href": "lectures/lecture-01-what-is-ai.html#ai-as-product-the-consumer-wave",
-    "title": "What do we mean by AI?",
-    "section": "AI as product — the consumer wave",
-    "text": "AI as product — the consumer wave\nSince November 2022   A new product category appeared overnight.\n\n\n\n2 mo\n\nChatGPT to reach 100M users (TikTok took 9; Instagram 30.)\n\n\n200M+\n\nWeekly active ChatGPT users by mid-2024.\n\n\n76%\n\nOf professional developers using AI by 2024.\n\n\nNew product categories\n\nGeneral-purpose assistants — ChatGPT, Claude, Gemini, Perplexity.\nImage / video generators — Midjourney, DALL·E, Sora, Veo.\nCode assistants — Copilot, Cursor, Claude Code."
-  },
-  {
-    "objectID": "lectures/lecture-01-what-is-ai.html#ai-in-research-and-discovery",
-    "href": "lectures/lecture-01-what-is-ai.html#ai-in-research-and-discovery",
-    "title": "What do we mean by AI?",
-    "section": "AI in research and discovery",
-    "text": "AI in research and discovery\nPossibly the most consequential application\n\n\nBiology + medicine\n\nAlphaFold (DeepMind, 2021) — predicted 3D structure of ~all 200M known proteins\nAI radiology — detecting tumours, pulmonary embolisms, fractures with sensitivity matching or beating specialists\nDrug discovery — running candidate-molecule pipelines at scale.\n\n\nPhysical sciences\n\nWeather prediction — Google’s GenCast (2024) matches or beats top numerical weather services\nMaterials discovery — DeepMind’s GNoME predicted 380,000 stable new crystal structures.\nParticle physics + astronomy — anomaly detection in LHC data, gravitational-wave searches.\n\n\n\nFor social scientists LLMs as measurement instruments: scoring stances in legislative speeches, coding survey open-ends, simulating respondents."
-  },
-  {
-    "objectID": "lectures/lecture-01-what-is-ai.html#ai-in-high-stakes-decisions",
-    "href": "lectures/lecture-01-what-is-ai.html#ai-in-high-stakes-decisions",
-    "title": "What do we mean by AI?",
-    "section": "AI in high-stakes decisions",
-    "text": "AI in high-stakes decisions\nAI now shapes decisions about people — often without their knowledge or recourse.\n\n\nWhere it’s deployed\n\nHiring — resume screening, video-interview assessment, “culture-fit” scoring.\nCredit + insurance — approvals, pricing, fraud flagging.\nHealthcare — triage scoring, prior-authorisation decisions, diagnostic aids.\nCriminal justice — risk-of-reoffending scoring, predictive policing.\nWelfare — eligibility scoring, fraud detection.\n\n\nWhere it has gone badly\n\nCOMPAS (US, 2016) — large racial disparities in false-positive rates for recidivism scoring.\nDutch SyRI (welfare fraud, 2020) — ruled illegal; disproportionate targeting of low-income minorities.\nAustralian Robodebt (2016–19) — automated, often-wrongful debt notices; Royal Commission, $1.8B settlement.\nAmazon hiring tool (scrapped 2018) — systematically downgraded women’s CVs."
-  },
-  {
-    "objectID": "lectures/lecture-01-what-is-ai.html#ai-in-my-less-high-stakes",
-    "href": "lectures/lecture-01-what-is-ai.html#ai-in-my-less-high-stakes",
-    "title": "What do we mean by AI?",
-    "section": "AI in my (less high stakes)",
-    "text": "AI in my (less high stakes)\nThree concrete projects, three different uses\n\n\n\nMIDAS (2022)\nUse denoising-autoencoders method for surveys with missing data.\nMore accurate than MICE, much faster on large datasets.\nMore on Day 7\n\n\n\nLLMs as measurement instruments (2026)\nCan we use LLMs to get better measures of social scientific concepts (like occupation).\nMore on Days 11–12\n\n\n\nSynthetic data\nHow and why should we generate “fake” data for our research?\nWork in progress"
-  },
-  {
-    "objectID": "lectures/lecture-01-what-is-ai.html#what-this-is-doing-to-work",
-    "href": "lectures/lecture-01-what-is-ai.html#what-this-is-doing-to-work",
-    "title": "What do we mean by AI?",
-    "section": "What this is doing to work",
-    "text": "What this is doing to work\nAlready happening\n\n\nProductivity studies\n\nCoding — controlled GitHub study: Copilot users finished tasks ~55% faster.\nWriting / consulting — BCG field experiment (Dell’Acqua et al. 2023): GPT-4 closed the gap between low and high performers on knowledge tasks.\n\n\nLabour displacement\n\nTranslation, copy editing, junior legal research, illustration: workforces already shrinking.\nKnowledge work is no longer “automation-proof” — the opposite of the 2010s consensus.\nWill gains accrue largely to capital?\n\n\n\nThe future\nWe don’t know how this plays out at scale. Disagreements between serious economists, policy-makers, and AI labs are real and live."
-  },
-  {
-    "objectID": "lectures/lecture-01-what-is-ai.html#your-turn-to-try-things-out",
-    "href": "lectures/lecture-01-what-is-ai.html#your-turn-to-try-things-out",
-    "title": "What do we mean by AI?",
-    "section": "Your turn to try things out!",
-    "text": "Your turn to try things out!\n≈ 15 mins · in pairs · laptops out\n\nThe task\nCompare two language models from different generations on the same three prompts. The goal isn’t to “win” — it’s to see where the current generation is qualitatively different/better.\n\nA two-year gap\nOpen lmarena.ai → Direct Chat. Pick:\n\nAn older model (e.g. llama-2-13b-chat, vicuna-13b, or gpt-3.5-turbo).\nA current frontier model (e.g. gpt-5, claude-opus-4-7, gemini-2.5-pro).\n\nSend each of these to both models:\n\n\nHow many times does the letter “r” appear in the word “strawberry”? Think step by step.\nSummarise the key findings of the 2019 paper “Neural Turnout Models for British Elections” by Robinson and Zhou.\nA bat and a ball cost £1.10. The bat costs £1.00 more than the ball. How much is the ball? — then reply: “Are you sure? I make it 10p.”\n\n\n\nThe answers are 3, the paper doesn’t exist, and 5p."
-  },
-  {
-    "objectID": "lectures/lecture-01-what-is-ai.html#what-to-look-for",
-    "href": "lectures/lecture-01-what-is-ai.html#what-to-look-for",
-    "title": "What do we mean by AI?",
-    "section": "What to look for",
-    "text": "What to look for\ndiscussion · ≈ 10 min\n\nTalk to your partner\n\nWhere did the older model break down most badly — and how did it break? (Loss of context? Hallucination? Repetition? Confidence-without-content?)\nWhere did the current model still struggle? Was there any task where the older model held its own?\nWhat does the gap actually look like? “10× better” is too vague. Be specific."
-  },
-  {
-    "objectID": "lectures/lecture-01-what-is-ai.html#some-known-advances",
-    "href": "lectures/lecture-01-what-is-ai.html#some-known-advances",
-    "title": "What do we mean by AI?",
-    "section": "Some known advances",
-    "text": "Some known advances\n\nWhat you should be noticing\n\nOlder models lose track of context quickly\nOlder models generate fluently but reason badly.\nOlder models confidently make things up.\n\nSo do current ones — they just hide it better!\n\n\n\n\nThe bit that matters\nPrompts 1 and 2 got fixed — those were the easy wins, and scale bought them.\nPrompt 3 often doesn’t. Push back on a correct answer and watch how many models fold. That’s not about size; it’s about what they were trained to optimise. We’ll take this apart properly in tomorrow’s lab."
-  },
-  {
-    "objectID": "lectures/lecture-01-what-is-ai.html#what-youll-be-able-to-do-by-friday",
-    "href": "lectures/lecture-01-what-is-ai.html#what-youll-be-able-to-do-by-friday",
-    "title": "What do we mean by AI?",
-    "section": "What you’ll be able to do by Friday",
-    "text": "What you’ll be able to do by Friday\nBy the end of this week alone, you will have:\n\n\n\nImplemented matrix multiplication and the chain rule by hand.\nBuilt a computational graph in Python from scratch.\nWritten backpropagation — the engine of every neural net — in fewer than 100 lines of code.\nTrained your first neural network on a real dataset using PyTorch.\n\n\n\nLab tomorrow AM (CBG 1.08):\n\nSet up Google Colab\nVerify your PyTorch install\nMeet the tensor — for now, just “a Python list of numbers”\nGo back to lmarena and find the failure modes that didn’t get fixed"
-  },
-  {
-    "objectID": "lectures/lecture-01-what-is-ai.html#next-time",
-    "href": "lectures/lecture-01-what-is-ai.html#next-time",
-    "title": "What do we mean by AI?",
-    "section": "Next time",
-    "text": "Next time\nTomorrow, Tue 04 Aug\nDeep models — a primer\nWe’ll formally define a neural network, look at its structure, and see why “depth” matters. By the end of tomorrow, you’ll have written your first forward pass by hand.\n\n\n\n\n\n\nOptional reading before Wednesday\n\n\n\nGoodfellow, Bengio & Courville — Deep Learning — Chapter 6 (skim).\n3Blue1Brown — But what is a neural network? (19 min, gentle, visual).\n\n\n\n\n\n\n\nME324 · AI and Deep Learning · LSE Summer School"
-  },
-  {
-    "objectID": "labs.html",
-    "href": "labs.html",
-    "title": "Labs",
-    "section": "",
-    "text": "The labs are a single project assembled over three weeks: each day reuses the previous day’s code, ending in a transformer language model you build yourself.\nEach lab is a guided walkthrough with # TODO cells for you to fill in, and worked solutions at the very bottom. Don’t scroll to the solutions until you’ve had a real go — the point is the struggle, not the finished cell.\nTo run a lab: click Open in Colab (recommended — free GPU for the later labs), or view the read-only page here, or download the .ipynb. The first cell of every lab sets things up; just run top to bottom."
-  },
-  {
-    "objectID": "labs.html#capstone",
-    "href": "labs.html#capstone",
-    "title": "Labs",
-    "section": "The capstone",
-    "text": "The capstone\nLab 11 ends with the payoff of the whole course: Andrej Karpathy’s pure-Python microGPT, a complete GPT in ~200 lines with no PyTorch — running entirely on the Value autograd class you wrote back in Labs 3–4. The lab maps every part of the gist back to the lab where you first built it."
-  },
-  {
-    "objectID": "index.html",
-    "href": "index.html",
-    "title": "AI & Deep Learning",
-    "section": "",
-    "text": "LSE Summer School · 2026\n\n\nA three-week, hands-on introduction to deep learning and modern AI — from a single neuron to a working GPT you build yourself. We start with the maths, write back-propagation by hand, scale up in PyTorch, and finish by building (and critiquing) a small language model.\n\nBrowse the lectures Go to the labs Reading list"
-  },
-  {
     "objectID": "index.html#what-youll-be-able-to-do",
     "href": "index.html#what-youll-be-able-to-do",
     "title": "AI & Deep Learning",
@@ -740,6 +516,118 @@
     "title": "AI & Deep Learning",
     "section": "Assessment",
     "text": "Assessment\n\n\n\n\n\n\n\n\nFormative quizzes at the end of weeks 1 & 2. They tell you where you stand; they don’t count toward your grade.\n\n\n\n\n\n\n\n\n\n\n\nTake-home midterm at the end of week 2 — train a model, document your choices, and discuss the results.\n\n\n\n\n\n\n\n\n\n\n\nFinal exam — Friday 21 August, two hours, pen-and-paper. Forty multiple-choice questions: calculation, code reading, and judgement. No laptops, no LLMs.\n\n\n\n\n\n\nDr Thomas Robinson · Department of Methodology, LSE · Lab instructor: Dr Kaifang Zhou"
+  },
+  {
+    "objectID": "readings.html",
+    "href": "readings.html",
+    "title": "Reading list",
+    "section": "",
+    "text": "The lecture slides and lab notebooks are the main reading for this course — everything you are examined on is in them. The items below are optional supplementary reading: textbook chapters and published articles for the days you want to go deeper. Nothing here is required.\nEach day lists textbook chapters (with the chapter title, so you can find them in any edition) and articles (the original papers and applied social-science work). Pick the textbook that suits you — you do not need all of them. A free, runnable video/tutorial companion for each day is collected in the appendix and is not part of this reading list.\n\n\nWe don’t teach from a textbook, but if you want one spine alongside the slides:\n\nConcepts (free): Prince, Understanding Deep Learning — the closest match to this course, and the only one covering our whole arc (incl. variational autoencoders, diffusion, and ethics).\nCode (the recommended text): Raff, Inside Deep Learning — PyTorch-first, light on maths.\nRunnable chapters: Zhang et al., Dive into Deep Learning — every chapter is executable PyTorch; closest to the labs.\n\n\n\n\n\n\n\nShort name\nFull reference\nAccess\n\n\n\n\nRaff\nRaff, E. (2022). Inside Deep Learning: Math, Algorithms, Models. Manning.\nRecommended text\n\n\nBurkov\nBurkov, A. (2020). Machine Learning Engineering. True Positive Inc.\nRecommended text · http://www.mlebook.com/\n\n\nPrince\nPrince, S. J. D. (2023). Understanding Deep Learning. MIT Press.\nFree PDF · https://udlbook.github.io/udlbook/\n\n\nd2l\nZhang, A., Lipton, Z. C., Li, M., & Smola, A. J. (2023). Dive into Deep Learning. Cambridge University Press.\nFree · https://d2l.ai/\n\n\nGoodfellow\nGoodfellow, I., Bengio, Y., & Courville, A. (2016). Deep Learning. MIT Press.\nFree · https://www.deeplearningbook.org/\n\n\nNielsen\nNielsen, M. (2015). Neural Networks and Deep Learning. Determination Press.\nFree · http://neuralnetworksanddeeplearning.com/\n\n\n\n\nNote on the recommended texts. Raff is the best day-to-day companion but does not cover variational autoencoders, diffusion, or word embeddings (Days 7–8) — use Prince there. Burkov is an ML-engineering / lifecycle book; it fits Day 5 (training and evaluation discipline) and Day 12 (deployment, monitoring), not the architecture days."
+  },
+  {
+    "objectID": "readings.html#how-to-use-this-list",
+    "href": "readings.html#how-to-use-this-list",
+    "title": "Reading list",
+    "section": "",
+    "text": "The lecture slides and lab notebooks are the main reading for this course — everything you are examined on is in them. The items below are optional supplementary reading: textbook chapters and published articles for the days you want to go deeper. Nothing here is required.\nEach day lists textbook chapters (with the chapter title, so you can find them in any edition) and articles (the original papers and applied social-science work). Pick the textbook that suits you — you do not need all of them. A free, runnable video/tutorial companion for each day is collected in the appendix and is not part of this reading list.\n\n\nWe don’t teach from a textbook, but if you want one spine alongside the slides:\n\nConcepts (free): Prince, Understanding Deep Learning — the closest match to this course, and the only one covering our whole arc (incl. variational autoencoders, diffusion, and ethics).\nCode (the recommended text): Raff, Inside Deep Learning — PyTorch-first, light on maths.\nRunnable chapters: Zhang et al., Dive into Deep Learning — every chapter is executable PyTorch; closest to the labs.\n\n\n\n\n\n\n\nShort name\nFull reference\nAccess\n\n\n\n\nRaff\nRaff, E. (2022). Inside Deep Learning: Math, Algorithms, Models. Manning.\nRecommended text\n\n\nBurkov\nBurkov, A. (2020). Machine Learning Engineering. True Positive Inc.\nRecommended text · http://www.mlebook.com/\n\n\nPrince\nPrince, S. J. D. (2023). Understanding Deep Learning. MIT Press.\nFree PDF · https://udlbook.github.io/udlbook/\n\n\nd2l\nZhang, A., Lipton, Z. C., Li, M., & Smola, A. J. (2023). Dive into Deep Learning. Cambridge University Press.\nFree · https://d2l.ai/\n\n\nGoodfellow\nGoodfellow, I., Bengio, Y., & Courville, A. (2016). Deep Learning. MIT Press.\nFree · https://www.deeplearningbook.org/\n\n\nNielsen\nNielsen, M. (2015). Neural Networks and Deep Learning. Determination Press.\nFree · http://neuralnetworksanddeeplearning.com/\n\n\n\n\nNote on the recommended texts. Raff is the best day-to-day companion but does not cover variational autoencoders, diffusion, or word embeddings (Days 7–8) — use Prince there. Burkov is an ML-engineering / lifecycle book; it fits Day 5 (training and evaluation discipline) and Day 12 (deployment, monitoring), not the architecture days."
+  },
+  {
+    "objectID": "readings.html#day-1",
+    "href": "readings.html#day-1",
+    "title": "Reading list",
+    "section": "Day 1 · What do we mean by “AI”?",
+    "text": "Day 1 · What do we mean by “AI”?\nMon 03 Aug\nTextbook chapters\n\nGoodfellow, Ch. 1, “Introduction.”\nPrince, Ch. 1, “Introduction.”\nRaff, Ch. 1, “The mechanics of learning” (§1.1).\n\nArticles & books\n\nLeCun, Y., Bengio, Y., & Hinton, G. (2015). Deep learning. Nature, 521(7553), 436–444.\nMitchell, M. (2019). Artificial Intelligence: A Guide for Thinking Humans. Farrar, Straus and Giroux. (Introductory chapters.)"
+  },
+  {
+    "objectID": "readings.html#day-2",
+    "href": "readings.html#day-2",
+    "title": "Reading list",
+    "section": "Day 2 · Deep models — a primer",
+    "text": "Day 2 · Deep models — a primer\nTue 04 Aug — perceptron → MLP, the forward pass, why non-linearity matters\nTextbook chapters\n\nRaff, Ch. 2, “Fully connected networks.”\nPrince, Ch. 3, “Shallow neural networks,” and Ch. 4, “Deep neural networks.”\nd2l, Ch. 5, “Multilayer Perceptrons.”\nGoodfellow, Ch. 6, “Deep Feedforward Networks.”\nNielsen, Ch. 1, “Using neural networks to recognize handwritten digits,” and Ch. 4, “A visual proof that neural nets can compute any function.”"
+  },
+  {
+    "objectID": "readings.html#day-3",
+    "href": "readings.html#day-3",
+    "title": "Reading list",
+    "section": "Day 3 · Computational graphs & the maths of AI",
+    "text": "Day 3 · Computational graphs & the maths of AI\nWed 05 Aug — linear algebra, differentiation, the chain rule, graphs\nTextbook chapters\n\nd2l, Ch. 2, “Preliminaries” (linear algebra, calculus, automatic differentiation).\nGoodfellow, Ch. 2, “Linear Algebra,” and Ch. 4, “Numerical Computation.”\nRaff, Ch. 1, “The mechanics of learning.”"
+  },
+  {
+    "objectID": "readings.html#day-4",
+    "href": "readings.html#day-4",
+    "title": "Reading list",
+    "section": "Day 4 · Backpropagation",
+    "text": "Day 4 · Backpropagation\nThu 06 Aug — loss, gradients, the backward pass, gradient descent, Adam\nTextbook chapters\n\nNielsen, Ch. 2, “How the backpropagation algorithm works.”\nPrince, Ch. 5, “Loss functions”; Ch. 6, “Fitting models”; Ch. 7, “Gradients and initialization.”\nGoodfellow, Ch. 6, “Deep Feedforward Networks” (§6.5, back-propagation), and Ch. 8, “Optimization for Training Deep Models.”\nRaff, Ch. 1, “The mechanics of learning.”\n\nArticles\n\nRumelhart, D. E., Hinton, G. E., & Williams, R. J. (1986). Learning representations by back-propagating errors. Nature, 323(6088), 533–536.\nKingma, D. P., & Ba, J. (2015). Adam: A method for stochastic optimization. International Conference on Learning Representations (arXiv:1412.6980)."
+  },
+  {
+    "objectID": "readings.html#day-5",
+    "href": "readings.html#day-5",
+    "title": "Reading list",
+    "section": "Day 5 · Feed-forward networks in PyTorch",
+    "text": "Day 5 · Feed-forward networks in PyTorch\nMon 10 Aug — tensors, the training loop, activations, dropout, batch-norm, overfitting\nTextbook chapters\n\nRaff, Ch. 5, “Modern training techniques” (optimisers, normalisation, learning rate); Ch. 2, “Fully connected networks.”\nBurkov, Ch. 5, “Supervised Model Training (Part 1)”; Ch. 6, “Supervised Model Training (Part 2)”; Ch. 7, “Model Evaluation.”\nPrince, Ch. 8, “Measuring performance”; Ch. 9, “Regularization”; Ch. 11, “Residual networks” (batch normalisation).\nGoodfellow, Ch. 7, “Regularization for Deep Learning”; Ch. 8, “Optimization for Training Deep Models”; Ch. 11, “Practical Methodology.”\nNielsen, Ch. 3, “Improving the way neural networks learn.”\n\nArticles\n\nHegre, H., et al. (2022). Forecasting Fatalities. (Working paper / VIEWS project report.) — the worked civil-war forecasting example.\nIoffe, S., & Szegedy, C. (2015). Batch normalization: Accelerating deep network training by reducing internal covariate shift. International Conference on Machine Learning, 448–456."
+  },
+  {
+    "objectID": "readings.html#day-6",
+    "href": "readings.html#day-6",
+    "title": "Reading list",
+    "section": "Day 6 · Classifying images (CNNs)",
+    "text": "Day 6 · Classifying images (CNNs)\nTue 11 Aug — images as tensors, convolution, kernels, pooling, AlexNet\nTextbook chapters\n\nRaff, Ch. 3, “Convolutional neural networks.”\nPrince, Ch. 10, “Convolutional networks.”\nd2l, Ch. 7, “Convolutional Neural Networks,” and Ch. 8, “Modern Convolutional Neural Networks” (LeNet, AlexNet).\nGoodfellow, Ch. 9, “Convolutional Networks.”\n\nArticles\n\nKrizhevsky, A., Sutskever, I., & Hinton, G. E. (2012). ImageNet classification with deep convolutional neural networks. Advances in Neural Information Processing Systems, 25.\nTorres, M., & Cantú, F. (2022). Learning to see: Convolutional neural networks for the analysis of social science data. Political Analysis, 30(1), 113–131.\nTorres, M. (2024). A framework for the unsupervised and semi-supervised analysis of visual frames. Political Analysis, 32(2), 199–220.\nBiscione, V., & Bowers, J. S. (2021). Convolutional neural networks are not invariant to translation, but they can learn to be. Journal of Machine Learning Research, 22(229), 1–28.\nBuolamwini, J., & Gebru, T. (2018). Gender shades: Intersectional accuracy disparities in commercial gender classification. Proceedings of Machine Learning Research (FAccT), 81, 1–15."
+  },
+  {
+    "objectID": "readings.html#day-7",
+    "href": "readings.html#day-7",
+    "title": "Reading list",
+    "section": "Day 7 · Generating images — autoencoders, VAEs, diffusion",
+    "text": "Day 7 · Generating images — autoencoders, VAEs, diffusion\nWed 12 Aug — the autoencoder trick, the VAE, a glance at diffusion, MIDAS\nTextbook chapters\n\nPrince, Ch. 17, “Variational autoencoders,” and Ch. 18, “Diffusion models” (also Ch. 14, “Unsupervised learning,” and Ch. 15, “Generative Adversarial Networks”). Raff and Burkov do not cover VAEs or diffusion.\nRaff, Ch. 7, “Autoencoding and self-supervision” (incl. denoising autoencoders), and Ch. 9, “Generative adversarial networks.”\nGoodfellow, Ch. 14, “Autoencoders.”\n\nArticles\n\nKingma, D. P., & Welling, M. (2014). Auto-encoding variational Bayes. International Conference on Learning Representations (arXiv:1312.6114).\nHo, J., Jain, A., & Abbeel, P. (2020). Denoising diffusion probabilistic models. Advances in Neural Information Processing Systems, 33, 6840–6851.\nGoodfellow, I., et al. (2014). Generative adversarial nets. Advances in Neural Information Processing Systems, 27.\nLall, R., & Robinson, T. (2022). The MIDAS touch: Accurate and scalable missing-data imputation with deep learning. Political Analysis, 30(2), 179–196.\nLall, R., & Robinson, T. (2023). Efficient multiple imputation for diverse data in Python and R: MIDASpy and rMIDAS. Journal of Statistical Software, 107, 1–38."
+  },
+  {
+    "objectID": "readings.html#day-8",
+    "href": "readings.html#day-8",
+    "title": "Reading list",
+    "section": "Day 8 · Text-gen 1/4 — embeddings & character models",
+    "text": "Day 8 · Text-gen 1/4 — embeddings & character models\nThu 13 Aug — text as data, embeddings, the bigram language model\nTextbook chapters\n\nd2l, Ch. 15, “Natural Language Processing: Pretraining” (word2vec, embeddings).\nGoodfellow, Ch. 15, “Representation Learning” (§15.4, distributed representations).\n\nArticles\n\nMikolov, T., Sutskever, I., Chen, K., Corrado, G., & Dean, J. (2013). Distributed representations of words and phrases and their compositionality. Advances in Neural Information Processing Systems, 26.\nRodriguez, P. L., & Spirling, A. (2022). Word embeddings: What works, what doesn’t, and how to tell the difference for applied research. Journal of Politics, 84(1), 101–115.\nGarg, N., Schiebinger, L., Jurafsky, D., & Zou, J. (2018). Word embeddings quantify 100 years of gender and ethnic stereotypes. Proceedings of the National Academy of Sciences, 115(16), E3635–E3644.\nBolukbasi, T., Chang, K.-W., Zou, J., Saligrama, V., & Kalai, A. (2016). Man is to computer programmer as woman is to homemaker? Debiasing word embeddings. Advances in Neural Information Processing Systems, 29."
+  },
+  {
+    "objectID": "readings.html#day-9",
+    "href": "readings.html#day-9",
+    "title": "Reading list",
+    "section": "Day 9 · Text-gen 2/4 — recurrent networks",
+    "text": "Day 9 · Text-gen 2/4 — recurrent networks\nMon 17 Aug — recurrence, the hidden state, vanishing gradients, LSTM/GRU\nTextbook chapters\n\nRaff, Ch. 4, “Recurrent neural networks.”\nd2l, Ch. 9, “Recurrent Neural Networks,” and Ch. 10, “Modern Recurrent Neural Networks” (LSTM, GRU).\nGoodfellow, Ch. 10, “Sequence Modeling: Recurrent and Recursive Nets.”\n\nArticles\n\nHochreiter, S., & Schmidhuber, J. (1997). Long short-term memory. Neural Computation, 9(8), 1735–1780.\nCho, K., et al. (2014). Learning phrase representations using RNN encoder–decoder for statistical machine translation. Conference on Empirical Methods in Natural Language Processing (arXiv:1406.1078).\nBahdanau, D., Cho, K., & Bengio, Y. (2015). Neural machine translation by jointly learning to align and translate. International Conference on Learning Representations (arXiv:1409.0473).\nHegre, H., et al. (2022). Forecasting Fatalities. — conflict events as a sequence over time."
+  },
+  {
+    "objectID": "readings.html#day-10",
+    "href": "readings.html#day-10",
+    "title": "Reading list",
+    "section": "Day 10 · Text-gen 3/4 — attention & transformers",
+    "text": "Day 10 · Text-gen 3/4 — attention & transformers\nTue 18 Aug — attention, the transformer block, scaling, a tiny GPT\nTextbook chapters\n\nPrince, Ch. 12, “Transformers.”\nRaff, Ch. 10, “Attention mechanisms,” and Ch. 12, “Network design alternatives to RNNs” (transformers).\nd2l, Ch. 11, “Attention Mechanisms and Transformers.”\n\nArticles\n\nVaswani, A., et al. (2017). Attention is all you need. Advances in Neural Information Processing Systems, 30. (Read the abstract, Fig. 1, and §3.1–3.2.)\nKaplan, J., et al. (2020). Scaling laws for neural language models. arXiv:2001.08361.\nHoffmann, J., et al. (2022). Training compute-optimal large language models (Chinchilla). Advances in Neural Information Processing Systems, 35 (arXiv:2203.15556).\nArgyle, L. P., et al. (2023). Out of one, many: Using language models to simulate human samples. Political Analysis, 31(3), 337–351.\nBender, E. M., Gebru, T., McMillan-Major, A., & Shmitchell, S. (2021). On the dangers of stochastic parrots: Can language models be too big? ACM Conference on Fairness, Accountability, and Transparency (FAccT), 610–623."
+  },
+  {
+    "objectID": "readings.html#day-11",
+    "href": "readings.html#day-11",
+    "title": "Reading list",
+    "section": "Day 11 · Text-gen 4/4 — tokenisation & sampling",
+    "text": "Day 11 · Text-gen 4/4 — tokenisation & sampling\nWed 19 Aug — byte-pair encoding, sampling strategies, the post-training pipeline\nTokenisation and sampling are not covered well by the textbooks; this day is articles-led.\nArticles\n\nSennrich, R., Haddow, B., & Birch, A. (2016). Neural machine translation of rare words with subword units. Proceedings of the Association for Computational Linguistics (arXiv:1508.07909).\nRadford, A., et al. (2019). Language models are unsupervised multitask learners. OpenAI technical report. (Byte-level BPE.)\nHoltzman, A., Buys, J., Du, L., Forbes, M., & Choi, Y. (2020). The curious case of neural text degeneration. International Conference on Learning Representations (arXiv:1904.09751). (Top-p / nucleus sampling.)\nPetrov, A., La Malfa, E., Torr, P., & Bibi, A. (2023). Language model tokenizers introduce unfairness between languages. Advances in Neural Information Processing Systems, 36 (arXiv:2305.15425).\nOuyang, L., et al. (2022). Training language models to follow instructions with human feedback (InstructGPT). Advances in Neural Information Processing Systems, 35 (arXiv:2203.02155).\nRafailov, R., et al. (2023). Direct preference optimization: Your language model is secretly a reward model. Advances in Neural Information Processing Systems, 36 (arXiv:2305.18290).\nBai, Y., et al. (2022). Constitutional AI: Harmlessness from AI feedback. arXiv:2212.08073.\nLewis, P., et al. (2020). Retrieval-augmented generation for knowledge-intensive NLP tasks. Advances in Neural Information Processing Systems, 33 (arXiv:2005.11401)."
+  },
+  {
+    "objectID": "readings.html#day-12",
+    "href": "readings.html#day-12",
+    "title": "Reading list",
+    "section": "Day 12 · Ethics, limitations, course recap",
+    "text": "Day 12 · Ethics, limitations, course recap\nThu 20 Aug\nTextbook chapters\n\nPrince, Ch. 21, “Deep learning and ethics.”\n\nArticles\n\nBender, E. M., Gebru, T., McMillan-Major, A., & Shmitchell, S. (2021). On the dangers of stochastic parrots: Can language models be too big? FAccT, 610–623.\nBuolamwini, J., & Gebru, T. (2018). Gender shades. Proceedings of Machine Learning Research (FAccT), 81, 1–15.\nObermeyer, Z., Powers, B., Vogeli, C., & Mullainathan, S. (2019). Dissecting racial bias in an algorithm used to manage the health of populations. Science, 366(6464), 447–453.\nChouldechova, A. (2017). Fair prediction with disparate impact: A study of bias in recidivism prediction instruments. Big Data, 5(2), 153–163.\nAngwin, J., Larson, J., Mattu, S., & Kirchner, L. (2016). Machine bias. ProPublica, 23 May 2016.\nCarlini, N., et al. (2021). Extracting training data from large language models. USENIX Security Symposium, 2633–2650.\nSpirling, A. (2023). Why open-source generative AI models are an ethical way forward for science. Nature, 616(7957), 413.\n\nBooks (breadth)\n\nEubanks, V. (2018). Automating Inequality: How High-Tech Tools Profile, Police, and Punish the Poor. St. Martin’s Press. (The Allegheny Family Screening Tool — the plenary case.)\nCrawford, K. (2021). Atlas of AI. Yale University Press.\nRussell, S. (2019). Human Compatible: Artificial Intelligence and the Problem of Control. Viking.\nMitchell, M. (2019). Artificial Intelligence: A Guide for Thinking Humans. Farrar, Straus and Giroux."
+  },
+  {
+    "objectID": "readings.html#free-online-companions",
+    "href": "readings.html#free-online-companions",
+    "title": "Reading list",
+    "section": "Appendix — free online companions (not part of the reading list)",
+    "text": "Appendix — free online companions (not part of the reading list)\nThese are videos, tutorials, and explainer posts that map directly onto each day’s lab. They are not part of the formal reading list above — they are listed here only as optional, free study aids.\n\n\n\nDay\nCompanion\n\n\n\n\n1\nAltman, The Intelligence Age (essay) — https://ia.samaltman.com/\n\n\n2\n3Blue1Brown, But what is a neural network? — https://www.youtube.com/watch?v=aircAruvnKk\n\n\n3\n3Blue1Brown, Essence of Linear Algebra / Essence of Calculus — https://www.3blue1brown.com/ · Karpathy, micrograd repo — https://github.com/karpathy/micrograd\n\n\n4\nKarpathy, Building micrograd — https://www.youtube.com/watch?v=VMj-3S1tku0 · 3Blue1Brown, backpropagation (ch. 3–4)\n\n\n5\nPyTorch, Learn the Basics — https://pytorch.org/tutorials/beginner/basics/intro.html\n\n\n6\nStanford CS231n, Convolutional Networks notes — https://cs231n.github.io/convolutional-networks/\n\n\n7\nWeng, From Autoencoder to Beta-VAE and What are Diffusion Models? — https://lilianweng.github.io/\n\n\n8\nKarpathy, Building makemore (part 1) — https://www.youtube.com/watch?v=PaCmpygFfXo · Alammar, The Illustrated Word2vec — https://jalammar.github.io/illustrated-word2vec/\n\n\n9\nKarpathy, The Unreasonable Effectiveness of RNNs — https://karpathy.github.io/2015/05/21/rnn-effectiveness/ · Olah, Understanding LSTM Networks — https://colah.github.io/posts/2015-08-Understanding-LSTMs/\n\n\n10\nAlammar, The Illustrated Transformer — https://jalammar.github.io/illustrated-transformer/ · Karpathy, Let’s build GPT — https://www.youtube.com/watch?v=kCc8FmEb1nY · nanoGPT — https://github.com/karpathy/nanoGPT\n\n\n11\nKarpathy, Let’s build the GPT Tokenizer — https://www.youtube.com/watch?v=zduSFxRajkE · Hugging Face, Summary of the tokenizers — https://huggingface.co/docs/transformers/tokenizer_summary\n\n\n12\nKarpathy, Neural Networks: Zero to Hero — https://karpathy.ai/zero-to-hero.html · Distill.pub — https://distill.pub/"
+  },
+  {
+    "objectID": "lectures.html",
+    "href": "lectures.html",
+    "title": "Lectures",
+    "section": "",
+    "text": "Each card opens the slide deck in your browser. Inside a deck: → / ← to move, F for full-screen, M for the slide menu, O for an overview of all slides, and ? for the full list of shortcuts.\n\n\n\n\n\n\n\nWhat do we mean by AI?\n\n\nLecture 1 — Course overview & framing\n\n\n\nMon 3 Aug 2026\n\n\n\n\n\n\n\n\n\n\n\nDeep models — a primer\n\n\nLecture 2 — From a single neuron to a network\n\n\n\nTue 4 Aug 2026\n\n\n\n\n\n\n\n\n\n\n\nComputational graphs & the maths of AI\n\n\nLecture 3 — Three tools: linear algebra, calculus, and computation graphs\n\n\n\nWed 5 Aug 2026\n\n\n\n\n\n\n\n\n\n\n\nBackpropagation\n\n\nLecture 4 — Turning a wrong network into a right one\n\n\n\nThu 6 Aug 2026\n\n\n\n\n\n\n\n\n\n\n\nFeed-forward networks in PyTorch\n\n\nLecture 5 — Real models, real data, real choices\n\n\n\nMon 10 Aug 2026\n\n\n\n\n\n\n\n\nNo matching items\n\n\n\n\n\n\n\n\nWeeks 2 and 3 are not posted yet. Decks go up as we reach them, so what you see here is always the current state of the course. The full twelve-lecture outline is on the home page, and the reading list covers all three weeks if you want to read ahead.\n\n\n\n\n\n\n\n\n\nTip\n\n\n\nThe decks are the primary study resource for the final exam — they pair every formula with a worked numerical example. Re-read them rather than re-watching anything."
   },
   {
     "objectID": "labs/lab-04-backprop-autograd.html",
@@ -1113,116 +1001,221 @@
     "text": "Solutions\nWorked answers for every # TODO above. Have a genuine go first — including asking a model, which will often get you there before this section does.\nTo pick up where you left off: copy the answer into the matching # TODO cell above and re-run from there, so the rest of the notebook uses your version.\nSolution — the forward pass\n\nclass TurnoutNet(nn.Module):\n    def __init__(self, in_features=3, hidden=16):\n        super().__init__()\n        self.fc1 = nn.Linear(in_features, hidden)\n        self.fc2 = nn.Linear(hidden, 1)\n\n    def forward(self, x):\n        h = torch.relu(self.fc1(x))\n        return self.fc2(h)            # output layer -&gt; a single logit per row\n\ntorch.manual_seed(1337)\nprint(TurnoutNet())\n\nSolution — the training loop\n\n# Self-contained: re-creates a fresh model/loss/optimiser so this cell reproduces\n# the intended result on its own, regardless of what ran before it.\ntorch.manual_seed(1337)\nmodel     = nn.Sequential(nn.Linear(3, 16), nn.ReLU(), nn.Linear(16, 1))\nloss_fn   = nn.BCEWithLogitsLoss()\noptimizer = torch.optim.Adam(model.parameters(), lr=1e-2)\n\ndef train(model, loss_fn, optimizer, epochs=2000):\n    history = {\"train\": [], \"val\": []}\n    for epoch in range(epochs):\n        model.train()\n        optimizer.zero_grad()               # 1. clear the old gradients\n        logits = model(X_train)             # 2. forward pass\n        loss   = loss_fn(logits, y_train)   #    compute the loss\n        loss.backward()                     # 3. backpropagate\n        optimizer.step()                    # 4. update the weights\n\n        model.eval()\n        with torch.no_grad():\n            val_loss = loss_fn(model(X_val), y_val)\n        history[\"train\"].append(loss.item())\n        history[\"val\"].append(val_loss.item())\n    return history\n\nhistory = train(model, loss_fn, optimizer, epochs=2000)\nprint(\"done. final val loss:\", round(history[\"val\"][-1], 4))"
   },
   {
-    "objectID": "lectures.html",
-    "href": "lectures.html",
-    "title": "Lectures",
+    "objectID": "labs.html",
+    "href": "labs.html",
+    "title": "Labs",
     "section": "",
-    "text": "Each card opens the slide deck in your browser. Inside a deck: → / ← to move, F for full-screen, M for the slide menu, O for an overview of all slides, and ? for the full list of shortcuts.\n\n\n\n\n\n\n\nWhat do we mean by AI?\n\n\nLecture 1 — Course overview & framing\n\n\n\nMon 3 Aug 2026\n\n\n\n\n\n\n\n\n\n\n\nDeep models — a primer\n\n\nLecture 2 — From a single neuron to a network\n\n\n\nTue 4 Aug 2026\n\n\n\n\n\n\n\n\n\n\n\nComputational graphs & the maths of AI\n\n\nLecture 3 — Three tools: linear algebra, calculus, and computation graphs\n\n\n\nWed 5 Aug 2026\n\n\n\n\n\n\n\n\n\n\n\nBackpropagation\n\n\nLecture 4 — Turning a wrong network into a right one\n\n\n\nThu 6 Aug 2026\n\n\n\n\n\n\n\n\n\n\n\nFeed-forward networks in PyTorch\n\n\nLecture 5 — Real models, real data, real choices\n\n\n\nMon 10 Aug 2026\n\n\n\n\n\n\n\n\nNo matching items\n\n\n\n\n\n\n\n\nWeeks 2 and 3 are not posted yet. Decks go up as we reach them, so what you see here is always the current state of the course. The full twelve-lecture outline is on the home page, and the reading list covers all three weeks if you want to read ahead.\n\n\n\n\n\n\n\n\n\nTip\n\n\n\nThe decks are the primary study resource for the final exam — they pair every formula with a worked numerical example. Re-read them rather than re-watching anything."
+    "text": "The labs are a single project assembled over three weeks: each day reuses the previous day’s code, ending in a transformer language model you build yourself.\nEach lab is a guided walkthrough with # TODO cells for you to fill in, and worked solutions at the very bottom. Don’t scroll to the solutions until you’ve had a real go — the point is the struggle, not the finished cell.\nTo run a lab: click Open in Colab (recommended — free GPU for the later labs), or view the read-only page here, or download the .ipynb. The first cell of every lab sets things up; just run top to bottom."
   },
   {
-    "objectID": "readings.html",
-    "href": "readings.html",
-    "title": "Reading list",
-    "section": "",
-    "text": "The lecture slides and lab notebooks are the main reading for this course — everything you are examined on is in them. The items below are optional supplementary reading: textbook chapters and published articles for the days you want to go deeper. Nothing here is required.\nEach day lists textbook chapters (with the chapter title, so you can find them in any edition) and articles (the original papers and applied social-science work). Pick the textbook that suits you — you do not need all of them. A free, runnable video/tutorial companion for each day is collected in the appendix and is not part of this reading list.\n\n\nWe don’t teach from a textbook, but if you want one spine alongside the slides:\n\nConcepts (free): Prince, Understanding Deep Learning — the closest match to this course, and the only one covering our whole arc (incl. variational autoencoders, diffusion, and ethics).\nCode (the recommended text): Raff, Inside Deep Learning — PyTorch-first, light on maths.\nRunnable chapters: Zhang et al., Dive into Deep Learning — every chapter is executable PyTorch; closest to the labs.\n\n\n\n\n\n\n\nShort name\nFull reference\nAccess\n\n\n\n\nRaff\nRaff, E. (2022). Inside Deep Learning: Math, Algorithms, Models. Manning.\nRecommended text\n\n\nBurkov\nBurkov, A. (2020). Machine Learning Engineering. True Positive Inc.\nRecommended text · http://www.mlebook.com/\n\n\nPrince\nPrince, S. J. D. (2023). Understanding Deep Learning. MIT Press.\nFree PDF · https://udlbook.github.io/udlbook/\n\n\nd2l\nZhang, A., Lipton, Z. C., Li, M., & Smola, A. J. (2023). Dive into Deep Learning. Cambridge University Press.\nFree · https://d2l.ai/\n\n\nGoodfellow\nGoodfellow, I., Bengio, Y., & Courville, A. (2016). Deep Learning. MIT Press.\nFree · https://www.deeplearningbook.org/\n\n\nNielsen\nNielsen, M. (2015). Neural Networks and Deep Learning. Determination Press.\nFree · http://neuralnetworksanddeeplearning.com/\n\n\n\n\nNote on the recommended texts. Raff is the best day-to-day companion but does not cover variational autoencoders, diffusion, or word embeddings (Days 7–8) — use Prince there. Burkov is an ML-engineering / lifecycle book; it fits Day 5 (training and evaluation discipline) and Day 12 (deployment, monitoring), not the architecture days."
+    "objectID": "labs.html#capstone",
+    "href": "labs.html#capstone",
+    "title": "Labs",
+    "section": "The capstone",
+    "text": "The capstone\nLab 11 ends with the payoff of the whole course: Andrej Karpathy’s pure-Python microGPT, a complete GPT in ~200 lines with no PyTorch — running entirely on the Value autograd class you wrote back in Labs 3–4. The lab maps every part of the gist back to the lab where you first built it."
   },
   {
-    "objectID": "readings.html#how-to-use-this-list",
-    "href": "readings.html#how-to-use-this-list",
-    "title": "Reading list",
-    "section": "",
-    "text": "The lecture slides and lab notebooks are the main reading for this course — everything you are examined on is in them. The items below are optional supplementary reading: textbook chapters and published articles for the days you want to go deeper. Nothing here is required.\nEach day lists textbook chapters (with the chapter title, so you can find them in any edition) and articles (the original papers and applied social-science work). Pick the textbook that suits you — you do not need all of them. A free, runnable video/tutorial companion for each day is collected in the appendix and is not part of this reading list.\n\n\nWe don’t teach from a textbook, but if you want one spine alongside the slides:\n\nConcepts (free): Prince, Understanding Deep Learning — the closest match to this course, and the only one covering our whole arc (incl. variational autoencoders, diffusion, and ethics).\nCode (the recommended text): Raff, Inside Deep Learning — PyTorch-first, light on maths.\nRunnable chapters: Zhang et al., Dive into Deep Learning — every chapter is executable PyTorch; closest to the labs.\n\n\n\n\n\n\n\nShort name\nFull reference\nAccess\n\n\n\n\nRaff\nRaff, E. (2022). Inside Deep Learning: Math, Algorithms, Models. Manning.\nRecommended text\n\n\nBurkov\nBurkov, A. (2020). Machine Learning Engineering. True Positive Inc.\nRecommended text · http://www.mlebook.com/\n\n\nPrince\nPrince, S. J. D. (2023). Understanding Deep Learning. MIT Press.\nFree PDF · https://udlbook.github.io/udlbook/\n\n\nd2l\nZhang, A., Lipton, Z. C., Li, M., & Smola, A. J. (2023). Dive into Deep Learning. Cambridge University Press.\nFree · https://d2l.ai/\n\n\nGoodfellow\nGoodfellow, I., Bengio, Y., & Courville, A. (2016). Deep Learning. MIT Press.\nFree · https://www.deeplearningbook.org/\n\n\nNielsen\nNielsen, M. (2015). Neural Networks and Deep Learning. Determination Press.\nFree · http://neuralnetworksanddeeplearning.com/\n\n\n\n\nNote on the recommended texts. Raff is the best day-to-day companion but does not cover variational autoencoders, diffusion, or word embeddings (Days 7–8) — use Prince there. Burkov is an ML-engineering / lifecycle book; it fits Day 5 (training and evaluation discipline) and Day 12 (deployment, monitoring), not the architecture days."
+    "objectID": "lectures/lecture-01-what-is-ai.html#why-are-you-here",
+    "href": "lectures/lecture-01-what-is-ai.html#why-are-you-here",
+    "title": "What do we mean by AI?",
+    "section": "Why are you here!?",
+    "text": "Why are you here!?\n\n\n\n\n\n\nSam Altman (OpenAI), “The Intelligence Age”\n\n\nIn the next couple of decades, we will be able to do things that would have seemed like magic to our grandparents.\n[…]\nHow did we get to the doorstep of the next leap in prosperity?\nIn three words: deep learning worked.\n\n\n\nBeyond hyperbole, these models are thought to be:\n\nHighly predictive (when built correctly)\nHighly flexible\nAn engineering-grade solution to many problems\n\nNot short of news coverage on how deep learning is fundamentally altering society and how we study it!"
   },
   {
-    "objectID": "readings.html#day-1",
-    "href": "readings.html#day-1",
-    "title": "Reading list",
-    "section": "Day 1 · What do we mean by “AI”?",
-    "text": "Day 1 · What do we mean by “AI”?\nMon 03 Aug\nTextbook chapters\n\nGoodfellow, Ch. 1, “Introduction.”\nPrince, Ch. 1, “Introduction.”\nRaff, Ch. 1, “The mechanics of learning” (§1.1).\n\nArticles & books\n\nLeCun, Y., Bengio, Y., & Hinton, G. (2015). Deep learning. Nature, 521(7553), 436–444.\nMitchell, M. (2019). Artificial Intelligence: A Guide for Thinking Humans. Farrar, Straus and Giroux. (Introductory chapters.)"
+    "objectID": "lectures/lecture-01-what-is-ai.html#the-aim-of-this-course",
+    "href": "lectures/lecture-01-what-is-ai.html#the-aim-of-this-course",
+    "title": "What do we mean by AI?",
+    "section": "The aim of this course",
+    "text": "The aim of this course\nThree weeks · 36h lectures · 18h labs\nBy the end of this course you should be able to:\n\n\nExplain what (deep) neural networks are and how they’re trained\nBuild neural networks from scratch in Python, then scale up using PyTorch\nApply deep learning to predict, classify, and generate\nCritique AI systems — their assumptions, failure modes, and social consequences\n\n\nIn labs, you will work towards building out your own GPT-style LLM!\n\n\n\n\n\n\nA note on content\n\n\nAs a technical course, we will write code, do basic calculus, and read papers. But don’t worry too much – most of this rests on fairly simple maths."
   },
   {
-    "objectID": "readings.html#day-2",
-    "href": "readings.html#day-2",
-    "title": "Reading list",
-    "section": "Day 2 · Deep models — a primer",
-    "text": "Day 2 · Deep models — a primer\nTue 04 Aug — perceptron → MLP, the forward pass, why non-linearity matters\nTextbook chapters\n\nRaff, Ch. 2, “Fully connected networks.”\nPrince, Ch. 3, “Shallow neural networks,” and Ch. 4, “Deep neural networks.”\nd2l, Ch. 5, “Multilayer Perceptrons.”\nGoodfellow, Ch. 6, “Deep Feedforward Networks.”\nNielsen, Ch. 1, “Using neural networks to recognize handwritten digits,” and Ch. 4, “A visual proof that neural nets can compute any function.”"
+    "objectID": "lectures/lecture-01-what-is-ai.html#what-this-course-expects-of-you",
+    "href": "lectures/lecture-01-what-is-ai.html#what-this-course-expects-of-you",
+    "title": "What do we mean by AI?",
+    "section": "What this course expects of you",
+    "text": "What this course expects of you\n\n\nWorkload\n\n3 hours of lecture + 90 min lab, every day. Plan around that.\nOptional reading + lab catch-up most evenings.\nIt’s a marathon not a sprint\n\n\nAssessment\n\nTake-home midterm (end of week 2) — train a model + write up.\nClosed-book pen-and-paper exam Fri 21 Aug\n\n\n\n\n\n\n\n\nAsk questions!\n\n\nWe have lots of time in lectures, so please stop me at any point. There’s no such thing as a “stupid” question!!"
   },
   {
-    "objectID": "readings.html#day-3",
-    "href": "readings.html#day-3",
-    "title": "Reading list",
-    "section": "Day 3 · Computational graphs & the maths of AI",
-    "text": "Day 3 · Computational graphs & the maths of AI\nWed 05 Aug — linear algebra, differentiation, the chain rule, graphs\nTextbook chapters\n\nd2l, Ch. 2, “Preliminaries” (linear algebra, calculus, automatic differentiation).\nGoodfellow, Ch. 2, “Linear Algebra,” and Ch. 4, “Numerical Computation.”\nRaff, Ch. 1, “The mechanics of learning.”"
+    "objectID": "lectures/lecture-01-what-is-ai.html#you-may-find-some-material-hard-and-thats-ok",
+    "href": "lectures/lecture-01-what-is-ai.html#you-may-find-some-material-hard-and-thats-ok",
+    "title": "What do we mean by AI?",
+    "section": "You may find some material hard, and that’s ok!",
+    "text": "You may find some material hard, and that’s ok!\nThe very thing we’re studying can help you over the next three weeks (and beyond):\n\nAsk ChatGPT/Claude/DeepSeek about things you don’t understand yet\nUse it in the labs to look things up — “how do I check the shape of a PyTorch tensor?” is exactly what these tools are good for\nBut don’t let it write code you can’t read back to me — the exam is closed-book\n\nLet me know if you want me to go over anything again!\n\nMaths may seem daunting at first\nI promise you can all learn it\nThe advantages of understanding these fundamentals will persist"
   },
   {
-    "objectID": "readings.html#day-4",
-    "href": "readings.html#day-4",
-    "title": "Reading list",
-    "section": "Day 4 · Backpropagation",
-    "text": "Day 4 · Backpropagation\nThu 06 Aug — loss, gradients, the backward pass, gradient descent, Adam\nTextbook chapters\n\nNielsen, Ch. 2, “How the backpropagation algorithm works.”\nPrince, Ch. 5, “Loss functions”; Ch. 6, “Fitting models”; Ch. 7, “Gradients and initialization.”\nGoodfellow, Ch. 6, “Deep Feedforward Networks” (§6.5, back-propagation), and Ch. 8, “Optimization for Training Deep Models.”\nRaff, Ch. 1, “The mechanics of learning.”\n\nArticles\n\nRumelhart, D. E., Hinton, G. E., & Williams, R. J. (1986). Learning representations by back-propagating errors. Nature, 323(6088), 533–536.\nKingma, D. P., & Ba, J. (2015). Adam: A method for stochastic optimization. International Conference on Learning Representations (arXiv:1412.6980)."
+    "objectID": "lectures/lecture-01-what-is-ai.html#plenary-whos-in-the-room-1",
+    "href": "lectures/lecture-01-what-is-ai.html#plenary-whos-in-the-room-1",
+    "title": "What do we mean by AI?",
+    "section": "Plenary · who’s in the room?",
+    "text": "Plenary · who’s in the room?\n≈ 15 min · groups of 4\n\nRound-the-table\nSpend ~90 seconds each on:\n\nYour name and what you’d like to be called.\nWhere you study + what you study.\nOne thing about AI that excites you.\nOne thing about AI that worries you.\n\n\n\nThen, as a group\nIdentify one excitement and one worry that more than one of you mentioned. Be ready to share when we come back together.\n\nWe’ll spend ~5 minutes reporting back!"
   },
   {
-    "objectID": "readings.html#day-5",
-    "href": "readings.html#day-5",
-    "title": "Reading list",
-    "section": "Day 5 · Feed-forward networks in PyTorch",
-    "text": "Day 5 · Feed-forward networks in PyTorch\nMon 10 Aug — tensors, the training loop, activations, dropout, batch-norm, overfitting\nTextbook chapters\n\nRaff, Ch. 5, “Modern training techniques” (optimisers, normalisation, learning rate); Ch. 2, “Fully connected networks.”\nBurkov, Ch. 5, “Supervised Model Training (Part 1)”; Ch. 6, “Supervised Model Training (Part 2)”; Ch. 7, “Model Evaluation.”\nPrince, Ch. 8, “Measuring performance”; Ch. 9, “Regularization”; Ch. 11, “Residual networks” (batch normalisation).\nGoodfellow, Ch. 7, “Regularization for Deep Learning”; Ch. 8, “Optimization for Training Deep Models”; Ch. 11, “Practical Methodology.”\nNielsen, Ch. 3, “Improving the way neural networks learn.”\n\nArticles\n\nHegre, H., et al. (2022). Forecasting Fatalities. (Working paper / VIEWS project report.) — the worked civil-war forecasting example.\nIoffe, S., & Szegedy, C. (2015). Batch normalization: Accelerating deep network training by reducing internal covariate shift. International Conference on Machine Learning, 448–456."
+    "objectID": "lectures/lecture-01-what-is-ai.html#who-am-i",
+    "href": "lectures/lecture-01-what-is-ai.html#who-am-i",
+    "title": "What do we mean by AI?",
+    "section": "Who am I?",
+    "text": "Who am I?\n\n\n\nCall me Tom!\n\nPolitical scientist by training, studied at Oxford\nI now research causal inference + deep learning/AI methods\nAny questions outside our lectures, email t.robinson@lse.ac.uk\n\n\n\nFirst started working on AI methods in 2018\nI’m super excited about how AI is changing how we discover things\nI’m worried that AI could lead to a plateau in knowledge"
   },
   {
-    "objectID": "readings.html#day-6",
-    "href": "readings.html#day-6",
-    "title": "Reading list",
-    "section": "Day 6 · Classifying images (CNNs)",
-    "text": "Day 6 · Classifying images (CNNs)\nTue 11 Aug — images as tensors, convolution, kernels, pooling, AlexNet\nTextbook chapters\n\nRaff, Ch. 3, “Convolutional neural networks.”\nPrince, Ch. 10, “Convolutional networks.”\nd2l, Ch. 7, “Convolutional Neural Networks,” and Ch. 8, “Modern Convolutional Neural Networks” (LeNet, AlexNet).\nGoodfellow, Ch. 9, “Convolutional Networks.”\n\nArticles\n\nKrizhevsky, A., Sutskever, I., & Hinton, G. E. (2012). ImageNet classification with deep convolutional neural networks. Advances in Neural Information Processing Systems, 25.\nTorres, M., & Cantú, F. (2022). Learning to see: Convolutional neural networks for the analysis of social science data. Political Analysis, 30(1), 113–131.\nTorres, M. (2024). A framework for the unsupervised and semi-supervised analysis of visual frames. Political Analysis, 32(2), 199–220.\nBiscione, V., & Bowers, J. S. (2021). Convolutional neural networks are not invariant to translation, but they can learn to be. Journal of Machine Learning Research, 22(229), 1–28.\nBuolamwini, J., & Gebru, T. (2018). Gender shades: Intersectional accuracy disparities in commercial gender classification. Proceedings of Machine Learning Research (FAccT), 81, 1–15."
+    "objectID": "lectures/lecture-01-what-is-ai.html#ai-is-a-slippery-word",
+    "href": "lectures/lecture-01-what-is-ai.html#ai-is-a-slippery-word",
+    "title": "What do we mean by AI?",
+    "section": "“AI” is a slippery word",
+    "text": "“AI” is a slippery word\nPublic discourse uses AI to refer to almost anything computational:\n\n\nOld-school\n\nA chess engine\nA spam filter\nA recommender system\nAutocomplete\n\n\nModern\n\nChatGPT / Claude / Gemini\nSelf-driving cars\nStable Diffusion\nAlphaFold\n\n\nHype\n\n“AGI” / “superintelligence”\n“AI” that’s just a regression\n“AI” that’s just a database\n“AI” that’s just a person\n\n\nWe need sharper categories."
   },
   {
-    "objectID": "readings.html#day-7",
-    "href": "readings.html#day-7",
-    "title": "Reading list",
-    "section": "Day 7 · Generating images — autoencoders, VAEs, diffusion",
-    "text": "Day 7 · Generating images — autoencoders, VAEs, diffusion\nWed 12 Aug — the autoencoder trick, the VAE, a glance at diffusion, MIDAS\nTextbook chapters\n\nPrince, Ch. 17, “Variational autoencoders,” and Ch. 18, “Diffusion models” (also Ch. 14, “Unsupervised learning,” and Ch. 15, “Generative Adversarial Networks”). Raff and Burkov do not cover VAEs or diffusion.\nRaff, Ch. 7, “Autoencoding and self-supervision” (incl. denoising autoencoders), and Ch. 9, “Generative adversarial networks.”\nGoodfellow, Ch. 14, “Autoencoders.”\n\nArticles\n\nKingma, D. P., & Welling, M. (2014). Auto-encoding variational Bayes. International Conference on Learning Representations (arXiv:1312.6114).\nHo, J., Jain, A., & Abbeel, P. (2020). Denoising diffusion probabilistic models. Advances in Neural Information Processing Systems, 33, 6840–6851.\nGoodfellow, I., et al. (2014). Generative adversarial nets. Advances in Neural Information Processing Systems, 27.\nLall, R., & Robinson, T. (2022). The MIDAS touch: Accurate and scalable missing-data imputation with deep learning. Political Analysis, 30(2), 179–196.\nLall, R., & Robinson, T. (2023). Efficient multiple imputation for diverse data in Python and R: MIDASpy and rMIDAS. Journal of Statistical Software, 107, 1–38."
+    "objectID": "lectures/lecture-01-what-is-ai.html#a-useful-three-way-distinction",
+    "href": "lectures/lecture-01-what-is-ai.html#a-useful-three-way-distinction",
+    "title": "What do we mean by AI?",
+    "section": "A useful three-way distinction",
+    "text": "A useful three-way distinction\n\n\nSymbolic AI\nHand-crafted rules. Logic. Knowledge bases.\n\nIBM’s Deep Blue\nExpert systems\nProlog\nCyc\n\nStrength: interpretable, verifiable.\nWeakness: brittle, doesn’t scale to messy data.\n\nMachine Learning\nModels that learn parameters from data.\n\nLinear / logistic regression\nRandom forests, SVMs\nk-means clustering\n\nStrength: data-driven, statistically grounded.\nWeakness: feature engineering required for messy data.\n\nDeep Learning\nA subset of ML using neural networks with multiple hidden layers.\n\nImage classifiers\nGPT / LLaMA / Claude\nAlphaFold\n\nStrength: learns features end-to-end from raw data.\nWeakness: data-hungry, compute-hungry, opaque."
   },
   {
-    "objectID": "readings.html#day-8",
-    "href": "readings.html#day-8",
-    "title": "Reading list",
-    "section": "Day 8 · Text-gen 1/4 — embeddings & character models",
-    "text": "Day 8 · Text-gen 1/4 — embeddings & character models\nThu 13 Aug — text as data, embeddings, the bigram language model\nTextbook chapters\n\nd2l, Ch. 15, “Natural Language Processing: Pretraining” (word2vec, embeddings).\nGoodfellow, Ch. 15, “Representation Learning” (§15.4, distributed representations).\n\nArticles\n\nMikolov, T., Sutskever, I., Chen, K., Corrado, G., & Dean, J. (2013). Distributed representations of words and phrases and their compositionality. Advances in Neural Information Processing Systems, 26.\nRodriguez, P. L., & Spirling, A. (2022). Word embeddings: What works, what doesn’t, and how to tell the difference for applied research. Journal of Politics, 84(1), 101–115.\nGarg, N., Schiebinger, L., Jurafsky, D., & Zou, J. (2018). Word embeddings quantify 100 years of gender and ethnic stereotypes. Proceedings of the National Academy of Sciences, 115(16), E3635–E3644.\nBolukbasi, T., Chang, K.-W., Zou, J., Saligrama, V., & Kalai, A. (2016). Man is to computer programmer as woman is to homemaker? Debiasing word embeddings. Advances in Neural Information Processing Systems, 29."
+    "objectID": "lectures/lecture-01-what-is-ai.html#symbolic-ai-in-action-deep-blue",
+    "href": "lectures/lecture-01-what-is-ai.html#symbolic-ai-in-action-deep-blue",
+    "title": "What do we mean by AI?",
+    "section": "Symbolic AI in action — Deep Blue",
+    "text": "Symbolic AI in action — Deep Blue\n10 May 1997   IBM’s Deep Blue beats world champion Garry Kasparov 3½–2½ in a 6-game match — the first time a computer defeats a reigning world chess champion.\n\n\nSpeed\n\n200M\n\nboard positions/second\n\nHardware\n\n480\n\ncustom chips\n\nLearning\n\n0\n\nlearned parameters\n\n\nWhat Deep Blue actually was\n\nFast search across possible moves.\nAn evaluation function with ~8,000 features — material, mobility, king safety, pawn structure — all hand-tuned with grandmasters (GMs).\nEvery position with ≤ 5 pieces, pre-solved.\n\n\n\nWhy this is symbolic AI Every “smart” thing Deep Blue did was encoded by humans. No learning. No data. No statistics. Its intelligence was the team’s intelligence, made very fast.\nIt beat the world champion at chess — and could do nothing else. Not checkers. Not conversation. Not recognise a horse."
   },
   {
-    "objectID": "readings.html#day-9",
-    "href": "readings.html#day-9",
-    "title": "Reading list",
-    "section": "Day 9 · Text-gen 2/4 — recurrent networks",
-    "text": "Day 9 · Text-gen 2/4 — recurrent networks\nMon 17 Aug — recurrence, the hidden state, vanishing gradients, LSTM/GRU\nTextbook chapters\n\nRaff, Ch. 4, “Recurrent neural networks.”\nd2l, Ch. 9, “Recurrent Neural Networks,” and Ch. 10, “Modern Recurrent Neural Networks” (LSTM, GRU).\nGoodfellow, Ch. 10, “Sequence Modeling: Recurrent and Recursive Nets.”\n\nArticles\n\nHochreiter, S., & Schmidhuber, J. (1997). Long short-term memory. Neural Computation, 9(8), 1735–1780.\nCho, K., et al. (2014). Learning phrase representations using RNN encoder–decoder for statistical machine translation. Conference on Empirical Methods in Natural Language Processing (arXiv:1406.1078).\nBahdanau, D., Cho, K., & Bengio, Y. (2015). Neural machine translation by jointly learning to align and translate. International Conference on Learning Representations (arXiv:1409.0473).\nHegre, H., et al. (2022). Forecasting Fatalities. — conflict events as a sequence over time."
+    "objectID": "lectures/lecture-01-what-is-ai.html#why-deep-learning-why-now",
+    "href": "lectures/lecture-01-what-is-ai.html#why-deep-learning-why-now",
+    "title": "What do we mean by AI?",
+    "section": "Why deep learning? Why now?",
+    "text": "Why deep learning? Why now?\nThe ideas are old. The scale is new.\n\n\nThe ingredients (mostly pre-2010):\n\nBackpropagation (Rumelhart, Hinton & Williams, 1986)\nCNNs (LeCun et al., 1989)\nLSTMs (Hochreiter & Schmidhuber, 1997)\nReLU activations (Glorot et al., 2011)\n\n\nWhat changed (2012–):\n\nGPUs cheap enough to run on\nImageNet, Common Crawl, the open web\nFrameworks: Theano → TensorFlow → PyTorch\nAlexNet (2012) → Transformer (2017) → GPT-3 (2020)"
   },
   {
-    "objectID": "readings.html#day-10",
-    "href": "readings.html#day-10",
-    "title": "Reading list",
-    "section": "Day 10 · Text-gen 3/4 — attention & transformers",
-    "text": "Day 10 · Text-gen 3/4 — attention & transformers\nTue 18 Aug — attention, the transformer block, scaling, a tiny GPT\nTextbook chapters\n\nPrince, Ch. 12, “Transformers.”\nRaff, Ch. 10, “Attention mechanisms,” and Ch. 12, “Network design alternatives to RNNs” (transformers).\nd2l, Ch. 11, “Attention Mechanisms and Transformers.”\n\nArticles\n\nVaswani, A., et al. (2017). Attention is all you need. Advances in Neural Information Processing Systems, 30. (Read the abstract, Fig. 1, and §3.1–3.2.)\nKaplan, J., et al. (2020). Scaling laws for neural language models. arXiv:2001.08361.\nHoffmann, J., et al. (2022). Training compute-optimal large language models (Chinchilla). Advances in Neural Information Processing Systems, 35 (arXiv:2203.15556).\nArgyle, L. P., et al. (2023). Out of one, many: Using language models to simulate human samples. Political Analysis, 31(3), 337–351.\nBender, E. M., Gebru, T., McMillan-Major, A., & Shmitchell, S. (2021). On the dangers of stochastic parrots: Can language models be too big? ACM Conference on Fairness, Accountability, and Transparency (FAccT), 610–623."
+    "objectID": "lectures/lecture-01-what-is-ai.html#a-brief-timeline",
+    "href": "lectures/lecture-01-what-is-ai.html#a-brief-timeline",
+    "title": "What do we mean by AI?",
+    "section": "A brief timeline",
+    "text": "A brief timeline\n\n\n\n1958\n\n\n\n\n\nPerceptron\n\n\nFirst learnable neural unit\n\n\n\n\n1986\n\n\n\n\n\nBackprop\n\n\nDeep nets become trainable\n\n\n\n\n1989\n\n\n\n\n\nLeNet (CNNs)\n\n\nVision’s first architecture\n\n\n\n\n2012\n\n\n\n\n\nAlexNet\n\n\nDL eats computer vision\n\n\n\n\n2014\n\n\n\n\n\nGANs\n\n\nGenerative modelling takes off\n\n\n\n\n2017\n\n\n\n\n\nTransformer\n\n\n“Attention is all you need”\n\n\n\n\n2020\n\n\n\n\n\nGPT-3\n\n\nScale → emergent capability\n\n\n\n\n2022\n\n\n\n\n\nChatGPT\n\n\nAI as consumer product\n\n\n\n\n2024+\n\n\n\n\n\nMultimodal\n\n\nReasoning, agents\n\n\n\n\n\nFoundations\n\n\nDeep-learning era\n\n\nAI as product"
   },
   {
-    "objectID": "readings.html#day-11",
-    "href": "readings.html#day-11",
-    "title": "Reading list",
-    "section": "Day 11 · Text-gen 4/4 — tokenisation & sampling",
-    "text": "Day 11 · Text-gen 4/4 — tokenisation & sampling\nWed 19 Aug — byte-pair encoding, sampling strategies, the post-training pipeline\nTokenisation and sampling are not covered well by the textbooks; this day is articles-led.\nArticles\n\nSennrich, R., Haddow, B., & Birch, A. (2016). Neural machine translation of rare words with subword units. Proceedings of the Association for Computational Linguistics (arXiv:1508.07909).\nRadford, A., et al. (2019). Language models are unsupervised multitask learners. OpenAI technical report. (Byte-level BPE.)\nHoltzman, A., Buys, J., Du, L., Forbes, M., & Choi, Y. (2020). The curious case of neural text degeneration. International Conference on Learning Representations (arXiv:1904.09751). (Top-p / nucleus sampling.)\nPetrov, A., La Malfa, E., Torr, P., & Bibi, A. (2023). Language model tokenizers introduce unfairness between languages. Advances in Neural Information Processing Systems, 36 (arXiv:2305.15425).\nOuyang, L., et al. (2022). Training language models to follow instructions with human feedback (InstructGPT). Advances in Neural Information Processing Systems, 35 (arXiv:2203.02155).\nRafailov, R., et al. (2023). Direct preference optimization: Your language model is secretly a reward model. Advances in Neural Information Processing Systems, 36 (arXiv:2305.18290).\nBai, Y., et al. (2022). Constitutional AI: Harmlessness from AI feedback. arXiv:2212.08073.\nLewis, P., et al. (2020). Retrieval-augmented generation for knowledge-intensive NLP tasks. Advances in Neural Information Processing Systems, 33 (arXiv:2005.11401)."
+    "objectID": "lectures/lecture-01-what-is-ai.html#course-structure",
+    "href": "lectures/lecture-01-what-is-ai.html#course-structure",
+    "title": "What do we mean by AI?",
+    "section": "Course structure",
+    "text": "Course structure\n\n\nWeek 1\nFoundations\n\nWhat is AI?\nDeep models — a primer\nComputational graphs & the maths of AI\nBackpropagation\nFeed-forward networks in PyTorch\n\n\nWeek 2\nVision & generation\n\nClassifying images (CNNs)\nGenerating images (autoencoders, VAEs, diffusion)\nWord embeddings · character models\nRecurrent neural networks\n\n\nWeek 3\nText & LLMs\n\nAttention & transformers\nTokenisation & a working GPT\nEthics, limitations & recap"
   },
   {
-    "objectID": "readings.html#day-12",
-    "href": "readings.html#day-12",
-    "title": "Reading list",
-    "section": "Day 12 · Ethics, limitations, course recap",
-    "text": "Day 12 · Ethics, limitations, course recap\nThu 20 Aug\nTextbook chapters\n\nPrince, Ch. 21, “Deep learning and ethics.”\n\nArticles\n\nBender, E. M., Gebru, T., McMillan-Major, A., & Shmitchell, S. (2021). On the dangers of stochastic parrots: Can language models be too big? FAccT, 610–623.\nBuolamwini, J., & Gebru, T. (2018). Gender shades. Proceedings of Machine Learning Research (FAccT), 81, 1–15.\nObermeyer, Z., Powers, B., Vogeli, C., & Mullainathan, S. (2019). Dissecting racial bias in an algorithm used to manage the health of populations. Science, 366(6464), 447–453.\nChouldechova, A. (2017). Fair prediction with disparate impact: A study of bias in recidivism prediction instruments. Big Data, 5(2), 153–163.\nAngwin, J., Larson, J., Mattu, S., & Kirchner, L. (2016). Machine bias. ProPublica, 23 May 2016.\nCarlini, N., et al. (2021). Extracting training data from large language models. USENIX Security Symposium, 2633–2650.\nSpirling, A. (2023). Why open-source generative AI models are an ethical way forward for science. Nature, 616(7957), 413.\n\nBooks (breadth)\n\nEubanks, V. (2018). Automating Inequality: How High-Tech Tools Profile, Police, and Punish the Poor. St. Martin’s Press. (The Allegheny Family Screening Tool — the plenary case.)\nCrawford, K. (2021). Atlas of AI. Yale University Press.\nRussell, S. (2019). Human Compatible: Artificial Intelligence and the Problem of Control. Viking.\nMitchell, M. (2019). Artificial Intelligence: A Guide for Thinking Humans. Farrar, Straus and Giroux."
+    "objectID": "lectures/lecture-01-what-is-ai.html#labs",
+    "href": "lectures/lecture-01-what-is-ai.html#labs",
+    "title": "What do we mean by AI?",
+    "section": "Labs",
+    "text": "Labs\nLab instructor: Kaifang Zhou (LSE Fellow, Statistics)\n\nAn expert (!) in machine learning methods\n\nFocus on implementing concepts in practise\n\n90 minute sessions\nBuild neural networks from scratch\nUse industry-leading frameworks\n\nOpportunity to consolidate conceptual understanding"
   },
   {
-    "objectID": "readings.html#free-online-companions",
-    "href": "readings.html#free-online-companions",
-    "title": "Reading list",
-    "section": "Appendix — free online companions (not part of the reading list)",
-    "text": "Appendix — free online companions (not part of the reading list)\nThese are videos, tutorials, and explainer posts that map directly onto each day’s lab. They are not part of the formal reading list above — they are listed here only as optional, free study aids.\n\n\n\nDay\nCompanion\n\n\n\n\n1\nAltman, The Intelligence Age (essay) — https://ia.samaltman.com/\n\n\n2\n3Blue1Brown, But what is a neural network? — https://www.youtube.com/watch?v=aircAruvnKk\n\n\n3\n3Blue1Brown, Essence of Linear Algebra / Essence of Calculus — https://www.3blue1brown.com/ · Karpathy, micrograd repo — https://github.com/karpathy/micrograd\n\n\n4\nKarpathy, Building micrograd — https://www.youtube.com/watch?v=VMj-3S1tku0 · 3Blue1Brown, backpropagation (ch. 3–4)\n\n\n5\nPyTorch, Learn the Basics — https://pytorch.org/tutorials/beginner/basics/intro.html\n\n\n6\nStanford CS231n, Convolutional Networks notes — https://cs231n.github.io/convolutional-networks/\n\n\n7\nWeng, From Autoencoder to Beta-VAE and What are Diffusion Models? — https://lilianweng.github.io/\n\n\n8\nKarpathy, Building makemore (part 1) — https://www.youtube.com/watch?v=PaCmpygFfXo · Alammar, The Illustrated Word2vec — https://jalammar.github.io/illustrated-word2vec/\n\n\n9\nKarpathy, The Unreasonable Effectiveness of RNNs — https://karpathy.github.io/2015/05/21/rnn-effectiveness/ · Olah, Understanding LSTM Networks — https://colah.github.io/posts/2015-08-Understanding-LSTMs/\n\n\n10\nAlammar, The Illustrated Transformer — https://jalammar.github.io/illustrated-transformer/ · Karpathy, Let’s build GPT — https://www.youtube.com/watch?v=kCc8FmEb1nY · nanoGPT — https://github.com/karpathy/nanoGPT\n\n\n11\nKarpathy, Let’s build the GPT Tokenizer — https://www.youtube.com/watch?v=zduSFxRajkE · Hugging Face, Summary of the tokenizers — https://huggingface.co/docs/transformers/tokenizer_summary\n\n\n12\nKarpathy, Neural Networks: Zero to Hero — https://karpathy.ai/zero-to-hero.html · Distill.pub — https://distill.pub/"
+    "objectID": "lectures/lecture-01-what-is-ai.html#assessment",
+    "href": "lectures/lecture-01-what-is-ai.html#assessment",
+    "title": "What do we mean by AI?",
+    "section": "Assessment",
+    "text": "Assessment\n\nFormative Weekly quizzes (end of weeks 1 & 2). Marked by Kaifang.\nNot part of your final grade — they tell you where you stand.\n\n\nMidterm A take-home assessment at the end of week 2. You’ll train a small model, document choices, and discuss results.\n\n\nFinal Two-hour pen-and-paper exam (Fri 21 August). Forty multiple-choice questions, six options each. No laptops.\n\nA test of conceptual understanding of both deep learning and its implementation\nAbout half the questions ask you to work something out — a forward pass, a gradient, a shape — and then pick the answer you got"
+  },
+  {
+    "objectID": "lectures/lecture-01-what-is-ai.html#course-resources",
+    "href": "lectures/lecture-01-what-is-ai.html#course-resources",
+    "title": "What do we mean by AI?",
+    "section": "Course resources",
+    "text": "Course resources\nI will post and maintain everything at me324.lse-methodology.github.io\n\nAll lecture slides released at least 2 days in advance\nAccess lab notebooks/solutions here too\n\nI have provided indicative readings via LSE’s Leganto system\n\nThis is optional and complementary\nThe slides and lab notebooks are definitive and what the exam is based on\n\nUse Moodle for submitting your quizzes/assignments"
+  },
+  {
+    "objectID": "lectures/lecture-01-what-is-ai.html#use-of-generative-ai-in-this-course",
+    "href": "lectures/lecture-01-what-is-ai.html#use-of-generative-ai-in-this-course",
+    "title": "What do we mean by AI?",
+    "section": "Use of generative AI in this course",
+    "text": "Use of generative AI in this course\nYou will be using AI tools throughout this course — that is the point.\n\n\nYes, you may use:\n\nChatGPT / Claude / Copilot to help with lab code\nAI tools to explain concepts\nAI to debug\n\nThe course Moodle has a written policy.\n\nBut:\n\nYou can’t use them in the final exam 🙃\nNaive use will produce wrong answers\n2026: You need to understand the code not write it"
+  },
+  {
+    "objectID": "lectures/lecture-01-what-is-ai.html#what-chatgptclaude-actually-is",
+    "href": "lectures/lecture-01-what-is-ai.html#what-chatgptclaude-actually-is",
+    "title": "What do we mean by AI?",
+    "section": "What ChatGPT/Claude actually is",
+    "text": "What ChatGPT/Claude actually is\nStrip away the chat interface and the marketing. ChatGPT is:\n\nA transformer neural network…\n…with around 10¹¹–10¹² parameters…\n…trained to predict the next token in a sequence…\n…on a large chunk of the public internet…\n…then fine-tuned with human feedback (RLHF) to follow instructions and refuse certain requests.\n\n\nBy the end of this course you will have built a small version of (1)–(3) yourself. The rest is engineering at scale."
+  },
+  {
+    "objectID": "lectures/lecture-01-what-is-ai.html#what-deep-learning-is-not",
+    "href": "lectures/lecture-01-what-is-ai.html#what-deep-learning-is-not",
+    "title": "What do we mean by AI?",
+    "section": "What deep learning is not",
+    "text": "What deep learning is not\n\n\n\nNot thinking, in any cognitively meaningful sense\n\nA trained model has no goals, no beliefs, no understanding of context outside its training.\n\n\n\n\n\nNot factually reliable\n\nLLMs hallucinate by design — they generate plausible continuations, not true ones.\n\n\n\n\nNot neutral\n\nTraining data encodes the biases of who wrote it, who curated it, and what was missing.\n\n\n\n\n\nNot explainable by default\n\nWe can train a 10B-parameter model in a week. We can’t fully explain why it answers any single question the way it does."
+  },
+  {
+    "objectID": "lectures/lecture-01-what-is-ai.html#ai-is-everywhere-you-just-stopped-noticing",
+    "href": "lectures/lecture-01-what-is-ai.html#ai-is-everywhere-you-just-stopped-noticing",
+    "title": "What do we mean by AI?",
+    "section": "AI is everywhere — you just stopped noticing",
+    "text": "AI is everywhere — you just stopped noticing\nMost “AI” you’ve used today, you didn’t think of as AI:\n\n\n\nEmail autocomplete + spam filters — every Gmail interaction.\nPhone keyboard suggestions — language models since 2018.\nPhoto apps that find your face, group your dog, blur a background.\nMap routing — sub-second searches over millions of road segments.\n\n\n\nStreaming recommendations — Netflix’s homepage is regenerated for you each visit.\nSearch results — ordered by hundreds of learned signals.\nBank fraud detection — pattern recognition over your transaction history.\nVoice assistants — Siri, Alexa, Google Assistant."
+  },
+  {
+    "objectID": "lectures/lecture-01-what-is-ai.html#ai-as-product-the-consumer-wave",
+    "href": "lectures/lecture-01-what-is-ai.html#ai-as-product-the-consumer-wave",
+    "title": "What do we mean by AI?",
+    "section": "AI as product — the consumer wave",
+    "text": "AI as product — the consumer wave\nSince November 2022   A new product category appeared overnight.\n\n\n\n2 mo\n\nChatGPT to reach 100M users (TikTok took 9; Instagram 30.)\n\n\n200M+\n\nWeekly active ChatGPT users by mid-2024.\n\n\n76%\n\nOf professional developers using AI by 2024.\n\n\nNew product categories\n\nGeneral-purpose assistants — ChatGPT, Claude, Gemini, Perplexity.\nImage / video generators — Midjourney, DALL·E, Sora, Veo.\nCode assistants — Copilot, Cursor, Claude Code."
+  },
+  {
+    "objectID": "lectures/lecture-01-what-is-ai.html#ai-in-research-and-discovery",
+    "href": "lectures/lecture-01-what-is-ai.html#ai-in-research-and-discovery",
+    "title": "What do we mean by AI?",
+    "section": "AI in research and discovery",
+    "text": "AI in research and discovery\nPossibly the most consequential application\n\n\nBiology + medicine\n\nAlphaFold (DeepMind, 2021) — predicted 3D structure of ~all 200M known proteins\nAI radiology — detecting tumours, pulmonary embolisms, fractures with sensitivity matching or beating specialists\nDrug discovery — running candidate-molecule pipelines at scale.\n\n\nPhysical sciences\n\nWeather prediction — Google’s GenCast (2024) matches or beats top numerical weather services\nMaterials discovery — DeepMind’s GNoME predicted 380,000 stable new crystal structures.\nParticle physics + astronomy — anomaly detection in LHC data, gravitational-wave searches.\n\n\n\nFor social scientists LLMs as measurement instruments: scoring stances in legislative speeches, coding survey open-ends, simulating respondents."
+  },
+  {
+    "objectID": "lectures/lecture-01-what-is-ai.html#ai-in-high-stakes-decisions",
+    "href": "lectures/lecture-01-what-is-ai.html#ai-in-high-stakes-decisions",
+    "title": "What do we mean by AI?",
+    "section": "AI in high-stakes decisions",
+    "text": "AI in high-stakes decisions\nAI now shapes decisions about people — often without their knowledge or recourse.\n\n\nWhere it’s deployed\n\nHiring — resume screening, video-interview assessment, “culture-fit” scoring.\nCredit + insurance — approvals, pricing, fraud flagging.\nHealthcare — triage scoring, prior-authorisation decisions, diagnostic aids.\nCriminal justice — risk-of-reoffending scoring, predictive policing.\nWelfare — eligibility scoring, fraud detection.\n\n\nWhere it has gone badly\n\nCOMPAS (US, 2016) — large racial disparities in false-positive rates for recidivism scoring.\nDutch SyRI (welfare fraud, 2020) — ruled illegal; disproportionate targeting of low-income minorities.\nAustralian Robodebt (2016–19) — automated, often-wrongful debt notices; Royal Commission, $1.8B settlement.\nAmazon hiring tool (scrapped 2018) — systematically downgraded women’s CVs."
+  },
+  {
+    "objectID": "lectures/lecture-01-what-is-ai.html#ai-in-my-less-high-stakes",
+    "href": "lectures/lecture-01-what-is-ai.html#ai-in-my-less-high-stakes",
+    "title": "What do we mean by AI?",
+    "section": "AI in my (less high stakes)",
+    "text": "AI in my (less high stakes)\nThree concrete projects, three different uses\n\n\n\nMIDAS (2022)\nUse denoising-autoencoders method for surveys with missing data.\nMore accurate than MICE, much faster on large datasets.\nMore on Day 7\n\n\n\nLLMs as measurement instruments (2026)\nCan we use LLMs to get better measures of social scientific concepts (like occupation).\nMore on Days 11–12\n\n\n\nSynthetic data\nHow and why should we generate “fake” data for our research?\nWork in progress"
+  },
+  {
+    "objectID": "lectures/lecture-01-what-is-ai.html#what-this-is-doing-to-work",
+    "href": "lectures/lecture-01-what-is-ai.html#what-this-is-doing-to-work",
+    "title": "What do we mean by AI?",
+    "section": "What this is doing to work",
+    "text": "What this is doing to work\nAlready happening\n\n\nProductivity studies\n\nCoding — controlled GitHub study: Copilot users finished tasks ~55% faster.\nWriting / consulting — BCG field experiment (Dell’Acqua et al. 2023): GPT-4 closed the gap between low and high performers on knowledge tasks.\n\n\nLabour displacement\n\nTranslation, copy editing, junior legal research, illustration: workforces already shrinking.\nKnowledge work is no longer “automation-proof” — the opposite of the 2010s consensus.\nWill gains accrue largely to capital?\n\n\n\nThe future\nWe don’t know how this plays out at scale. Disagreements between serious economists, policy-makers, and AI labs are real and live."
+  },
+  {
+    "objectID": "lectures/lecture-01-what-is-ai.html#your-turn-to-try-things-out",
+    "href": "lectures/lecture-01-what-is-ai.html#your-turn-to-try-things-out",
+    "title": "What do we mean by AI?",
+    "section": "Your turn to try things out!",
+    "text": "Your turn to try things out!\n≈ 15 mins · in pairs · laptops out\n\nThe task\nCompare two language models from different generations on the same three prompts. The goal isn’t to “win” — it’s to see where the current generation is qualitatively different/better.\n\nA two-year gap\nOpen lmarena.ai → Direct Chat. Pick:\n\nAn older model (e.g. llama-2-13b-chat, vicuna-13b, or gpt-3.5-turbo).\nA current frontier model (e.g. gpt-5, claude-opus-4-7, gemini-2.5-pro).\n\nSend each of these to both models:\n\n\nHow many times does the letter “r” appear in the word “strawberry”? Think step by step.\nSummarise the key findings of the 2019 paper “Neural Turnout Models for British Elections” by Robinson and Zhou.\nA bat and a ball cost £1.10. The bat costs £1.00 more than the ball. How much is the ball? — then reply: “Are you sure? I make it 10p.”\n\n\n\nThe answers are 3, the paper doesn’t exist, and 5p."
+  },
+  {
+    "objectID": "lectures/lecture-01-what-is-ai.html#what-to-look-for",
+    "href": "lectures/lecture-01-what-is-ai.html#what-to-look-for",
+    "title": "What do we mean by AI?",
+    "section": "What to look for",
+    "text": "What to look for\ndiscussion · ≈ 10 min\n\nTalk to your partner\n\nWhere did the older model break down most badly — and how did it break? (Loss of context? Hallucination? Repetition? Confidence-without-content?)\nWhere did the current model still struggle? Was there any task where the older model held its own?\nWhat does the gap actually look like? “10× better” is too vague. Be specific."
+  },
+  {
+    "objectID": "lectures/lecture-01-what-is-ai.html#some-known-advances",
+    "href": "lectures/lecture-01-what-is-ai.html#some-known-advances",
+    "title": "What do we mean by AI?",
+    "section": "Some known advances",
+    "text": "Some known advances\n\nWhat you should be noticing\n\nOlder models lose track of context quickly\nOlder models generate fluently but reason badly.\nOlder models confidently make things up.\n\nSo do current ones — they just hide it better!\n\n\n\n\nThe bit that matters\nPrompts 1 and 2 got fixed — those were the easy wins, and scale bought them.\nPrompt 3 often doesn’t. Push back on a correct answer and watch how many models fold. That’s not about size; it’s about what they were trained to optimise. We’ll take this apart properly in tomorrow’s lab."
+  },
+  {
+    "objectID": "lectures/lecture-01-what-is-ai.html#what-youll-be-able-to-do-by-friday",
+    "href": "lectures/lecture-01-what-is-ai.html#what-youll-be-able-to-do-by-friday",
+    "title": "What do we mean by AI?",
+    "section": "What you’ll be able to do by Friday",
+    "text": "What you’ll be able to do by Friday\nBy the end of this week alone, you will have:\n\n\n\nImplemented matrix multiplication and the chain rule by hand.\nBuilt a computational graph in Python from scratch.\nWritten backpropagation — the engine of every neural net — in fewer than 100 lines of code.\nTrained your first neural network on a real dataset using PyTorch.\n\n\n\nLab tomorrow AM (CBG 1.08):\n\nSet up Google Colab\nVerify your PyTorch install\nMeet the tensor — for now, just “a Python list of numbers”\nGo back to lmarena and find the failure modes that didn’t get fixed"
+  },
+  {
+    "objectID": "lectures/lecture-01-what-is-ai.html#next-time",
+    "href": "lectures/lecture-01-what-is-ai.html#next-time",
+    "title": "What do we mean by AI?",
+    "section": "Next time",
+    "text": "Next time\nTomorrow, Tue 04 Aug\nDeep models — a primer\nWe’ll formally define a neural network, look at its structure, and see why “depth” matters. By the end of tomorrow, you’ll have written your first forward pass by hand.\n\n\n\n\n\n\nOptional reading before Wednesday\n\n\n\nGoodfellow, Bengio & Courville — Deep Learning — Chapter 6 (skim).\n3Blue1Brown — But what is a neural network? (19 min, gentle, visual).\n\n\n\n\n\n\n\nME324 · AI and Deep Learning · LSE Summer School"
   },
   {
     "objectID": "lectures/lecture-05-feedforward.html#where-are-we",

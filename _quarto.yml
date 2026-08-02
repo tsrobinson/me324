@@ -45,8 +45,9 @@ website:
   repo-actions: [source]
   open-graph: true
   navbar:
-    background: "#0E1A2B"
-    foreground: "#FBFAF6"
+    # Cobalt sampled from the hero banner, replacing the near-black navy.
+    background: "#183D87"
+    foreground: "#F7F1E3"
     pinned: true
     left:
       - href: index.qmd

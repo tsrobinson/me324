@@ -4,6 +4,13 @@ page-layout: full
 toc: false
 ---
 
+```{=html}
+<div class="site-banner">
+  <img src="assets/images/hero-banner.webp"
+       alt="A painted cut-out collage in the style of Matisse: seaweed fronds, waves and a spiral shell in blue, green and orange on cream paper, with a four-layer neural network drawn across the middle as rows of coloured circles joined by black lines.">
+</div>
+```
+
 ::: {.hero}
 [LSE Summer School · 2026]{.eyebrow}
 
