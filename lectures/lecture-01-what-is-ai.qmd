@@ -519,7 +519,7 @@ Not part of your final grade — they tell *you* where you stand.
 
 ## Course resources
 
-I will post and maintain everything at [me324.lse-methodology.github.io](me324.lse-methodology.github.io)
+I will post and maintain everything at [ts-robinson.com/me324](https://ts-robinson.com/me324)
 
 * All lecture slides released at least 2 days in advance
 * Access lab notebooks/solutions here too
