@@ -4,7 +4,7 @@
     "href": "lectures/lecture-03-computational-graphs.html#why-we-need-this",
     "title": "Computational graphs & the maths of AI",
     "section": "Why we need this",
-    "text": "Why we need this\nA modern neural network operates on tensors with millions of entries. We need notation that scales — both for writing and for computing.\n\nEvery layer of a neural network is essentially a matmul followed by an non-linear action function applied element-wise.\n\nBut we’re social scientists 😨\n\nMatrices aren’t that scary! Stacking survey into a data frame (n rows, k columns) gives you a matrix.\nWe’re largely dressing up familiar maths using new notation."
+    "text": "Why we need this\nA modern neural network operates on tensors with millions of entries. We need notation that scales — both for writing and for computing.\n\nEvery layer of a neural network is a matmul followed by a non-linear activation function applied element-wise.\n\n\nMatrices aren’t that scary! Stacking survey into a data frame (n rows, k columns) gives you a matrix.\nWe’re largely dressing up familiar maths using new notation."
   },
   {
     "objectID": "lectures/lecture-03-computational-graphs.html#scalars",
@@ -67,7 +67,7 @@
     "href": "lectures/lecture-03-computational-graphs.html#matrix-multiplication",
     "title": "Computational graphs & the maths of AI",
     "section": "Matrix multiplication",
-    "text": "Matrix multiplication\nTake \\mathbf{A} \\in \\mathbb{R}^{n \\times k} and \\mathbf{B} \\in \\mathbb{R}^{k \\times t}.\nThe product \\mathbf{AB} is the n \\times t matrix whose entry (i, j) is the dot product of row i of \\mathbf{A} and column j of \\mathbf{B}:\n\n(\\mathbf{AB})_{ij} = \\sum_{\\ell=1}^k A_{i\\ell} \\, B_{\\ell j}\n\n\nDimension rule (memorise this): the inner dimensions must match.\n\n(\\underbrace{n \\times k}_{\\mathbf{A}}) \\cdot (\\underbrace{k \\times t}_{\\mathbf{B}}) \\longrightarrow (n \\times t)\n\nIf they don’t match, the product is undefined."
+    "text": "Matrix multiplication\nTake \\mathbf{A} \\in \\mathbb{R}^{n \\times k} and \\mathbf{B} \\in \\mathbb{R}^{k \\times t}.\nThe product \\mathbf{AB} is the n \\times t matrix whose entry (i, j) is the dot product of row i of \\mathbf{A} and column j of \\mathbf{B}:\n\n(\\mathbf{AB})_{ij} = \\sum_{\\ell=1}^k A_{i\\ell} \\, B_{\\ell j}\n\n\nDimension rule: the inner dimensions must match.\n\n(\\underbrace{n \\times k}_{\\mathbf{A}}) \\cdot (\\underbrace{k \\times t}_{\\mathbf{B}}) \\longrightarrow (n \\times t)\n\nIf they don’t match, the product is undefined."
   },
   {
     "objectID": "lectures/lecture-03-computational-graphs.html#matrix-multiplication-worked-example",
@@ -102,7 +102,7 @@
     "href": "lectures/lecture-03-computational-graphs.html#plenary-matrix-products-by-hand-1",
     "title": "Computational graphs & the maths of AI",
     "section": "Plenary · matrix products by hand",
-    "text": "Plenary · matrix products by hand\n≈ 20 min · pen and paper, in pairs\n\nFive problems\nFor each, compute or say “undefined” (with a reason).\n\n\\begin{bmatrix} 1 & 2 \\\\ 3 & 4 \\end{bmatrix} \\begin{bmatrix} 5 \\\\ 6 \\end{bmatrix} = \\ ?\n\\begin{bmatrix} 1 & 0 \\\\ 0 & 1 \\end{bmatrix} \\begin{bmatrix} 7 & 8 \\\\ 9 & 10 \\end{bmatrix} = \\ ?\n\\begin{bmatrix} 1 & 2 & 3 \\end{bmatrix} \\begin{bmatrix} 4 \\\\ 5 \\\\ 6 \\end{bmatrix} = \\ ?\n\\begin{bmatrix} 1 \\\\ 2 \\\\ 3 \\end{bmatrix} \\begin{bmatrix} 4 & 5 \\end{bmatrix} = \\ ?\n\\begin{bmatrix} 1 & 2 \\end{bmatrix} \\begin{bmatrix} 3 \\\\ 4 \\\\ 5 \\end{bmatrix} = \\ ?\n\n\nTen minutes. Then we’ll discuss together."
+    "text": "Plenary · matrix products by hand\n≈ 10 min · pen and paper, in pairs\n\nFive problems\nFor each, compute or say “undefined” (with a reason).\n\n\\begin{bmatrix} 1 & 2 \\\\ 3 & 4 \\end{bmatrix} \\begin{bmatrix} 5 \\\\ 6 \\end{bmatrix} = \\ ?\n\\begin{bmatrix} 1 & 0 \\\\ 0 & 1 \\end{bmatrix} \\begin{bmatrix} 7 & 8 \\\\ 9 & 10 \\end{bmatrix} = \\ ?\n\\begin{bmatrix} 1 & 2 & 3 \\end{bmatrix} \\begin{bmatrix} 4 \\\\ 5 \\\\ 6 \\end{bmatrix} = \\ ?\n\\begin{bmatrix} 1 \\\\ 2 \\\\ 3 \\end{bmatrix} \\begin{bmatrix} 4 & 5 \\end{bmatrix} = \\ ?\n\\begin{bmatrix} 1 & 2 \\end{bmatrix} \\begin{bmatrix} 3 \\\\ 4 \\\\ 5 \\end{bmatrix} = \\ ?\n\n\nFive minutes. Then we’ll discuss together."
   },
   {
     "objectID": "lectures/lecture-03-computational-graphs.html#plenary-answers",
@@ -172,21 +172,21 @@
     "href": "lectures/lecture-03-computational-graphs.html#partial-derivatives-gradients",
     "title": "Computational graphs & the maths of AI",
     "section": "Partial derivatives & gradients",
-    "text": "Partial derivatives & gradients\nFor a function of several variables, e.g. y = f(x_1, x_2) = 3 x_1^2 + 2 x_2 + 1:\n\n\nCompute partial derivatives — treat the other vars as constants: \n\\frac{\\partial y}{\\partial x_1} = 6 x_1, \\qquad \\frac{\\partial y}{\\partial x_2} = 2\n\nCollect them into a gradient vector: \n\\nabla f = \\begin{bmatrix} \\frac{\\partial y}{\\partial x_1} \\\\ \\frac{\\partial y}{\\partial x_2} \\end{bmatrix} = \\begin{bmatrix} 6 x_1 \\\\ 2 \\end{bmatrix}\n\n\n\nWhy we care.\nFor a neural network with millions of weights, the loss is a function L(\\mathbf{W}) from “all the weights” to “a single number”.\nThe gradient \\nabla L is a vector of the same size as \\mathbf{W} — one entry per weight. It tells us, for each weight, how the loss changes.\nThat is the thing we minimise tomorrow."
+    "text": "Partial derivatives & gradients\nFor a function of several variables, e.g. y = f(a, b) = 3 a^2 + 2 b + 1:\n\n\nCompute partial derivatives — treat the other vars as constants: \n\\frac{\\partial y}{\\partial a} = 6 a, \\qquad \\frac{\\partial y}{\\partial b} = 2\n\nCollect them into a gradient vector: \n\\nabla f = \\begin{bmatrix} \\frac{\\partial y}{\\partial x_1} \\\\ \\frac{\\partial y}{\\partial x_2} \\end{bmatrix} = \\begin{bmatrix} 6 x_1 \\\\ 2 \\end{bmatrix}\n\n\n\nWhy we care.\nFor a neural network with millions of weights, the loss is a function L(\\mathbf{W}) from “all the weights” to “a single number”.\nThe gradient \\nabla L is a vector of the same size as \\mathbf{W} — one entry per weight. It tells us, for each weight, how the loss changes.\nThat is the thing we minimise tomorrow."
   },
   {
     "objectID": "lectures/lecture-03-computational-graphs.html#activity-chain-rule",
     "href": "lectures/lecture-03-computational-graphs.html#activity-chain-rule",
     "title": "Computational graphs & the maths of AI",
     "section": "Activity · chain rule",
-    "text": "Activity · chain rule\n≈ 15 min · pen and paper, in pairs\nFor each y, find \\dfrac{dy}{dx} — using the chain rule, without expanding.\n\n\ny = (3x + 1)^4\ny = e^{2x + 5}\ny = \\ln(x^2 + 1)\ny = \\sigma(3x) where \\sigma(z) = \\tfrac{1}{1 + e^{-z}}\ny = (a - x)^2 — find \\dfrac{dy}{dx}, treating a as a constant.\n\n\nTwelve minutes. We’ll discuss the trickier ones."
+    "text": "Activity · chain rule\n≈ 8 min · pen and paper\nFor each y, find \\dfrac{dy}{dx} — using the chain rule, without expanding.\n\n\ny = (3x + 1)^4\ny = e^{2x + 5}\ny = \\ln(x^2 + 1)\ny = \\sigma(3x) where \\sigma(z) = \\tfrac{1}{1 + e^{-z}}\ny = (a - x)^2 — find \\dfrac{dy}{dx}, treating a as a constant."
   },
   {
     "objectID": "lectures/lecture-03-computational-graphs.html#activity-answers",
     "href": "lectures/lecture-03-computational-graphs.html#activity-answers",
     "title": "Computational graphs & the maths of AI",
     "section": "Activity · answers",
-    "text": "Activity · answers\n\n\n\\dfrac{dy}{dx} = 4(3x+1)^3 \\cdot 3 = 12(3x+1)^3.\n\\dfrac{dy}{dx} = e^{2x+5} \\cdot 2 = 2 e^{2x+5}.\n\\dfrac{dy}{dx} = \\dfrac{1}{x^2+1} \\cdot 2x = \\dfrac{2x}{x^2 + 1}.\n\\dfrac{dy}{dx} = \\sigma(3x)(1 - \\sigma(3x)) \\cdot 3.\n\\dfrac{dy}{dx} = 2(a - x) \\cdot (-1) = -2(a - x).\n\n\n\n\n\n\n\n\nTip\n\n\nTomorrow we use exactly this pattern — repeatedly — to compute gradients across an entire neural network."
+    "text": "Activity · answers\n\n\n\\dfrac{dy}{dx} = 4(3x+1)^3 \\cdot 3 = 12(3x+1)^3.\n\\dfrac{dy}{dx} = e^{2x+5} \\cdot 2 = 2 e^{2x+5}.\n\\dfrac{dy}{dx} = \\dfrac{1}{x^2+1} \\cdot 2x = \\dfrac{2x}{x^2 + 1}.\n\\dfrac{dy}{dx} = \\sigma(3x)(1 - \\sigma(3x)) \\cdot 3.\n\\dfrac{dy}{dx} = 2(a - x) \\cdot (-1) = -2(a - x)."
   },
   {
     "objectID": "lectures/lecture-03-computational-graphs.html#a-function-as-a-picture",
@@ -221,7 +221,7 @@
     "href": "lectures/lecture-03-computational-graphs.html#the-perceptron-as-a-graph",
     "title": "Computational graphs & the maths of AI",
     "section": "The perceptron as a graph",
-    "text": "The perceptron as a graph\nYesterday’s linear perceptron y = wx + b becomes:\n\n\n\n\n\n\n\nG\n\n\nx\n\nx\n\n\n\nt\n\n*\n\n\n\nx-&gt;t\n\n\n\n\n\nw\n\nw\n\n\n\nw-&gt;t\n\n\n\n\n\nb\n\nb\n\n\n\np\n\n+\n\n\n\nb-&gt;p\n\n\n\n\n\nt-&gt;p\n\n\n\n\n\ny\n\ny\n\n\n\np-&gt;y\n\n\n\n\n\n\n\n\n\n\n(With an activation function \\sigma added between the + and the output, you’d insert one more node — same picture, one more step.)\n\nEvery node has a local derivative we can compute — using the cheat-sheet from earlier. The chain rule will glue them.\nThat’s the move that makes the whole edifice work. Tomorrow we use it."
+    "text": "The perceptron as a graph\nYesterday’s linear perceptron y = wx + b becomes:\n\n\n\n\n\n\n\nG\n\n\nx\n\nx\n\n\n\nt\n\n*\n\n\n\nx-&gt;t\n\n\n\n\n\nw\n\nw\n\n\n\nw-&gt;t\n\n\n\n\n\nb\n\nb\n\n\n\np\n\n+\n\n\n\nb-&gt;p\n\n\n\n\n\nt-&gt;p\n\n\n\n\n\ny\n\ny\n\n\n\np-&gt;y\n\n\n\n\n\n\n\n\n\n\n(With an activation function \\sigma added between the + and the output, you’d insert one more node — same picture, one more step.)\n\nEvery node has a local derivative we can compute.\nUsing the cheat-sheet from earlier, we can assign the form of these derivatives when we build the graph, to save compute."
   },
   {
     "objectID": "lectures/lecture-03-computational-graphs.html#a-network-as-a-graph",
@@ -242,7 +242,7 @@
     "href": "lectures/lecture-03-computational-graphs.html#take-stock",
     "title": "Computational graphs & the maths of AI",
     "section": "Take stock",
-    "text": "Take stock\nWhere you are at the end of Day 3\n\nYou can now:\n\nMultiply matrices and check shapes by hand.\nDifferentiate simple expressions, including with the chain rule.\nDraw any expression — from a simple polynomial to a two-layer network — as a directed acyclic graph.\nState what we still don’t have: a way to put loss into the graph and let gradients flow backwards.\n\n\n\n\n\n\n\n\nTip\n\n\nYou have all three tools. Tomorrow we put them together."
+    "text": "Take stock\nWhere you are at the end of Day 3\n\nYou can now:\n\nMultiply matrices and check shapes by hand.\nDifferentiate simple expressions, including with the chain rule.\nDraw any expression, from a simple function to a multi-layer neural network, as a directed acyclic graph.\n\nWhat we don’t have:\n\nA way to put loss into the graph and let gradients flow backwards.\n\n\n\n\n\n\n\n\nTip\n\n\nYou have all three tools. Tomorrow we put them together."
   },
   {
     "objectID": "lectures/lecture-03-computational-graphs.html#todays-lab-90-minutes",
@@ -256,7 +256,7 @@
     "href": "lectures/lecture-03-computational-graphs.html#see-you-tomorrow",
     "title": "Computational graphs & the maths of AI",
     "section": "See you tomorrow",
-    "text": "See you tomorrow\nLecture 4 — Backpropagation\nIf you want a head start: skim Karpathy’s micrograd GitHub README tonight. Don’t read the implementation yet — we’ll write it together tomorrow.\n\n\n\nME324 · AI and Deep Learning · LSE Summer School"
+    "text": "See you tomorrow\nLecture 4 — Backpropagation\nIf you want a head start: skim Karpathy’s micrograd GitHub README tonight. No need to read the implementation yet as we’ll write it together tomorrow.\n\n\n\nME324 · AI and Deep Learning · LSE Summer School"
   },
   {
     "objectID": "lectures/lecture-02-deep-models-primer.html#the-name-is-a-metaphor",
@@ -347,7 +347,7 @@
     "href": "lectures/lecture-02-deep-models-primer.html#plenary-answers",
     "title": "Deep models — a primer",
     "section": "Plenary · answers",
-    "text": "Plenary · answers\n\nLinear perceptron outputs\n\nA: 0.4(1) - 0.3(2) + 1.1(0) + 0.2 = 0.4 - 0.6 + 0 + 0.2 = 0.0\nB: 0.4(0) - 0.3(0) + 1.1(1) + 0.2 = 0 - 0 + 1.1 + 0.2 = 1.3\nC: 0.4(0.5) - 0.3(1) + 1.1(-1) + 0.2 = 0.2 - 0.3 - 1.1 + 0.2 = -1.0\n\n\n\nBonus f(\\mathbf{x},\\mathbf{w},b) =  \\mathbf{w} \\cdot \\mathbf{x} + b\n\n\n\n\n\n\n\nWe’re going to be doing a lot of dot products this August!\n\n\nEvery layer of every neural network is built out of this exact operation — a dot product plus a bias. No matter how complicated the architecture, it will rely on this very basic maths."
+    "text": "Plenary · answers\n\nLinear perceptron outputs\n\nA: 0.4(1) - 0.3(2) + 1.1(0) + 0.2 = 0.4 - 0.6 + 0 + 0.2 = 0.0\nB: 0.4(0) - 0.3(0) + 1.1(1) + 0.2 = 0 - 0 + 1.1 + 0.2 = 1.3\nC: 0.4(0.5) - 0.3(1) + 1.1(-1) + 0.2 = 0.2 - 0.3 - 1.1 + 0.2 = -1.0\n\n\n\nBonus f(\\mathbf{x}) =  \\mathbf{w} \\cdot \\mathbf{x} + b\n\n\n\n\n\n\n\nWe’re going to be doing a lot of dot products this August!\n\n\nEvery layer of every neural network is built out of this exact operation — a dot product plus a bias. No matter how complicated the architecture, it will rely on this very basic maths."
   },
   {
     "objectID": "lectures/lecture-02-deep-models-primer.html#why-one-linear-neuron-isnt-enough-concretely",
@@ -1306,7 +1306,7 @@
     "href": "lectures/lecture-05-feedforward.html#plenary-predict-the-activations",
     "title": "Feed-forward networks in PyTorch",
     "section": "Plenary · predict the activations",
-    "text": "Plenary · predict the activations\n≈ 20 min · in pairs\n\nThe pre-activation value:\nz = -3.5\nFor each activation, compute (or estimate) the post-activation value \\sigma(z):\n\nIdentity — \\sigma(z) = z\nReLU — \\sigma(z) = \\max(0, z)\nSigmoid — \\sigma(z) = 1/(1 + e^{-z})\ntanh — \\sigma(z) = (e^{2z} - 1)/(e^{2z} + 1)\n\nThen for each, give the derivative at z = -3.5.\n\nWhy does it matter that ReLU gives a 0 derivative and identity gives a derivative of exactly 1, while sigmoid/tanh give tiny derivatives?"
+    "text": "Plenary · predict the activations\n≈ 10 min · in pairs\n\nThe pre-activation value:\nz = -3.5\nFor each activation, compute (or estimate) the post-activation value \\sigma(z):\n\nIdentity — \\sigma(z) = z\nReLU — \\sigma(z) = \\max(0, z)\nSigmoid — \\sigma(z) = 1/(1 + e^{-z})\ntanh — \\sigma(z) = (e^{2z} - 1)/(e^{2z} + 1)\n\nThen for each, give the derivative at z = -3.5.\n\nWhy does it matter that ReLU gives a 0 derivative and identity gives a derivative of exactly 1, while sigmoid/tanh give tiny derivatives?"
   },
   {
     "objectID": "lectures/lecture-05-feedforward.html#plenary-answers",
@@ -1362,7 +1362,7 @@
     "href": "lectures/lecture-05-feedforward.html#activity-predict-the-effect",
     "title": "Feed-forward networks in PyTorch",
     "section": "Activity · predict the effect",
-    "text": "Activity · predict the effect\n≈ 15 min · in pairs\nFor each change, predict what happens to (a) training loss and (b) validation loss, then justify:\n\n\nYou increase the learning rate from 10^{-3} to 10^{-1}.\nYou add a third hidden layer (200 nodes wide).\nYou drop the activation function from all hidden layers — set \\sigma to identity everywhere.\nYou freeze the first hidden layer — it doesn’t update during training."
+    "text": "Activity · predict the effect\n≈ 8 min · in pairs\nFor each change, predict what happens to (a) training loss and (b) validation loss, then justify:\n\n\nYou increase the learning rate from 10^{-3} to 10^{-1}.\nYou add a third hidden layer (200 nodes wide).\nYou drop the activation function from all hidden layers — set \\sigma to identity everywhere.\nYou freeze the first hidden layer — it doesn’t update during training."
   },
   {
     "objectID": "lectures/lecture-05-feedforward.html#activity-answers",
@@ -1579,7 +1579,7 @@
     "href": "lectures/lecture-04-backpropagation.html#plenary-backward-pass-by-hand-1",
     "title": "Backpropagation",
     "section": "Plenary · backward pass by hand",
-    "text": "Plenary · backward pass by hand\n≈ 20 min · pen and paper, in pairs\n\nThe graph\n\ny = (3x + 2)(x - 1) \\quad \\text{with } x = 4.\n\nBreak it into operations:\n\na = 3x\nb = a + 2\nc = x - 1\ny = b \\cdot c\n\nCompute, step by step:\n\nForward: values of a, b, c, y.\nBackward: \\dfrac{\\partial y}{\\partial b}, \\dfrac{\\partial y}{\\partial c}, \\dfrac{\\partial y}{\\partial a}, \\dfrac{\\partial y}{\\partial x}.\nSanity check: differentiate y = (3x+2)(x-1) algebraically and evaluate at x = 4. Do you get the same number?"
+    "text": "Plenary · backward pass by hand\n≈ 10 min · pen and paper, in pairs\n\nThe graph\n\ny = (3x + 2)(x - 1) \\quad \\text{with } x = 4.\n\nBreak it into operations:\n\na = 3x\nb = a + 2\nc = x - 1\ny = b \\cdot c\n\nCompute, step by step:\n\nForward: values of a, b, c, y.\nBackward: \\dfrac{\\partial y}{\\partial b}, \\dfrac{\\partial y}{\\partial c}, \\dfrac{\\partial y}{\\partial a}, \\dfrac{\\partial y}{\\partial x}.\nSanity check: differentiate y = (3x+2)(x-1) algebraically and evaluate at x = 4. Do you get the same number?"
   },
   {
     "objectID": "lectures/lecture-04-backpropagation.html#plenary-answers",
@@ -1663,7 +1663,7 @@
     "href": "lectures/lecture-04-backpropagation.html#activity-one-step-of-gradient-descent-1",
     "title": "Backpropagation",
     "section": "Activity · one step of gradient descent",
-    "text": "Activity · one step of gradient descent\n≈ 15 min · pen and paper, in pairs\n\nThe model and one observation\nA linear perceptron:  z = wx + b, \\quad L = (z - y)^2. \nCurrent parameters: w = 0.5, b = 0.1. Example: x = 2, y = 3. Learning rate \\lambda = 0.1.\nCompute\n\nThe forward pass: both z, and then L.\nBackward pass: \\frac{\\partial L}{\\partial w} and \\frac{\\partial L}{\\partial b}.\nUpdate new w and new b values.\nForward pass with these new parameters to confirm the loss has fallen."
+    "text": "Activity · one step of gradient descent\n≈ 8 min · pen and paper, in pairs\n\nThe model and one observation\nA linear perceptron:  z = wx + b, \\quad L = (z - y)^2. \nCurrent parameters: w = 0.5, b = 0.1. Example: x = 2, y = 3. Learning rate \\lambda = 0.1.\nCompute\n\nThe forward pass: both z, and then L.\nBackward pass: \\frac{\\partial L}{\\partial w} and \\frac{\\partial L}{\\partial b}.\nUpdate new w and new b values.\nForward pass with these new parameters to confirm the loss has fallen."
   },
   {
     "objectID": "lectures/lecture-04-backpropagation.html#activity-answer",
@@ -1726,7 +1726,7 @@
     "href": "lectures/lecture-04-backpropagation.html#see-you-next-week",
     "title": "Backpropagation",
     "section": "See you next week",
-    "text": "See you next week\nLecture 5 — Feed-forward networks in PyTorch — Monday 10 August\n\n\n\n\n\n\nOver the weekend:\n\n\n\nWell done! Week 1 is the steepest part of the whole course\nIf you’re curious, watch Karpathy’s Building micrograd – it walks through the exact lab you just did.\nOptional: install PyTorch locally if you want to run things outside Colab. Setup notes are on Moodle.\n\n\n\n\n\n\n\nME324 · AI and Deep Learning · LSE Summer School\n\n\n\n\nKingma, D. P. (2014). Adam: A method for stochastic optimization. arXiv Preprint arXiv:1412.6980.\n\n\nLall, R., & Robinson, T. (2022). The MIDAS touch: Accurate and scalable missing-data imputation with deep learning. Political Analysis, 30(2), 179–196.\n\n\nRumelhart, D. E., Hinton, G. E., & Williams, R. J. (1986). Learning representations by back-propagating errors. Nature, 323(6088), 533–536."
+    "text": "See you next week\nLecture 5 — Feed-forward networks in PyTorch — Monday 10 August\n\n\n\n\n\n\nOver the weekend:\n\n\n\nWell done! Week 1 is the steepest part of the whole course\nIf you’re curious, watch Karpathy’s Building micrograd – it walks through the exact lab you just did.\nOptional: install PyTorch locally if you want to run things outside Colab. Setup notes are on Moodle.\n\n\n\n\n\n\n\nME324 · AI and Deep Learning · LSE Summer School\n\n\n\n\nDauphin, Y. N., Pascanu, R., Gulcehre, C., Cho, K., Ganguli, S., & Bengio, Y. (2014). Identifying and attacking the saddle point problem in high-dimensional non-convex optimization. Advances in Neural Information Processing Systems, 27.\n\n\nKingma, D. P. (2014). Adam: A method for stochastic optimization. arXiv Preprint arXiv:1412.6980.\n\n\nLall, R., & Robinson, T. (2022). The MIDAS touch: Accurate and scalable missing-data imputation with deep learning. Political Analysis, 30(2), 179–196.\n\n\nRumelhart, D. E., Hinton, G. E., & Williams, R. J. (1986). Learning representations by back-propagating errors. Nature, 323(6088), 533–536."
   },
   {
     "objectID": "lectures/lecture-02-deep-models-primer.html#seeing-the-problem",
@@ -1734,5 +1734,208 @@
     "title": "Deep models — a primer",
     "section": "Seeing the problem",
     "text": "Seeing the problem\nVisualizing the XOR dataset\n\n\n\n\n\n\n\n\n\n\nClass A sits on two opposite corners, and Class B on the other two.\nWherever you draw a line, at least one cluster is placed on the wrong side. Datasets like this are called not linearly separable."
+  },
+  {
+    "objectID": "lectures/lecture-03-computational-graphs.html#warm-up-three-questions-from-last-time",
+    "href": "lectures/lecture-03-computational-graphs.html#warm-up-three-questions-from-last-time",
+    "title": "Computational graphs & the maths of AI",
+    "section": "Warm-up · three questions from last time",
+    "text": "Warm-up · three questions from last time\n≈ 5 min · shout it out\n\n\nA perceptron has w = 2 and b = -1. What is y when x = 3?\nWe stack three linear layers, with no activation functions. What family of functions can the stack represent — and why?\nA perceptron takes three inputs. How many parameters does it have, counting the bias?"
+  },
+  {
+    "objectID": "lectures/lecture-03-computational-graphs.html#warm-up-answers",
+    "href": "lectures/lecture-03-computational-graphs.html#warm-up-answers",
+    "title": "Computational graphs & the maths of AI",
+    "section": "Warm-up · answers",
+    "text": "Warm-up · answers\n\n\ny = wx + b = (2 \\times 3) - 1 = 6 - 1 = 5.\nStill linear. A composition of linear maps is a linear map, so three stacked linear layers collapse into one. Depth buys nothing until we add activation functions.\nThree weights plus one bias: 3 + 1 = 4 parameters."
+  },
+  {
+    "objectID": "lectures/lecture-03-computational-graphs.html#the-cost-of-a-matrix-product",
+    "href": "lectures/lecture-03-computational-graphs.html#the-cost-of-a-matrix-product",
+    "title": "Computational graphs & the maths of AI",
+    "section": "The cost of a matrix product",
+    "text": "The cost of a matrix product\nWe now know what a matrix product computes. How much work is it?\n\nOne entry of an (n \\times m)(m \\times p) product is a dot product of length m: m multiplications and m - 1 additions. Each multiply or add is one floating-point operation (a FLOP), so one entry costs about 2m FLOPs.\nThe output has n \\times p entries:\n\n\\text{total cost} \\approx n \\times p \\times 2m = 2nmp \\ \\text{FLOPs}\n\n\nWorked example. A layer reading a 28 \\times 28 pixel image (784 features) into 128 hidden nodes, for a batch of 64 images: \\mathbf{X}\\mathbf{W}^\\mathsf{T} is (64 \\times 784)(784 \\times 128).\n\n2 \\times 64 \\times 784 \\times 128 = 12{,}845{,}056 \\approx 13\\text{M FLOPs}\n\n… For one layer, of one forward pass."
+  },
+  {
+    "objectID": "lectures/lecture-03-computational-graphs.html#why-gpus",
+    "href": "lectures/lecture-03-computational-graphs.html#why-gpus",
+    "title": "Computational graphs & the maths of AI",
+    "section": "Why GPUs?",
+    "text": "Why GPUs?\nThe good news: none of that work has to happen in sequence.\n\nEvery entry of the output is independent of every other. Entry (i, j) needs row i of \\mathbf{X} and column j of \\mathbf{W}^\\mathsf{T}.\n\nWe can compute thousands of entries at the same time.\n\n\nA GPU (graphics card) is built for exactly this because it calls the same easy computation, over thousands of points at once.\n\nA modern GPU manages on the order of 10^{14} FLOPs per second.\nAt that rate, our 13M-FLOP layer takes roughly a ten-millionth of a second.\n\n\nTry it yourself The output layer maps those 128 hidden values to 10 classes, same batch of 64. How many FLOPs?\n\n\n\nAnswer 2 \\times 64 \\times 128 \\times 10 = 163{,}840 FLOPs — about 78 times cheaper than the 784 → 128 layer."
+  },
+  {
+    "objectID": "lectures/lecture-03-computational-graphs.html#checking-a-derivative-numerically",
+    "href": "lectures/lecture-03-computational-graphs.html#checking-a-derivative-numerically",
+    "title": "Computational graphs & the maths of AI",
+    "section": "Checking a derivative numerically",
+    "text": "Checking a derivative numerically\nSuppose a computer cannot differentiate a function. Can we approximate the derivative?\n\nThe derivative asks how much would the output change if we adjust an input by a tiny interval.\nSo, empirically, we can take a small step \\varepsilon either side of x and measure that change:\n\nf'(x) \\approx \\frac{f(x + \\varepsilon) - f(x - \\varepsilon)}{2\\varepsilon}\n\nThis is called the central difference. It is the empirical evaluation of a gradient at a given point.\n\nWorked example. Suppose f(x) = x^2, and we evaluate at x = 3.\nWith \\varepsilon = 0.01:\n\n\\frac{f(3.01) - f(2.99)}{0.02} = \\frac{9.0601 - 8.9401}{0.02} = \\frac{0.1200}{0.02} = 6.0000\n\nFormally, we know f'(x) = 2x, so f'(3) = 6 – they match!"
+  },
+  {
+    "objectID": "lectures/lecture-03-computational-graphs.html#try-it-on-the-sigmoid",
+    "href": "lectures/lecture-03-computational-graphs.html#try-it-on-the-sigmoid",
+    "title": "Computational graphs & the maths of AI",
+    "section": "Try it on the sigmoid",
+    "text": "Try it on the sigmoid\nThe cheat-sheet claims \\sigma'(x) = \\sigma(x)(1 - \\sigma(x)). We took that on trust. Now we can check it.\n\nTry it yourself Estimate \\sigma'(0) with the central difference and \\varepsilon = 0.01.\nTo 4 d.p.: \\sigma(0.01) = 0.5025 and \\sigma(-0.01) = 0.4975.\n\n\n\nAnswer \n\\sigma'(0) \\approx \\frac{0.5025 - 0.4975}{0.02} = \\frac{0.0050}{0.02} = 0.25\n\nThe rule agrees: \\sigma(0) = \\tfrac{1}{1 + e^{0}} = 0.5, so \\sigma'(0) = 0.5 \\times 0.5 = 0.25."
+  },
+  {
+    "objectID": "lectures/lecture-03-computational-graphs.html#gradient-checking",
+    "href": "lectures/lecture-03-computational-graphs.html#gradient-checking",
+    "title": "Computational graphs & the maths of AI",
+    "section": "Gradient checking",
+    "text": "Gradient checking\nThe central difference matters for two reasons — and has one flaw that rules it out for training.\n\n\nWhy it matters\n\nIt is how autograd libraries test themselves: compute each derivative by rule, then by central difference, and demand the two agree. The trade name is gradient checking.\nIt is the referee for the derivative rules we use tomorrow. If our chain-rule code is wrong, this catches it.\n\n\nWhy nobody trains with it\n\nChecking one parameter means nudging it and rerunning the whole network — an extra forward pass per parameter.\nA model with millions of parameters would need millions of forward passes for a single training step.\n\n\n\n\n\n\n\n\nTip\n\n\nTomorrow’s approach — the chain rule on the computational graph — gets every gradient from one forward and one backward pass. That gap is the case for backpropagation."
+  },
+  {
+    "objectID": "lectures/lecture-05-feedforward.html#warm-up-three-questions-from-last-time",
+    "href": "lectures/lecture-05-feedforward.html#warm-up-three-questions-from-last-time",
+    "title": "Feed-forward networks in PyTorch",
+    "section": "Warm-up · three questions from last time",
+    "text": "Warm-up · three questions from last time\n≈ 5 min · shout it out\n\nFrom last week\n\nOne gradient-descent update. w = 1, \\frac{\\partial L}{\\partial w} = 0.5, learning rate \\lambda = 0.1. What is the new w?\nWhat does a loss function measure — and which loss did we use for regression?\nIn which direction does backpropagation walk the computational graph, and what does it carry with it?\n\n\nThe weekend was long. Everything here is from Thursday’s lecture!"
+  },
+  {
+    "objectID": "lectures/lecture-05-feedforward.html#warm-up-answers",
+    "href": "lectures/lecture-05-feedforward.html#warm-up-answers",
+    "title": "Feed-forward networks in PyTorch",
+    "section": "Warm-up · answers",
+    "text": "Warm-up · answers\n\n\nStep against the gradient, scaled by \\lambda: \nw_{\\text{new}} = w - \\lambda \\frac{\\partial L}{\\partial w} = 1 - 0.1 \\times 0.5 = 1 - 0.05 = 0.95\n\nHow wrong the model’s predictions are on the data, as a single number — lower is better. For regression we used mean squared error.\nBackwards — from the loss to the inputs, multiplying local derivatives along the way. That is the chain rule.\n\n\nAll three are about to become one line of PyTorch each."
+  },
+  {
+    "objectID": "lectures/lecture-05-feedforward.html#diagnosing-a-run-from-its-loss-curves",
+    "href": "lectures/lecture-05-feedforward.html#diagnosing-a-run-from-its-loss-curves",
+    "title": "Feed-forward networks in PyTorch",
+    "section": "Diagnosing a run from its loss curves",
+    "text": "Diagnosing a run from its loss curves\n≈ 3 min · in pairs\n\n\n\n\n\n\n\n\n\n\n\n\n\nMatch each panel to a diagnosis\nFour training runs. Same model, same data — four different outcomes:\n\nlearning rate too high\noverfitting\nunderfitting\nhealthy\n\nWhich is which — and what in the curves told you?\n\nThese are the curves you plot in today’s lab."
+  },
+  {
+    "objectID": "lectures/lecture-05-feedforward.html#diagnosing-a-run-answers",
+    "href": "lectures/lecture-05-feedforward.html#diagnosing-a-run-answers",
+    "title": "Feed-forward networks in PyTorch",
+    "section": "Diagnosing a run · answers",
+    "text": "Diagnosing a run · answers\n\n\nA — overfitting. Training keeps falling; validation bottoms out, then climbs. Fix: dropout or weight decay, early stopping, or more data — the defences from the overfitting slide.\nB — healthy. Both curves fall together and the gap stays small. Fix: none. Leave it alone.\nC — learning rate too high. The loss jumps around and drifts upwards. Fix: lower the learning rate — from 10^{-1} back towards 10^{-3}.\nD — underfitting. Both curves flat and high from the first epoch. Fix: a bigger model, or train for longer.\n\n\n\n\n\n\n\n\n\nOne habit to keep\n\n\nWhen a run misbehaves, plot these two curves before touching anything else. The shape tells you which problem you have — and each problem has a different fix."
+  },
+  {
+    "objectID": "lectures/lecture-04-backpropagation.html#warm-up-three-questions-from-last-time",
+    "href": "lectures/lecture-04-backpropagation.html#warm-up-three-questions-from-last-time",
+    "title": "Backpropagation",
+    "section": "Warm-up · three questions from last time",
+    "text": "Warm-up · three questions from last time\n≈ 5 min · shout it out\n\n\nIs the product of a 2 \\times 3 matrix and a 3 \\times 1 matrix defined? If so, what shape is the result?\nUse the chain rule: what is \\frac{d}{dx}(2x+1)^3?\nIn a computational graph, what do the nodes and edges represent — and why must the graph have no cycles?"
+  },
+  {
+    "objectID": "lectures/lecture-04-backpropagation.html#warm-up-answers",
+    "href": "lectures/lecture-04-backpropagation.html#warm-up-answers",
+    "title": "Backpropagation",
+    "section": "Warm-up · answers",
+    "text": "Warm-up · answers\n\n1. Yes — the product is defined. The inner dimensions match (3 and 3), and the outer dimensions give the shape of the result:\n\n(2 \\times 3)(3 \\times 1) \\rightarrow 2 \\times 1\n\n2. Let u = 2x + 1, so y = u^3. Then \\frac{dy}{du} = 3u^2 and \\frac{du}{dx} = 2:\n\n\\frac{dy}{dx} = 3u^2 \\cdot 2 = 6(2x+1)^2\n\n3. Nodes hold values and operations; edges carry each result forward into the next operation. And no cycles allowed: a cycle would make a value depend on itself, so the forward pass could never finish."
+  },
+  {
+    "objectID": "lectures/lecture-04-backpropagation.html#saddle-points-a-million-directions-to-check",
+    "href": "lectures/lecture-04-backpropagation.html#saddle-points-a-million-directions-to-check",
+    "title": "Backpropagation",
+    "section": "Saddle points — a million directions to check",
+    "text": "Saddle points — a million directions to check\n\n\nIn two dimensions we picture getting stuck in a valley — a local minimum.\nIn a million dimensions, being a minimum is a demanding job. At a critical point — a point where the gradient is zero — the loss must curve upward in every one of a million directions.\nCount the up/down patterns of curvature:\n\n2 directions → 2^2 = 4 patterns. One is a minimum (all up), one a maximum (all down), and the other 2 are saddle points.\n20 directions → 2^{20} = 1{,}048{,}576 patterns; 1,048,574 are saddles.\n\nIn a big network, almost every critical point has at least one downhill direction — a saddle, not a minimum (Dauphin et al., 2014).\n\n\n\n\n\n\n\n\n\n\nThe surface z = x^2 - y^2: uphill along x, downhill along y — the shape of a horse’s saddle."
+  },
+  {
+    "objectID": "lectures/lecture-04-backpropagation.html#what-saddles-mean-for-training",
+    "href": "lectures/lecture-04-backpropagation.html#what-saddles-mean-for-training",
+    "title": "Backpropagation",
+    "section": "What saddles mean for training",
+    "text": "What saddles mean for training\n\nNear a saddle point the surface is nearly flat, so the gradient is small — and small gradients mean tiny steps.\nGradient descent doesn’t get trapped there (a downhill direction exists). It stalls.\n\n\n\nThe accidental fix Mini-batch gradients are noisy — each batch of examples gives a slightly different gradient. Near a saddle, that noise shoves the parameters off the flat ridge and onto the downhill direction, and descent resumes.\nThe noise we accept to keep steps cheap — mini-batch gradient descent, two slides from now — also helps the optimiser escape saddles."
+  },
+  {
+    "objectID": "lectures/lecture-04-backpropagation.html#momentum-give-the-update-a-memory",
+    "href": "lectures/lecture-04-backpropagation.html#momentum-give-the-update-a-memory",
+    "title": "Backpropagation",
+    "section": "Momentum — give the update a memory",
+    "text": "Momentum — give the update a memory\nPlain SGD forgets everything between steps. Momentum keeps a running velocity v, and steps along that instead of the raw gradient:\n\nv \\leftarrow \\gamma v + g, \\qquad w \\leftarrow w - \\lambda v\n\n\ng — the current gradient, \\frac{\\partial L}{\\partial w}.\n\\gamma — the decay rate, typically 0.9. It sets how much of the old velocity survives each step.\n\n\nWorked example · \\gamma = 0.9, \\lambda = 0.1, start at w = 1, v = 0; the gradient is g = 1 at both steps\nStep 1: v = 0.9(0) + 1 = 1, so w = 1 - 0.1(1) = 0.9.\nStep 2: v = 0.9(1) + 1 = 1.9, so w = 0.9 - 0.1(1.9) = 0.9 - 0.19 = 0.71.\nPlain SGD takes two steps of 0.1 and reaches only 0.8. Momentum’s second step is nearly twice its first.\n\nWhen the gradient agrees with itself step after step, the velocity builds — and the steps grow."
+  },
+  {
+    "objectID": "lectures/lecture-04-backpropagation.html#momentum-when-the-gradient-flips",
+    "href": "lectures/lecture-04-backpropagation.html#momentum-when-the-gradient-flips",
+    "title": "Backpropagation",
+    "section": "Momentum when the gradient flips",
+    "text": "Momentum when the gradient flips\nNow suppose the gradient oscillates: g = +1 on step 1, then g = -1 on step 2.\n\nSame setup · \\gamma = 0.9, \\lambda = 0.1, start at w = 1, v = 0\nStep 1 (g = +1): v = 0.9(0) + 1 = 1, so w = 1 - 0.1(1) = 0.9.\nStep 2 (g = -1): v = 0.9(1) - 1 = -0.1, so w = 0.9 - 0.1(-0.1) = 0.91.\nPlain SGD would bounce all the way back to 1.0. Momentum moves just 0.01 — the +1 and the -1 nearly cancel inside v.\n\n\nWhat momentum buys us Agreement across steps builds speed. Disagreement cancels out, so oscillations are damped.\nOne problem from two slides ago remains: every parameter still shares the single step size \\lambda. Adam — next slide — combines momentum with a step size per parameter."
+  },
+  {
+    "objectID": "lectures/lecture-03-computational-graphs.html#broadcasting-adding-shapes-that-dont-match",
+    "href": "lectures/lecture-03-computational-graphs.html#broadcasting-adding-shapes-that-dont-match",
+    "title": "Computational graphs & the maths of AI",
+    "section": "Broadcasting — adding shapes that don’t match",
+    "text": "Broadcasting — adding shapes that don’t match\nBy the rules we wrote down earlier, the previous slide’s addition is undefined.\nYet, if we run it in Python, it works anyway.\n\nnumpy and PyTorch use on extra rule called broadcasting:\n\nLine the two shapes up from the right\nTwo dimensions are compatible when they are equal, or when one of them is 1 (or missing).\nThe smaller array is then reused along the other’s dimension\n\n\nSuppose we have: (3 \\times 2) + (1 \\times 2). Reusing along a dimension means copying the object until the shapes match, then adding as normal:\n\n\\begin{bmatrix} 1 & 2 \\\\ 3 & 4 \\\\ 5 & 6 \\end{bmatrix} + \\begin{bmatrix} 10 & 20 \\end{bmatrix}\n\\;=\\;\n\\begin{bmatrix} 1 & 2 \\\\ 3 & 4 \\\\ 5 & 6 \\end{bmatrix} + \\underbrace{\\begin{bmatrix} 10 & 20 \\\\ 10 & 20 \\\\ 10 & 20 \\end{bmatrix}}_{\\text{the re-use}}\n= \\begin{bmatrix} 11 & 22 \\\\ 13 & 24 \\\\ 15 & 26 \\end{bmatrix}\n\nThe middle version is ordinary same-shape addition — no new rules. Every row gets the same \\begin{bmatrix} 10 & 20 \\end{bmatrix}: one bias per node, reused for every observation. That is what \\mathbf{X}\\mathbf{W}^\\mathsf{T} + \\mathbf{b} means in code."
+  },
+  {
+    "objectID": "lectures/lecture-03-computational-graphs.html#try-it-which-of-these-broadcast",
+    "href": "lectures/lecture-03-computational-graphs.html#try-it-which-of-these-broadcast",
+    "title": "Computational graphs & the maths of AI",
+    "section": "Try it — which of these broadcast?",
+    "text": "Try it — which of these broadcast?\n\nTry it yourself For each pair of shapes, does the addition work — and if so, what shape comes out?\n\n(2 \\times 3) + a single number\n(64 \\times 2) + (1 \\times 2)\n(64 \\times 2) + (64,)\n\\begin{bmatrix} 10 \\\\ 20 \\\\ 30 \\end{bmatrix} + \\begin{bmatrix} 1 & 2 \\end{bmatrix} — that is, (3 \\times 1) + (1 \\times 2)\n\n\n\n\nAnswer 1. Works — a single number is compatible with every dimension. Shape (2 \\times 3).\n\nWorks — from the right: 2 matches 2, then the 1 stretches over 64. Shape (64 \\times 2). This is the layer bias.\nError — from the right: 2 against 64. A per-observation vector cannot be added this way. Reshape it to (64 \\times 1) and it broadcasts across the columns instead.\nWorks — both stretch. Written out: \\begin{bmatrix} 10 & 10 \\\\ 20 & 20 \\\\ 30 & 30 \\end{bmatrix} + \\begin{bmatrix} 1 & 2 \\\\ 1 & 2 \\\\ 1 & 2 \\end{bmatrix} = \\begin{bmatrix} 11 & 12 \\\\ 21 & 22 \\\\ 31 & 32 \\end{bmatrix} — shape (3 \\times 2), every pairwise sum."
+  },
+  {
+    "objectID": "lectures/lecture-03-computational-graphs.html#from-one-observation-to-a-batch",
+    "href": "lectures/lecture-03-computational-graphs.html#from-one-observation-to-a-batch",
+    "title": "Computational graphs & the maths of AI",
+    "section": "From one observation to a batch",
+    "text": "From one observation to a batch\nSo far, one observation at a time. But, the labs feed many at once by stacking the observations as the rows of a matrix \\mathbf{X}.\n\nWith 64 observations and our h = 2, k = 3 layer:\n\n\\mathbf{X}\\mathbf{W}^\\mathsf{T} is (64 \\times 3)(3 \\times 2) \\to (64 \\times 2)\nThe same matrix product, just done simultaneously\n\n\nNotice, we still need to add the biases \\mathbf{b}…\n\nBut \\mathbf{b} is (1 \\times 2)!?"
+  },
+  {
+    "objectID": "lectures/lecture-03-computational-graphs.html#broadcasting-the-other-way",
+    "href": "lectures/lecture-03-computational-graphs.html#broadcasting-the-other-way",
+    "title": "Computational graphs & the maths of AI",
+    "section": "Broadcasting the other way",
+    "text": "Broadcasting the other way\nBroadcasting can stretch a column too. Take (3 \\times 2) + (3 \\times 1): from the right, 2 against 1 — so the 1 stretches across the columns; then 3 against 3 match.\n\n\\begin{bmatrix} 1 & 2 \\\\ 3 & 4 \\\\ 5 & 6 \\end{bmatrix} + \\begin{bmatrix} 10 \\\\ 20 \\\\ 30 \\end{bmatrix}\n\\;=\\;\n\\begin{bmatrix} 1 & 2 \\\\ 3 & 4 \\\\ 5 & 6 \\end{bmatrix} + \\underbrace{\\begin{bmatrix} 10 & 10 \\\\ 20 & 20 \\\\ 30 & 30 \\end{bmatrix}}_{\\text{stretching}}\n= \\begin{bmatrix} 11 & 12 \\\\ 23 & 24 \\\\ 35 & 36 \\end{bmatrix}\n\nOne number per row, reused along that row.\n\nThe direction of the stretch follows the shape.\n\nA (1 \\times 2) row spreads down the rows; a (3 \\times 1) column spreads across the columns.\n\n\n\n\n\n\n\n\nTip\n\n\nYou have broadcast before. Standardising a data frame subtracts a (1 \\times k) row of column means from an (n \\times k) matrix — the same pattern as the bias."
+  },
+  {
+    "objectID": "lectures/lecture-03-computational-graphs.html#broadcasting-across-dimensions",
+    "href": "lectures/lecture-03-computational-graphs.html#broadcasting-across-dimensions",
+    "title": "Computational graphs & the maths of AI",
+    "section": "Broadcasting across dimensions",
+    "text": "Broadcasting across dimensions\nLater, when we stack matrices to get 3-D tensors, we’ll have more complicated shapes like (64 \\times 28 \\times 28)\nSuppose we subtract something dimensionally smaller like (28 \\times 28). Broadcasting works even here:\n(64, 28, 28)\n    (28, 28)   →  pad left with 1s  →  (1, 28, 28)  →  stretch  →  (64, 28, 28)\n\nWhen one shape is shorter, we pad it with 1s on the left, then line up from the right as before.\n\nSo the above shape is treated as (1 \\times 28 \\times 28) and reused for all 64 square matrices.\n\n\nE.g. (2 \\times 2 \\times 2) + (2 \\times 2):\n\n\\underbrace{\\begin{bmatrix} 1 & 2 \\\\ 3 & 4 \\end{bmatrix}, \\ \\begin{bmatrix} 5 & 6 \\\\ 7 & 8 \\end{bmatrix}}_{\\text{a stack of two matrices}} + \\ \\begin{bmatrix} 10 & 20 \\\\ 30 & 40 \\end{bmatrix}\n= \\ \\begin{bmatrix} 11 & 22 \\\\ 33 & 44 \\end{bmatrix}, \\ \\begin{bmatrix} 15 & 26 \\\\ 37 & 48 \\end{bmatrix}\n\nEach matrix in the stack gets the same (2 \\times 2) added — as if we had written + \\ \\begin{bmatrix} 10 & 20 \\\\ 30 & 40 \\end{bmatrix}, \\ \\begin{bmatrix} 10 & 20 \\\\ 30 & 40 \\end{bmatrix}, one copy per layer.\n\n\n\n\n\n\nWarning\n\n\nThe padding is only ever on the left. (64, 28, 28) + (64, 28) fails: from the right, 28 matches 28, then 28 hits 64. If you mean “one number per image” — say, dividing each image by its own maximum — the shape you want is (64 \\times 1 \\times 1). Broadcasting follows the same rules for every element-wise operation, not only addition."
+  },
+  {
+    "objectID": "lectures/lecture-03-computational-graphs.html#a-longer-chain",
+    "href": "lectures/lecture-03-computational-graphs.html#a-longer-chain",
+    "title": "Computational graphs & the maths of AI",
+    "section": "A longer chain",
+    "text": "A longer chain\nTake a function with three nested operations:\n\ny = \\left( \\tfrac{1}{n} (a - x)^2 \\right)^{1/2}\n\nDecompose: * u_2 = a - x * u_1 = u_2^2 = (a - x)^2 * y = (u_1 / n)^{1/2}\nApply the chain rule:\n\n\\frac{dy}{dx} = \\underbrace{\\frac{d}{du_1}\\!\\left[\\left(\\tfrac{u_1}{n}\\right)^{1/2}\\right]}_{\\text{outer}} \\cdot\n\\underbrace{\\frac{d}{du_2} [u_2^2]}_{\\text{middle}} \\cdot\n\\underbrace{\\frac{d}{dx} [a - x]}_{\\text{inner}}\n\nThree small derivatives. We don’t even need to expand y to do this."
+  },
+  {
+    "objectID": "lectures/lecture-03-computational-graphs.html#why-dont-we-just-use-the-central-difference",
+    "href": "lectures/lecture-03-computational-graphs.html#why-dont-we-just-use-the-central-difference",
+    "title": "Computational graphs & the maths of AI",
+    "section": "Why don’t we just use the central difference?",
+    "text": "Why don’t we just use the central difference?\nThe central difference has one flaw that rules it out for training, but is useful for testing calculations.\n\n\nIt’s far too slow\n\nChecking one parameter means nudging one w and rerunning the whole network – so, one forward pass per parameter.\nA model with millions of parameters would need millions of forward passes for a single training step.\n\n\nWhy it’s still useful\n\nAutograd libraries use central difference to test themselves\n\nCompute each derivative exactly\nCompute the central difference\nOnly allow the algorithm to pass if they agree (called gradient checking)\n\nIf our chain-rule code is wrong, gradient checking flags it\n\n\n\n\n\n\n\n\nWe can calculate entire network gradients with 1 forward and 1 backward pass\n\n\nWe’ll see this tomorrow!"
+  },
+  {
+    "objectID": "lectures/lecture-03-computational-graphs.html#scaling-up-three-hidden-layers-of-five",
+    "href": "lectures/lecture-03-computational-graphs.html#scaling-up-three-hidden-layers-of-five",
+    "title": "Computational graphs & the maths of AI",
+    "section": "Scaling up — three hidden layers of five",
+    "text": "Scaling up — three hidden layers of five\nThe computational graph of a network with 3 inputs, three hidden layers of five nodes, and one output — the last slide’s picture, two layers longer:\n\n\n\n\n\n\n\nG\n12 operations · 22 nodes — three hidden layers and an output layer\n\n\nx\n\nx\n\n\n\nm1\n\n×\n\n\n\nx-&gt;m1\n\n\n\n\n\nW1\n\nW₁ᵀ\n\n\n\nW1-&gt;m1\n\n\n\n\n\nb1\n\nb₁\n\n\n\na1\n\n+\n\n\n\nb1-&gt;a1\n\n\n\n\n\nW2\n\nW₂ᵀ\n\n\n\nm2\n\n×\n\n\n\nW2-&gt;m2\n\n\n\n\n\nb2\n\nb₂\n\n\n\na2\n\n+\n\n\n\nb2-&gt;a2\n\n\n\n\n\nW3\n\nW₃ᵀ\n\n\n\nm3\n\n×\n\n\n\nW3-&gt;m3\n\n\n\n\n\nb3\n\nb₃\n\n\n\na3\n\n+\n\n\n\nb3-&gt;a3\n\n\n\n\n\nw4\n\nw₄ᵀ\n\n\n\nm4\n\n×\n\n\n\nw4-&gt;m4\n\n\n\n\n\nb4\n\nb₄\n\n\n\na4\n\n+\n\n\n\nb4-&gt;a4\n\n\n\n\n\nm1-&gt;a1\n\n\n\n\n\ns1\n\nσ\n\n\n\na1-&gt;s1\n\n\n\n\n\ns1-&gt;m2\n\n\n\n\n\nm2-&gt;a2\n\n\n\n\n\ns2\n\nσ\n\n\n\na2-&gt;s2\n\n\n\n\n\ns2-&gt;m3\n\n\n\n\n\nm3-&gt;a3\n\n\n\n\n\ns3\n\nσ\n\n\n\na3-&gt;s3\n\n\n\n\n\ns3-&gt;m4\n\n\n\n\n\nm4-&gt;a4\n\n\n\n\n\ns4\n\nσ\n\n\n\na4-&gt;s4\n\n\n\n\n\ny\n\nŷ\n\n\n\ns4-&gt;y\n\n\n\n\n\n\n\n\n\n\n\n\nTwo layers took 6 operations; four take 12. The graph grows with layers, not with width. The “five nodes per layer” are nowhere to be seen — they hide in the shapes flowing along the wires: \\mathbf{x} is (1 \\times 3), every hidden \\sigma emits (1 \\times 5), the last emits a single number.\n\n\nAll 86 parameters sit in the eight parameter nodes: \\mathbf{W}_1^\\mathsf{T} holds 3 \\times 5 = 15, \\mathbf{W}_2^\\mathsf{T} and \\mathbf{W}_3^\\mathsf{T} hold 5 \\times 5 = 25 each, \\mathbf{w}_4^\\mathsf{T} holds 5, and the biases hold 5 + 5 + 5 + 1 = 16. Sum: 15 + 25 + 25 + 5 + 16 = 86.\nMake every layer 500 wide and this picture does not change — only the shapes inside the boxes do."
+  },
+  {
+    "objectID": "lectures/lecture-03-computational-graphs.html#tomorrow-mornings-lab-90-minutes",
+    "href": "lectures/lecture-03-computational-graphs.html#tomorrow-mornings-lab-90-minutes",
+    "title": "Computational graphs & the maths of AI",
+    "section": "Tomorrow morning’s lab — 90 minutes",
+    "text": "Tomorrow morning’s lab — 90 minutes\nGoals\nIn Python, build a small computational graph library from scratch.\nYou will implement:\n\nA Value class that stores data, grad, and a list of “child” values.\nMethods __add__, __mul__, and __pow__ that build a graph as you do arithmetic.\nA small test: write c = a * b + 1 for Values a, b, and verify the graph has the right structure.\n\n\nDeliverable. A working Value class. We will add gradient computation to it in the following lab, which turns this library into a fully-working autodiff system.\nThis comes from Andrej Karpathy’s micrograd scripts."
+  },
+  {
+    "objectID": "lectures/lecture-03-computational-graphs.html#graphs-are-fairly-common-in-social-sciences",
+    "href": "lectures/lecture-03-computational-graphs.html#graphs-are-fairly-common-in-social-sciences",
+    "title": "Computational graphs & the maths of AI",
+    "section": "Graphs are fairly common in social sciences",
+    "text": "Graphs are fairly common in social sciences\nSocial-science graphs\n\n\nA computational graph is structurally identical to:\n\nA causal DAG in causal inference (cf. Judea Pearl’s work).\nA factor graph in probabilistic modelling.\nA dataflow diagram in software engineering.\nA path diagram in structural equation models.\n\n\n\nThe shared idea: a calculation is a structure of operations on values.\nThe structure itself carries information, by telling us what depends on what, what we can compute first, and what to differentiate with respect to what."
+  },
+  {
+    "objectID": "lectures/lecture-03-computational-graphs.html#how-does-the-computer-know-what-to-run-first",
+    "href": "lectures/lecture-03-computational-graphs.html#how-does-the-computer-know-what-to-run-first",
+    "title": "Computational graphs & the maths of AI",
+    "section": "How does the computer know what to run first?",
+    "text": "How does the computer know what to run first?\nThe graph itself is not numbered.\n\nInstead, the order is extracted from the arrows\n\n\n\nA node is ready when every arrow into it comes from a node that has already run.\nEvery ready node is added to a heap\nRun any node in the heap then mark it done.\nRepeat until every node has run.\n\nA list built this way is called a topological order of the graph.\n\nTwo things worth noticing:\n\nThe order is not unique. Layer 1 can run the multiplications in any order\n\nLayer 2 multiples rely on layer-1 finishing\n\nThe heap only clears because the graph is acyclic.\n\nWhen cycles exist, (at least) two nodes are waiting for each other"
+  },
+  {
+    "objectID": "lectures/lecture-03-computational-graphs.html#scaling-up-three-hidden-layers-of-32",
+    "href": "lectures/lecture-03-computational-graphs.html#scaling-up-three-hidden-layers-of-32",
+    "title": "Computational graphs & the maths of AI",
+    "section": "Scaling up — three hidden layers of 32",
+    "text": "Scaling up — three hidden layers of 32\nThis is still a tiny deep learning model:\n\n3 inputs,\n3 hidden layers of 32 nodes\nOne output node\n\nTo make it fit, one dot represents a multiply, add, or squash, in running order.\n\n\n\n\n\n\n\n\n\n\n\nFor one prediction:\n\nMultiplies: 96 + 1{,}024 + 1{,}024 + 32 = 2{,}176\nAdds: 2{,}176 (97 of them bias adds)\nSquashes: 97 — one per neuron\nTotal: 4{,}449 operations from 2{,}273 parameters.\n\n\n\nGrouped into matrix operations, this whole ribbon is still 4 \\times (multiply, add, squash) = 12 nodes. The dots are what the computer does underneath.\nFor context, a forward pass of GPT-3 requires about 350 billion floating point operations."
   }
 ]

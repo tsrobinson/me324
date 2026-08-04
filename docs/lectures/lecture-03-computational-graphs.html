@@ -424,6 +424,27 @@ Dr Thomas Robinson
 
   <p class="date">August 5, 2026</p>
 </section>
+<section id="warm-up-three-questions-from-last-time" class="slide level2">
+<h2>Warm-up · three questions from last time</h2>
+<p><span class="eyebrow"><span class="pause-cue">≈ 5 min</span> · shout it out</span></p>
+<div class="card">
+<ol type="1">
+<li><p>A perceptron has <span class="math inline">w = 2</span> and <span class="math inline">b = -1</span>. What is <span class="math inline">y</span> when <span class="math inline">x = 3</span>?</p></li>
+<li><p>We stack three <em>linear</em> layers, with no activation functions. What family of functions can the stack represent — and why?</p></li>
+<li><p>A perceptron takes three inputs. How many parameters does it have, counting the bias?</p></li>
+</ol>
+</div>
+</section>
+<section id="warm-up-answers" class="slide level2">
+<h2>Warm-up · answers</h2>
+<div class="card">
+<ol type="1">
+<li><p><span class="math inline">y = wx + b = (2 \times 3) - 1 = 6 - 1 = 5</span>.</p></li>
+<li><p><strong>Still linear.</strong> A composition of linear maps is a linear map, so three stacked linear layers collapse into one. Depth buys nothing until we add activation functions.</p></li>
+<li><p>Three weights plus one bias: <span class="math inline">3 + 1 = 4</span> parameters.</p></li>
+</ol>
+</div>
+</section>
 <section>
 <section id="part-1-linear-algebra" class="title-slide slide level1 center" data-background-color="#0E1A2B">
 <h1>Part 1 · Linear algebra</h1>
@@ -433,9 +454,8 @@ Dr Thomas Robinson
 <h2>Why we need this</h2>
 <p>A modern neural network operates on <strong>tensors with millions of entries</strong>. We need notation that scales — both for writing and for computing.</p>
 <div class="card">
-<p>Every layer of a neural network is essentially a <em>matmul</em> followed by an non-linear action function applied element-wise.</p>
+<p>Every layer of a neural network is a <em>matmul</em> followed by a non-linear activation function applied element-wise.</p>
 </div>
-<p><strong>But we’re social scientists 😨</strong></p>
 <ul>
 <li><p>Matrices aren’t that scary! Stacking survey into a data frame (<span class="math inline">n</span> rows, <span class="math inline">k</span> columns) gives you a matrix.</p></li>
 <li><p>We’re largely dressing up familiar maths using new notation.</p></li>
@@ -644,7 +664,7 @@ a_{31} &amp; a_{32} &amp; a_{33}
 (\mathbf{AB})_{ij} = \sum_{\ell=1}^k A_{i\ell} \, B_{\ell j}
 </span></p>
 <div class="card">
-<p><strong>Dimension rule</strong> (memorise this): the <em>inner</em> dimensions must match.</p>
+<p><strong>Dimension rule</strong>: the <em>inner</em> dimensions must match.</p>
 <p><span class="math display">
 (\underbrace{n \times k}_{\mathbf{A}}) \cdot (\underbrace{k \times t}_{\mathbf{B}}) \longrightarrow (n \times t)
 </span></p>
@@ -716,22 +736,163 @@ w_2^{(1)} &amp; w_2^{(2)} \\ w_3^{(1)} &amp; w_3^{(2)} \end{bmatrix}</span></p>
 <p>So we get a two-length row vector output (one value per neuron).</p>
 </div>
 </section>
-<section id="stop-and-check" class="slide level2">
-<h2>Stop and check</h2>
-<p><span class="eyebrow"><span class="pause-cue">Stop &amp; check</span> — pair with a neighbour, 2 minutes</span></p>
+<section id="from-one-observation-to-a-batch" class="slide level2">
+<h2>From one observation to a batch</h2>
+<p>So far, one observation at a time. But, the labs feed many at once by stacking the observations as the <strong>rows</strong> of a matrix <span class="math inline">\mathbf{X}</span>.</p>
+<div class="card">
+<p>With 64 observations and our <span class="math inline">h = 2</span>, <span class="math inline">k = 3</span> layer:</p>
+<ul>
+<li><p><span class="math inline">\mathbf{X}\mathbf{W}^\mathsf{T}</span> is <span class="math inline">(64 \times 3)(3 \times 2) \to (64 \times 2)</span></p></li>
+<li><p>The same matrix product, just done simultaneously</p></li>
+</ul>
+</div>
+<p>Notice, we still need to add the biases <span class="math inline">\mathbf{b}</span>…</p>
+<ul>
+<li>But <span class="math inline">\mathbf{b}</span> is <span class="math inline">(1 \times 2)</span>!?</li>
+</ul>
+</section>
+<section id="broadcasting-adding-shapes-that-dont-match" class="slide level2">
+<h2>Broadcasting — adding shapes that don’t match</h2>
+<p>By the rules we wrote down earlier, the previous slide’s addition is undefined.</p>
+<p>Yet, if we run it in Python, it works anyway.</p>
+<div class="card">
+<p>numpy and PyTorch use on extra rule called <strong>broadcasting</strong>:</p>
+<ul>
+<li>Line the two shapes up <strong>from the right</strong></li>
+<li>Two dimensions are compatible when they are equal, or when one of them is 1 (or missing).</li>
+<li>The smaller array is then reused along the other’s dimension</li>
+</ul>
+</div>
+<p>Suppose we have: <span class="math inline">(3 \times 2) + (1 \times 2)</span>. Reusing along a dimension means copying the object until the shapes match, then adding as normal:</p>
+<p><span class="math display">
+\begin{bmatrix} 1 &amp; 2 \\ 3 &amp; 4 \\ 5 &amp; 6 \end{bmatrix} + \begin{bmatrix} 10 &amp; 20 \end{bmatrix}
+\;=\;
+\begin{bmatrix} 1 &amp; 2 \\ 3 &amp; 4 \\ 5 &amp; 6 \end{bmatrix} + \underbrace{\begin{bmatrix} 10 &amp; 20 \\ 10 &amp; 20 \\ 10 &amp; 20 \end{bmatrix}}_{\text{the re-use}}
+= \begin{bmatrix} 11 &amp; 22 \\ 13 &amp; 24 \\ 15 &amp; 26 \end{bmatrix}
+</span></p>
+<p>The middle version is ordinary same-shape addition — no new rules. Every row gets the same <span class="math inline">\begin{bmatrix} 10 &amp; 20 \end{bmatrix}</span>: one bias per node, reused for every observation. That is what <span class="math inline">\mathbf{X}\mathbf{W}^\mathsf{T} + \mathbf{b}</span> means in code.</p>
+</section>
+<section id="broadcasting-the-other-way" class="slide level2">
+<h2>Broadcasting the other way</h2>
+<p>Broadcasting can stretch a column too. Take <span class="math inline">(3 \times 2) + (3 \times 1)</span>: from the right, 2 against 1 — so the 1 stretches across the columns; then 3 against 3 match.</p>
+<p><span class="math display">
+\begin{bmatrix} 1 &amp; 2 \\ 3 &amp; 4 \\ 5 &amp; 6 \end{bmatrix} + \begin{bmatrix} 10 \\ 20 \\ 30 \end{bmatrix}
+\;=\;
+\begin{bmatrix} 1 &amp; 2 \\ 3 &amp; 4 \\ 5 &amp; 6 \end{bmatrix} + \underbrace{\begin{bmatrix} 10 &amp; 10 \\ 20 &amp; 20 \\ 30 &amp; 30 \end{bmatrix}}_{\text{stretching}}
+= \begin{bmatrix} 11 &amp; 12 \\ 23 &amp; 24 \\ 35 &amp; 36 \end{bmatrix}
+</span></p>
+<p>One number per row, reused along that row.</p>
+<div class="card">
+<p>The direction of the stretch follows the <strong>shape</strong>.</p>
+<ul>
+<li>A <span class="math inline">(1 \times 2)</span> row spreads down the rows; a <span class="math inline">(3 \times 1)</span> column spreads across the columns.</li>
+</ul>
+</div>
+<div class="callout callout-tip callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Tip</strong></p>
+</div>
+<div class="callout-content">
+<p>You have broadcast before. Standardising a data frame subtracts a <span class="math inline">(1 \times k)</span> row of column means from an <span class="math inline">(n \times k)</span> matrix — the same pattern as the bias.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="broadcasting-across-dimensions" class="slide level2">
+<h2>Broadcasting across dimensions</h2>
+<p>Later, when we stack matrices to get <strong>3-D tensors</strong>, we’ll have more complicated shapes like <span class="math inline">(64 \times 28 \times 28)</span></p>
+<p>Suppose we subtract something dimensionally smaller like <span class="math inline">(28 \times 28)</span>. Broadcasting works even here:</p>
+<pre><code>(64, 28, 28)
+    (28, 28)   →  pad left with 1s  →  (1, 28, 28)  →  stretch  →  (64, 28, 28)</code></pre>
+<div class="card">
+<p>When one <em>shape</em> is shorter, <strong>we pad it with 1s on the left</strong>, then line up from the right as before.</p>
+<ul>
+<li>So the above shape is treated as <span class="math inline">(1 \times 28 \times 28)</span> and reused for all 64 square matrices.</li>
+</ul>
+</div>
+<p>E.g. <span class="math inline">(2 \times 2 \times 2) + (2 \times 2)</span>:</p>
+<p><span class="math display">
+\underbrace{\begin{bmatrix} 1 &amp; 2 \\ 3 &amp; 4 \end{bmatrix}, \ \begin{bmatrix} 5 &amp; 6 \\ 7 &amp; 8 \end{bmatrix}}_{\text{a stack of two matrices}} + \ \begin{bmatrix} 10 &amp; 20 \\ 30 &amp; 40 \end{bmatrix}
+= \ \begin{bmatrix} 11 &amp; 22 \\ 33 &amp; 44 \end{bmatrix}, \ \begin{bmatrix} 15 &amp; 26 \\ 37 &amp; 48 \end{bmatrix}
+</span></p>
+<p>Each matrix in the stack gets the same <span class="math inline">(2 \times 2)</span> added — as if we had written <span class="math inline">+ \ \begin{bmatrix} 10 &amp; 20 \\ 30 &amp; 40 \end{bmatrix}, \ \begin{bmatrix} 10 &amp; 20 \\ 30 &amp; 40 \end{bmatrix}</span>, one copy per layer.</p>
+<div class="callout callout-warning callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Warning</strong></p>
+</div>
+<div class="callout-content">
+<p>The padding is only ever on the <strong>left</strong>. <span class="math inline">(64, 28, 28) + (64, 28)</span> fails: from the right, 28 matches 28, then 28 hits 64. If you mean “one number per image” — say, dividing each image by its own maximum — the shape you want is <span class="math inline">(64 \times 1 \times 1)</span>. Broadcasting follows the same rules for every element-wise operation, not only addition.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="try-it-which-of-these-broadcast" class="slide level2">
+<h2>Try it — which of these broadcast?</h2>
 <div class="try-box">
-<p><span class="try-label">Question: what happens if <span class="math inline">\mathbf{X}</span> is a dataframe (i.e.&nbsp;multiple observations)?</span> <span class="math inline">\mathbf{W} \in \mathbb{R}^{50 \times 5}</span> — a hidden layer of width 50 receiving 5 input features. <span class="math inline">\mathbf{X} \in \mathbb{R}^{100 \times 5}</span> — a dataset of 100 observations.</p>
-<p><strong>What is the shape of <span class="math inline">\mathbf{X} \mathbf{W}^\mathsf{T}</span>? What does each row of it represent?</strong></p>
+<p><span class="try-label">Try it yourself</span> <strong>For each pair of shapes, does the addition work — and if so, what shape comes out?</strong></p>
+<ol type="1">
+<li><span class="math inline">(2 \times 3)</span> + a single number</li>
+<li><span class="math inline">(64 \times 2)</span> + <span class="math inline">(1 \times 2)</span></li>
+<li><span class="math inline">(64 \times 2)</span> + <span class="math inline">(64,)</span></li>
+<li><span class="math inline">\begin{bmatrix} 10 \\ 20 \\ 30 \end{bmatrix} + \begin{bmatrix} 1 &amp; 2 \end{bmatrix}</span> — that is, <span class="math inline">(3 \times 1) + (1 \times 2)</span></li>
+</ol>
 </div>
 <div class="fragment">
 <div class="reveal-box">
-<p><span class="reveal-label">Answer</span> <span class="math inline">(100 \times 5) \cdot (5 \times 50) \to (100 \times 50)</span>.</p>
-<p><strong>Each row</strong> = the 50 hidden-layer pre-activations for one observation.</p>
+<p><span class="reveal-label">Answer</span> 1. <strong>Works</strong> — a single number is compatible with every dimension. Shape <span class="math inline">(2 \times 3)</span>.</p>
+<ol start="2" type="1">
+<li><p><strong>Works</strong> — from the right: 2 matches 2, then the 1 stretches over 64. Shape <span class="math inline">(64 \times 2)</span>. This is the layer bias.</p></li>
+<li><p><strong>Error</strong> — from the right: 2 against 64. A per-observation vector cannot be added this way. Reshape it to <span class="math inline">(64 \times 1)</span> and it broadcasts across the columns instead.</p></li>
+<li><p><strong>Works</strong> — <em>both</em> stretch. Written out: <span class="math inline">\begin{bmatrix} 10 &amp; 10 \\ 20 &amp; 20 \\ 30 &amp; 30 \end{bmatrix} + \begin{bmatrix} 1 &amp; 2 \\ 1 &amp; 2 \\ 1 &amp; 2 \end{bmatrix} = \begin{bmatrix} 11 &amp; 12 \\ 21 &amp; 22 \\ 31 &amp; 32 \end{bmatrix}</span> — shape <span class="math inline">(3 \times 2)</span>, every pairwise sum.</p></li>
+</ol>
 </div>
-<p><em>Notice this is the forward pass logic of yesterday</em></p>
+</div>
+</section>
+<section id="the-cost-of-a-matrix-product" class="slide level2">
+<h2>The cost of a matrix product</h2>
+<p>We now know <em>what</em> a matrix product computes. How much work is it?</p>
+<div class="card">
+<p>One entry of an <span class="math inline">(n \times m)(m \times p)</span> product is a dot product of length <span class="math inline">m</span>: <strong><span class="math inline">m</span> multiplications and <span class="math inline">m - 1</span> additions</strong>. Each multiply or add is one <strong>floating-point operation</strong> (a <strong>FLOP</strong>), so one entry costs about <span class="math inline">2m</span> FLOPs.</p>
+<p>The output has <span class="math inline">n \times p</span> entries:</p>
+<p><span class="math display">
+\text{total cost} \approx n \times p \times 2m = 2nmp \ \text{FLOPs}
+</span></p>
+</div>
+<p><strong>Worked example.</strong> A layer reading a <span class="math inline">28 \times 28</span> pixel image (784 features) into 128 hidden nodes, for a batch of 64 images: <span class="math inline">\mathbf{X}\mathbf{W}^\mathsf{T}</span> is <span class="math inline">(64 \times 784)(784 \times 128)</span>.</p>
+<p><span class="math display">
+2 \times 64 \times 784 \times 128 = 12{,}845{,}056 \approx 13\text{M FLOPs}
+</span></p>
+<p>… For <em>one</em> layer, of <em>one</em> forward pass.</p>
+</section>
+<section id="why-gpus" class="slide level2">
+<h2>Why GPUs?</h2>
+<p>The good news: none of that work has to happen in sequence.</p>
+<div class="card">
+<p><strong>Every entry of the output is independent of every other.</strong> Entry <span class="math inline">(i, j)</span> needs row <span class="math inline">i</span> of <span class="math inline">\mathbf{X}</span> and column <span class="math inline">j</span> of <span class="math inline">\mathbf{W}^\mathsf{T}</span>.</p>
 <ul>
-<li>But now, done simultaneously over every observation in one matmul!</li>
+<li>We can compute thousands of entries at the same time.</li>
 </ul>
+</div>
+<p>A <strong>GPU</strong> (graphics card) is built for exactly this because it calls the same easy computation, over thousands of points at once.</p>
+<ul>
+<li>A modern GPU manages on the order of <span class="math inline">10^{14}</span> FLOPs per second.</li>
+<li>At that rate, our 13M-FLOP layer takes roughly a ten-millionth of a second.</li>
+</ul>
+<div class="try-box">
+<p><span class="try-label">Try it yourself</span> <strong>The output layer maps those 128 hidden values to 10 classes, same batch of 64. How many FLOPs?</strong></p>
+</div>
+<div class="fragment">
+<div class="reveal-box">
+<p><span class="reveal-label">Answer</span> <span class="math inline">2 \times 64 \times 128 \times 10 = 163{,}840</span> FLOPs — about 78 times cheaper than the 784 → 128 layer.</p>
+</div>
 </div>
 </section></section>
 <section>
@@ -741,7 +902,7 @@ w_2^{(1)} &amp; w_2^{(2)} \\ w_3^{(1)} &amp; w_3^{(2)} \end{bmatrix}</span></p>
 </section>
 <section id="plenary-matrix-products-by-hand-1" class="slide level2">
 <h2>Plenary · matrix products by hand</h2>
-<p><span class="eyebrow"><span class="pause-cue">≈ 20 min</span> · pen and paper, in pairs</span></p>
+<p><span class="eyebrow"><span class="pause-cue">≈ 10 min</span> · pen and paper, in pairs</span></p>
 <div class="card">
 <p><span class="eyebrow">Five problems</span></p>
 <p>For each, compute or say “undefined” (with a reason).</p>
@@ -753,7 +914,7 @@ w_2^{(1)} &amp; w_2^{(2)} \\ w_3^{(1)} &amp; w_3^{(2)} \end{bmatrix}</span></p>
 <li><p><span class="math inline">\begin{bmatrix} 1 &amp; 2 \end{bmatrix} \begin{bmatrix} 3 \\ 4 \\ 5 \end{bmatrix} = \ ?</span></p></li>
 </ol>
 </div>
-<p><span class="muted">Ten minutes. Then we’ll discuss together.</span></p>
+<p><span class="muted">Five minutes. Then we’ll discuss together.</span></p>
 </section>
 <section id="plenary-answers" class="slide level2">
 <h2>Plenary · answers</h2>
@@ -835,7 +996,7 @@ w_2^{(1)} &amp; w_2^{(2)} \\ w_3^{(1)} &amp; w_3^{(2)} \end{bmatrix}</span></p>
 <section id="seeing-the-slope" class="slide level2">
 <h2>Seeing the slope</h2>
 <p><span class="eyebrow">The same worked example, drawn: <span class="math inline">y = 3x^2 + 5</span></span></p>
-<div id="21dda476" class="cell" data-fig-height="3.9" data-fig-width="9" data-execution_count="1">
+<div id="c317bc10" class="cell" data-fig-height="3.9" data-fig-width="9" data-execution_count="1">
 <div class="cell-output cell-output-display">
 <div>
 <figure>
@@ -942,8 +1103,8 @@ w_2^{(1)} &amp; w_2^{(2)} \\ w_3^{(1)} &amp; w_3^{(2)} \end{bmatrix}</span></p>
 <p>This is the deepest reason deep learning works: any reasonable composition of operations can be differentiated <strong>one operation at a time</strong>, then assembled.</p>
 </div>
 </section>
-<section id="a-longer-worked-chain" class="slide level2">
-<h2>A longer worked chain</h2>
+<section id="a-longer-chain" class="slide level2">
+<h2>A longer chain</h2>
 <p><span class="eyebrow">Take a function with three nested operations:</span></p>
 <p><span class="math display">
 y = \left( \tfrac{1}{n} (a - x)^2 \right)^{1/2}
@@ -959,11 +1120,11 @@ y = \left( \tfrac{1}{n} (a - x)^2 \right)^{1/2}
 </section>
 <section id="partial-derivatives-gradients" class="slide level2">
 <h2>Partial derivatives &amp; gradients</h2>
-<p>For a function of several variables, e.g.&nbsp;<span class="math inline">y = f(x_1, x_2) = 3 x_1^2 + 2 x_2 + 1</span>:</p>
+<p>For a function of several variables, e.g.&nbsp;<span class="math inline">y = f(a, b) = 3 a^2 + 2 b + 1</span>:</p>
 <div class="columns">
 <div class="column" style="width:50%;">
 <p>Compute <strong>partial derivatives</strong> — treat the other vars as constants: <span class="math display">
-\frac{\partial y}{\partial x_1} = 6 x_1, \qquad \frac{\partial y}{\partial x_2} = 2
+\frac{\partial y}{\partial a} = 6 a, \qquad \frac{\partial y}{\partial b} = 2
 </span></p>
 <p>Collect them into a <strong>gradient vector</strong>: <span class="math display">
 \nabla f = \begin{bmatrix} \frac{\partial y}{\partial x_1} \\ \frac{\partial y}{\partial x_2} \end{bmatrix} = \begin{bmatrix} 6 x_1 \\ 2 \end{bmatrix}
@@ -976,6 +1137,76 @@ y = \left( \tfrac{1}{n} (a - x)^2 \right)^{1/2}
 <p>That is the thing we minimise tomorrow.</p>
 </div>
 </div></div>
+</section>
+<section id="checking-a-derivative-numerically" class="slide level2">
+<h2>Checking a derivative numerically</h2>
+<p>Suppose a computer cannot differentiate a function. Can we approximate the derivative?</p>
+<div class="card">
+<p>The derivative asks how much would the output change if we adjust an input by a tiny interval.</p>
+<p>So, empirically, we can take a small step <span class="math inline">\varepsilon</span> either side of <span class="math inline">x</span> and measure that change:</p>
+<p><span class="math display">
+f'(x) \approx \frac{f(x + \varepsilon) - f(x - \varepsilon)}{2\varepsilon}
+</span></p>
+<p>This is called the <strong>central difference</strong>. It is the empirical evaluation of a gradient <em>at a given point</em>.</p>
+</div>
+<p><strong>Worked example.</strong> Suppose <span class="math inline">f(x) = x^2</span>, and we evaluate at <span class="math inline">x = 3</span>.</p>
+<p>With <span class="math inline">\varepsilon = 0.01</span>:</p>
+<p><span class="math display">
+\frac{f(3.01) - f(2.99)}{0.02} = \frac{9.0601 - 8.9401}{0.02} = \frac{0.1200}{0.02} = 6.0000
+</span></p>
+<p>Formally, we know <span class="math inline">f'(x) = 2x</span>, so <span class="math inline">f'(3) = 6</span> – they match!</p>
+</section>
+<section id="try-it-on-the-sigmoid" class="slide level2">
+<h2>Try it on the sigmoid</h2>
+<p>The cheat-sheet claims <span class="math inline">\sigma'(x) = \sigma(x)(1 - \sigma(x))</span>. We took that on trust. Now we can check it.</p>
+<div class="try-box">
+<p><span class="try-label">Try it yourself</span> <strong>Estimate <span class="math inline">\sigma'(0)</span> with the central difference and <span class="math inline">\varepsilon = 0.01</span>.</strong></p>
+<p>To 4 d.p.: <span class="math inline">\sigma(0.01) = 0.5025</span> and <span class="math inline">\sigma(-0.01) = 0.4975</span>.</p>
+</div>
+<div class="fragment">
+<div class="reveal-box">
+<p><span class="reveal-label">Answer</span> <span class="math display">
+\sigma'(0) \approx \frac{0.5025 - 0.4975}{0.02} = \frac{0.0050}{0.02} = 0.25
+</span></p>
+<p>The rule agrees: <span class="math inline">\sigma(0) = \tfrac{1}{1 + e^{0}} = 0.5</span>, so <span class="math inline">\sigma'(0) = 0.5 \times 0.5 = 0.25</span>.</p>
+</div>
+</div>
+</section>
+<section id="why-dont-we-just-use-the-central-difference" class="slide level2">
+<h2>Why don’t we just use the central difference?</h2>
+<p>The central difference has one flaw that rules it out for training, but is useful for testing calculations.</p>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><span class="pill-amber">It’s far too slow</span></p>
+<ul>
+<li>Checking one parameter means nudging <em>one</em> <span class="math inline">w</span> and rerunning the whole network – so, one forward pass per parameter.</li>
+<li>A model with millions of parameters would need millions of forward passes for a <em>single</em> training step.</li>
+</ul>
+</div><div class="column" style="width:50%;">
+<p><span class="pill-green">Why it’s still useful</span></p>
+<ul>
+<li><p>Autograd libraries use central difference to test themselves</p>
+<ul>
+<li>Compute each derivative exactly</li>
+<li>Compute the central difference</li>
+<li>Only allow the algorithm to pass if they agree (called <strong>gradient checking</strong>)</li>
+</ul></li>
+<li><p>If our chain-rule code is wrong, gradient checking flags it</p></li>
+</ul>
+</div></div>
+<div class="callout callout-tip callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>We can calculate entire network gradients with 1 forward and 1 backward pass</strong></p>
+</div>
+<div class="callout-content">
+<p>We’ll see this tomorrow!</p>
+</div>
+</div>
+</div>
 </section></section>
 <section>
 <section id="activity-chain-rule-exercises" class="title-slide slide level1 center" data-background-color="#0E1A2B">
@@ -984,7 +1215,7 @@ y = \left( \tfrac{1}{n} (a - x)^2 \right)^{1/2}
 </section>
 <section id="activity-chain-rule" class="slide level2">
 <h2>Activity · chain rule</h2>
-<p><span class="eyebrow"><span class="pause-cue">≈ 15 min</span> · pen and paper, in pairs</span></p>
+<p><span class="eyebrow"><span class="pause-cue">≈ 8 min</span> · pen and paper</span></p>
 <p>For each <span class="math inline">y</span>, find <span class="math inline">\dfrac{dy}{dx}</span> — using the chain rule, <em>without</em> expanding.</p>
 <div class="card">
 <ol type="1">
@@ -995,7 +1226,6 @@ y = \left( \tfrac{1}{n} (a - x)^2 \right)^{1/2}
 <li><p><span class="math inline">y = (a - x)^2</span> — find <span class="math inline">\dfrac{dy}{dx}</span>, treating <span class="math inline">a</span> as a constant.</p></li>
 </ol>
 </div>
-<p><span class="muted">Twelve minutes. We’ll discuss the trickier ones.</span></p>
 </section>
 <section id="activity-answers" class="slide level2">
 <h2>Activity · answers</h2>
@@ -1007,19 +1237,6 @@ y = \left( \tfrac{1}{n} (a - x)^2 \right)^{1/2}
 <li><p><span class="math inline">\dfrac{dy}{dx} = \sigma(3x)(1 - \sigma(3x)) \cdot 3</span>.</p></li>
 <li><p><span class="math inline">\dfrac{dy}{dx} = 2(a - x) \cdot (-1) = -2(a - x)</span>.</p></li>
 </ol>
-</div>
-<div class="callout callout-tip callout-titled callout-style-default">
-<div class="callout-body">
-<div class="callout-title">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<p><strong>Tip</strong></p>
-</div>
-<div class="callout-content">
-<p>Tomorrow we use exactly this pattern — repeatedly — to compute gradients across an entire neural network.</p>
-</div>
-</div>
 </div>
 </section></section>
 <section>
@@ -1425,8 +1642,8 @@ y = \left( \tfrac{1}{n} (a - x)^2 \right)^{1/2}
 </div>
 </div>
 </section>
-<section id="youve-maybe-seen-this-picture-before" class="slide level2">
-<h2>You’ve maybe seen this picture before</h2>
+<section id="graphs-are-fairly-common-in-social-sciences" class="slide level2">
+<h2>Graphs are fairly common in social sciences</h2>
 <p><span class="eyebrow">Social-science graphs</span></p>
 <div class="columns">
 <div class="column" style="width:55%;">
@@ -1530,8 +1747,8 @@ y = \left( \tfrac{1}{n} (a - x)^2 \right)^{1/2}
 </div>
 <p>(With an activation function <span class="math inline">\sigma</span> added between the <code>+</code> and the output, you’d insert one more node — same picture, one more step.)</p>
 <div class="card">
-<p><strong>Every node has a local derivative we can compute</strong> — using the cheat-sheet from earlier. The chain rule will glue them.</p>
-<p>That’s the move that makes the whole edifice work. Tomorrow we use it.</p>
+<p><strong>Every node has a local derivative we can compute</strong>.</p>
+<p>Using the cheat-sheet from earlier, we can assign the form of these derivatives when we build the graph, to save compute.</p>
 </div>
 </section>
 <section id="a-network-as-a-graph" class="slide level2">
@@ -1907,6 +2124,67 @@ y = \left( \tfrac{1}{n} (a - x)^2 \right)^{1/2}
 <p>In <strong>Labs 3–4</strong> you build exactly this, where every single arithmetic operation becomes a node in your <code>Value</code> graph. A tiny network makes a surprisingly big graph — and that is precisely why we let the computer walk it for us.</p>
 </div>
 </section>
+<section id="scaling-up-three-hidden-layers-of-32" class="slide level2">
+<h2>Scaling up — three hidden layers of 32</h2>
+<p>This is still a <em>tiny</em> deep learning model:</p>
+<ul>
+<li>3 inputs,</li>
+<li>3 hidden layers of 32 nodes</li>
+<li>One output node</li>
+</ul>
+<p>To make it fit, one dot represents a multiply, add, or squash, in running order.</p>
+<div id="41cf7891" class="cell" data-fig-height="2.1" data-fig-width="11.5" data-execution_count="2">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="lecture-03-computational-graphs_files/figure-revealjs/cell-3-output-1.svg" class="quarto-figure quarto-figure-center"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p>For <strong>one prediction</strong>:</p>
+<ul>
+<li>Multiplies: <span class="math inline">96 + 1{,}024 + 1{,}024 + 32 = 2{,}176</span></li>
+<li>Adds: <span class="math inline">2{,}176</span> (<span class="math inline">97</span> of them bias adds)</li>
+<li>Squashes: <span class="math inline">97</span> — one per neuron</li>
+<li><strong>Total: <span class="math inline">4{,}449</span> operations</strong> from <span class="math inline">2{,}273</span> parameters.</li>
+</ul>
+</div><div class="column" style="width:50%;">
+<div class="card">
+<p>Grouped into matrix operations, this whole ribbon is still <span class="math inline">4 \times</span> (multiply, add, squash) <span class="math inline">= 12</span> nodes. The dots are what the computer does underneath.</p>
+<p>For context, a forward pass of GPT-3 requires about <em>350 billion</em> floating point operations.</p>
+</div>
+</div></div>
+</section>
+<section id="how-does-the-computer-know-what-to-run-first" class="slide level2">
+<h2>How does the computer know what to run first?</h2>
+<p>The graph itself is not numbered.</p>
+<ul>
+<li>Instead, the order is extracted from the <strong>arrows</strong></li>
+</ul>
+<div class="card">
+<ol type="1">
+<li>A node is <strong>ready</strong> when every arrow <em>into</em> it comes from a node that has already run.</li>
+<li>Every ready node is added to a <em>heap</em></li>
+<li>Run any node in the heap then mark it done.</li>
+<li>Repeat until every node has run.</li>
+</ol>
+<p>A list built this way is called a <strong>topological order</strong> of the graph.</p>
+</div>
+<p>Two things worth noticing:</p>
+<ul>
+<li><p>The order is <strong>not unique</strong>. Layer 1 can run the multiplications in any order</p>
+<ul>
+<li>Layer 2 multiples rely on layer-1 finishing</li>
+</ul></li>
+<li><p>The heap only clears because the graph is <em>acyclic</em>.</p>
+<ul>
+<li>When cycles exist, (at least) two nodes are waiting for each other</li>
+</ul></li>
+</ul>
+</section>
 <section id="the-two-passes-preview-of-tomorrow" class="slide level2">
 <h2>The two passes — preview of tomorrow</h2>
 <div class="columns">
@@ -1948,9 +2226,12 @@ y = \left( \tfrac{1}{n} (a - x)^2 \right)^{1/2}
 <ol type="1">
 <li>Multiply matrices and check shapes by hand.</li>
 <li>Differentiate simple expressions, including with the chain rule.</li>
-<li>Draw any expression — from a simple polynomial to a two-layer network — as a directed acyclic graph.</li>
-<li>State what we still don’t have: a <strong>way to put loss into the graph and let gradients flow backwards</strong>.</li>
+<li>Draw any expression, from a simple function to a multi-layer neural network, as a directed acyclic graph.</li>
 </ol>
+<p>What we don’t have:</p>
+<ul>
+<li>A <strong>way to put loss into the graph and let gradients flow backwards</strong>.</li>
+</ul>
 </div>
 <div class="callout callout-tip callout-titled callout-style-default">
 <div class="callout-body">
@@ -1967,14 +2248,14 @@ y = \left( \tfrac{1}{n} (a - x)^2 \right)^{1/2}
 </div>
 </section></section>
 <section>
-<section id="lab-brief-todays-afternoon" class="title-slide slide level1 center" data-background-color="#0E1A2B">
-<h1>Lab brief · today’s afternoon</h1>
+<section id="lab-brief" class="title-slide slide level1 center" data-background-color="#0E1A2B">
+<h1>Lab brief</h1>
 
 </section>
-<section id="todays-lab-90-minutes" class="slide level2">
-<h2>Today’s lab — 90 minutes</h2>
+<section id="tomorrow-mornings-lab-90-minutes" class="slide level2">
+<h2>Tomorrow morning’s lab — 90 minutes</h2>
 <p><span class="eyebrow">Goals</span></p>
-<p>In Python (no PyTorch yet), build a small <strong>computational graph library</strong> from scratch.</p>
+<p>In Python, build a small <strong>computational graph library</strong> from scratch.</p>
 <p>You will implement:</p>
 <ol type="1">
 <li>A <code>Value</code> class that stores <code>data</code>, <code>grad</code>, and a list of “child” values.</li>
@@ -1982,14 +2263,14 @@ y = \left( \tfrac{1}{n} (a - x)^2 \right)^{1/2}
 <li>A small test: write <code>c = a * b + 1</code> for <code>Value</code>s <code>a, b</code>, and verify the graph has the right structure.</li>
 </ol>
 <div class="card">
-<p><strong>Deliverable.</strong> A working <code>Value</code> class. We will add gradient computation to it <strong>tomorrow</strong> — that step turns this library into a fully-working autodiff system.</p>
-<p>The pattern is Andrej Karpathy’s <code>micrograd</code>. We are walking it deliberately.</p>
+<p><strong>Deliverable.</strong> A working <code>Value</code> class. We will add gradient computation to it in the following lab, which turns this library into a fully-working autodiff system.</p>
+<p>This comes from Andrej Karpathy’s <code>micrograd</code> scripts.</p>
 </div>
 </section>
 <section id="see-you-tomorrow" class="slide level2" data-background-color="#0E1A2B">
 <h2>See you tomorrow</h2>
 <p><span class="eyebrow">Lecture 4 — <em>Backpropagation</em></span></p>
-<p><span class="smaller"><span class="muted">If you want a head start: skim Karpathy’s <em>micrograd</em> GitHub README tonight. Don’t read the implementation yet — we’ll write it together tomorrow.</span></span></p>
+<p><span class="smaller"><span class="muted">If you want a head start: skim Karpathy’s <em>micrograd</em> GitHub README tonight. No need to read the implementation yet as we’ll write it together tomorrow.</span></span></p>
 
 <div class="quarto-auto-generated-content">
 <div class="footer footer-default">

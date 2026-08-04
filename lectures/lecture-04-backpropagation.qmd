@@ -10,6 +10,34 @@ format:
     smaller: true
 ---
 
+## Warm-up · three questions from last time
+
+[<span class="pause-cue">≈ 5 min</span> · shout it out]{.eyebrow}
+
+::: {.card}
+1. Is the product of a $2 \times 3$ matrix and a $3 \times 1$ matrix defined? If so, what shape is the result?
+2. Use the chain rule: what is $\frac{d}{dx}(2x+1)^3$?
+3. In a computational graph, what do the nodes and edges represent — and why must the graph have no cycles?
+:::
+
+## Warm-up · answers
+
+::: {.card}
+**1. Yes — the product is defined.** The inner dimensions match ($3$ and $3$), and the outer dimensions give the shape of the result:
+
+$$
+(2 \times 3)(3 \times 1) \rightarrow 2 \times 1
+$$
+
+**2.** Let $u = 2x + 1$, so $y = u^3$. Then $\frac{dy}{du} = 3u^2$ and $\frac{du}{dx} = 2$:
+
+$$
+\frac{dy}{dx} = 3u^2 \cdot 2 = 6(2x+1)^2
+$$
+
+**3.** Nodes hold **values** and **operations**; edges carry each result forward into the next operation. And no cycles allowed: a cycle would make a value depend on itself, so the forward pass could never finish.
+:::
+
 # Part 1 · Loss & the goal {background-color="#0E1A2B"}
 
 ## Where we are — and what we still need
@@ -456,7 +484,7 @@ It is the **single algorithm** that powers every modern neural network. It was p
 
 ## Plenary · backward pass by hand
 
-[<span class="pause-cue">≈ 20 min</span> · pen and paper, in pairs]{.eyebrow}
+[<span class="pause-cue">≈ 10 min</span> · pen and paper, in pairs]{.eyebrow}
 
 ::: {.card}
 [The graph]{.eyebrow}
@@ -796,6 +824,105 @@ Deep learning is therefore **experimental**: it works far better than anyone cou
 
 :::
 
+## Saddle points — a million directions to check
+
+::: {.columns}
+::: {.column width="50%"}
+In two dimensions we picture getting **stuck in a valley** — a local minimum.
+
+In a million dimensions, being a minimum is a demanding job. At a **critical point** — a point where the gradient is zero — the loss must curve *upward in every one of a million directions*.
+
+Count the up/down patterns of curvature:
+
+* 2 directions → $2^2 = 4$ patterns. One is a minimum (all up), one a maximum (all down), and the other 2 are **saddle points**.
+* 20 directions → $2^{20} = 1{,}048{,}576$ patterns; 1,048,574 are saddles.
+
+In a big network, almost every critical point has at least one downhill direction — a saddle, not a minimum [@dauphin2014identifying].
+:::
+::: {.column width="50%"}
+```{python}
+#| echo: false
+#| fig-width: 5.4
+#| fig-height: 4.4
+#| fig-align: center
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib_inline.backend_inline as backend_inline
+
+# SVG keeps the figure vector-sharp when the deck is projected.
+backend_inline.set_matplotlib_formats("svg")
+
+# ME324 deck palette (see assets/theme/me324.scss)
+INK, MUTED, RULE, PAPER = "#0E1A2B", "#5C6473", "#D7D2C5", "#FBFAF6"
+ACCENT, BLUE = "#C9322B", "#1A6FB4"
+
+plt.rcParams.update({
+    "font.family": "sans-serif",
+    "font.sans-serif": ["Inter", "Helvetica Neue", "Arial", "DejaVu Sans"],
+    "text.color": INK, "axes.labelcolor": INK,
+    "xtick.color": MUTED, "ytick.color": MUTED, "axes.edgecolor": RULE,
+})
+
+# The saddle z = x^2 - y^2: up along x, down along y
+grid = np.linspace(-1, 1, 41)
+X, Y = np.meshgrid(grid, grid)
+Z = X**2 - Y**2
+
+fig = plt.figure(figsize=(5.4, 4.4))
+fig.patch.set_alpha(0)          # sit on the slide's own background
+ax = fig.add_subplot(projection="3d")
+ax.patch.set_alpha(0)
+
+ax.plot_surface(X, Y, Z, rcount=25, ccount=25, color=RULE,
+                alpha=0.45, edgecolor=MUTED, lw=0.25)
+
+# The two slices through the critical point, each labelled directly
+# (identity never rests on colour alone).
+t = np.linspace(-1, 1, 100)
+ax.plot(t, 0*t, t**2, color=BLUE, lw=3, zorder=5)
+ax.plot(0*t, t, -t**2, color=ACCENT, lw=3, zorder=5)
+ax.scatter([0], [0], [0], color=INK, s=45, zorder=6)
+
+ax.text(0.9, 0, 1.12, "up along $x$", color=BLUE,
+        fontsize=11, fontweight="bold")
+ax.text(0, 1.02, -1.28, "down along $y$", color=ACCENT,
+        fontsize=11, fontweight="bold")
+ax.text(-0.25, -0.15, 0.62, "gradient $= 0$", color=INK,
+        fontsize=11, fontweight="bold", ha="right")
+
+# Transparent panes so the plot sits on the slide background
+for axis in (ax.xaxis, ax.yaxis, ax.zaxis):
+    axis.pane.set_alpha(0)
+    axis.line.set_color(RULE)
+ax.set_xticks([]); ax.set_yticks([]); ax.set_zticks([])
+ax.set_xlabel("$x$", fontsize=12)
+ax.set_ylabel("$y$", fontsize=12)
+ax.view_init(elev=22, azim=-60)
+plt.tight_layout()
+plt.show()
+```
+
+[The surface $z = x^2 - y^2$: uphill along $x$, downhill along $y$ — the shape of a horse's saddle.]{.smaller}
+:::
+:::
+
+## What saddles mean for training
+
+::: {.card}
+Near a saddle point the surface is nearly **flat**, so the gradient is small — and small gradients mean tiny steps.
+
+Gradient descent doesn't get trapped there (a downhill direction exists). It **stalls**.
+:::
+
+::: {.fragment}
+::: {.reveal-box}
+[The accidental fix]{.reveal-label}
+Mini-batch gradients are **noisy** — each batch of examples gives a slightly different gradient. Near a saddle, that noise shoves the parameters off the flat ridge and onto the downhill direction, and descent resumes.
+
+The noise we accept to keep steps cheap — mini-batch gradient descent, two slides from now — also helps the optimiser escape saddles.
+:::
+:::
+
 ## A (slightly) more realistic example
 
 Suppose we have two observations — $(x = 1, y = 2)$ and $(x = 3, y = 6)$ — what should we do?
@@ -872,7 +999,7 @@ As with "regular" ML, we must not *leak* validation/test data into training. If 
 
 ## Activity · one step of gradient descent
 
-[<span class="pause-cue">≈ 15 min</span> · pen and paper, in pairs]{.eyebrow}
+[<span class="pause-cue">≈ 8 min</span> · pen and paper, in pairs]{.eyebrow}
 
 ::: {.card}
 [The model and one observation]{.eyebrow}
@@ -944,6 +1071,50 @@ We'll use these in every PyTorch model from Day 5.
   * They are a good default for most DL projects
   
 :::
+:::
+
+## Momentum — give the update a memory
+
+Plain SGD forgets everything between steps. **Momentum** keeps a running **velocity** $v$, and steps along that instead of the raw gradient:
+
+$$
+v \leftarrow \gamma v + g, \qquad w \leftarrow w - \lambda v
+$$
+
+* $g$ — the current gradient, $\frac{\partial L}{\partial w}$.
+* $\gamma$ — the **decay rate**, typically 0.9. It sets how much of the old velocity survives each step.
+
+::: {.card}
+[Worked example · $\gamma = 0.9$, $\lambda = 0.1$, start at $w = 1$, $v = 0$; the gradient is $g = 1$ at both steps]{.eyebrow}
+
+**Step 1:** $v = 0.9(0) + 1 = 1$, so $w = 1 - 0.1(1) = 0.9$.
+
+**Step 2:** $v = 0.9(1) + 1 = 1.9$, so $w = 0.9 - 0.1(1.9) = 0.9 - 0.19 = 0.71$.
+
+Plain SGD takes two steps of $0.1$ and reaches only $0.8$. Momentum's second step is nearly twice its first.
+:::
+
+When the gradient agrees with itself step after step, the velocity builds — and the steps grow.
+
+## Momentum when the gradient flips
+
+Now suppose the gradient oscillates: $g = +1$ on step 1, then $g = -1$ on step 2.
+
+::: {.card}
+[Same setup · $\gamma = 0.9$, $\lambda = 0.1$, start at $w = 1$, $v = 0$]{.eyebrow}
+
+**Step 1** ($g = +1$): $v = 0.9(0) + 1 = 1$, so $w = 1 - 0.1(1) = 0.9$.
+
+**Step 2** ($g = -1$): $v = 0.9(1) - 1 = -0.1$, so $w = 0.9 - 0.1(-0.1) = 0.91$.
+
+Plain SGD would bounce all the way back to $1.0$. Momentum moves just $0.01$ — the $+1$ and the $-1$ nearly cancel inside $v$.
+:::
+
+::: {.reveal-box}
+[What momentum buys us]{.reveal-label}
+Agreement across steps **builds speed**. Disagreement **cancels out**, so oscillations are damped.
+
+One problem from two slides ago remains: every parameter still shares the single step size $\lambda$. **Adam** — next slide — combines momentum with a step size *per parameter*.
 :::
 
 ## Adam, in one slide

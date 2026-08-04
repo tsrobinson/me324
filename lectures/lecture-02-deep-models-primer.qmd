@@ -373,7 +373,7 @@ We have written the model as an equation. Can you convert this into a functional
 
 ::: {.card}
 [Bonus]{.eyebrow}
-$f(\mathbf{x},\mathbf{w},b) =  \mathbf{w} \cdot \mathbf{x} + b$
+$f(\mathbf{x}) =  \mathbf{w} \cdot \mathbf{x} + b$
 :::
 
 ::: {.callout-tip}

@@ -34,6 +34,33 @@ Moving from "understanding the algorithm" to "building a useful model".
 
 After today, every remaining lecture uses PyTorch.
 
+## Warm-up · three questions from last time
+
+[<span class="pause-cue">≈ 5 min</span> · shout it out]{.eyebrow}
+
+::: {.card}
+[From last week]{.eyebrow}
+
+1. One gradient-descent update. $w = 1$, $\frac{\partial L}{\partial w} = 0.5$, learning rate $\lambda = 0.1$. What is the new $w$?
+2. What does a loss function measure — and which loss did we use for regression?
+3. In which direction does backpropagation walk the computational graph, and what does it carry with it?
+:::
+
+[The weekend was long. Everything here is from Thursday's lecture!]{.muted}
+
+## Warm-up · answers
+
+::: {.card}
+1. Step against the gradient, scaled by $\lambda$:
+$$
+w_{\text{new}} = w - \lambda \frac{\partial L}{\partial w} = 1 - 0.1 \times 0.5 = 1 - 0.05 = 0.95
+$$
+2. How wrong the model's predictions are on the data, as a single number — lower is better. For regression we used **mean squared error**.
+3. **Backwards** — from the loss to the inputs, multiplying local derivatives along the way. That is the chain rule.
+:::
+
+All three are about to become one line of PyTorch each.
+
 # Part 1 · From `Value` to PyTorch {background-color="#0E1A2B"}
 
 ## What PyTorch gives us
@@ -441,7 +468,7 @@ This is exactly the kind of model you'll build in today's lab.
 
 ## Plenary · predict the activations
 
-[<span class="pause-cue">≈ 20 min</span> · in pairs]{.eyebrow}
+[<span class="pause-cue">≈ 10 min</span> · in pairs]{.eyebrow}
 
 ::: {.card}
 [The pre-activation value:]{.eyebrow}
@@ -620,7 +647,7 @@ During training, several neural network features will operate differently than d
 
 ## Activity · predict the effect
 
-[<span class="pause-cue">≈ 15 min</span> · in pairs]{.eyebrow}
+[<span class="pause-cue">≈ 8 min</span> · in pairs]{.eyebrow}
 
 For each change, **predict** what happens to (a) training loss and (b) validation loss, then justify:
 
@@ -858,6 +885,119 @@ The statistics come from **one example**, so layer norm is *independent of batch
 ::: {.column width="50%"}
 [Layer norm]{.pill} one $\mu$ per **example**, averaged across its features. Batch-size independent. Predominantly used in **transformers**.
 :::
+:::
+
+## Diagnosing a run from its loss curves
+
+[<span class="pause-cue">≈ 3 min</span> · in pairs]{.eyebrow}
+
+::: {.columns}
+::: {.column width="58%"}
+```{python}
+#| echo: false
+#| fig-width: 5.6
+#| fig-height: 4.4
+#| fig-align: center
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib_inline.backend_inline as backend_inline
+from matplotlib.lines import Line2D
+
+backend_inline.set_matplotlib_formats("svg")
+
+# ME324 deck palette (see assets/theme/me324.scss)
+INK, MUTED, RULE, PAPER = "#0E1A2B", "#5C6473", "#D7D2C5", "#FBFAF6"
+TRAIN, VAL = "#1A6FB4", "#C9322B"
+
+plt.rcParams.update({
+    "font.family": "sans-serif",
+    "font.sans-serif": ["Inter", "Helvetica Neue", "Arial", "DejaVu Sans"],
+    "text.color": INK, "axes.labelcolor": INK,
+    "xtick.color": MUTED, "ytick.color": MUTED, "axes.edgecolor": RULE,
+})
+
+rng = np.random.default_rng(324)
+epochs = np.arange(1, 41)
+
+def jitter(scale):
+    return rng.normal(0, scale, epochs.shape)
+
+# Four sketched runs — the reveal is on the next slide, so no titles here.
+a_train = 0.05 + 1.75 * np.exp(-epochs / 6) + jitter(0.015)
+a_val   = 0.52 + 1.45 * np.exp(-epochs / 6) + 0.02 * np.maximum(0, epochs - 12) + jitter(0.02)
+
+b_train = 0.30 + 1.55 * np.exp(-epochs / 9) + jitter(0.015)
+b_val   = 0.42 + 1.55 * np.exp(-epochs / 9) + jitter(0.02)
+
+c_train = np.clip(1.15 + 0.022 * epochs + jitter(0.30), 0.15, 2.45)
+c_val   = np.clip(1.30 + 0.022 * epochs + jitter(0.34), 0.15, 2.45)
+
+d_train = 1.52 + 0.10 * np.exp(-epochs / 12) + jitter(0.015)
+d_val   = 1.62 + 0.10 * np.exp(-epochs / 12) + jitter(0.02)
+
+panels = [("A", a_train, a_val), ("B", b_train, b_val),
+          ("C", c_train, c_val), ("D", d_train, d_val)]
+
+fig, axes = plt.subplots(2, 2, figsize=(5.6, 4.4), sharex=True, sharey=True)
+fig.patch.set_alpha(0)          # sit on the slide's own background
+
+for ax, (letter, tr, va) in zip(axes.flat, panels):
+    ax.patch.set_alpha(0)
+    ax.plot(epochs, tr, color=TRAIN, lw=2.2, zorder=3)
+    ax.plot(epochs, va, color=VAL, lw=2.2, zorder=2)
+    ax.set_xlim(0, 41)
+    ax.set_ylim(0, 2.6)
+    ax.set_xticks([])           # sketches — the shapes carry the message
+    ax.set_yticks([])
+    for side in ("top", "right"):
+        ax.spines[side].set_visible(False)
+    ax.set_title(letter, loc="left", fontsize=13, fontweight="bold",
+                 color=INK, pad=4)
+
+for ax in axes[1]:
+    ax.set_xlabel("epoch", fontsize=10, color=MUTED)
+for ax in axes[:, 0]:
+    ax.set_ylabel("loss", fontsize=10, color=MUTED)
+
+# Legend text names the lines, so identity never rests on colour alone.
+fig.legend(handles=[Line2D([], [], color=TRAIN, lw=2.2, label="training"),
+                    Line2D([], [], color=VAL, lw=2.2, label="validation")],
+           loc="upper center", ncols=2, frameon=False, fontsize=10,
+           bbox_to_anchor=(0.5, 1.0))
+
+plt.tight_layout(rect=(0, 0, 1, 0.93))
+plt.show()
+```
+:::
+::: {.column width="42%"}
+::: {.try-box}
+[Match each panel to a diagnosis]{.try-label}
+
+Four training runs. Same model, same data — four different outcomes:
+
+* learning rate too high
+* overfitting
+* underfitting
+* healthy
+
+**Which is which — and what in the curves told you?**
+:::
+
+[These are the curves you plot in today's lab.]{.muted}
+:::
+:::
+
+## Diagnosing a run · answers
+
+::: {.card}
+* **A — overfitting.** Training keeps falling; validation bottoms out, then climbs. *Fix:* dropout or weight decay, early stopping, or more data — the defences from the overfitting slide.
+* **B — healthy.** Both curves fall together and the gap stays small. *Fix:* none. Leave it alone.
+* **C — learning rate too high.** The loss jumps around and drifts upwards. *Fix:* lower the learning rate — from $10^{-1}$ back towards $10^{-3}$.
+* **D — underfitting.** Both curves flat and high from the first epoch. *Fix:* a bigger model, or train for longer.
+:::
+
+::: {.callout-tip title="One habit to keep"}
+When a run misbehaves, plot these two curves before touching anything else. The shape tells you *which* problem you have — and each problem has a different fix.
 :::
 
 ## A practical checklist for week 2 onwards

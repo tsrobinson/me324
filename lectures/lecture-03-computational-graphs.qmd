@@ -10,6 +10,28 @@ format:
     smaller: true
 ---
 
+## Warm-up · three questions from last time
+
+[<span class="pause-cue">≈ 5 min</span> · shout it out]{.eyebrow}
+
+::: {.card}
+1. A perceptron has $w = 2$ and $b = -1$. What is $y$ when $x = 3$?
+
+2. We stack three *linear* layers, with no activation functions. What family of functions can the stack represent — and why?
+
+3. A perceptron takes three inputs. How many parameters does it have, counting the bias?
+:::
+
+## Warm-up · answers
+
+::: {.card}
+1. $y = wx + b = (2 \times 3) - 1 = 6 - 1 = 5$.
+
+2. **Still linear.** A composition of linear maps is a linear map, so three stacked linear layers collapse into one. Depth buys nothing until we add activation functions.
+
+3. Three weights plus one bias: $3 + 1 = 4$ parameters.
+:::
+
 # Part 1 · Linear algebra {background-color="#0E1A2B"}
 
 ## Why we need this
@@ -17,15 +39,12 @@ format:
 A modern neural network operates on **tensors with millions of entries**. We need notation that scales — both for writing and for computing.
 
 ::: {.card}
-Every layer of a neural network is essentially a *matmul* followed by an non-linear action function applied element-wise.
+Every layer of a neural network is a *matmul* followed by a non-linear activation function applied element-wise.
 :::
 
-**But we're social scientists 😨**
-
-* Matrices aren't that scary! Stacking survey into a data frame ($n$ rows, $k$ columns) gives you a matrix. 
+* Matrices aren't that scary! Stacking survey into a data frame ($n$ rows, $k$ columns) gives you a matrix.
 
 * We're largely dressing up familiar maths using new notation.
-
 
 ## Scalars
 
@@ -267,7 +286,7 @@ $$
 $$
 
 ::: {.card}
-**Dimension rule** (memorise this): the *inner* dimensions must match.
+**Dimension rule**: the *inner* dimensions must match.
 
 $$
 (\underbrace{n \times k}_{\mathbf{A}}) \cdot (\underbrace{k \times t}_{\mathbf{B}}) \longrightarrow (n \times t)
@@ -345,40 +364,181 @@ So we get a two-length row vector output (one value per neuron).
 
 :::
 
+## From one observation to a batch
 
-## Stop and check
+So far, one observation at a time. But, the labs feed many at once by stacking the observations as the **rows** of a matrix $\mathbf{X}$.
 
-[<span class="pause-cue">Stop & check</span> — pair with a neighbour, 2 minutes]{.eyebrow}
+::: {.card}
+With 64 observations and our $h = 2$, $k = 3$ layer:
+
+* $\mathbf{X}\mathbf{W}^\mathsf{T}$ is $(64 \times 3)(3 \times 2) \to (64 \times 2)$
+
+* The same matrix product, just done simultaneously
+:::
+
+Notice, we still need to add the biases $\mathbf{b}$...
+
+* But $\mathbf{b}$ is $(1 \times 2)$!?
+
+## Broadcasting — adding shapes that don't match
+
+By the rules we wrote down earlier, the previous slide's addition is undefined. 
+
+Yet, if we run it in Python, it works anyway.
+
+::: {.card}
+numpy and PyTorch use on extra rule called **broadcasting**:
+
+* Line the two shapes up **from the right**
+* Two dimensions are compatible when they are equal, or when one of them is 1 (or missing). 
+* The smaller array is then reused along the other's dimension
+:::
+
+Suppose we have: $(3 \times 2) + (1 \times 2)$. Reusing along a dimension means copying the object until the shapes match, then adding as normal:
+
+$$
+\begin{bmatrix} 1 & 2 \\ 3 & 4 \\ 5 & 6 \end{bmatrix} + \begin{bmatrix} 10 & 20 \end{bmatrix}
+\;=\;
+\begin{bmatrix} 1 & 2 \\ 3 & 4 \\ 5 & 6 \end{bmatrix} + \underbrace{\begin{bmatrix} 10 & 20 \\ 10 & 20 \\ 10 & 20 \end{bmatrix}}_{\text{the re-use}}
+= \begin{bmatrix} 11 & 22 \\ 13 & 24 \\ 15 & 26 \end{bmatrix}
+$$
+
+The middle version is ordinary same-shape addition — no new rules. Every row gets the same $\begin{bmatrix} 10 & 20 \end{bmatrix}$: one bias per node, reused for every observation. That is what $\mathbf{X}\mathbf{W}^\mathsf{T} + \mathbf{b}$ means in code.
+
+## Broadcasting the other way
+
+Broadcasting can stretch a column too. Take $(3 \times 2) + (3 \times 1)$: from the right, 2 against 1 — so the 1 stretches across the columns; then 3 against 3 match.
+
+$$
+\begin{bmatrix} 1 & 2 \\ 3 & 4 \\ 5 & 6 \end{bmatrix} + \begin{bmatrix} 10 \\ 20 \\ 30 \end{bmatrix}
+\;=\;
+\begin{bmatrix} 1 & 2 \\ 3 & 4 \\ 5 & 6 \end{bmatrix} + \underbrace{\begin{bmatrix} 10 & 10 \\ 20 & 20 \\ 30 & 30 \end{bmatrix}}_{\text{stretching}}
+= \begin{bmatrix} 11 & 12 \\ 23 & 24 \\ 35 & 36 \end{bmatrix}
+$$
+
+One number per row, reused along that row.
+
+::: {.card}
+The direction of the stretch follows the **shape**.
+
+* A $(1 \times 2)$ row spreads down the rows; a $(3 \times 1)$ column spreads across the columns.
+:::
+
+::: {.callout-tip}
+You have broadcast before. Standardising a data frame subtracts a $(1 \times k)$ row of column means from an $(n \times k)$ matrix — the same pattern as the bias.
+:::
+
+## Broadcasting across dimensions
+
+Later, when we stack matrices to get **3-D tensors**, we'll have more complicated shapes like $(64 \times 28 \times 28)$ 
+
+Suppose we subtract something dimensionally smaller like $(28 \times 28)$. Broadcasting works even here:
+
+```
+(64, 28, 28)
+    (28, 28)   →  pad left with 1s  →  (1, 28, 28)  →  stretch  →  (64, 28, 28)
+```
+
+::: {.card}
+When one *shape* is shorter, **we pad it with 1s on the left**, then line up from the right as before. 
+
+* So the above shape is treated as $(1 \times 28 \times 28)$ and reused for all 64 square matrices.
+:::
+
+E.g. $(2 \times 2 \times 2) + (2 \times 2)$:
+
+$$
+\underbrace{\begin{bmatrix} 1 & 2 \\ 3 & 4 \end{bmatrix}, \ \begin{bmatrix} 5 & 6 \\ 7 & 8 \end{bmatrix}}_{\text{a stack of two matrices}} + \ \begin{bmatrix} 10 & 20 \\ 30 & 40 \end{bmatrix}
+= \ \begin{bmatrix} 11 & 22 \\ 33 & 44 \end{bmatrix}, \ \begin{bmatrix} 15 & 26 \\ 37 & 48 \end{bmatrix}
+$$
+
+Each matrix in the stack gets the same $(2 \times 2)$ added — as if we had written $+ \ \begin{bmatrix} 10 & 20 \\ 30 & 40 \end{bmatrix}, \ \begin{bmatrix} 10 & 20 \\ 30 & 40 \end{bmatrix}$, one copy per layer.
+
+::: {.callout-warning}
+The padding is only ever on the **left**. $(64, 28, 28) + (64, 28)$ fails: from the right, 28 matches 28, then 28 hits 64. If you mean "one number per image" — say, dividing each image by its own maximum — the shape you want is $(64 \times 1 \times 1)$. Broadcasting follows the same rules for every element-wise operation, not only addition.
+:::
+
+## Try it — which of these broadcast?
 
 ::: {.try-box}
-[Question: what happens if $\mathbf{X}$ is a dataframe (i.e. multiple observations)?]{.try-label}
-$\mathbf{W} \in \mathbb{R}^{50 \times 5}$ — a hidden layer of width 50 receiving 5 input features.
-$\mathbf{X} \in \mathbb{R}^{100 \times 5}$ — a dataset of 100 observations.
+[Try it yourself]{.try-label}
+**For each pair of shapes, does the addition work — and if so, what shape comes out?**
 
-**What is the shape of $\mathbf{X} \mathbf{W}^\mathsf{T}$? What does each row of it represent?**
+1. $(2 \times 3)$ + a single number
+2. $(64 \times 2)$ + $(1 \times 2)$
+3. $(64 \times 2)$ + $(64,)$
+4. $\begin{bmatrix} 10 \\ 20 \\ 30 \end{bmatrix} + \begin{bmatrix} 1 & 2 \end{bmatrix}$ — that is, $(3 \times 1) + (1 \times 2)$
 :::
 
 ::: {.fragment}
 ::: {.reveal-box}
 [Answer]{.reveal-label}
-$(100 \times 5) \cdot (5 \times 50) \to (100 \times 50)$.
+1. **Works** — a single number is compatible with every dimension. Shape $(2 \times 3)$.
 
-**Each row** = the 50 hidden-layer pre-activations for one observation.
+2. **Works** — from the right: 2 matches 2, then the 1 stretches over 64. Shape $(64 \times 2)$. This is the layer bias.
+
+3. **Error** — from the right: 2 against 64. A per-observation vector cannot be added this way. Reshape it to $(64 \times 1)$ and it broadcasts across the columns instead.
+4. **Works** — *both* stretch. Written out: $\begin{bmatrix} 10 & 10 \\ 20 & 20 \\ 30 & 30 \end{bmatrix} + \begin{bmatrix} 1 & 2 \\ 1 & 2 \\ 1 & 2 \end{bmatrix} = \begin{bmatrix} 11 & 12 \\ 21 & 22 \\ 31 & 32 \end{bmatrix}$ — shape $(3 \times 2)$, every pairwise sum.
+:::
+:::
+
+## The cost of a matrix product
+
+We now know *what* a matrix product computes. How much work is it?
+
+::: {.card}
+One entry of an $(n \times m)(m \times p)$ product is a dot product of length $m$: **$m$ multiplications and $m - 1$ additions**. Each multiply or add is one **floating-point operation** (a **FLOP**), so one entry costs about $2m$ FLOPs.
+
+The output has $n \times p$ entries:
+
+$$
+\text{total cost} \approx n \times p \times 2m = 2nmp \ \text{FLOPs}
+$$
+:::
+
+**Worked example.** A layer reading a $28 \times 28$ pixel image (784 features) into 128 hidden nodes, for a batch of 64 images: $\mathbf{X}\mathbf{W}^\mathsf{T}$ is $(64 \times 784)(784 \times 128)$.
+
+$$
+2 \times 64 \times 784 \times 128 = 12{,}845{,}056 \approx 13\text{M FLOPs}
+$$
+
+... For *one* layer, of *one* forward pass.
+
+## Why GPUs?
+
+The good news: none of that work has to happen in sequence.
+
+::: {.card}
+**Every entry of the output is independent of every other.** Entry $(i, j)$ needs row $i$ of $\mathbf{X}$ and column $j$ of $\mathbf{W}^\mathsf{T}$. 
+
+* We can compute thousands of entries at the same time.
 
 :::
 
-*Notice this is the forward pass logic of yesterday* 
+A **GPU** (graphics card) is built for exactly this because it calls the same easy computation, over thousands of points at once.
 
-* But now, done simultaneously over every observation in one matmul!
+* A modern GPU manages on the order of $10^{14}$ FLOPs per second.
+* At that rate, our 13M-FLOP layer takes roughly a ten-millionth of a second.
 
+::: {.try-box}
+[Try it yourself]{.try-label}
+**The output layer maps those 128 hidden values to 10 classes, same batch of 64. How many FLOPs?**
 :::
+
+::: {.fragment}
+::: {.reveal-box}
+[Answer]{.reveal-label}
+$2 \times 64 \times 128 \times 10 = 163{,}840$ FLOPs — about 78 times cheaper than the 784 → 128 layer.
+:::
+:::
+
 
 
 # Plenary · matrix products by hand {background-color="#0E1A2B"}
 
 ## Plenary · matrix products by hand
 
-[<span class="pause-cue">≈ 20 min</span> · pen and paper, in pairs]{.eyebrow}
+[<span class="pause-cue">≈ 10 min</span> · pen and paper, in pairs]{.eyebrow}
 
 ::: {.card}
 [Five problems]{.eyebrow}
@@ -396,7 +556,7 @@ For each, compute or say "undefined" (with a reason).
 5. $\begin{bmatrix} 1 & 2 \end{bmatrix} \begin{bmatrix} 3 \\ 4 \\ 5 \end{bmatrix} = \ ?$
 :::
 
-[Ten minutes. Then we'll discuss together.]{.muted}
+[Five minutes. Then we'll discuss together.]{.muted}
 
 ## Plenary · answers
 
@@ -619,7 +779,7 @@ $$
 This is the deepest reason deep learning works: any reasonable composition of operations can be differentiated **one operation at a time**, then assembled.
 :::
 
-## A longer worked chain
+## A longer chain
 
 [Take a function with three nested operations:]{.eyebrow}
 
@@ -644,13 +804,13 @@ Three small derivatives. We don't even need to expand $y$ to do this.
 
 ## Partial derivatives & gradients
 
-For a function of several variables, e.g. $y = f(x_1, x_2) = 3 x_1^2 + 2 x_2 + 1$:
+For a function of several variables, e.g. $y = f(a, b) = 3 a^2 + 2 b + 1$:
 
 ::: {.columns}
 ::: {.column width="50%"}
 Compute **partial derivatives** — treat the other vars as constants:
 $$
-\frac{\partial y}{\partial x_1} = 6 x_1, \qquad \frac{\partial y}{\partial x_2} = 2
+\frac{\partial y}{\partial a} = 6 a, \qquad \frac{\partial y}{\partial b} = 2
 $$
 
 Collect them into a **gradient vector**:
@@ -671,11 +831,92 @@ That is the thing we minimise tomorrow.
 :::
 :::
 
+## Checking a derivative numerically
+
+Suppose a computer cannot differentiate a function. Can we approximate the derivative?
+
+::: {.card}
+The derivative asks how much would the output change if we adjust an input by a tiny interval. 
+
+So, empirically, we can take a small step  $\varepsilon$ either side of $x$ and measure that change:
+
+$$
+f'(x) \approx \frac{f(x + \varepsilon) - f(x - \varepsilon)}{2\varepsilon}
+$$
+
+This is called the **central difference**. It is the empirical evaluation of a gradient *at a given point*.
+:::
+
+**Worked example.** Suppose $f(x) = x^2$, and we evaluate at $x = 3$.
+
+With $\varepsilon = 0.01$:
+
+$$
+\frac{f(3.01) - f(2.99)}{0.02} = \frac{9.0601 - 8.9401}{0.02} = \frac{0.1200}{0.02} = 6.0000
+$$
+
+Formally, we know $f'(x) = 2x$, so $f'(3) = 6$ -- they match!
+
+## Try it on the sigmoid
+
+The cheat-sheet claims $\sigma'(x) = \sigma(x)(1 - \sigma(x))$. We took that on trust. Now we can check it.
+
+::: {.try-box}
+[Try it yourself]{.try-label}
+**Estimate $\sigma'(0)$ with the central difference and $\varepsilon = 0.01$.**
+
+To 4 d.p.: $\sigma(0.01) = 0.5025$ and $\sigma(-0.01) = 0.4975$.
+:::
+
+::: {.fragment}
+::: {.reveal-box}
+[Answer]{.reveal-label}
+$$
+\sigma'(0) \approx \frac{0.5025 - 0.4975}{0.02} = \frac{0.0050}{0.02} = 0.25
+$$
+
+The rule agrees: $\sigma(0) = \tfrac{1}{1 + e^{0}} = 0.5$, so $\sigma'(0) = 0.5 \times 0.5 = 0.25$.
+:::
+:::
+
+## Why don't we just use the central difference?
+
+The central difference has one flaw that rules it out for training, but is useful for testing calculations.
+
+::: {.columns}
+
+::: {.column width="50%"}
+[It's far too slow]{.pill-amber}
+
+* Checking one parameter means nudging *one* $w$ and rerunning the whole network -- so, one forward pass per parameter.
+* A model with millions of parameters would need millions of forward passes for a *single* training step.
+:::
+
+::: {.column width="50%"}
+[Why it's still useful]{.pill-green}
+
+* Autograd libraries use central difference to test themselves
+
+  * Compute each derivative exactly
+  * Compute the central difference
+  * Only allow the algorithm to pass if they agree (called **gradient checking**)
+  
+* If our chain-rule code is wrong, gradient checking flags it
+:::
+
+:::
+
+::: {.callout-tip}
+# We can calculate entire network gradients with 1 forward and 1 backward pass
+
+We'll see this tomorrow!
+:::
+
 # Activity · chain-rule exercises {background-color="#0E1A2B"}
 
 ## Activity · chain rule
 
-[<span class="pause-cue">≈ 15 min</span> · pen and paper, in pairs]{.eyebrow}
+[<span class="pause-cue">≈ 8 min</span> · pen and paper]{.eyebrow}
 
 For each $y$, find $\dfrac{dy}{dx}$ — using the chain rule, *without* expanding.
 
@@ -691,8 +932,6 @@ For each $y$, find $\dfrac{dy}{dx}$ — using the chain rule, *without* expandin
 5. $y = (a - x)^2$ — find $\dfrac{dy}{dx}$, treating $a$ as a constant.
 :::
 
-[Twelve minutes. We'll discuss the trickier ones.]{.muted}
-
 ## Activity · answers
 
 ::: {.card}
@@ -705,10 +944,6 @@ For each $y$, find $\dfrac{dy}{dx}$ — using the chain rule, *without* expandin
 4. $\dfrac{dy}{dx} = \sigma(3x)(1 - \sigma(3x)) \cdot 3$.
 
 5. $\dfrac{dy}{dx} = 2(a - x) \cdot (-1) = -2(a - x)$.
-:::
-
-::: {.callout-tip}
-Tomorrow we use exactly this pattern — repeatedly — to compute gradients across an entire neural network.
 :::
 
 # Part 3 · Computational graphs {background-color="#0E1A2B"}
@@ -814,7 +1049,7 @@ digraph G { rankdir="LR"; bgcolor="transparent"; node [fontname="Inter"];
 **We *will* see cycles later** — recurrent networks on Day 9, where the same operation is reused across time steps. But each unrolled time-step is still a DAG.
 :::
 
-## You've maybe seen this picture before
+## Graphs are fairly common in social sciences
 
 [Social-science graphs]{.eyebrow}
 
@@ -859,9 +1094,10 @@ digraph G {
 (With an activation function $\sigma$ added between the `+` and the output, you'd insert one more node — same picture, one more step.)
 
 ::: {.card}
-**Every node has a local derivative we can compute** — using the cheat-sheet from earlier. The chain rule will glue them.
+**Every node has a local derivative we can compute**. 
 
-That's the move that makes the whole edifice work. Tomorrow we use it.
+Using the cheat-sheet from earlier, we can assign the form of these derivatives when we build the graph, to save compute.
+
 :::
 
 ## A network as a graph
@@ -950,6 +1186,105 @@ We **multiply, add, "squash"**, twice. What grows is the *tracking*: three opera
 In **Labs 3–4** you build exactly this, where every single arithmetic operation becomes a node in your `Value` graph. A tiny network makes a surprisingly big graph — and that is precisely why we let the computer walk it for us.
 :::
 
+## Scaling up — three hidden layers of 32
+
+This is still a *tiny* deep learning model:
+
+* 3 inputs, 
+* 3 hidden layers of 32 nodes
+* One output node 
+
+To make it fit, one dot represents a multiply, add, or squash, in running order.
+
+```{python}
+#| echo: false
+#| fig-width: 11.5
+#| fig-height: 2.1
+#| fig-align: center
+import matplotlib.pyplot as plt
+import matplotlib_inline.backend_inline as backend_inline
+
+# SVG keeps the figure vector-sharp when the deck is projected.
+backend_inline.set_matplotlib_formats("svg")
+
+# ME324 deck palette (see assets/theme/me324.scss)
+INK, MUTED, RED, COBALT = "#0E1A2B", "#5C6473", "#C9322B", "#183D87"
+
+# One entry per scalar operation, in a valid running order:
+# each neuron does k multiplies, k adds (bias included), one squash.
+layers = [(3, 32), (32, 32), (32, 32), (32, 1)]
+ops = []
+for k, n_out in layers:
+    for _ in range(n_out):
+        ops += ["mul"] * k + ["add"] * k + ["sig"]
+
+WRAP = 220
+xs = [i % WRAP for i in range(len(ops))]
+ys = [-(i // WRAP) for i in range(len(ops))]
+colour = {"mul": COBALT, "add": MUTED, "sig": RED}
+
+fig, ax = plt.subplots(figsize=(11.5, 2.1))
+fig.patch.set_alpha(0)
+ax.set_facecolor("none")
+ax.scatter(xs, ys, c=[colour[o] for o in ops], s=4, marker="s", linewidths=0)
+
+end_l1 = 32 * (3 + 3 + 1)
+ax.annotate(f"layer 1 ends here (operation {end_l1})",
+            xy=(end_l1 % WRAP, -(end_l1 // WRAP) + 0.4), xytext=(end_l1 % WRAP + 14, 2.2),
+            fontsize=8, color=INK,
+            arrowprops=dict(arrowstyle="-", color=MUTED, lw=0.8))
+for lab, col in [("multiply", COBALT), ("add", MUTED), ("squash", RED)]:
+    ax.scatter([], [], c=col, s=14, marker="s", label=lab)
+ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.02), frameon=False, ncol=3, fontsize=8)
+ax.set_xlim(-1, WRAP)
+ax.set_ylim(min(ys) - 1, 3.2)
+ax.axis("off")
+plt.show()
+```
+
+::: {.columns}
+::: {.column width="50%"}
+For **one prediction**:
+
+* Multiplies: $96 + 1{,}024 + 1{,}024 + 32 = 2{,}176$
+* Adds: $2{,}176$ ($97$ of them bias adds)
+* Squashes: $97$ — one per neuron
+* **Total: $4{,}449$ operations** from $2{,}273$ parameters.
+:::
+::: {.column width="50%"}
+::: {.card}
+Grouped into matrix operations, this whole ribbon is still $4 \times$ (multiply, add, squash) $= 12$ nodes. The dots are what the computer does underneath.
+
+For context, a forward pass of GPT-3 requires about *350 billion* floating point operations. 
+:::
+:::
+:::
+
+## How does the computer know what to run first?
+
+The graph itself is not numbered.
+
+  * Instead, the order is extracted from the **arrows**
+
+::: {.card}
+1. A node is **ready** when every arrow *into* it comes from a node that has already run.
+2. Every ready node is added to a *heap*
+2. Run any node in the heap then mark it done.
+3. Repeat until every node has run.
+
+A list built this way is called a **topological order** of the graph.
+:::
+
+Two things worth noticing:
+
+* The order is **not unique**. Layer 1 can run the multiplications in any order
+
+  * Layer 2 multiples rely on layer-1 finishing
+  
+* The heap only clears because the graph is *acyclic*.
+
+  * When cycles exist, (at least) two nodes are waiting for each other
+
 ## The two passes — preview of tomorrow
 
 ::: {.columns}
@@ -983,21 +1318,25 @@ You can now:
 
 1. Multiply matrices and check shapes by hand.
 2. Differentiate simple expressions, including with the chain rule.
-3. Draw any expression — from a simple polynomial to a two-layer network — as a directed acyclic graph.
-4. State what we still don't have: a **way to put loss into the graph and let gradients flow backwards**.
+3. Draw any expression, from a simple function to a multi-layer neural network, as a directed acyclic graph.
+
+What we don't have:
+
+* A **way to put loss into the graph and let gradients flow backwards**.
+
 :::
 
 ::: {.callout-tip}
 You have all three tools. Tomorrow we put them together.
 :::
 
-# Lab brief · today's afternoon {background-color="#0E1A2B"}
+# Lab brief {background-color="#0E1A2B"}
 
-## Today's lab — 90 minutes
+## Tomorrow morning's lab — 90 minutes
 
 [Goals]{.eyebrow}
 
-In Python (no PyTorch yet), build a small **computational graph library** from scratch.
+In Python, build a small **computational graph library** from scratch.
 
 You will implement:
 
@@ -1006,13 +1345,13 @@ You will implement:
 3. A small test: write `c = a * b + 1` for `Value`s `a, b`, and verify the graph has the right structure.
 
 ::: {.card}
-**Deliverable.** A working `Value` class. We will add gradient computation to it **tomorrow** — that step turns this library into a fully-working autodiff system.
+**Deliverable.** A working `Value` class. We will add gradient computation to it in the following lab, which turns this library into a fully-working autodiff system.
 
-The pattern is Andrej Karpathy's `micrograd`. We are walking it deliberately.
+This comes from Andrej Karpathy's `micrograd` scripts.
 :::
 
 ## See you tomorrow {background-color="#0E1A2B"}
 
 [Lecture 4 — *Backpropagation*]{.eyebrow}
 
-[<span class="muted">If you want a head start: skim Karpathy's *micrograd* GitHub README tonight. Don't read the implementation yet — we'll write it together tomorrow.</span>]{.smaller}
+[<span class="muted">If you want a head start: skim Karpathy's *micrograd* GitHub README tonight. No need to read the implementation yet as we'll write it together tomorrow.</span>]{.smaller}

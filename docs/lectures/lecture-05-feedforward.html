@@ -470,6 +470,32 @@ Dr Thomas Robinson
 </div>
 <p>After today, every remaining lecture uses PyTorch.</p>
 </section>
+<section id="warm-up-three-questions-from-last-time" class="slide level2">
+<h2>Warm-up · three questions from last time</h2>
+<p><span class="eyebrow"><span class="pause-cue">≈ 5 min</span> · shout it out</span></p>
+<div class="card">
+<p><span class="eyebrow">From last week</span></p>
+<ol type="1">
+<li>One gradient-descent update. <span class="math inline">w = 1</span>, <span class="math inline">\frac{\partial L}{\partial w} = 0.5</span>, learning rate <span class="math inline">\lambda = 0.1</span>. What is the new <span class="math inline">w</span>?</li>
+<li>What does a loss function measure — and which loss did we use for regression?</li>
+<li>In which direction does backpropagation walk the computational graph, and what does it carry with it?</li>
+</ol>
+</div>
+<p><span class="muted">The weekend was long. Everything here is from Thursday’s lecture!</span></p>
+</section>
+<section id="warm-up-answers" class="slide level2">
+<h2>Warm-up · answers</h2>
+<div class="card">
+<ol type="1">
+<li>Step against the gradient, scaled by <span class="math inline">\lambda</span>: <span class="math display">
+w_{\text{new}} = w - \lambda \frac{\partial L}{\partial w} = 1 - 0.1 \times 0.5 = 1 - 0.05 = 0.95
+</span></li>
+<li>How wrong the model’s predictions are on the data, as a single number — lower is better. For regression we used <strong>mean squared error</strong>.</li>
+<li><strong>Backwards</strong> — from the loss to the inputs, multiplying local derivatives along the way. That is the chain rule.</li>
+</ol>
+</div>
+<p>All three are about to become one line of PyTorch each.</p>
+</section>
 <section>
 <section id="part-1-from-value-to-pytorch" class="title-slide slide level1 center" data-background-color="#0E1A2B">
 <h1>Part 1 · From <code>Value</code> to PyTorch</h1>
@@ -679,7 +705,7 @@ Dr Thomas Robinson
 \sigma_{\text{GELU}}(x) = x \cdot \Phi(x)
 </span></p>
 <p><span class="smaller"><span class="math inline">\Phi</span> is the <strong>standard-normal cumulative distribution function</strong>. GELU is just a softer version of ReLU.</span></p>
-<div id="7f2da9e8" class="cell" data-fig-height="2.95" data-fig-width="9" data-execution_count="1">
+<div id="c9631b95" class="cell" data-fig-height="2.95" data-fig-width="9" data-execution_count="1">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
@@ -778,7 +804,7 @@ e^2 = 7.39, \quad e^1 = 2.72, \quad e^0 = 1.00, \quad \textstyle\sum = 11.11
 </section>
 <section id="plenary-predict-the-activations" class="slide level2">
 <h2>Plenary · predict the activations</h2>
-<p><span class="eyebrow"><span class="pause-cue">≈ 20 min</span> · in pairs</span></p>
+<p><span class="eyebrow"><span class="pause-cue">≈ 10 min</span> · in pairs</span></p>
 <div class="card">
 <p><span class="eyebrow">The pre-activation value:</span></p>
 <p><span class="math inline">z = -3.5</span></p>
@@ -981,7 +1007,7 @@ e^2 = 7.39, \quad e^1 = 2.72, \quad e^0 = 1.00, \quad \textstyle\sum = 11.11
 </section>
 <section id="the-full-training-loop-revisited" class="slide level2">
 <h2>The full training loop, revisited</h2>
-<div id="80336b10" class="cell" data-execution_count="2">
+<div id="b7b7bc36" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
 <span id="cb6-2"><a aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torch.utils.data <span class="im">import</span> DataLoader</span>
 <span id="cb6-3"><a aria-hidden="true" tabindex="-1"></a></span>
@@ -1037,7 +1063,7 @@ e^2 = 7.39, \quad e^1 = 2.72, \quad e^0 = 1.00, \quad \textstyle\sum = 11.11
 </section>
 <section id="activity-predict-the-effect" class="slide level2">
 <h2>Activity · predict the effect</h2>
-<p><span class="eyebrow"><span class="pause-cue">≈ 15 min</span> · in pairs</span></p>
+<p><span class="eyebrow"><span class="pause-cue">≈ 8 min</span> · in pairs</span></p>
 <p>For each change, <strong>predict</strong> what happens to (a) training loss and (b) validation loss, then justify:</p>
 <div class="card">
 <ol type="1">
@@ -1377,6 +1403,61 @@ e^2 = 7.39, \quad e^1 = 2.72, \quad e^0 = 1.00, \quad \textstyle\sum = 11.11
 </div><div class="column" style="width:50%;">
 <p><span class="pill">Layer norm</span> one <span class="math inline">\mu</span> per <strong>example</strong>, averaged across its features. Batch-size independent. Predominantly used in <strong>transformers</strong>.</p>
 </div></div>
+</section>
+<section id="diagnosing-a-run-from-its-loss-curves" class="slide level2">
+<h2>Diagnosing a run from its loss curves</h2>
+<p><span class="eyebrow"><span class="pause-cue">≈ 3 min</span> · in pairs</span></p>
+<div class="columns">
+<div class="column" style="width:58%;">
+<div id="1a8835c6" class="cell" data-fig-height="4.4" data-fig-width="5.6" data-execution_count="3">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="lecture-05-feedforward_files/figure-revealjs/cell-4-output-1.svg" class="quarto-figure quarto-figure-center"></p>
+</figure>
+</div>
+</div>
+</div>
+</div><div class="column" style="width:42%;">
+<div class="try-box">
+<p><span class="try-label">Match each panel to a diagnosis</span></p>
+<p>Four training runs. Same model, same data — four different outcomes:</p>
+<ul>
+<li>learning rate too high</li>
+<li>overfitting</li>
+<li>underfitting</li>
+<li>healthy</li>
+</ul>
+<p><strong>Which is which — and what in the curves told you?</strong></p>
+</div>
+<p><span class="muted">These are the curves you plot in today’s lab.</span></p>
+</div></div>
+</section>
+<section id="diagnosing-a-run-answers" class="slide level2">
+<h2>Diagnosing a run · answers</h2>
+<div class="card">
+<ul>
+<li><strong>A — overfitting.</strong> Training keeps falling; validation bottoms out, then climbs. <em>Fix:</em> dropout or weight decay, early stopping, or more data — the defences from the overfitting slide.</li>
+<li><strong>B — healthy.</strong> Both curves fall together and the gap stays small. <em>Fix:</em> none. Leave it alone.</li>
+<li><strong>C — learning rate too high.</strong> The loss jumps around and drifts upwards. <em>Fix:</em> lower the learning rate — from <span class="math inline">10^{-1}</span> back towards <span class="math inline">10^{-3}</span>.</li>
+<li><strong>D — underfitting.</strong> Both curves flat and high from the first epoch. <em>Fix:</em> a bigger model, or train for longer.</li>
+</ul>
+</div>
+<div title="One habit to keep">
+<div class="callout callout-tip callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>One habit to keep</strong></p>
+</div>
+<div class="callout-content">
+<p>When a run misbehaves, plot these two curves before touching anything else. The shape tells you <em>which</em> problem you have — and each problem has a different fix.</p>
+</div>
+</div>
+</div>
+</div>
 </section>
 <section id="a-practical-checklist-for-week-2-onwards" class="slide level2">
 <h2>A practical checklist for week 2 onwards</h2>

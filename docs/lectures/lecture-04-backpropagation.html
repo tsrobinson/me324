@@ -444,6 +444,31 @@ Dr Thomas Robinson
 
   <p class="date">August 6, 2026</p>
 </section>
+<section id="warm-up-three-questions-from-last-time" class="slide level2">
+<h2>Warm-up · three questions from last time</h2>
+<p><span class="eyebrow"><span class="pause-cue">≈ 5 min</span> · shout it out</span></p>
+<div class="card">
+<ol type="1">
+<li>Is the product of a <span class="math inline">2 \times 3</span> matrix and a <span class="math inline">3 \times 1</span> matrix defined? If so, what shape is the result?</li>
+<li>Use the chain rule: what is <span class="math inline">\frac{d}{dx}(2x+1)^3</span>?</li>
+<li>In a computational graph, what do the nodes and edges represent — and why must the graph have no cycles?</li>
+</ol>
+</div>
+</section>
+<section id="warm-up-answers" class="slide level2">
+<h2>Warm-up · answers</h2>
+<div class="card">
+<p><strong>1. Yes — the product is defined.</strong> The inner dimensions match (<span class="math inline">3</span> and <span class="math inline">3</span>), and the outer dimensions give the shape of the result:</p>
+<p><span class="math display">
+(2 \times 3)(3 \times 1) \rightarrow 2 \times 1
+</span></p>
+<p><strong>2.</strong> Let <span class="math inline">u = 2x + 1</span>, so <span class="math inline">y = u^3</span>. Then <span class="math inline">\frac{dy}{du} = 3u^2</span> and <span class="math inline">\frac{du}{dx} = 2</span>:</p>
+<p><span class="math display">
+\frac{dy}{dx} = 3u^2 \cdot 2 = 6(2x+1)^2
+</span></p>
+<p><strong>3.</strong> Nodes hold <strong>values</strong> and <strong>operations</strong>; edges carry each result forward into the next operation. And no cycles allowed: a cycle would make a value depend on itself, so the forward pass could never finish.</p>
+</div>
+</section>
 <section>
 <section id="part-1-loss-the-goal" class="title-slide slide level1 center" data-background-color="#0E1A2B">
 <h1>Part 1 · Loss &amp; the goal</h1>
@@ -1056,7 +1081,7 @@ L(\hat{y}, y) = -\big(y \ln \hat{y} + (1-y) \ln (1-\hat{y})\big)
 </section>
 <section id="plenary-backward-pass-by-hand-1" class="slide level2">
 <h2>Plenary · backward pass by hand</h2>
-<p><span class="eyebrow"><span class="pause-cue">≈ 20 min</span> · pen and paper, in pairs</span></p>
+<p><span class="eyebrow"><span class="pause-cue">≈ 10 min</span> · pen and paper, in pairs</span></p>
 <div class="card">
 <p><span class="eyebrow">The graph</span></p>
 <p><span class="math display">
@@ -1254,7 +1279,7 @@ y = (3x + 2)(x - 1) \quad \text{with } x = 4.
 <section id="the-same-descent-as-a-picture" class="slide level2">
 <h2>The same descent, as a picture</h2>
 <p><span class="eyebrow"><span class="math inline">w</span> and <span class="math inline">b</span> start equal and get the same gradient, so they move together — one axis shows both</span></p>
-<div id="2a816ce4" class="cell" data-fig-height="3.6" data-fig-width="9" data-execution_count="1">
+<div id="89b9d6be" class="cell" data-fig-height="3.6" data-fig-width="9" data-execution_count="1">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
@@ -1269,7 +1294,7 @@ y = (3x + 2)(x - 1) \quad \text{with } x = 4.
 </section>
 <section id="the-learning-rate-the-one-toggle-you-always-tune" class="slide level2">
 <h2>The learning rate — the one toggle you always tune</h2>
-<div id="29b7a124" class="cell" data-fig-height="3.5" data-fig-width="9" data-execution_count="2">
+<div id="eb866798" class="cell" data-fig-height="3.5" data-fig-width="9" data-execution_count="2">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
@@ -1313,6 +1338,44 @@ y = (3x + 2)(x - 1) \quad \text{with } x = 4.
 <li>But this is an empirical observation, not a mathematical theorem.</li>
 </ul>
 <p>Deep learning is therefore <strong>experimental</strong>: it works far better than anyone could prove it should!</p>
+</div>
+</section>
+<section id="saddle-points-a-million-directions-to-check" class="slide level2">
+<h2>Saddle points — a million directions to check</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p>In two dimensions we picture getting <strong>stuck in a valley</strong> — a local minimum.</p>
+<p>In a million dimensions, being a minimum is a demanding job. At a <strong>critical point</strong> — a point where the gradient is zero — the loss must curve <em>upward in every one of a million directions</em>.</p>
+<p>Count the up/down patterns of curvature:</p>
+<ul>
+<li>2 directions → <span class="math inline">2^2 = 4</span> patterns. One is a minimum (all up), one a maximum (all down), and the other 2 are <strong>saddle points</strong>.</li>
+<li>20 directions → <span class="math inline">2^{20} = 1{,}048{,}576</span> patterns; 1,048,574 are saddles.</li>
+</ul>
+<p>In a big network, almost every critical point has at least one downhill direction — a saddle, not a minimum <span class="citation" data-cites="dauphin2014identifying">(<a href="#/see-you-next-week" role="doc-biblioref" onclick="">Dauphin et al., 2014</a>)</span>.</p>
+</div><div class="column" style="width:50%;">
+<div id="252b33d4" class="cell" data-fig-height="4.4" data-fig-width="5.4" data-execution_count="3">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="lecture-04-backpropagation_files/figure-revealjs/cell-4-output-1.svg" class="quarto-figure quarto-figure-center"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><span class="smaller">The surface <span class="math inline">z = x^2 - y^2</span>: uphill along <span class="math inline">x</span>, downhill along <span class="math inline">y</span> — the shape of a horse’s saddle.</span></p>
+</div></div>
+</section>
+<section id="what-saddles-mean-for-training" class="slide level2">
+<h2>What saddles mean for training</h2>
+<div class="card">
+<p>Near a saddle point the surface is nearly <strong>flat</strong>, so the gradient is small — and small gradients mean tiny steps.</p>
+<p>Gradient descent doesn’t get trapped there (a downhill direction exists). It <strong>stalls</strong>.</p>
+</div>
+<div class="fragment">
+<div class="reveal-box">
+<p><span class="reveal-label">The accidental fix</span> Mini-batch gradients are <strong>noisy</strong> — each batch of examples gives a slightly different gradient. Near a saddle, that noise shoves the parameters off the flat ridge and onto the downhill direction, and descent resumes.</p>
+<p>The noise we accept to keep steps cheap — mini-batch gradient descent, two slides from now — also helps the optimiser escape saddles.</p>
+</div>
 </div>
 </section>
 <section id="a-slightly-more-realistic-example" class="slide level2">
@@ -1417,7 +1480,7 @@ Loss stops decreasing meaningfully.
 </section>
 <section id="activity-one-step-of-gradient-descent-1" class="slide level2">
 <h2>Activity · one step of gradient descent</h2>
-<p><span class="eyebrow"><span class="pause-cue">≈ 15 min</span> · pen and paper, in pairs</span></p>
+<p><span class="eyebrow"><span class="pause-cue">≈ 8 min</span> · pen and paper, in pairs</span></p>
 <div class="card">
 <p><span class="eyebrow">The model and one observation</span></p>
 <p>A linear perceptron: <span class="math display"> z = wx + b, \quad L = (z - y)^2. </span></p>
@@ -1473,6 +1536,38 @@ Loss stops decreasing meaningfully.
 </ul>
 </div></div>
 </section>
+<section id="momentum-give-the-update-a-memory" class="slide level2">
+<h2>Momentum — give the update a memory</h2>
+<p>Plain SGD forgets everything between steps. <strong>Momentum</strong> keeps a running <strong>velocity</strong> <span class="math inline">v</span>, and steps along that instead of the raw gradient:</p>
+<p><span class="math display">
+v \leftarrow \gamma v + g, \qquad w \leftarrow w - \lambda v
+</span></p>
+<ul>
+<li><span class="math inline">g</span> — the current gradient, <span class="math inline">\frac{\partial L}{\partial w}</span>.</li>
+<li><span class="math inline">\gamma</span> — the <strong>decay rate</strong>, typically 0.9. It sets how much of the old velocity survives each step.</li>
+</ul>
+<div class="card">
+<p><span class="eyebrow">Worked example · <span class="math inline">\gamma = 0.9</span>, <span class="math inline">\lambda = 0.1</span>, start at <span class="math inline">w = 1</span>, <span class="math inline">v = 0</span>; the gradient is <span class="math inline">g = 1</span> at both steps</span></p>
+<p><strong>Step 1:</strong> <span class="math inline">v = 0.9(0) + 1 = 1</span>, so <span class="math inline">w = 1 - 0.1(1) = 0.9</span>.</p>
+<p><strong>Step 2:</strong> <span class="math inline">v = 0.9(1) + 1 = 1.9</span>, so <span class="math inline">w = 0.9 - 0.1(1.9) = 0.9 - 0.19 = 0.71</span>.</p>
+<p>Plain SGD takes two steps of <span class="math inline">0.1</span> and reaches only <span class="math inline">0.8</span>. Momentum’s second step is nearly twice its first.</p>
+</div>
+<p>When the gradient agrees with itself step after step, the velocity builds — and the steps grow.</p>
+</section>
+<section id="momentum-when-the-gradient-flips" class="slide level2">
+<h2>Momentum when the gradient flips</h2>
+<p>Now suppose the gradient oscillates: <span class="math inline">g = +1</span> on step 1, then <span class="math inline">g = -1</span> on step 2.</p>
+<div class="card">
+<p><span class="eyebrow">Same setup · <span class="math inline">\gamma = 0.9</span>, <span class="math inline">\lambda = 0.1</span>, start at <span class="math inline">w = 1</span>, <span class="math inline">v = 0</span></span></p>
+<p><strong>Step 1</strong> (<span class="math inline">g = +1</span>): <span class="math inline">v = 0.9(0) + 1 = 1</span>, so <span class="math inline">w = 1 - 0.1(1) = 0.9</span>.</p>
+<p><strong>Step 2</strong> (<span class="math inline">g = -1</span>): <span class="math inline">v = 0.9(1) - 1 = -0.1</span>, so <span class="math inline">w = 0.9 - 0.1(-0.1) = 0.91</span>.</p>
+<p>Plain SGD would bounce all the way back to <span class="math inline">1.0</span>. Momentum moves just <span class="math inline">0.01</span> — the <span class="math inline">+1</span> and the <span class="math inline">-1</span> nearly cancel inside <span class="math inline">v</span>.</p>
+</div>
+<div class="reveal-box">
+<p><span class="reveal-label">What momentum buys us</span> Agreement across steps <strong>builds speed</strong>. Disagreement <strong>cancels out</strong>, so oscillations are damped.</p>
+<p>One problem from two slides ago remains: every parameter still shares the single step size <span class="math inline">\lambda</span>. <strong>Adam</strong> — next slide — combines momentum with a step size <em>per parameter</em>.</p>
+</div>
+</section>
 <section id="adam-in-one-slide" class="slide level2">
 <h2>Adam, in one slide</h2>
 <p><span class="eyebrow">For each parameter <span class="math inline">\theta</span>, on each step:</span></p>
@@ -1506,7 +1601,7 @@ Loss stops decreasing meaningfully.
 </section>
 <section id="the-training-loop-preview-of-next-week" class="slide level2">
 <h2>The training loop — preview of next week</h2>
-<div id="0400e374" class="cell" data-execution_count="3">
+<div id="c323c93d" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> epoch <span class="kw">in</span> <span class="bu">range</span>(num_epochs):</span>
 <span id="cb1-2"><a aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> x_batch, y_batch <span class="kw">in</span> train_loader:</span>
 <span id="cb1-3"><a aria-hidden="true" tabindex="-1"></a>        optimizer.zero_grad()              <span class="co"># clear last step's gradients</span></span>
@@ -1631,6 +1726,9 @@ Loss stops decreasing meaningfully.
 </div>
 </div>
 <div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list">
+<div id="ref-dauphin2014identifying" class="csl-entry" role="listitem">
+Dauphin, Y. N., Pascanu, R., Gulcehre, C., Cho, K., Ganguli, S., &amp; Bengio, Y. (2014). Identifying and attacking the saddle point problem in high-dimensional non-convex optimization. <em>Advances in Neural Information Processing Systems</em>, <em>27</em>.
+</div>
 <div id="ref-kingma2014adam" class="csl-entry" role="listitem">
 Kingma, D. P. (2014). Adam: A method for stochastic optimization. <em>arXiv Preprint arXiv:1412.6980</em>.
 </div>
