@@ -1727,5 +1727,12 @@
     "title": "Backpropagation",
     "section": "See you next week",
     "text": "See you next week\nLecture 5 — Feed-forward networks in PyTorch — Monday 10 August\n\n\n\n\n\n\nOver the weekend:\n\n\n\nWell done! Week 1 is the steepest part of the whole course\nIf you’re curious, watch Karpathy’s Building micrograd – it walks through the exact lab you just did.\nOptional: install PyTorch locally if you want to run things outside Colab. Setup notes are on Moodle.\n\n\n\n\n\n\n\nME324 · AI and Deep Learning · LSE Summer School\n\n\n\n\nKingma, D. P. (2014). Adam: A method for stochastic optimization. arXiv Preprint arXiv:1412.6980.\n\n\nLall, R., & Robinson, T. (2022). The MIDAS touch: Accurate and scalable missing-data imputation with deep learning. Political Analysis, 30(2), 179–196.\n\n\nRumelhart, D. E., Hinton, G. E., & Williams, R. J. (1986). Learning representations by back-propagating errors. Nature, 323(6088), 533–536."
+  },
+  {
+    "objectID": "lectures/lecture-02-deep-models-primer.html#seeing-the-problem",
+    "href": "lectures/lecture-02-deep-models-primer.html#seeing-the-problem",
+    "title": "Deep models — a primer",
+    "section": "Seeing the problem",
+    "text": "Seeing the problem\nThe same dataset, drawn\n\n\n\n\n\n\n\n\n\n\nClass A sits on two opposite corners, and Class B on the other two. Try to draw one straight line with all the circles on one side and all the squares on the other — wherever you put it (the dashed line is one attempt), at least one cluster is stranded on the wrong side. Datasets like this are called not linearly separable, and a single linear neuron can never classify them."
   }
 ]

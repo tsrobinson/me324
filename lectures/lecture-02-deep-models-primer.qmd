@@ -415,6 +415,78 @@ A linear perceptron *cannot* solve XOR. This is a result by Minsky & Papert that
 :::
 :::
 
+## Seeing the problem
+
+[The same dataset, drawn]{.eyebrow}
+
+```{python}
+#| echo: false
+#| fig-width: 6
+#| fig-height: 4.4
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib_inline.backend_inline as backend_inline
+
+# SVG keeps the figure vector-sharp when the deck is projected.
+backend_inline.set_matplotlib_formats("svg")
+
+# ME324 deck palette (see assets/theme/me324.scss)
+INK, MUTED, RULE, PAPER = "#0E1A2B", "#5C6473", "#D7D2C5", "#FBFAF6"
+RED, BLUE = "#C9322B", "#1A6FB4"
+
+plt.rcParams.update({
+    "font.family": "sans-serif",
+    "font.sans-serif": ["Inter", "Helvetica Neue", "Arial", "DejaVu Sans"],
+    "text.color": INK, "axes.labelcolor": INK,
+    "xtick.color": MUTED, "ytick.color": MUTED, "axes.edgecolor": RULE,
+})
+
+rng = np.random.default_rng(324)
+
+fig, ax = plt.subplots(figsize=(6, 4.4))
+fig.patch.set_alpha(0)          # sit on the slide's own background
+ax.patch.set_alpha(0)
+
+# Class A (red circles) on one diagonal, Class B (blue squares) on the other,
+# so identity never rests on colour alone.
+clusters = [
+    ((0, 0), RED, "o", "A", (-14, -14)),
+    ((1, 1), RED, "o", "A", (12, 8)),
+    ((0, 1), BLUE, "s", "B", (-14, 8)),
+    ((1, 0), BLUE, "s", "B", (12, -14)),
+]
+for (cx, cy), colour, marker, label, offset in clusters:
+    pts = rng.normal([cx, cy], 0.07, size=(12, 2))
+    ax.plot(pts[:, 0], pts[:, 1], marker, color=colour, ms=8,
+            mec=PAPER, mew=1.2, zorder=4)
+    ax.annotate(label, xy=(cx, cy), xytext=offset,
+                textcoords="offset points", color=colour,
+                fontsize=13, fontweight="bold", ha="center", zorder=6)
+
+# One attempted separating line: Class A ends up on both sides of it.
+xs = np.array([-0.35, 0.85])
+ax.plot(xs, 0.5 - xs, ls="--", color=MUTED, lw=1.8, zorder=2)
+ax.annotate("one attempt at a line", xy=(0.78, -0.33), color=MUTED,
+            fontsize=11, ha="right", zorder=6)
+
+ax.set_xlim(-0.45, 1.55)
+ax.set_ylim(-0.45, 1.55)
+ax.set_xticks([0, 1])
+ax.set_yticks([0, 1])
+ax.set_xlabel("$x_1$", fontsize=12)
+ax.set_ylabel("$x_2$", fontsize=12)
+ax.grid(True, color=RULE, lw=0.8, alpha=0.5)
+ax.set_axisbelow(True)
+for side in ("top", "right"):
+    ax.spines[side].set_visible(False)
+plt.tight_layout()
+plt.show()
+```
+
+::: {.card}
+Class A sits on two *opposite* corners, and Class B on the other two. Try to draw one straight line with all the circles on one side and all the squares on the other — wherever you put it (the dashed line is one attempt), at least one cluster is stranded on the wrong side. Datasets like this are called **not linearly separable**, and a single linear neuron can never classify them.
+:::
+
 ## So let's try stacking
 
 [The natural next moves]{.eyebrow}
