@@ -907,7 +907,7 @@ You can now:
 That is the conceptual core of the course. The next ten lectures expand outwards from this — but the centre is here.
 :::
 
-# Lab brief · today's afternoon {background-color="#0E1A2B"}
+# Lab brief {background-color="#0E1A2B"}
 
 ## Today's lab — 90 minutes
 
