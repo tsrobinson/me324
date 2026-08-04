@@ -77,9 +77,9 @@ ul.task-list li input[type="checkbox"] {
     }
 
     const options = {
-      valueNames: ['listing-title','listing-subtitle','listing-date',{ data: ['index'] },{ data: ['categories'] },{ data: ['listing-date-sort'] },{ data: ['listing-file-modified-sort'] }],
+      valueNames: ['listing-project','listing-website','listing-format','listing-bibliography','listing-csl','listing-editor','listing-_quarto-vars','listing-language','listing-title','listing-subtitle','listing-author','listing-date','listing-date-format','listing-path','listing-outputHref','listing-date-modified','listing-description','listing-filename','listing-file-modified','listing-reading-time','listing-word-count','listing-pdf',{ data: ['index'] },{ data: ['categories'] },{ data: ['listing-date-sort'] },{ data: ['listing-date-modified-sort'] },{ data: ['listing-file-modified-sort'] },{ data: ['listing-reading-time-sort'] },{ data: ['listing-word-count-sort'] }],
       
-      searchColumns: ["listing-title","listing-author","listing-date","listing-image","listing-description"],
+      searchColumns: ["listing-project","listing-website","listing-format","listing-bibliography","listing-csl","listing-editor","listing-_quarto-vars","listing-language","listing-title","listing-subtitle","listing-author","listing-date","listing-date-format","listing-path","listing-outputHref","listing-date-modified","listing-description","listing-filename","listing-file-modified","listing-reading-time","listing-word-count","listing-pdf"],
     };
 
     window['quarto-listings'] = window['quarto-listings'] || {};
@@ -211,11 +211,11 @@ window.Quarto = {
 
 
 <p>Each card opens the slide deck in your browser. Inside a deck: <strong>→ / ←</strong> to move, <strong>F</strong> for full-screen, <strong>M</strong> for the slide menu, <strong>O</strong> for an overview of all slides, and <strong>?</strong> for the full list of shortcuts.</p>
-<div id="listing-lecture-listing" class="quarto-listing quarto-listing-container-grid">
+<div id="listing-lecture-listing" class="quarto-listing quarto-listing-container-custom">
 <div class="list grid quarto-listing-cols-3">
-<div class="g-col-1" data-index="0" data-listing-date-sort="1785711600000" data-listing-file-modified-sort="1785844326825" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="13" data-listing-word-count-sort="2582">
-<a href="./lectures/lecture-01-what-is-ai.html" class="quarto-grid-link">
+<div class="g-col-1">
 <div class="quarto-grid-item card h-100 card-left">
+<a href="./lectures/lecture-01-what-is-ai.html" class="quarto-grid-link">
 <div class="card-body post-contents">
 <h5 class="no-anchor card-title listing-title">
 What do we mean by AI?
@@ -223,18 +223,19 @@ What do we mean by AI?
 <div class="card-subtitle listing-subtitle">
 Lecture 1 — Course overview &amp; framing
 </div>
-<div class="card-attribution card-text-small end">
-<div class="listing-date">
-Mon 3 Aug 2026
-</div>
-</div>
-</div>
 </div>
 </a>
+<div class="card-footer card-text-small d-flex justify-content-between align-items-center">
+<div class="listing-date">
+Mon, 3 Aug 2026
 </div>
-<div class="g-col-1" data-index="1" data-listing-date-sort="1785798000000" data-listing-file-modified-sort="1785847667834" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="18" data-listing-word-count-sort="3447">
-<a href="./lectures/lecture-02-deep-models-primer.html" class="quarto-grid-link">
+<p><a href="lectures/pdf/lecture-01-what-is-ai.pdf">⬇ PDF version</a></p>
+</div>
+</div>
+</div>
+<div class="g-col-1">
 <div class="quarto-grid-item card h-100 card-left">
+<a href="./lectures/lecture-02-deep-models-primer.html" class="quarto-grid-link">
 <div class="card-body post-contents">
 <h5 class="no-anchor card-title listing-title">
 Deep models — a primer
@@ -242,18 +243,19 @@ Deep models — a primer
 <div class="card-subtitle listing-subtitle">
 Lecture 2 — From a single neuron to a network
 </div>
-<div class="card-attribution card-text-small end">
-<div class="listing-date">
-Tue 4 Aug 2026
-</div>
-</div>
-</div>
 </div>
 </a>
+<div class="card-footer card-text-small d-flex justify-content-between align-items-center">
+<div class="listing-date">
+Tue, 4 Aug 2026
 </div>
-<div class="g-col-1" data-index="2" data-listing-date-sort="1785884400000" data-listing-file-modified-sort="1785520144440" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="21" data-listing-word-count-sort="4093">
-<a href="./lectures/lecture-03-computational-graphs.html" class="quarto-grid-link">
+<p><a href="lectures/pdf/lecture-02-deep-models-primer.pdf">⬇ PDF version</a></p>
+</div>
+</div>
+</div>
+<div class="g-col-1">
 <div class="quarto-grid-item card h-100 card-left">
+<a href="./lectures/lecture-03-computational-graphs.html" class="quarto-grid-link">
 <div class="card-body post-contents">
 <h5 class="no-anchor card-title listing-title">
 Computational graphs &amp; the maths of AI
@@ -261,18 +263,19 @@ Computational graphs &amp; the maths of AI
 <div class="card-subtitle listing-subtitle">
 Lecture 3 — Three tools: linear algebra, calculus, and computation graphs
 </div>
-<div class="card-attribution card-text-small end">
-<div class="listing-date">
-Wed 5 Aug 2026
-</div>
-</div>
-</div>
 </div>
 </a>
+<div class="card-footer card-text-small d-flex justify-content-between align-items-center">
+<div class="listing-date">
+Wed, 5 Aug 2026
 </div>
-<div class="g-col-1" data-index="3" data-listing-date-sort="1785970800000" data-listing-file-modified-sort="1785667204235" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="24" data-listing-word-count-sort="4636">
-<a href="./lectures/lecture-04-backpropagation.html" class="quarto-grid-link">
+<p><a href="lectures/pdf/lecture-03-computational-graphs.pdf">⬇ PDF version</a></p>
+</div>
+</div>
+</div>
+<div class="g-col-1">
 <div class="quarto-grid-item card h-100 card-left">
+<a href="./lectures/lecture-04-backpropagation.html" class="quarto-grid-link">
 <div class="card-body post-contents">
 <h5 class="no-anchor card-title listing-title">
 Backpropagation
@@ -280,18 +283,19 @@ Backpropagation
 <div class="card-subtitle listing-subtitle">
 Lecture 4 — Turning a wrong network into a right one
 </div>
-<div class="card-attribution card-text-small end">
-<div class="listing-date">
-Thu 6 Aug 2026
-</div>
-</div>
-</div>
 </div>
 </a>
+<div class="card-footer card-text-small d-flex justify-content-between align-items-center">
+<div class="listing-date">
+Thu, 6 Aug 2026
 </div>
-<div class="g-col-1" data-index="4" data-listing-date-sort="1786316400000" data-listing-file-modified-sort="1785674599335" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="24" data-listing-word-count-sort="4661">
-<a href="./lectures/lecture-05-feedforward.html" class="quarto-grid-link">
+<p><a href="lectures/pdf/lecture-04-backpropagation.pdf">⬇ PDF version</a></p>
+</div>
+</div>
+</div>
+<div class="g-col-1">
 <div class="quarto-grid-item card h-100 card-left">
+<a href="./lectures/lecture-05-feedforward.html" class="quarto-grid-link">
 <div class="card-body post-contents">
 <h5 class="no-anchor card-title listing-title">
 Feed-forward networks in PyTorch
@@ -299,14 +303,15 @@ Feed-forward networks in PyTorch
 <div class="card-subtitle listing-subtitle">
 Lecture 5 — Real models, real data, real choices
 </div>
-<div class="card-attribution card-text-small end">
-<div class="listing-date">
-Mon 10 Aug 2026
-</div>
-</div>
-</div>
 </div>
 </a>
+<div class="card-footer card-text-small d-flex justify-content-between align-items-center">
+<div class="listing-date">
+Mon, 10 Aug 2026
+</div>
+<p><a href="lectures/pdf/lecture-05-feedforward.pdf">⬇ PDF version</a></p>
+</div>
+</div>
 </div>
 </div>
 <div class="listing-no-matching d-none">

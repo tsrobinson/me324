@@ -8,18 +8,18 @@ listing:
   # (see `render:` in _quarto.yml), and a glob would advertise unbuilt ones.
   # Add each deck here as you release it.
   contents:
-    - "lectures/lecture-01-what-is-ai.qmd"
-    - "lectures/lecture-02-deep-models-primer.qmd"
-    - "lectures/lecture-03-computational-graphs.qmd"
-    - "lectures/lecture-04-backpropagation.qmd"
-    - "lectures/lecture-05-feedforward.qmd"
-  type: grid
-  grid-columns: 3
+    - path: "lectures/lecture-01-what-is-ai.qmd"
+      pdf: "lectures/pdf/lecture-01-what-is-ai.pdf"
+    - path: "lectures/lecture-02-deep-models-primer.qmd"
+      pdf: "lectures/pdf/lecture-02-deep-models-primer.pdf"
+    - path: "lectures/lecture-03-computational-graphs.qmd"
+      pdf: "lectures/pdf/lecture-03-computational-graphs.pdf"
+    - path: "lectures/lecture-04-backpropagation.qmd"
+      pdf: "lectures/pdf/lecture-04-backpropagation.pdf"
+    - path: "lectures/lecture-05-feedforward.qmd"
+      pdf: "lectures/pdf/lecture-05-feedforward.pdf"
+  template: assets/lecture-grid.ejs
   sort: "date"
-  sort-ui: false
-  filter-ui: false
-  fields: [title, subtitle, date]
-  date-format: "ddd D MMM YYYY"
 ---
 
 Each card opens the slide deck in your browser. Inside a deck: **→ / ←** to move,

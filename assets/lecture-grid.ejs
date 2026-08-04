@@ -1,0 +1,33 @@
+<%
+// Custom grid template: same card look as Quarto's built-in grid listing, but
+// the deck link wraps only the card body, so the PDF link in the footer is a
+// sibling anchor rather than an (invalid) nested one.
+function fmt(d) {
+  try {
+    const dt = d instanceof Date ? d : new Date(d);
+    return dt.toLocaleDateString("en-GB", {
+      weekday: "short", day: "numeric", month: "short", year: "numeric",
+    });
+  } catch (e) {
+    return d ?? "";
+  }
+}
+%>
+<div class="list grid quarto-listing-cols-3">
+<% for (const item of items) { %>
+<div class="g-col-1">
+<div class="quarto-grid-item card h-100 card-left">
+<a href="<%- item.path %>" class="quarto-grid-link">
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title"><%= item.title %></h5>
+<div class="card-subtitle listing-subtitle"><%= item.subtitle %></div>
+</div>
+</a>
+<div class="card-footer card-text-small d-flex justify-content-between align-items-center">
+<div class="listing-date"><%= fmt(item.date) %></div>
+<% if (item.pdf) { %><a href="<%- item.pdf %>">⬇ PDF version</a><% } %>
+</div>
+</div>
+</div>
+<% } %>
+</div>
