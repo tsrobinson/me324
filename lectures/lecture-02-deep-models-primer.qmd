@@ -417,7 +417,7 @@ A linear perceptron *cannot* solve XOR. This is a result by Minsky & Papert that
 
 ## Seeing the problem
 
-[The same dataset, drawn]{.eyebrow}
+[Visualizing the XOR dataset]{.eyebrow}
 
 ```{python}
 #| echo: false
@@ -484,7 +484,9 @@ plt.show()
 ```
 
 ::: {.card}
-Class A sits on two *opposite* corners, and Class B on the other two. Try to draw one straight line with all the circles on one side and all the squares on the other — wherever you put it (the dashed line is one attempt), at least one cluster is stranded on the wrong side. Datasets like this are called **not linearly separable**, and a single linear neuron can never classify them.
+Class A sits on two *opposite* corners, and Class B on the other two.
+
+Wherever you draw a line, at least one cluster is placed on the wrong side. Datasets like this are called **not linearly separable**.
 :::
 
 ## So let's try stacking

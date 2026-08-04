@@ -1733,6 +1733,6 @@
     "href": "lectures/lecture-02-deep-models-primer.html#seeing-the-problem",
     "title": "Deep models — a primer",
     "section": "Seeing the problem",
-    "text": "Seeing the problem\nThe same dataset, drawn\n\n\n\n\n\n\n\n\n\n\nClass A sits on two opposite corners, and Class B on the other two. Try to draw one straight line with all the circles on one side and all the squares on the other — wherever you put it (the dashed line is one attempt), at least one cluster is stranded on the wrong side. Datasets like this are called not linearly separable, and a single linear neuron can never classify them."
+    "text": "Seeing the problem\nVisualizing the XOR dataset\n\n\n\n\n\n\n\n\n\n\nClass A sits on two opposite corners, and Class B on the other two.\nWherever you draw a line, at least one cluster is placed on the wrong side. Datasets like this are called not linearly separable."
   }
 ]
