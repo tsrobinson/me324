@@ -302,6 +302,12 @@ a { color: var(--cobalt); }
         <select id="gen-n"><option value="12">12 rows</option><option value="24">24 rows</option><option value="40" selected>40 rows</option></select>
         <button class="act" id="add-row">+ row</button>
       </div>
+      <div class="row-actions" id="pattern-row" style="display:none">
+        <label style="font-size:0.72rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted)">Pattern</label>
+        <span class="seg" id="pattern-seg">
+          <button data-v="lab">lab 2 generator</button><button data-v="band">curved (ReLU demo)</button>
+        </span>
+      </div>
     </section>
 
     <section class="panel stage">
@@ -379,15 +385,20 @@ a { color: var(--cobalt); }
       <summary>How to use this in class</summary>
       <p><b>Start one step at a time.</b> Any mode opens with three neurons in one hidden layer — small enough that every
         number on the diagram is readable. Walk the four buttons once and read the loss, the gradients, and the update.</p>
-      <p><b>Then show that capacity is a choice.</b> On <b>Turnout · 2 variables</b> the true boundary is a curve, and three
-        ReLU neurons can only bend a line a few times. Run 100, look at the map, then press <b>+</b> on the hidden layer and
-        run again — each neuron buys another kink. The same story runs on <b>A bend</b> with one input, where you can see the
-        kinks directly.</p>
+      <p><b>Then show that capacity is a choice.</b> The turnout modes open on lab 2's own generator, whose signal is weak
+        by design — about 60% is the ceiling for <i>any</i> model, so a soft map there is the right answer, not a broken one.
+        Switch <b>Pattern</b> under the data table to <b>curved</b> and the boundary becomes a band that no straight line can
+        fence off: train it, then set the hidden layer to linear and watch the map fall apart. <b>A bend</b> makes the same
+        point with one input, where you can count the kinks — one per neuron.</p>
       <p><b>Then break it.</b> Set λ to 1.0 and watch the loss diverge. On <b>XOR</b>, switch the hidden layer to linear and
         watch it stall dead at 0.25, predicting 0.50 for everything — lecture 2's point about linear separability, live.
         Press <b>Backward</b> twice without zeroing and watch the gradients double.</p>
       <p><b>Then test it properly.</b> <b>🎲 Random data</b> draws a fresh sample from the <i>same</i> rule, so you can ask
         whether the model found the pattern or just memorised the points in front of it.</p>
+      <p><b>Then hand it over.</b> <b>✏️ Draw your own</b> starts with an empty canvas: click the map to place points in
+        either colour and the class has to separate what they drew. Two clean blobs take seconds; a ring inside a ring, or
+        four alternating corners, will not go in with three neurons — which is the whole argument for depth, made by the
+        room rather than by you.</p>
       <p><b>To reproduce the lecture's own numbers</b>, pick <b>Straight line · y = 2x</b> and press <b>−</b> on the hidden
         layer until it disappears. That is the deck's single linear neuron; set <code>w</code> and <code>b</code> to 0 under
         "show every parameter" and a point at <code>x = 1, y = 2</code> gives <code>L = 4</code> with
@@ -497,7 +508,7 @@ const SUB = ["₀", "₁", "₂", "₃", "₄", "₅", "₆"];
 const sup = (n) => ["⁰", "¹", "²", "³", "⁴", "⁵"][n] || String(n);
 const BLUE = "#183D87", ORANGE = "#E16E26", RED = "#C9322B";
 
-const MAX_IN = 3, MAX_WIDTH = 5, MAX_LAYERS = 3, MAX_ROWS = 40;
+const MAX_IN = 3, MAX_WIDTH = 5, MAX_LAYERS = 3, MAX_ROWS = 60;
 
 /* ===========================================================================
    3 · Data-generating processes
@@ -506,20 +517,30 @@ const MAX_IN = 3, MAX_WIDTH = 5, MAX_LAYERS = 3, MAX_ROWS = 40;
    can see whether it found it — rather than a new problem each time.
    =========================================================================== */
 
-// Turnout. Voting is an INVERTED U in age — it climbs through early adulthood, peaks
-// in middle age and falls away again among the very oldest — and rises with income.
-// Having voted last time (x₃, when present) shifts the whole thing up.
+// Turnout, two patterns — switchable under the data table.
 //
-// The shape is the point. "Votes" is a BAND in age, not a half-plane, so no straight
-// line separates these people however you draw it: the model has to bend twice, once
-// on each side of the peak. That is what makes a hidden layer necessary rather than
-// decorative — and it is why switching the activation to linear visibly wrecks it.
-// The 1.8 gain sharpens the labels. Sampled 0/1 labels are noisy by construction, and
-// at gain 1 the band was so blurred that a straight line scored as well as a bent one
-// — which would quietly teach the opposite of the lesson.
-const turnoutZ = (age, income, voted) => 1.8 * (
+// THE DEFAULT is the course's own generator: `make_turnout_data` from labs 2 and 4,
+// same coefficients, same interaction term, same past-behaviour effect. Points drawn
+// here come from exactly the process the notebooks use. With two inputs the
+// voted-last-time term simply drops out.
+const turnoutZ_lab = (age, income, voted) =>
+  1.6 * age + 1.2 * income + (voted == null ? 0 : 2.0 * voted)
+  - 3.0 * age * income                        // interaction: the nonlinearity
+  - 1.0;
+
+// THE ALTERNATIVE is built to make the activation function matter visibly. Voting is
+// an inverted U in age — climbing through early adulthood, peaking in middle age,
+// falling away among the very oldest — so "votes" is a BAND, not a half-plane, and no
+// straight line separates it however you draw it. The model has to bend twice, once
+// either side of the peak, which is why switching the hidden layer to linear wrecks it.
+// The 1.8 gain sharpens the labels: sampled 0/1 labels are noisy by construction, and
+// at gain 1 the band blurred enough that a straight line scored as well as a bent one.
+const turnoutZ_band = (age, income, voted) => 1.8 * (
   5.5 * (1 - Math.pow((age - 0.55) / 0.42, 2)) + 2.0 * (income - 0.5) - 3.0
   + (voted == null ? 0 : 2.4 * voted - 1.2));
+
+const turnoutZ = (age, income, voted) =>
+  (S.turnoutPattern === "band" ? turnoutZ_band : turnoutZ_lab)(age, income, voted);
 
 function turnoutRows(rand, n, nIn) {
   const rows = [];
@@ -574,16 +595,16 @@ const PRESETS = {
   turnout2: {
     name: "Turnout · 2 variables",
     nIn: 2, outAct: "sigmoid", lossFn: "bce", lr: 0.5, n: 40, seed: 555,
-    labels: ["age", "income"],
+    labels: ["age", "income"], turnout: true,
     gen: turnoutRows,
-    note: "Age and income → did they turn out? Voting is an <b>inverted U in age</b> — it peaks in middle age — so the voters sit in a <i>band</i>, and no straight line can fence them off. Run 100 a few times, then switch the hidden layer to linear and watch the map collapse."
+    note: "Age and income → did they turn out? This is the course's own <code>make_turnout_data</code> from lab 2, interaction term and all. Its signal is deliberately weak: even a perfect model only reaches about 60% here, so expect a soft map rather than a crisp boundary. For a version where you can <i>see</i> what ReLU buys, switch the pattern under the table to <b>curved</b>."
   },
   turnout3: {
     name: "Turnout · 3 variables",
     nIn: 3, outAct: "sigmoid", lossFn: "bce", lr: 0.5, n: 40, seed: 555,
-    labels: ["age", "income", "voted"],
+    labels: ["age", "income", "voted"], turnout: true,
     gen: turnoutRows,
-    note: "The same band, plus whether they voted last time — which lifts everyone's chances. Flip <b>voted</b> under the map to watch the whole boundary shift."
+    note: "The same generator with all three of lab 2's features, including whether they voted last time — the strongest term in it by far. Flip <b>voted</b> under the map to watch the whole boundary shift. The <b>curved</b> pattern is again the one that shows what the activation function is for."
   },
   xor: {
     name: "XOR",
@@ -596,6 +617,12 @@ const PRESETS = {
     nIn: 1, outAct: "linear", lossFn: "mse", lr: 0.1, n: 12, seed: 808,
     gen: bendRows,
     note: "Points on y = x². A linear network can only draw a straight line through them — ReLU is what buys the bend, and you get one kink per neuron, so watch the fit improve each time you press <b>+</b>."
+  },
+  draw: {
+    name: "✏️ Draw your own",
+    nIn: 2, outAct: "sigmoid", lossFn: "bce", lr: 0.5, n: 0, seed: 0,
+    draw: true, gen: () => [],
+    note: "An empty canvas. <b>Click the map</b> on the right to place voters — one colour, then the other — and the network will try to separate them. Make it as easy or as vicious as you like."
   },
   line: {
     name: "Straight line · y = 2x",
@@ -616,8 +643,10 @@ const S = {
   sel: 0, phase: "forward", step: 0, history: [],
   fwd: null, loss: null, prevLoss: null,
   gradsLive: false, stale: false, diverged: false, hot: null,
-  showEdgeNums: true, hold: 1
+  showEdgeNums: true, hold: 1, addClass: 1, turnoutPattern: "lab"
 };
+// In the drawing mode the map is an input surface, not just a picture.
+const isDrawMode = () => S.preset === "draw";
 // Column names for the current mode, falling back to x₁, x₂, x₃.
 const varName = (j) => (S.labels && S.labels[j]) || (S.nIn === 1 ? "x" : "x" + SUB[j + 1]);
 
@@ -796,6 +825,9 @@ function stepOnce() {
 }
 
 function runMany(n) {
+  // With no data there is no loss; without this the run below produces NaN, which the
+  // divergence check reads as a blow-up and disables the whole cycle.
+  if (!S.data.length) { narrate("<b>No data yet.</b> Click the map to place some points first.", "warn"); return; }
   if (S.diverged) { narrate("<b>This run has diverged.</b> Lower λ and press <b>Reset weights</b> before running again.", "bad"); return; }
   const before = S.loss;
   for (let k = 0; k < n; k++) stepOnce();
@@ -913,11 +945,22 @@ function renderData() {
   });
   t.append(tb); host.append(t);
 
+  // Drawing replaces the generator: the points come from the map, not a distribution.
+  const drawing = isDrawMode();
+  $("#gen").style.display = drawing ? "none" : "";
+  $("#gen-n").style.display = drawing ? "none" : "";
+  // The two turnout modes can be driven by either data-generating process.
+  const P = PRESETS[S.preset];
+  $("#pattern-row").style.display = (P && P.turnout) ? "" : "none";
+  $("#pattern-seg").querySelectorAll("button").forEach((b) => b.classList.toggle("on", b.dataset.v === S.turnoutPattern));
+
   const badY = S.lossFn === "bce" && S.data.some((r) => r.y !== 0 && r.y !== 1);
   const key = S.labels ? S.labels.map((n, j) => `<b>x${SUB[j + 1]}</b> ${n}`).join(" · ") : "";
   $("#data-sub").innerHTML = badY
     ? "<span style='color:var(--grad)'>Cross-entropy needs every target to be 0 or 1.</span>"
-    : `${S.data.length} points · <b>ŷ</b> fills in after a forward pass.${key ? `<br><span class="varkey">${key}</span>` : ""}`;
+    : (drawing && !S.data.length)
+      ? "No points yet — <b>click the map</b> to place some."
+      : `${S.data.length} points · <b>ŷ</b> fills in after a forward pass.${key ? `<br><span class="varkey">${key}</span>` : ""}`;
 }
 
 function numInput(value, onset) {
@@ -1238,7 +1281,8 @@ function renderPlot() {
   const W = 300, H = 240, m = { l: 34, r: 10, t: 10, b: 28 };
   const plotW = W - m.l - m.r, plotH = H - m.t - m.b;
 
-  if (!S.data.length) { host.innerHTML = ""; return; }
+  // The drawing mode needs its canvas before there is any data to put on it.
+  if (!S.data.length && !isDrawMode()) { host.innerHTML = ""; return; }
 
   if (S.nIn === 1) {
     // ---- function view -------------------------------------------------
@@ -1268,8 +1312,12 @@ function renderPlot() {
   }
 
   // ---- decision map (2 inputs, or a slice of 3) -------------------------
+  // While drawing, the frame is FIXED. Rescaling the axes to fit the data would move
+  // the canvas under the cursor on every click, which makes drawing impossible.
+  const drawing = isDrawMode();
   const xs = S.data.map((r) => r.x[0]), ys = S.data.map((r) => r.x[1]);
-  const [x0, x1] = range(xs, 0.18), [y0, y1] = range(ys, 0.18);
+  const [x0, x1] = drawing ? [-0.05, 1.05] : range(xs, 0.18);
+  const [y0, y1] = drawing ? [-0.05, 1.05] : range(ys, 0.18);
   const sx = (x) => m.l + ((x - x0) / (x1 - x0)) * plotW;
   const sy = (y) => m.t + plotH - ((y - y0) / (y1 - y0)) * plotH;
 
@@ -1279,7 +1327,7 @@ function renderPlot() {
   // to mean "the model would get this one right". Scaling to the model's own range
   // would move the reference frame on every update and recolour the data underneath it.
   const ys0 = S.data.map((r) => r.y);
-  let ylo = Math.min(...ys0), yhi = Math.max(...ys0);
+  let ylo = ys0.length ? Math.min(...ys0) : 0, yhi = ys0.length ? Math.max(...ys0) : 1;
   if (yhi - ylo < 1e-9) { ylo -= 0.5; yhi += 0.5; }
   const shade = (v) => {
     const t = clamp((v - ylo) / (yhi - ylo), 0, 1);
@@ -1316,8 +1364,13 @@ function renderPlot() {
   });
   s += "</svg>";
   host.innerHTML = s;
+  if (drawing) attachDrawing(host, { W, H, m, plotW, plotH, x0, x1, y0, y1 });
 
-  $("#plot-sub").innerHTML = `Small dots are test points coloured by <b>what the model predicts</b> there — they move as it
+  $("#plot-sub").innerHTML = drawing
+    ? `<b>Click to place a point</b> in the colour chosen below · <b>shift-click</b> for the other colour ·
+       <b>right-click</b> to remove one. The faint dots are what the model predicts everywhere, so you are drawing the
+       problem and watching it try to solve it.`
+    : `Small dots are test points coloured by <b>what the model predicts</b> there — they move as it
     learns. Ringed dots are your data, coloured by their <b>true y</b>, which never changes.
     ${isClassifier() ? "Where a data point matches the shading under it, the model has that one right."
                      : "Blue is the top of your targets' range, orange the bottom."}`;
@@ -1331,6 +1384,26 @@ function renderPlot() {
        <span style="margin-left:0.6rem"><span class="dot" style="background:${ORANGE}"></span>low y</span>
        <span style="margin-left:0.6rem">· faint = model · ringed = your data</span>`;
   ctl.append(legend);
+
+  if (drawing) {
+    const wrap = el("span");
+    wrap.style.marginLeft = "auto";
+    wrap.append(el("span", "", "placing "));
+    const seg = el("span", "seg");
+    [1, 0].forEach((v) => {
+      const b = el("button", S.addClass === v ? "on" : "", "● " + v);
+      if (S.addClass !== v) b.style.color = v === 1 ? BLUE : ORANGE;
+      b.title = `Click the map to place points with y = ${v}`;
+      b.onclick = () => { S.addClass = v; renderPlot(); };
+      seg.append(b);
+    });
+    wrap.append(seg);
+    const clr = el("button", "act", "Clear");
+    clr.style.marginLeft = "0.4rem";
+    clr.onclick = () => { S.data = []; S.sel = 0; invalidate(); narrateDraw(); render(); };
+    wrap.append(clr);
+    ctl.append(wrap);
+  }
 
   if (S.nIn === 3) {
     const wrap = el("span");
@@ -1353,6 +1426,64 @@ function renderPlot() {
     wrap.append(el("span", "", ` · ${shown} of ${S.data.length} points`));
     ctl.append(wrap);
   }
+}
+
+// Turn clicks on the map into data points. Client pixels → viewBox units → data
+// coordinates; the geometry is passed in rather than recomputed so the mapping can
+// never drift out of step with what was drawn.
+function attachDrawing(host, g) {
+  const svg = host.querySelector("svg");
+  if (!svg) return;
+  svg.style.cursor = "crosshair";
+  const toData = (ev) => {
+    const r = svg.getBoundingClientRect();
+    const vx = ((ev.clientX - r.left) / r.width) * g.W;
+    const vy = ((ev.clientY - r.top) / r.height) * g.H;
+    if (vx < g.m.l - 4 || vx > g.m.l + g.plotW + 4 || vy < g.m.t - 4 || vy > g.m.t + g.plotH + 4) return null;
+    const x = g.x0 + ((vx - g.m.l) / g.plotW) * (g.x1 - g.x0);
+    const y = g.y0 + ((g.m.t + g.plotH - vy) / g.plotH) * (g.y1 - g.y0);
+    return [clamp(r2(x), 0, 1), clamp(r2(y), 0, 1)];
+  };
+  svg.onclick = (ev) => {
+    const p = toData(ev);
+    if (!p) return;
+    if (S.data.length >= MAX_ROWS) {
+      narrate(`<b>That is ${MAX_ROWS} points</b> — plenty to be going on with. Remove a few before adding more.`, "warn");
+      return;
+    }
+    S.data.push({ x: p, y: ev.shiftKey ? 1 - S.addClass : S.addClass });
+    S.sel = S.data.length - 1;
+    invalidate(); narrateDraw(); render();
+  };
+  svg.oncontextmenu = (ev) => {
+    ev.preventDefault();
+    const p = toData(ev);
+    if (!p) return;
+    let best = -1, bestD = 0.07;                    // only remove something genuinely near the cursor
+    S.data.forEach((r, i) => {
+      const d = Math.hypot(r.x[0] - p[0], r.x[1] - p[1]);
+      if (d < bestD) { bestD = d; best = i; }
+    });
+    if (best < 0) return;
+    S.data.splice(best, 1);
+    S.sel = Math.min(S.sel, Math.max(0, S.data.length - 1));
+    invalidate(); narrateDraw(); render();
+  };
+}
+
+function narrateDraw() {
+  const ones = S.data.filter((r) => r.y === 1).length, zeros = S.data.length - ones;
+  if (!S.data.length) { narrate("<b>Empty canvas.</b> Click the map on the right to place your first point."); return; }
+  // One class only is a genuine trap: the loss is already at its floor, every gradient
+  // is tiny, and it looks like the network has "learned" when it has learned nothing.
+  if (!ones || !zeros) {
+    narrate(`<b>${S.data.length} point${S.data.length > 1 ? "s" : ""}, all the same colour.</b> Add some of the other one —
+      with a single label to predict, the network just answers that label everywhere and the loss is already about as low
+      as it goes.`, "warn");
+    return;
+  }
+  narrate(`<b>${S.data.length} points</b> — ${ones} blue, ${zeros} orange. Press <b>Forward pass</b> to measure the loss,
+    or <b>Run 100</b> and watch the boundary form around what you drew.`);
 }
 
 function axes(m, plotW, plotH, x0, x1, y0, y1, xlab, ylab) {
@@ -1524,8 +1655,10 @@ function loadPreset(key) {
   S.hidden = [3]; S.acts = ["relu"];
   initParams(S.seed);
   // Fixed seed per mode, so the picture is the same in every lecture theatre.
-  S.data = generateData(P.n, P.seed);
-  $("#gen-n").value = String(P.n);          // 🎲 defaults to this mode's own sample size
+  // The drawing mode starts with nothing at all — the points are the user's job.
+  S.data = P.draw ? [] : generateData(P.n, P.seed);
+  S.addClass = 1;
+  if (!P.draw) $("#gen-n").value = String(P.n);   // 🎲 defaults to this mode's sample size
   S.hold = 1; S.sel = 0;
   resetRun();
   narrate(`<b>${P.name}.</b> ${P.note} Press <b>Forward pass</b> to begin.`);
@@ -1559,6 +1692,23 @@ function init() {
       Press <b>Forward pass</b>.`);
     render();
   };
+  $("#pattern-seg").querySelectorAll("button").forEach((b) => {
+    b.onclick = () => {
+      if (S.turnoutPattern === b.dataset.v) return;
+      S.turnoutPattern = b.dataset.v;
+      const P = PRESETS[S.preset];
+      S.data = generateData(S.data.length || P.n, P.seed);   // same seed: the change you see is the rule, not the draw
+      S.sel = 0; invalidate(); resetRun();
+      narrate(S.turnoutPattern === "band"
+        ? `<b>Curved pattern.</b> Turnout now peaks in middle age, so the voters form a <i>band</i> and no straight line can
+           fence them off. Train it, then switch the hidden layer to linear — the map falls apart, which is what the
+           activation function is buying you.`
+        : `<b>Lab 2 generator.</b> The course's own <code>make_turnout_data</code>: age, income, whether they voted last
+           time, and the age×income interaction. This is the process the notebooks sample from.`);
+      render();
+    };
+  });
+
   $("#add-row").onclick = () => {
     if (S.data.length >= MAX_ROWS) return;
     S.data.push({ x: new Array(S.nIn).fill(0), y: 0 });
