@@ -11,6 +11,10 @@ project:
   # resources so a full render, which wipes docs/, copies them back in.
   resources:
     - lectures/pdf
+    # Hand-written, self-contained HTML page (no Quarto rendering involved), so
+    # it needs the same treatment as the PDFs above: without this line a full
+    # render wipes it out of docs/ and the link from labs.qmd 404s.
+    - labs/backprop-playground.html
   # Only released material is listed here. Weeks 2-3 (lectures 6-12, labs 6-12)
   # exist on disk but are deliberately NOT rendered or published yet -- add the
   # relevant lines below (and drop them from .gitignore) to release them.
