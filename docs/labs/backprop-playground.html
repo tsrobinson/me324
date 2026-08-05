@@ -1,0 +1,1607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Backprop playground · ME324</title>
+<meta name="description" content="A hands-on backpropagation playground: a few data points, one button per step — forward pass, loss, every gradient, one step of gradient descent.">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,500;6..72,600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* ---------------------------------------------------------------------------
+   Palette lifted from the ME324 site theme (assets/theme/site.scss), so this
+   page looks native both on ts-robinson.com/me324 and on its own.
+   --------------------------------------------------------------------------- */
+:root {
+  --paper:   #FBF7EC;
+  --cream:   #EFE2C7;
+  --card:    #FFFDF7;
+  --cobalt:  #183D87;
+  --forest:  #396545;
+  --orange:  #E16E26;
+  --orange-deep: #AD5118;
+  --gold:    #E2B049;
+  --ink:     #1B1B1A;
+  --body:    #2E2A24;
+  --muted:   #6B6459;
+  --rule:    rgba(27,27,26,0.13);
+  --rule-soft: rgba(27,27,26,0.07);
+  /* Gradients get their own colour, matching the loss node in the lecture 4
+     deck (#C9322B). Weights are blue/orange; anything red is a derivative. */
+  --grad:    #C9322B;
+  --grad-soft: rgba(201,50,43,0.10);
+
+  --sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --serif: "Newsreader", Georgia, "Times New Roman", serif;
+  --mono: "JetBrains Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+  --radius: 0.85rem;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--paper); color: var(--body);
+  font-family: var(--sans); font-size: 16px; line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3 { font-family: var(--serif); color: var(--ink); font-weight: 600; letter-spacing: -0.005em; margin: 0; }
+.wrap { max-width: 1500px; margin: 0 auto; padding: 1.5rem 1.25rem 3rem; }
+
+/* ---- header ---------------------------------------------------------- */
+.hero { background: var(--cream); border-radius: var(--radius); padding: 1.3rem 1.6rem 1.4rem; margin-bottom: 1rem; }
+.eyebrow { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--orange-deep); margin: 0 0 0.35rem; }
+.hero h1 { font-size: 2.05rem; line-height: 1.1; }
+.hero .lede { font-family: var(--serif); font-size: 1.06rem; color: #4A443B; margin: 0.4rem 0 0; max-width: 70ch; }
+.presets { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.9rem; align-items: center; }
+.presets .plabel { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-right: 0.2rem; }
+.chip {
+  font: inherit; font-size: 0.85rem; font-weight: 500;
+  border: 1px solid rgba(24,61,135,0.3); background: rgba(255,255,255,0.65);
+  color: var(--cobalt); padding: 0.3rem 0.7rem; border-radius: 999px; cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, transform 0.05s;
+}
+.chip:hover { background: #fff; border-color: var(--cobalt); }
+.chip:active { transform: translateY(1px); }
+.chip.on { background: var(--cobalt); border-color: var(--cobalt); color: #fff; }
+
+/* ---- layout ---------------------------------------------------------- */
+.grid { display: grid; gap: 1rem; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 1000px) {
+  .grid { grid-template-columns: 300px minmax(0, 1fr); }
+  .stage { grid-column: 2; grid-row: 1 / span 2; }
+}
+@media (min-width: 1340px) {
+  .grid { grid-template-columns: 300px minmax(0, 1fr) 330px; }
+  .stage { grid-column: 2; grid-row: 1 / span 2; }
+  .right-col { grid-column: 3; grid-row: 1 / span 2; }
+}
+.right-col { display: flex; flex-direction: column; gap: 1rem; min-width: 0; }
+.panel { background: var(--card); border: 1px solid var(--rule); border-radius: var(--radius); padding: 0.9rem 1rem 1rem; }
+.panel > h2 { font-size: 1.02rem; display: flex; align-items: baseline; justify-content: space-between; gap: 0.5rem; }
+.panel > h2 .hint { font-family: var(--sans); font-size: 0.72rem; font-weight: 500; color: var(--muted); }
+.panel .sub { font-size: 0.8rem; color: var(--muted); margin: 0.15rem 0 0.7rem; }
+
+/* ---- data table ------------------------------------------------------ */
+.tscroll { overflow: auto; max-height: 340px; }
+table.data { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 0.82rem; }
+table.data th {
+  font-family: var(--sans); font-size: 0.64rem; font-weight: 600; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--muted); text-align: right; padding: 0.2rem 0.25rem;
+  border-bottom: 1px solid var(--rule); position: sticky; top: 0; background: var(--card); z-index: 1;
+}
+table.data th:first-child { text-align: left; }
+table.data td { padding: 0.12rem 0.15rem; border-bottom: 1px solid var(--rule-soft); text-align: right; }
+table.data tr.sel td { background: rgba(24,61,135,0.07); }
+table.data tr.sel td:first-child { box-shadow: inset 3px 0 0 var(--cobalt); }
+td.idx { color: var(--muted); font-size: 0.72rem; width: 1.5rem; text-align: center; cursor: pointer; }
+td.pred { color: var(--muted); padding-right: 0.35rem; }
+td.pred.good { color: var(--forest); }
+input.num {
+  font-family: var(--mono); font-size: 0.82rem; color: var(--ink); width: 100%; min-width: 2.6rem;
+  border: 1px solid transparent; background: transparent; border-radius: 5px; padding: 0.16rem 0.25rem; text-align: right;
+}
+input.num:hover { border-color: var(--rule); background: #fff; }
+input.num:focus { outline: none; border-color: var(--cobalt); background: #fff; box-shadow: 0 0 0 2px rgba(24,61,135,0.12); }
+button.del { font: inherit; font-size: 0.85rem; line-height: 1; color: var(--muted); background: none; border: none; cursor: pointer; padding: 0.15rem 0.25rem; border-radius: 5px; }
+button.del:hover { color: var(--grad); background: var(--grad-soft); }
+.row-actions { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.6rem; align-items: center; }
+
+/* ---- buttons --------------------------------------------------------- */
+button.act {
+  font: inherit; font-size: 0.83rem; font-weight: 500; cursor: pointer;
+  border: 1px solid var(--rule); background: #fff; color: var(--body);
+  border-radius: 7px; padding: 0.3rem 0.65rem;
+}
+button.act:hover { border-color: var(--cobalt); color: var(--cobalt); }
+button.act.strong { background: var(--cobalt); border-color: var(--cobalt); color: #fff; }
+button.act.strong:hover { background: #14336f; color: #fff; }
+select, input[type="number"].box {
+  font: inherit; font-size: 0.82rem; font-family: var(--mono);
+  border: 1px solid var(--rule); background: #fff; color: var(--ink); border-radius: 6px; padding: 0.22rem 0.35rem;
+}
+select { font-family: var(--sans); }
+select:focus, input.box:focus { outline: none; border-color: var(--cobalt); box-shadow: 0 0 0 2px rgba(24,61,135,0.12); }
+input[type="number"].box { width: 4.4rem; text-align: right; }
+.seg { display: inline-flex; border: 1px solid var(--rule); border-radius: 7px; overflow: hidden; }
+.seg button { font: inherit; font-size: 0.78rem; border: none; background: #fff; color: var(--body); padding: 0.24rem 0.55rem; cursor: pointer; }
+.seg button + button { border-left: 1px solid var(--rule); }
+.seg button.on { background: var(--cobalt); color: #fff; }
+
+/* ---- the cycle ------------------------------------------------------- */
+.cycle { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; margin-top: 0.2rem; }
+@media (max-width: 700px) { .cycle { grid-template-columns: repeat(2, 1fr); } }
+.cyc {
+  font: inherit; text-align: left; cursor: pointer; border: 1px solid var(--rule); background: #fff;
+  border-radius: 10px; padding: 0.5rem 0.6rem 0.55rem; color: var(--body);
+  display: flex; flex-direction: column; gap: 0.08rem;
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s, transform 0.05s;
+}
+.cyc:hover { border-color: var(--cobalt); }
+.cyc:active { transform: translateY(1px); }
+.cyc .num { font-family: var(--mono); font-size: 0.66rem; font-weight: 600; color: var(--muted); letter-spacing: 0.08em; }
+.cyc .cap { font-weight: 600; font-size: 0.92rem; color: var(--ink); }
+.cyc small { color: var(--muted); font-size: 0.72rem; line-height: 1.3; }
+.cyc.next { border-color: var(--cobalt); background: rgba(24,61,135,0.05); box-shadow: 0 0 0 2px rgba(24,61,135,0.16); }
+.cyc.next .num { color: var(--cobalt); }
+.cyc:disabled { opacity: 0.45; cursor: not-allowed; }
+.runbar { display: flex; flex-wrap: wrap; gap: 0.45rem; align-items: center; margin-top: 0.55rem; }
+.runbar .spacer { flex: 1 1 auto; }
+.kbd { font-family: var(--mono); font-size: 0.7rem; color: var(--muted); border: 1px solid var(--rule); border-bottom-width: 2px; border-radius: 4px; padding: 0.05rem 0.3rem; }
+
+/* ---- training settings strip ----------------------------------------- */
+.settings {
+  display: flex; flex-wrap: wrap; gap: 0.35rem 1.1rem; align-items: center;
+  margin-top: 0.6rem; padding: 0.5rem 0.7rem; border: 1px solid var(--rule-soft);
+  background: rgba(239,226,199,0.35); border-radius: 8px; font-size: 0.82rem;
+}
+.settings > div { display: flex; align-items: center; gap: 0.4rem; }
+.settings label { color: var(--muted); font-size: 0.75rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
+.varkey { font-size: 0.74rem; color: var(--muted); margin-top: 0.45rem; }
+.varkey b { color: var(--cobalt); font-family: var(--mono); font-weight: 500; }
+
+/* ---- narration ------------------------------------------------------- */
+.narration {
+  margin-top: 0.7rem; border-left: 3px solid var(--cobalt); background: rgba(24,61,135,0.05);
+  border-radius: 0 8px 8px 0; padding: 0.55rem 0.8rem; font-size: 0.9rem; min-height: 2.9rem;
+}
+.narration b { color: var(--ink); }
+.narration code { font-family: var(--mono); font-size: 0.85em; }
+.narration.warn { border-left-color: var(--gold); background: rgba(226,176,73,0.14); }
+.narration.bad { border-left-color: var(--grad); background: var(--grad-soft); }
+
+/* ---- diagram + its column controls ----------------------------------- */
+.diagram { margin-top: 0.9rem; position: relative; }
+.diagram svg.net { width: 100%; height: auto; display: block; }
+.colctl { position: relative; height: 60px; }
+.cc { position: absolute; transform: translateX(-50%); text-align: center; width: 92px; }
+.cc-name { font-size: 0.62rem; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.15rem; white-space: nowrap; }
+.cc-row { display: inline-flex; align-items: center; gap: 0.1rem; }
+.cc-btn {
+  font: inherit; font-size: 0.85rem; line-height: 1; width: 1.25rem; height: 1.25rem; cursor: pointer;
+  border: 1px solid var(--rule); background: #fff; color: var(--cobalt); border-radius: 5px;
+  display: inline-flex; align-items: center; justify-content: center; padding: 0;
+}
+.cc-btn:hover:not(:disabled) { background: var(--cobalt); color: #fff; border-color: var(--cobalt); }
+.cc-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.cc-n { font-family: var(--mono); font-size: 0.82rem; font-weight: 600; color: var(--ink); min-width: 1rem; }
+.cc-act {
+  font: inherit; font-size: 0.66rem; cursor: pointer; margin-top: 0.18rem; white-space: nowrap;
+  border: 1px solid var(--rule); background: #fff; color: var(--muted); border-radius: 999px; padding: 0.02rem 0.4rem;
+}
+.cc-act.on { background: rgba(57,101,69,0.12); border-color: rgba(57,101,69,0.4); color: var(--forest); font-weight: 600; }
+.cc-add {
+  position: absolute; transform: translateX(-50%); font: inherit; font-size: 0.7rem; cursor: pointer;
+  border: 1px dashed rgba(24,61,135,0.45); background: rgba(255,255,255,0.7); color: var(--cobalt);
+  border-radius: 6px; padding: 0.12rem 0.35rem; top: 14px; white-space: nowrap;
+}
+.cc-add:hover { background: var(--cobalt); color: #fff; border-style: solid; }
+@media (max-width: 760px) {
+  .colctl { height: auto; display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: flex-start; }
+  .cc, .cc-add { position: static; transform: none; width: auto; }
+}
+.stale-badge {
+  position: absolute; top: 0.2rem; right: 0.2rem; z-index: 2; font-size: 0.7rem; color: var(--orange-deep);
+  background: rgba(226,176,73,0.2); border: 1px solid rgba(173,81,24,0.3); border-radius: 999px; padding: 0.1rem 0.55rem;
+}
+.legend { display: flex; flex-wrap: wrap; gap: 0.9rem; font-size: 0.75rem; color: var(--muted); margin-top: 0.3rem; }
+.legend i { display: inline-block; width: 1.4rem; height: 0; border-top-width: 3px; border-top-style: solid; vertical-align: middle; margin-right: 0.3rem; }
+.node-c { fill: #fff; stroke: var(--ink); stroke-width: 1.4; transition: fill 0.25s, stroke 0.25s; }
+.node-c.lit { fill: rgba(24,61,135,0.10); stroke: var(--cobalt); stroke-width: 2.2; }
+.node-c.out { stroke: var(--forest); }
+.node-c.loss { fill: var(--grad); stroke: var(--grad); }
+.node-c.loss.lit { fill: var(--grad); stroke: #7E1F1A; stroke-width: 5; }
+.node-v { font-family: var(--mono); font-size: 12px; fill: var(--ink); text-anchor: middle; }
+.node-v.on-dark { fill: #fff; }
+.node-l { font-family: var(--sans); font-size: 11px; font-weight: 600; fill: var(--muted); text-anchor: middle;
+  paint-order: stroke; stroke: var(--card); stroke-width: 3px; stroke-linejoin: round; }
+.node-g { font-family: var(--mono); font-size: 10.5px; fill: var(--grad); text-anchor: middle;
+  paint-order: stroke; stroke: var(--card); stroke-width: 3px; stroke-linejoin: round; }
+.edge { transition: stroke-width 0.15s, opacity 0.15s; cursor: pointer; }
+.edge.hot { stroke: var(--gold) !important; stroke-width: 5 !important; }
+.edge-l { font-family: var(--mono); font-size: 9.5px; text-anchor: middle; paint-order: stroke; stroke: var(--card); stroke-width: 3px; stroke-linejoin: round; }
+.gflow { stroke: var(--grad); stroke-width: 1.5; fill: none; opacity: 0; stroke-dasharray: 5 4; }
+.gflow.show { opacity: 0.62; animation: dashflow 0.9s linear infinite; }
+@keyframes dashflow { to { stroke-dashoffset: -20; } }
+.stale .node-v, .stale .node-g { opacity: 0.35; }
+@media (prefers-reduced-motion: reduce) { .gflow.show { animation: none; } .node-c { transition: none; } }
+
+/* ---- loss readout ---------------------------------------------------- */
+.lossbar { display: flex; flex-wrap: wrap; gap: 1.1rem; align-items: flex-end; margin-top: 0.9rem; }
+.stat { line-height: 1.15; }
+.stat .k { font-size: 0.66rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+.stat .v { font-family: var(--mono); font-size: 1.55rem; font-weight: 500; color: var(--ink); }
+.stat .v.small { font-size: 1.02rem; }
+.d.down { color: var(--forest); }
+.d.up { color: var(--grad); }
+.spark { flex: 1 1 200px; min-width: 180px; }
+.spark svg { width: 100%; height: 70px; display: block; }
+
+/* ---- prediction map -------------------------------------------------- */
+/* The map is a 300×240 viewBox. Left uncapped it scales to whatever column it lands
+   in, and at full width the test-point grid turns into blobs. */
+.plot svg { width: 100%; max-width: 400px; height: auto; display: block; margin: 0 auto; }
+.plot-ctl { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; font-size: 0.76rem; color: var(--muted); margin-top: 0.4rem; }
+.dot { display: inline-block; width: 0.6rem; height: 0.6rem; border-radius: 50%; vertical-align: -1px; margin-right: 0.2rem; }
+
+/* ---- gradients panel ------------------------------------------------- */
+.grow { display: grid; grid-template-columns: 3.4rem 3.2rem 1fr 3.6rem; gap: 0.3rem; align-items: center; font-family: var(--mono); font-size: 0.75rem; padding: 0.12rem 0; }
+.grow .nm { color: var(--cobalt); }
+.grow .vl { color: var(--muted); text-align: right; }
+.grow .gv { color: var(--grad); text-align: right; }
+.gbar { position: relative; height: 5px; background: var(--rule-soft); border-radius: 3px; }
+.gbar .f { position: absolute; top: 0; height: 5px; background: var(--grad); border-radius: 3px; }
+.gbar .mid { position: absolute; left: 50%; top: -1px; height: 7px; width: 1px; background: var(--rule); }
+details.allp { margin-top: 0.6rem; border-top: 1px solid var(--rule-soft); padding-top: 0.5rem; }
+details.allp summary { cursor: pointer; font-size: 0.8rem; color: var(--cobalt); }
+.layer-block { margin: 0.6rem 0; }
+.layer-head { font-size: 0.66rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.25rem; display: flex; justify-content: space-between; }
+.layer-head .tag { color: var(--cobalt); letter-spacing: 0.02em; text-transform: none; font-family: var(--mono); font-size: 0.72rem; }
+.mat { display: grid; gap: 3px; }
+.mat .mhead, .mat .rlabel { font-family: var(--mono); font-size: 0.62rem; color: var(--muted); text-align: center; }
+.mat .rlabel { display: flex; align-items: center; }
+.cell { border: 1px solid var(--rule); border-radius: 6px; background: #fff; padding: 0.14rem 0.15rem 0.18rem; min-width: 0; }
+.cell.bias { background: rgba(226,176,73,0.10); }
+.cell.hot { border-color: var(--gold); box-shadow: 0 0 0 2px rgba(226,176,73,0.35); }
+.cell input { font-family: var(--mono); font-size: 0.73rem; color: var(--ink); width: 100%; border: none; background: transparent; text-align: center; padding: 0; }
+.cell input:focus { outline: none; color: var(--cobalt); }
+.cell .g { font-family: var(--mono); font-size: 0.62rem; color: var(--grad); text-align: center; display: block; height: 0.9rem; }
+.cell .g.zero { color: var(--muted); opacity: 0.5; }
+.checkline { font-size: 0.76rem; margin-top: 0.5rem; }
+.badge { display: inline-block; font-family: var(--sans); font-size: 0.66rem; font-weight: 600; letter-spacing: 0.08em; border-radius: 999px; padding: 0.05rem 0.5rem; }
+.badge.pass { background: rgba(57,101,69,0.14); color: var(--forest); }
+.badge.fail { background: var(--grad-soft); color: var(--grad); }
+
+/* ---- notes / footer -------------------------------------------------- */
+.notes { margin-top: 1rem; }
+.notes details { background: var(--card); border: 1px solid var(--rule); border-radius: var(--radius); padding: 0.7rem 1.05rem; margin-bottom: 0.6rem; }
+.notes summary { cursor: pointer; font-weight: 600; font-family: var(--serif); font-size: 1.02rem; color: var(--ink); }
+.notes summary::marker { color: var(--orange); }
+.notes p, .notes li { font-size: 0.9rem; }
+.notes code { font-family: var(--mono); font-size: 0.85em; background: rgba(27,27,26,0.05); padding: 0.05em 0.3em; border-radius: 4px; }
+footer.foot { margin-top: 1.6rem; padding-top: 0.9rem; border-top: 1px solid var(--rule); font-size: 0.8rem; color: var(--muted); display: flex; flex-wrap: wrap; gap: 0.6rem; justify-content: space-between; }
+a { color: var(--cobalt); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <p class="eyebrow">ME324 · AI and Deep Learning · Lecture 4</p>
+    <h1>Backprop playground</h1>
+    <p class="lede">A few data points, and the training loop one button at a time:
+      <b>forward pass</b> → <b>loss</b> → <b>every gradient</b> → <b>one step of gradient descent</b>. Nothing is hidden.</p>
+    <div class="presets" id="presets"><span class="plabel">Start from</span></div>
+  </header>
+
+  <div class="grid">
+
+    <section class="panel data-panel">
+      <h2>Data <span class="hint">click a row to inspect it</span></h2>
+      <p class="sub" id="data-sub"></p>
+      <div class="tscroll" id="data-table"></div>
+      <div class="row-actions">
+        <button class="act strong" id="gen">🎲 Random data</button>
+        <select id="gen-n"><option value="12">12 rows</option><option value="24">24 rows</option><option value="40" selected>40 rows</option></select>
+        <button class="act" id="add-row">+ row</button>
+      </div>
+    </section>
+
+    <section class="panel stage">
+      <h2>The loop <span class="hint">press <span class="kbd">space</span> for the next step</span></h2>
+      <p class="sub">Each press does exactly one thing, in the order the lecture gives them.</p>
+
+      <div class="cycle" id="cycle">
+        <button class="cyc" data-act="forward"><span class="num">STEP 1</span><span class="cap">Forward pass</span><small>push the data through, measure the loss</small></button>
+        <button class="cyc" data-act="backward"><span class="num">STEP 2</span><span class="cap">Backward pass</span><small>fill ∂L/∂θ for every parameter</small></button>
+        <button class="cyc" data-act="update"><span class="num">STEP 3</span><span class="cap">Update</span><small>θ ← θ − λ · ∂L/∂θ</small></button>
+        <button class="cyc" data-act="zero"><span class="num">STEP 4</span><span class="cap">Zero the grads</span><small>clear last step's numbers</small></button>
+      </div>
+
+      <div class="runbar">
+        <button class="act strong" id="run-1">Run 1 full step</button>
+        <button class="act" id="run-10">Run 10</button>
+        <button class="act" id="run-100">Run 100</button>
+        <span class="spacer"></span>
+        <button class="act" id="reset">Reset weights</button>
+        <button class="act" id="reseed">New random start</button>
+      </div>
+
+      <div class="settings">
+        <div><label for="lossfn">Loss</label>
+          <select id="lossfn"><option value="mse">squared error</option><option value="bce">cross-entropy</option></select></div>
+        <div><label for="lr">Learning rate λ</label>
+          <input type="number" class="box" id="lr" step="0.01" min="0"></div>
+      </div>
+
+      <div class="narration" id="narration"></div>
+
+      <div class="diagram" id="diagram">
+        <div class="colctl" id="colctl"></div>
+        <div id="net"></div>
+      </div>
+      <div class="legend">
+        <span><i style="border-color:#183D87"></i>positive weight</span>
+        <span><i style="border-color:#E16E26"></i>negative weight</span>
+        <span><i style="border-color:#C9322B; border-top-style:dashed"></i>gradient flowing backwards</span>
+        <span style="color:#C9322B">red numbers = ∂L/∂(that value)</span>
+      </div>
+
+      <div class="lossbar">
+        <div class="stat"><div class="k">Loss L</div><div class="v" id="loss-v">—</div></div>
+        <div class="stat"><div class="k">Change</div><div class="v small d" id="loss-d">—</div></div>
+        <div class="stat"><div class="k">Steps</div><div class="v small" id="step-n">0</div></div>
+        <div class="spark" id="spark"></div>
+      </div>
+    </section>
+
+    <div class="right-col">
+      <section class="panel">
+        <h2>What the model predicts</h2>
+        <p class="sub" id="plot-sub"></p>
+        <div class="plot" id="plot"></div>
+        <div class="plot-ctl" id="plot-ctl"></div>
+      </section>
+
+      <section class="panel">
+        <h2>Gradients <span class="hint">biggest first</span></h2>
+        <p class="sub" id="grad-sub">Run a backward pass to fill these.</p>
+        <div id="grad-top"></div>
+        <details class="allp" id="allp">
+          <summary id="allp-sum">Show every parameter</summary>
+          <div id="params"></div>
+          <button class="act" id="gradcheck" style="margin-top:0.5rem">Check these gradients numerically</button>
+          <div class="checkline" id="checkline"></div>
+        </details>
+      </section>
+    </div>
+  </div>
+
+  <div class="notes">
+    <details>
+      <summary>How to use this in class</summary>
+      <p><b>Start one step at a time.</b> Any mode opens with three neurons in one hidden layer — small enough that every
+        number on the diagram is readable. Walk the four buttons once and read the loss, the gradients, and the update.</p>
+      <p><b>Then show that capacity is a choice.</b> On <b>Turnout · 2 variables</b> the true boundary is a curve, and three
+        ReLU neurons can only bend a line a few times. Run 100, look at the map, then press <b>+</b> on the hidden layer and
+        run again — each neuron buys another kink. The same story runs on <b>A bend</b> with one input, where you can see the
+        kinks directly.</p>
+      <p><b>Then break it.</b> Set λ to 1.0 and watch the loss diverge. On <b>XOR</b>, switch the hidden layer to linear and
+        watch it stall dead at 0.25, predicting 0.50 for everything — lecture 2's point about linear separability, live.
+        Press <b>Backward</b> twice without zeroing and watch the gradients double.</p>
+      <p><b>Then test it properly.</b> <b>🎲 Random data</b> draws a fresh sample from the <i>same</i> rule, so you can ask
+        whether the model found the pattern or just memorised the points in front of it.</p>
+      <p><b>To reproduce the lecture's own numbers</b>, pick <b>Straight line · y = 2x</b> and press <b>−</b> on the hidden
+        layer until it disappears. That is the deck's single linear neuron; set <code>w</code> and <code>b</code> to 0 under
+        "show every parameter" and a point at <code>x = 1, y = 2</code> gives <code>L = 4</code> with
+        <code>∂L/∂w = ∂L/∂b = −4</code>, exactly as on the slide.</p>
+    </details>
+    <details>
+      <summary>What the numbers mean</summary>
+      <ul>
+        <li><b>Value in a node</b> — the output of that neuron for the highlighted data point (after its activation).</li>
+        <li><b>Red number under a node</b> — ∂L/∂(that value): how much the loss would change per unit change in it.
+          This is "the gradient flowing in from the right" from the lecture.</li>
+        <li><b>Gradient of a parameter</b> — negative means <i>increase</i> it to reduce the loss; positive means
+          <i>decrease</i> it. The size says how strongly the loss responds.</li>
+        <li><b>The loss</b> — the mean over every data point, so every gradient is the mean of its per-point gradients.
+          The diagram shows one point at a time (click a row to change it); the numbers being minimised are the average.</li>
+        <li><b>The prediction map</b> — a grid of test points, coloured by what the model <i>predicts</i> there, so it moves
+          as the model learns. The large ringed markers are your data, coloured by their <i>true</i> y, so they never move.
+          With three inputs the map is a slice: two variables on the axes, the third held at the value shown, and only the
+          data points at that value are drawn.</li>
+        <li><b>🎲 Random data</b> — a fresh sample from the same underlying rule, never a different rule. Each mode has one
+          fixed pattern behind it, which is what makes "did it learn?" a question worth asking.</li>
+      </ul>
+    </details>
+    <details>
+      <summary>Is this really the same algorithm as the lab?</summary>
+      <p>Yes. The engine underneath this page is a direct translation of the <code>Value</code> class from
+        <b>Lab 4</b>: every node stores <code>data</code>, <code>grad</code>, its <code>children</code> and the
+        <b>local derivative</b> with respect to each child; <code>backward()</code> topologically sorts the graph, seeds
+        <code>grad = 1</code> at the loss, and walks it in reverse accumulating
+        <code>child.grad += local_grad × node.grad</code>. Nothing is approximated.</p>
+      <p><b>Check these gradients numerically</b> (under "show every parameter") is the lab's <code>grad_check</code>: it
+        recomputes every gradient with a central finite difference, <code>(L(θ+h) − L(θ−h)) / 2h</code>, and reports the
+        worst disagreement. It should be around 1e-10.</p>
+    </details>
+  </div>
+
+  <footer class="foot">
+    <span>ME324 · AI and Deep Learning · LSE Summer School — companion to lecture 4 and lab 4.</span>
+    <span>Single file, no dependencies. Works offline.</span>
+  </footer>
+</div>
+
+<script>
+"use strict";
+/* ===========================================================================
+   1 · The autograd engine — a JavaScript twin of Lab 4's `Value` class.
+   Each node keeps its data, its gradient, its children, and the LOCAL
+   derivative w.r.t. each child. JS has no operator overloading, so the
+   operators are plain functions.
+   =========================================================================== */
+class V {
+  constructor(data, children = [], local = []) {
+    this.data = data; this.grad = 0; this.children = children; this.local = local;
+  }
+}
+const val  = (x) => (x instanceof V ? x : new V(x));
+const add  = (a, b) => { a = val(a); b = val(b); return new V(a.data + b.data, [a, b], [1, 1]); };
+const mul  = (a, b) => { a = val(a); b = val(b); return new V(a.data * b.data, [a, b], [b.data, a.data]); };
+const powc = (a, k) => { a = val(a); return new V(Math.pow(a.data, k), [a], [k * Math.pow(a.data, k - 1)]); };
+const neg  = (a) => mul(a, -1);
+const sub  = (a, b) => add(a, neg(val(b)));
+const expv = (a) => { const e = Math.exp(a.data); return new V(e, [a], [e]); };
+// Guarded log: cross-entropy on a saturated sigmoid can ask for log(0), which would
+// poison the whole graph with -Infinity. The floor only bites at ~1e-15.
+const logv = (a) => { const s = Math.max(a.data, 1e-15); return new V(Math.log(s), [a], [1 / s]); };
+const relu = (a) => new V(Math.max(0, a.data), [a], [a.data > 0 ? 1 : 0]);
+// sigmoid adds nothing to the engine: it is neg, exp, + and ÷, exactly as in the lab.
+const sigmoid = (a) => mul(val(1), powc(add(val(1), expv(neg(a))), -1));
+
+function backward(root) {
+  const topo = [], seen = new Set();
+  const build = (v) => { if (seen.has(v)) return; seen.add(v); for (const c of v.children) build(c); topo.push(v); };
+  build(root);
+  root.grad = 1;
+  for (let i = topo.length - 1; i >= 0; i--) {
+    const v = topo[i];
+    for (let j = 0; j < v.children.length; j++) v.children[j].grad += v.local[j] * v.grad;
+  }
+}
+
+/* ===========================================================================
+   2 · Helpers
+   =========================================================================== */
+const $ = (s) => document.querySelector(s);
+const el = (tag, cls, txt) => { const n = document.createElement(tag); if (cls) n.className = cls; if (txt != null) n.textContent = txt; return n; };
+const MINUS = "−";
+function fmt(x, d = 3) {
+  if (!isFinite(x)) return isNaN(x) ? "NaN" : (x > 0 ? "∞" : MINUS + "∞");
+  const a = Math.abs(x);
+  if (a !== 0 && a < 5e-4) return x.toExponential(1).replace("-", MINUS);
+  if (a >= 1e5) return x.toExponential(1).replace("-", MINUS);
+  return x.toFixed(d).replace("-", MINUS);
+}
+const sfmt = (x, d = 3) => (!isFinite(x) ? fmt(x, d) : (x < 0 ? MINUS : "+") + fmt(Math.abs(x), d));
+const parseNum = (s) => { const v = parseFloat(String(s).replace(/−/g, "-").trim()); return isFinite(v) ? v : null; };
+const r2 = (v) => Math.round(v * 100) / 100;
+const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+function mulberry32(seed) {
+  return function () {
+    seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+const SUB = ["₀", "₁", "₂", "₃", "₄", "₅", "₆"];
+const sup = (n) => ["⁰", "¹", "²", "³", "⁴", "⁵"][n] || String(n);
+const BLUE = "#183D87", ORANGE = "#E16E26", RED = "#C9322B";
+
+const MAX_IN = 3, MAX_WIDTH = 5, MAX_LAYERS = 3, MAX_ROWS = 40;
+
+/* ===========================================================================
+   3 · Data-generating processes
+   Every mode has ONE fixed pattern behind it. Pressing 🎲 draws a fresh sample
+   from that same pattern, so the model is always chasing the same target and you
+   can see whether it found it — rather than a new problem each time.
+   =========================================================================== */
+
+// Turnout. Voting is an INVERTED U in age — it climbs through early adulthood, peaks
+// in middle age and falls away again among the very oldest — and rises with income.
+// Having voted last time (x₃, when present) shifts the whole thing up.
+//
+// The shape is the point. "Votes" is a BAND in age, not a half-plane, so no straight
+// line separates these people however you draw it: the model has to bend twice, once
+// on each side of the peak. That is what makes a hidden layer necessary rather than
+// decorative — and it is why switching the activation to linear visibly wrecks it.
+// The 1.8 gain sharpens the labels. Sampled 0/1 labels are noisy by construction, and
+// at gain 1 the band was so blurred that a straight line scored as well as a bent one
+// — which would quietly teach the opposite of the lesson.
+const turnoutZ = (age, income, voted) => 1.8 * (
+  5.5 * (1 - Math.pow((age - 0.55) / 0.42, 2)) + 2.0 * (income - 0.5) - 3.0
+  + (voted == null ? 0 : 2.4 * voted - 1.2));
+
+function turnoutRows(rand, n, nIn) {
+  const rows = [];
+  for (let k = 0; k < n; k++) {
+    const age = r2(rand()), income = r2(rand());
+    const voted = nIn >= 3 ? (rand() < 0.5 ? 0 : 1) : null;
+    const p = 1 / (1 + Math.exp(-turnoutZ(age, income, voted)));
+    const x = nIn >= 3 ? [age, income, voted] : [age, income];
+    rows.push({ x, y: rand() < p ? 1 : 0 });
+  }
+  return rows;
+}
+
+// XOR, but as four CLUSTERS rather than four exact corners — so there is a real
+// distribution to fit, and the decision boundary has to hold up between points.
+function xorRows(rand, n) {
+  const corners = [[0, 0, 0], [0, 1, 1], [1, 0, 1], [1, 1, 0]];
+  const rows = [];
+  for (let k = 0; k < n; k++) {
+    const c = corners[k % 4];                       // cycle, so the classes stay balanced
+    const jit = () => (rand() * 2 - 1) * 0.16;
+    rows.push({ x: [r2(c[0] + jit()), r2(c[1] + jit())], y: c[2] });
+  }
+  return rows;
+}
+
+// y = x², the curve a linear network cannot draw.
+function bendRows(rand, n) {
+  const rows = [];
+  for (let k = 0; k < n; k++) {
+    const x = r2(rand() * 2 - 1);
+    rows.push({ x: [x], y: r2(x * x + (rand() - 0.5) * 0.06) });
+  }
+  return rows;
+}
+
+// The lecture's own relationship: y = 2x. Its worked example, x = 1 → y = 2, is a
+// draw from exactly this process.
+function lineRows(rand, n) {
+  const rows = [];
+  for (let k = 0; k < n; k++) {
+    const x = r2(rand() * 3);
+    rows.push({ x: [x], y: r2(2 * x + (rand() - 0.5) * 0.3) });
+  }
+  return rows;
+}
+
+/* ===========================================================================
+   4 · Presets — every one starts as a single hidden layer of 3 ReLU neurons
+   =========================================================================== */
+const PRESETS = {
+  turnout2: {
+    name: "Turnout · 2 variables",
+    nIn: 2, outAct: "sigmoid", lossFn: "bce", lr: 0.5, n: 40, seed: 555,
+    labels: ["age", "income"],
+    gen: turnoutRows,
+    note: "Age and income → did they turn out? Voting is an <b>inverted U in age</b> — it peaks in middle age — so the voters sit in a <i>band</i>, and no straight line can fence them off. Run 100 a few times, then switch the hidden layer to linear and watch the map collapse."
+  },
+  turnout3: {
+    name: "Turnout · 3 variables",
+    nIn: 3, outAct: "sigmoid", lossFn: "bce", lr: 0.5, n: 40, seed: 555,
+    labels: ["age", "income", "voted"],
+    gen: turnoutRows,
+    note: "The same band, plus whether they voted last time — which lifts everyone's chances. Flip <b>voted</b> under the map to watch the whole boundary shift."
+  },
+  xor: {
+    name: "XOR",
+    nIn: 2, outAct: "sigmoid", lossFn: "mse", lr: 1.2, n: 24, seed: 4242,
+    gen: xorRows,
+    note: "Four clusters in the XOR arrangement from lecture 2 — not linearly separable. Run 100 a couple of times: three neurons usually crack it. If a run stalls with one cluster wrong, press <b>+</b> — a dead ReLU cannot recover on its own, and another neuron gets you past it."
+  },
+  bend: {
+    name: "A bend (needs ReLU)",
+    nIn: 1, outAct: "linear", lossFn: "mse", lr: 0.1, n: 12, seed: 808,
+    gen: bendRows,
+    note: "Points on y = x². A linear network can only draw a straight line through them — ReLU is what buys the bend, and you get one kink per neuron, so watch the fit improve each time you press <b>+</b>."
+  },
+  line: {
+    name: "Straight line · y = 2x",
+    nIn: 1, outAct: "linear", lossFn: "mse", lr: 0.04, n: 12, seed: 11,
+    gen: lineRows,
+    note: "The lecture's own relationship: y = 2x, its worked example (x = 1 → y = 2) being one draw from it. Press <b>−</b> on the hidden layer until it is gone to get back to the deck's single neuron."
+  }
+};
+
+/* ===========================================================================
+   4 · State
+   =========================================================================== */
+const S = {
+  preset: "turnout2",
+  nIn: 2, hidden: [3], acts: ["relu"], outAct: "sigmoid", lossFn: "bce",
+  lr: 0.5, seed: 1337,
+  data: [], layers: [], pname: new Map(), labels: null,
+  sel: 0, phase: "forward", step: 0, history: [],
+  fwd: null, loss: null, prevLoss: null,
+  gradsLive: false, stale: false, diverged: false, hot: null,
+  showEdgeNums: true, hold: 1
+};
+// Column names for the current mode, falling back to x₁, x₂, x₃.
+const varName = (j) => (S.labels && S.labels[j]) || (S.nIn === 1 ? "x" : "x" + SUB[j + 1]);
+
+const sizes = () => [S.nIn, ...S.hidden, 1];
+const allParams = () => S.layers.flatMap((L) => [...L.W.flat(), ...L.b]);
+const weightCount = () => S.layers.reduce((n, L) => n + L.W.length * L.W[0].length, 0);
+// Numbers on every edge are a gift on a small graph and unreadable soup on a big one.
+const autoEdgeNums = () => { S.showEdgeNums = weightCount() <= 12; };
+const isClassifier = () => S.outAct === "sigmoid";
+
+function initParams(seed) {
+  const rand = mulberry32(seed);
+  const sz = sizes();
+  S.layers = []; S.pname = new Map();
+  for (let l = 0; l < sz.length - 1; l++) {
+    const W = [], b = [];
+    for (let i = 0; i < sz[l + 1]; i++) {
+      const row = [];
+      for (let j = 0; j < sz[l]; j++) {
+        const w = new V(rand() * 2 - 1);
+        S.pname.set(w, `w${sup(l + 1)}${SUB[i + 1]}${SUB[j + 1]}`);
+        row.push(w);
+      }
+      // Biases start slightly POSITIVE, not at zero. A ReLU unit that outputs 0 for
+      // every data point has a gradient of exactly 0 and can never recover — no
+      // learning rate rescues it — and starting at 0 walks into that often enough to
+      // ruin a live demo (XOR solved 9/12 runs at b=0, 11/12 at b=0.1). This is the
+      // standard trick for ReLU nets; the lab's `Neuron` starts at 0 because nothing
+      // there depends on a single run going well.
+      const bias = new V(0.1);
+      S.pname.set(bias, `b${sup(l + 1)}${SUB[i + 1]}`);
+      W.push(row); b.push(bias);
+    }
+    S.layers.push({ W, b });
+  }
+  autoEdgeNums();
+}
+const paramName = (p) => S.pname.get(p) || "θ";
+const layerLabel = (l) => (l === S.layers.length - 1 ? "output layer" : `hidden layer ${l + 1}`);
+
+function setParams(spec) {
+  spec.forEach((ls, l) => {
+    if (!S.layers[l]) return;
+    ls.W.forEach((row, i) => row.forEach((v, j) => { if (S.layers[l].W[i] && S.layers[l].W[i][j]) S.layers[l].W[i][j].data = v; }));
+    ls.b.forEach((v, i) => { if (S.layers[l].b[i]) S.layers[l].b[i].data = v; });
+  });
+}
+
+/* ===========================================================================
+   5 · Forward pass
+   =========================================================================== */
+function forwardOne(row) {
+  const acts = [row.x.map((v) => new V(v))];
+  let a = acts[0];
+  S.layers.forEach((L, l) => {
+    const isHidden = l < S.layers.length - 1;
+    const out = L.W.map((wrow, i) => {
+      let z = L.b[i];
+      for (let j = 0; j < wrow.length; j++) z = add(z, mul(wrow[j], a[j]));
+      return (isHidden && S.acts[l] === "relu") ? relu(z) : z;
+    });
+    acts.push(out); a = out;
+  });
+  const z = a[0];
+  const pred = S.outAct === "sigmoid" ? sigmoid(z) : z;
+  const loss = S.lossFn === "bce"
+    ? neg(add(mul(new V(row.y), logv(pred)), mul(new V(1 - row.y), logv(sub(new V(1), pred)))))
+    : powc(sub(pred, new V(row.y)), 2);
+  return { acts, z, pred, loss, y: row.y };
+}
+
+function runForward() {
+  if (!S.data.length) return null;
+  const per = {}; let total = new V(0);
+  S.data.forEach((row, i) => { const p = forwardOne(row); per[i] = p; total = add(total, p.loss); });
+  return { per, idxs: S.data.map((_, i) => i), loss: mul(total, new V(1 / S.data.length)) };
+}
+const lossValueOnly = () => { const f = runForward(); return f ? f.loss.data : NaN; };
+
+// Plain arithmetic, no graph. The prediction map calls this a few hundred times per
+// render, and building autograd nodes for throwaway points would be pure waste.
+function predictRaw(xs) {
+  let a = xs.slice();
+  for (let l = 0; l < S.layers.length; l++) {
+    const L = S.layers[l], isHidden = l < S.layers.length - 1;
+    const out = new Array(L.W.length);
+    for (let i = 0; i < L.W.length; i++) {
+      let z = L.b[i].data, row = L.W[i];
+      for (let j = 0; j < row.length; j++) z += row[j].data * a[j];
+      out[i] = (isHidden && S.acts[l] === "relu") ? Math.max(0, z) : z;
+    }
+    a = out;
+  }
+  return S.outAct === "sigmoid" ? 1 / (1 + Math.exp(-a[0])) : a[0];
+}
+
+/* ===========================================================================
+   6 · The four steps
+   =========================================================================== */
+// "Diverged" is not only NaN: a loss of 1e40 is just as dead, and it is the shape a
+// too-large learning rate actually takes. Treat both the same way.
+const blownUp = (v) => !isFinite(v) || Math.abs(v) > 1e8;
+
+function doForward() {
+  const f = runForward();
+  if (!f) { narrate("Add at least one data point first.", "warn"); return; }
+  S.fwd = f; S.prevLoss = S.loss; S.loss = f.loss.data; S.stale = false;
+  if (blownUp(S.loss)) {
+    S.diverged = true;
+    narrate(`<b>The loss has blown up (${fmt(S.loss, 2)}).</b> This is what a diverging model looks like — and the learning
+      rate is almost always the cause. Halve λ and press <b>Reset weights</b>.`, "bad");
+  } else {
+    const n = f.idxs.length;
+    narrate(`<b>Forward pass.</b> Pushed ${n} ${n === 1 ? "point" : "points"} through the network and measured the loss:
+      <b>L = ${fmt(S.loss, 4)}</b>. Nothing has learned yet — we have only found out how wrong we are.`);
+  }
+  S.phase = "backward"; render(); animateForward();
+}
+
+function doBackward() {
+  if (!S.fwd) { narrate("Run the forward pass first — there is no graph to walk backwards through yet.", "warn"); return; }
+  const wasLive = S.gradsLive;
+  backward(S.fwd.loss);
+  S.gradsLive = true; S.phase = "update";
+  const ps = allParams();
+  let big = ps[0];
+  ps.forEach((p) => { if (Math.abs(p.grad) > Math.abs(big.grad)) big = p; });
+  if (wasLive) {
+    narrate(`<b>Backward pass — but the gradients were not zeroed.</b> Every number below is now the <i>sum</i> of this
+      backward pass and the last one. This is the single most common bug in PyTorch code, and it looks exactly like this.
+      Press <b>Zero the grads</b>, then forward and backward again.`, "warn");
+  } else if (Math.abs(big.grad) < 1e-12) {
+    narrate(`<b>Backward pass.</b> Every gradient is zero — the loss does not respond to any parameter here.
+      With ReLU that usually means every hidden neuron is switched off for every data point.`, "warn");
+  } else {
+    narrate(`<b>Backward pass.</b> Every parameter now carries ∂L/∂θ. The loss responds most to <b>${paramName(big)}</b>,
+      at <b>${sfmt(big.grad, 4)}</b>: ${big.grad < 0 ? "negative, so <b>increase</b>" : "positive, so <b>decrease</b>"} it to
+      reduce the loss. No parameter was nudged to find this out.`);
+  }
+  render(); animateBackward();
+}
+
+function doUpdate() {
+  if (!S.gradsLive) { narrate("Run the backward pass first — the gradients are all zero, so this step would change nothing.", "warn"); return; }
+  const ps = allParams();
+  let moved = 0;
+  ps.forEach((p) => { const d = S.lr * p.grad; p.data -= d; moved += Math.abs(d); });
+  S.step++; S.stale = true;
+  if (isFinite(S.loss)) S.history.push(S.loss);
+  if (ps.some((p) => blownUp(p.data))) {
+    S.diverged = true;
+    narrate("<b>The parameters have blown up.</b> λ is too large for this problem — halve it and press <b>Reset weights</b>.", "bad");
+  } else {
+    narrate(`<b>Update.</b> Every parameter stepped downhill: θ ← θ − ${S.lr} × ∂L/∂θ (total movement ${fmt(moved, 3)}).
+      The network has changed — run the <b>forward pass</b> again to find out whether the loss actually fell.`);
+  }
+  S.phase = "zero"; render();
+}
+
+function doZero() {
+  allParams().forEach((p) => { p.grad = 0; });
+  S.gradsLive = false; S.phase = "forward";
+  narrate(`<b>Gradients zeroed.</b> Parameters live between steps, so their gradients would otherwise <i>accumulate</i>.
+    Ready for the next forward pass.`);
+  render();
+}
+
+function stepOnce() {
+  const f = runForward();
+  if (!f) return;
+  allParams().forEach((p) => { p.grad = 0; });
+  backward(f.loss);
+  allParams().forEach((p) => { p.data -= S.lr * p.grad; });
+  S.step++;
+  if (isFinite(f.loss.data)) S.history.push(f.loss.data);
+}
+
+function runMany(n) {
+  if (S.diverged) { narrate("<b>This run has diverged.</b> Lower λ and press <b>Reset weights</b> before running again.", "bad"); return; }
+  const before = S.loss;
+  for (let k = 0; k < n; k++) stepOnce();
+  allParams().forEach((p) => { p.grad = 0; });
+  S.gradsLive = false;
+  const f = runForward();
+  S.fwd = f; S.prevLoss = before; S.loss = f ? f.loss.data : NaN; S.stale = false; S.phase = "backward";
+  if (blownUp(S.loss) || allParams().some((p) => blownUp(p.data))) {
+    S.diverged = true;
+    narrate(`<b>The loss diverged during the run</b> — it reached ${fmt(S.loss, 2)}. λ = ${S.lr} is too big for this problem.
+      Halve it and press <b>Reset weights</b>. A diverging loss is almost always the learning rate.`, "bad");
+  } else if (before != null && S.loss > before) {
+    narrate(`<b>${n} full steps — and the loss went <i>up</i>:</b> ${fmt(before, 4)} → <b>${fmt(S.loss, 4)}</b>.
+      The steps are overshooting the bottom of the valley. Try a smaller λ.`, "warn");
+  } else {
+    narrate(`<b>${n} full steps.</b> ${before != null ? `Loss went ${fmt(before, 4)} → <b>${fmt(S.loss, 4)}</b>.` : `Loss is now <b>${fmt(S.loss, 4)}</b>.`}
+      Each step was forward → zero → backward → update, exactly as above.`);
+  }
+  render();
+}
+
+/* ===========================================================================
+   7 · Data generation
+   =========================================================================== */
+// The 3-input classifier is lab 2 and lab 4's turnout generator, unchanged: two
+// scaled continuous features, one binary, and an interaction term that makes the
+// boundary genuinely non-linear.
+// Draw a sample from the CURRENT mode's pattern. The mode owns the process; this
+// just runs it, and for a classifier insists on a sample worth looking at.
+function generateData(n, seed) {
+  const P = PRESETS[S.preset] || PRESETS.turnout2;
+  const rand = mulberry32(seed == null ? (Math.random() * 1e9) | 0 : seed);
+  const draw = () => P.gen(rand, n, S.nIn);
+  if (!isClassifier()) return draw();
+  // A sampled label is a coin flip, so a small draw can land 20:4 — from which the
+  // right answer really is "predict 1 for everybody", and the prediction map comes
+  // out a flat field that teaches nothing. Every row is still an honest draw from
+  // the true process; we just keep redrawing until both classes are represented.
+  const need = Math.max(1, Math.floor(n * 0.35));
+  let best = null, bestScore = -1;
+  for (let t = 0; t < 40; t++) {
+    const rows = draw();
+    const ones = rows.filter((r) => r.y === 1).length;
+    const score = Math.min(ones, n - ones);
+    if (score >= need) return rows;
+    if (score > bestScore) { bestScore = score; best = rows; }
+  }
+  return best;
+}
+
+/* ===========================================================================
+   8 · Rendering
+   =========================================================================== */
+function narrate(html, kind) {
+  const n = $("#narration");
+  n.className = "narration" + (kind ? " " + kind : "");
+  n.innerHTML = html;
+}
+function render() {
+  renderData(); renderSettings(); renderCycle();
+  renderColControls(); renderNet(); renderLoss(); renderPlot(); renderGrads();
+}
+
+/* ---- data ------------------------------------------------------------- */
+function renderData() {
+  const host = $("#data-table"); host.innerHTML = "";
+  const t = el("table", "data");
+  const hr = el("tr");
+  hr.append(el("th", "", ""));
+  for (let j = 0; j < S.nIn; j++) {
+    const th = el("th", "", varName(j));
+    th.title = S.nIn === 1 ? "x" : "x" + SUB[j + 1];
+    hr.append(th);
+  }
+  hr.append(el("th", "", "y"));
+  hr.append(el("th", "", "ŷ"));
+  hr.append(el("th", "", ""));
+  const thead = el("thead"); thead.append(hr); t.append(thead);
+
+  const tb = el("tbody");
+  S.data.forEach((row, i) => {
+    const tr = el("tr", i === S.sel ? "sel" : "");
+    const idx = el("td", "idx", String(i + 1));
+    idx.title = "Show this point in the diagram";
+    idx.onclick = () => selectRow(i);
+    tr.append(idx);
+    for (let j = 0; j < S.nIn; j++) {
+      const td = el("td");
+      td.append(numInput(row.x[j], (v) => { row.x[j] = v; onDataChange(); }));
+      tr.append(td);
+    }
+    const tdy = el("td");
+    tdy.append(numInput(row.y, (v) => { row.y = v; onDataChange(); }));
+    tr.append(tdy);
+
+    const p = S.fwd && S.fwd.per[i];
+    const tdp = el("td", "pred", p ? fmt(p.pred.data, 2) : "—");
+    if (p) {
+      const err = Math.abs(p.pred.data - row.y);
+      if (err < (isClassifier() ? 0.25 : 0.05)) tdp.classList.add("good");
+      tdp.title = `target ${fmt(row.y, 2)} · error ${sfmt(p.pred.data - row.y, 3)} · loss ${fmt(p.loss.data, 3)}`;
+    }
+    tr.append(tdp);
+
+    const tdd = el("td");
+    const del = el("button", "del", "×");
+    del.title = "Remove this point";
+    del.onclick = () => {
+      if (S.data.length <= 1) return;
+      S.data.splice(i, 1); S.sel = Math.min(S.sel, S.data.length - 1); onDataChange();
+    };
+    tdd.append(del); tr.append(tdd);
+    tr.onclick = (e) => { if (e.target.tagName !== "INPUT" && e.target.tagName !== "BUTTON") selectRow(i); };
+    tb.append(tr);
+  });
+  t.append(tb); host.append(t);
+
+  const badY = S.lossFn === "bce" && S.data.some((r) => r.y !== 0 && r.y !== 1);
+  const key = S.labels ? S.labels.map((n, j) => `<b>x${SUB[j + 1]}</b> ${n}`).join(" · ") : "";
+  $("#data-sub").innerHTML = badY
+    ? "<span style='color:var(--grad)'>Cross-entropy needs every target to be 0 or 1.</span>"
+    : `${S.data.length} points · <b>ŷ</b> fills in after a forward pass.${key ? `<br><span class="varkey">${key}</span>` : ""}`;
+}
+
+function numInput(value, onset) {
+  const inp = el("input", "num");
+  inp.type = "text"; inp.inputMode = "decimal"; inp.value = String(value);
+  inp.onchange = () => { const v = parseNum(inp.value); if (v == null) { inp.value = String(value); return; } onset(v); };
+  inp.onkeydown = (e) => { if (e.key === "Enter") inp.blur(); };
+  return inp;
+}
+
+// The forward pass covers every point, so picking a row only changes which one the
+// diagram is showing — no need to invalidate anything.
+function selectRow(i) {
+  if (i === S.sel) return;
+  S.sel = i;
+  render();
+}
+function invalidate() {
+  S.fwd = null; S.stale = false; S.phase = "forward"; S.gradsLive = false;
+  allParams().forEach((p) => { p.grad = 0; });
+}
+function onDataChange() {
+  invalidate();
+  narrate("<b>Data changed.</b> The old forward pass no longer applies — run it again.");
+  render();
+}
+
+/* ---- settings --------------------------------------------------------- */
+function renderSettings() {
+  $("#lossfn").value = S.lossFn;
+  $("#lr").value = String(S.lr);
+  document.querySelectorAll("#presets .chip").forEach((b) => b.classList.toggle("on", b.dataset.k === S.preset));
+}
+function renderCycle() {
+  $("#cycle").querySelectorAll(".cyc").forEach((b) => {
+    b.classList.toggle("next", b.dataset.act === S.phase && !S.diverged);
+    b.disabled = S.diverged;
+  });
+  $("#step-n").textContent = String(S.step);
+}
+
+/* ---- diagram geometry (shared by the controls and the SVG) ------------ */
+const GEO = { R: 25, DX: 128, X0: 58, DY: 86 };
+function geometry() {
+  const sz = sizes();
+  const nCols = sz.length + (S.outAct === "sigmoid" ? 1 : 0) + 1;
+  const W = GEO.X0 + (nCols - 1) * GEO.DX + 74;
+  const H = Math.max(210, Math.max(...sz) * GEO.DY + 56);
+  return { sz, nCols, W, H, midY: H / 2, colX: (c) => GEO.X0 + c * GEO.DX };
+}
+
+/* ---- the column controls (the model editor) --------------------------- */
+function renderColControls() {
+  const g = geometry(), host = $("#colctl");
+  host.innerHTML = "";
+  const pct = (x) => (x / g.W) * 100 + "%";
+
+  const stepper = (n, onMinus, onPlus, minusTitle, plusTitle, canMinus, canPlus) => {
+    const row = el("div", "cc-row");
+    const m = el("button", "cc-btn", "−"); m.title = minusTitle; m.disabled = !canMinus; m.onclick = onMinus;
+    const v = el("span", "cc-n", String(n));
+    const p = el("button", "cc-btn", "+"); p.title = plusTitle; p.disabled = !canPlus; p.onclick = onPlus;
+    row.append(m, v, p); return row;
+  };
+
+  // Input column. No stepper: the number of inputs is a property of the data, and the
+  // data is chosen by the mode at the top (turnout with 2 variables, or with 3).
+  const ci = el("div", "cc");
+  ci.style.left = pct(g.colX(0));
+  ci.append(el("div", "cc-name", "inputs"));
+  const fixed = el("div", "cc-row");
+  fixed.append(el("span", "cc-n", String(S.nIn)));
+  fixed.title = "Set by the mode you picked at the top";
+  ci.append(fixed);
+  host.append(ci);
+
+  // hidden columns
+  S.hidden.forEach((n, l) => {
+    const c = el("div", "cc");
+    c.style.left = pct(g.colX(l + 1));
+    c.append(el("div", "cc-name", "hidden " + (l + 1)));
+    c.append(stepper(n,
+      () => setWidth(l, n - 1), () => setWidth(l, n + 1),
+      n === 1 ? "remove this layer" : "one fewer neuron", "one more neuron",
+      true, n < MAX_WIDTH));
+    const a = el("button", "cc-act" + (S.acts[l] === "relu" ? " on" : ""), S.acts[l] === "relu" ? "✓ ReLU" : "linear");
+    a.title = "Activation for this layer — click to switch between ReLU and none";
+    a.onclick = () => { S.acts[l] = S.acts[l] === "relu" ? "none" : "relu"; invalidate(); render(); };
+    c.append(a);
+    host.append(c);
+  });
+
+  // "add a layer", sitting in the gap before the output column
+  if (S.hidden.length < MAX_LAYERS) {
+    const add = el("button", "cc-add", "+ layer");
+    add.title = "Add another hidden layer";
+    add.style.left = pct((g.colX(S.hidden.length) + g.colX(S.hidden.length + 1)) / 2);
+    add.onclick = () => {
+      S.hidden.push(3); S.acts.push("relu");
+      initParams(S.seed); resetRun(); render();
+    };
+    host.append(add);
+  }
+
+  // output column
+  const co = el("div", "cc");
+  co.style.left = pct(g.colX(S.hidden.length + 1));
+  co.append(el("div", "cc-name", "output"));
+  const oa = el("button", "cc-act" + (S.outAct === "sigmoid" ? " on" : ""), S.outAct === "sigmoid" ? "✓ sigmoid" : "linear");
+  oa.title = "Output activation — sigmoid turns the score into a probability";
+  oa.onclick = () => setOutAct(S.outAct === "sigmoid" ? "linear" : "sigmoid");
+  co.append(oa);
+  host.append(co);
+}
+
+// The mode selects the DATA; these controls shape the NETWORK. Editing the network
+// therefore leaves the mode — and so 🎲 — pointing at the same pattern as before.
+function setWidth(l, n) {
+  if (n < 1) { S.hidden.splice(l, 1); S.acts.splice(l, 1); }
+  else S.hidden[l] = Math.min(n, MAX_WIDTH);
+  initParams(S.seed); resetRun(); render();
+}
+function setOutAct(a) {
+  S.outAct = a;
+  if (S.lossFn === "bce" && a !== "sigmoid") {
+    S.lossFn = "mse";
+    narrate("<b>Cross-entropy needs a probability</b>, so the loss switched back to squared error when you made the output linear.", "warn");
+  }
+  invalidate(); render();
+}
+function resetRun() {
+  S.step = 0; S.history = []; S.loss = null; S.prevLoss = null;
+  S.fwd = null; S.gradsLive = false; S.stale = false; S.diverged = false; S.phase = "forward";
+  S.sel = Math.min(S.sel, Math.max(0, S.data.length - 1));
+}
+
+/* ---- the network diagram ---------------------------------------------- */
+function renderNet() {
+  const g = geometry(), { sz, W, H, midY, colX } = g, R = GEO.R, DY = GEO.DY;
+  const nodeY = (n, k) => midY - ((n - 1) * DY) / 2 + k * DY;
+  const p = S.fwd && S.fwd.per[S.sel] ? S.fwd.per[S.sel] : null;
+  const showVals = !!p;
+
+  let svg = `<svg class="net" viewBox="0 0 ${W} ${H}" role="img" aria-label="network diagram" class="${S.stale ? "stale" : ""}">
+    <defs><marker id="garrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M0 0.5 L8 4 L0 7.5 z" fill="${RED}"/></marker></defs>`;
+
+  let wmax = 1e-9;
+  S.layers.forEach((L) => L.W.forEach((r) => r.forEach((w) => { wmax = Math.max(wmax, Math.abs(w.data)); })));
+
+  S.layers.forEach((L, l) => {
+    L.W.forEach((wrow, i) => wrow.forEach((w, j) => {
+      const x1 = colX(l) + R, y1 = nodeY(sz[l], j), x2 = colX(l + 1) - R, y2 = nodeY(sz[l + 1], i);
+      const col = w.data >= 0 ? BLUE : ORANGE;
+      const sw = 1 + 3.4 * Math.min(1, Math.abs(w.data) / wmax);
+      const hot = S.hot && S.hot.l === l && S.hot.i === i && S.hot.j === j;
+      svg += `<line class="edge${hot ? " hot" : ""}" data-l="${l}" data-i="${i}" data-j="${j}"
+        x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${col}" stroke-width="${sw}" stroke-linecap="round">
+        <title>${paramName(w)} = ${fmt(w.data, 4)}${S.gradsLive ? `\n∂L/∂w = ${sfmt(w.grad, 4)}` : ""}</title></line>`;
+      if (S.showEdgeNums) {
+        // Stagger the label along each edge, or every weight in a dense layer lands
+        // in the same little cluster next to the source node.
+        const t = 0.26 + 0.15 * ((i + j) % 3);
+        svg += `<text class="edge-l" x="${x1 + (x2 - x1) * t}" y="${y1 + (y2 - y1) * t - 4}" fill="${col}">${fmt(w.data, 2)}</text>`;
+      }
+    }));
+  });
+
+  // Gradient flow, offset perpendicular to the weight edge: drawn on top of it, a red
+  // dashed line is indistinguishable from an orange (negative) weight. Alongside it,
+  // it reads as a second thing travelling the other way — which is what it is.
+  if (S.gradsLive) {
+    S.layers.forEach((L, l) => {
+      L.W.forEach((wrow, i) => wrow.forEach((w, j) => {
+        const x1 = colX(l) + R, y1 = nodeY(sz[l], j), x2 = colX(l + 1) - R, y2 = nodeY(sz[l + 1], i);
+        const dx = x1 - x2, dy = y1 - y2, len = Math.hypot(dx, dy) || 1;
+        const ox = (-dy / len) * 5.5, oy = (dx / len) * 5.5;
+        svg += `<line class="gflow" data-gl="${l}" marker-end="url(#garrow)"
+          x1="${x2 + ox}" y1="${y2 + oy}" x2="${x1 + ox}" y2="${y1 + oy}"/>`;
+      }));
+    });
+  }
+
+  const nodeSvg = (x, y, label, value, grad, cls, dark) => {
+    let s = `<g><circle class="node-c ${cls}" cx="${x}" cy="${y}" r="${R}"/>`;
+    s += `<text class="node-v${dark ? " on-dark" : ""}" x="${x}" y="${y + 4}">${value}</text>`;
+    s += `<text class="node-l" x="${x}" y="${y - R - 7}">${label}</text>`;
+    if (grad != null) s += `<text class="node-g" x="${x}" y="${y + R + 14}">${grad}</text>`;
+    return s + "</g>";
+  };
+  sz.forEach((n, c) => {
+    for (let k = 0; k < n; k++) {
+      const x = colX(c), y = nodeY(n, k);
+      const node = showVals ? p.acts[c][k] : null;
+      const label = c === 0 ? "x" + SUB[k + 1]
+        : (c === sz.length - 1 ? (S.outAct === "sigmoid" ? "z" : "ŷ") : "h" + sup(c) + SUB[k + 1]);
+      svg += nodeSvg(x, y, label, node ? fmt(node.data, 2) : "—",
+        (node && S.gradsLive) ? sfmt(node.grad, 3) : null, `n-${c}` + (c === sz.length - 1 ? " out" : ""), false);
+    }
+  });
+
+  let lastX = colX(sz.length - 1);
+  if (S.outAct === "sigmoid") {
+    lastX = colX(sz.length);
+    svg += `<line x1="${colX(sz.length - 1) + R}" y1="${midY}" x2="${lastX - R}" y2="${midY}" stroke="#396545" stroke-width="1.6"/>`;
+    svg += nodeSvg(lastX, midY, "ŷ = σ(z)", showVals ? fmt(p.pred.data, 3) : "—",
+      (showVals && S.gradsLive) ? sfmt(p.pred.grad, 3) : null, "n-sig out", false);
+  }
+  const lossX = colX(g.nCols - 1), ty = midY - 62;
+  svg += `<line x1="${lastX + R}" y1="${midY}" x2="${lossX - R}" y2="${midY}" stroke="${RED}" stroke-width="1.6"/>`;
+  svg += `<g><rect x="${lossX - 26}" y="${ty - 15}" width="52" height="30" rx="7" fill="#EFE2C7" stroke="#1B1B1A" stroke-width="1.2"/>
+    <text class="node-v" x="${lossX}" y="${ty + 4}">${showVals ? fmt(p.y, 2) : "—"}</text>
+    <text class="node-l" x="${lossX}" y="${ty - 21}">target y</text></g>`;
+  svg += `<line x1="${lossX}" y1="${ty + 15}" x2="${lossX}" y2="${midY - R}" stroke="${RED}" stroke-width="1.6"/>`;
+  // The loss node shown is the one for THIS data point; when the loss is a mean over
+  // several points, that node's own gradient is 1/N, not 1 — worth showing honestly.
+  const lossNode = showVals ? p.loss : (S.fwd ? S.fwd.loss : null);
+  svg += nodeSvg(lossX, midY, "L", lossNode ? fmt(lossNode.data, 3) : "—",
+    (S.gradsLive && lossNode) ? fmt(lossNode.grad, 3) : null, "loss", true);
+  svg += "</svg>";
+
+  const host = $("#net");
+  host.innerHTML = svg;
+  if (S.stale) {
+    const b = el("span", "stale-badge", "parameters changed — run the forward pass again");
+    $("#diagram").append(b);
+    setTimeout(() => b.remove(), 2400);
+  }
+  if (S.data.length > 1 && showVals) {
+    const cap = el("p", "sub");
+    cap.style.margin = "0.35rem 0 0";
+    cap.innerHTML = `Node values are for <b>point ${S.sel + 1}</b> (its own loss is at L); the loss being minimised is the
+      mean over all ${S.data.length} points, and the gradients are for that mean.`;
+    host.append(cap);
+  }
+  host.querySelectorAll(".edge").forEach((line) => {
+    line.onmouseenter = () => { S.hot = { l: +line.dataset.l, i: +line.dataset.i, j: +line.dataset.j }; syncHot(); };
+    line.onmouseleave = () => { S.hot = null; syncHot(); };
+  });
+}
+
+function syncHot() {
+  document.querySelectorAll(".edge").forEach((e) => {
+    const on = S.hot && +e.dataset.l === S.hot.l && +e.dataset.i === S.hot.i && +e.dataset.j === S.hot.j;
+    e.classList.toggle("hot", !!on);
+  });
+  document.querySelectorAll(".cell").forEach((c) => {
+    const on = S.hot && c.dataset.k === "w" && +c.dataset.l === S.hot.l && +c.dataset.i === S.hot.i && +c.dataset.j === S.hot.j;
+    c.classList.toggle("hot", !!on);
+  });
+}
+
+const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+function animateForward() {
+  if (reduceMotion) return;
+  const host = $("#net");
+  const cols = sizes().map((_, c) => `.node-c.n-${c}`);
+  if (S.outAct === "sigmoid") cols.push(".node-c.n-sig");
+  cols.push(".node-c.loss");
+  host.querySelectorAll(".node-c").forEach((c) => c.classList.remove("lit"));
+  cols.forEach((sel, k) => setTimeout(() => {
+    host.querySelectorAll(sel).forEach((n) => { n.classList.add("lit"); setTimeout(() => n.classList.remove("lit"), 520); });
+  }, k * 150));
+}
+function animateBackward() {
+  const flows = $("#net").querySelectorAll(".gflow");
+  if (reduceMotion) { flows.forEach((f) => f.classList.add("show")); return; }
+  const nL = S.layers.length;
+  for (let l = nL - 1; l >= 0; l--) {
+    setTimeout(() => { $("#net").querySelectorAll(`.gflow[data-gl="${l}"]`).forEach((f) => f.classList.add("show")); }, (nL - 1 - l) * 220);
+  }
+}
+
+/* ---- loss + sparkline -------------------------------------------------- */
+function renderLoss() {
+  $("#loss-v").textContent = S.loss == null ? "—" : fmt(S.loss, 4);
+  const d = $("#loss-d");
+  if (S.loss == null || S.prevLoss == null) { d.textContent = "—"; d.className = "v small d"; }
+  else {
+    const diff = S.loss - S.prevLoss;
+    d.textContent = sfmt(diff, 4);
+    d.className = "v small d " + (diff < 0 ? "down" : diff > 0 ? "up" : "");
+  }
+  const host = $("#spark"), h = S.history;
+  if (h.length < 2) { host.innerHTML = `<div class="sub" style="margin:0">The loss at every step will be plotted here.</div>`; return; }
+  const W = 320, H = 70, pad = 6;
+  const finite = h.filter(isFinite);
+  const lo = Math.min(...finite, 0), hi = Math.max(...finite), span = (hi - lo) || 1;
+  const pts = h.map((v, i) => [pad + (i / (h.length - 1)) * (W - 2 * pad), H - pad - (((isFinite(v) ? v : hi) - lo) / span) * (H - 2 * pad)]);
+  const dstr = pts.map((q, i) => (i ? "L" : "M") + q[0].toFixed(1) + " " + q[1].toFixed(1)).join(" ");
+  const last = pts[pts.length - 1];
+  host.innerHTML = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-label="loss per step">
+      <path d="${dstr}" fill="none" stroke="${BLUE}" stroke-width="1.8" vector-effect="non-scaling-stroke"/>
+      <circle cx="${last[0]}" cy="${last[1]}" r="3" fill="${RED}"/>
+      <text x="${W - pad}" y="12" text-anchor="end" font-size="9" fill="#6B6459">${fmt(hi, 3)}</text>
+      <text x="${W - pad}" y="${H - 2}" text-anchor="end" font-size="9" fill="#6B6459">${fmt(lo, 3)}</text>
+    </svg>`;
+}
+
+/* ===========================================================================
+   9 · The prediction map
+   With one input it is a curve: the model's output across the input range.
+   With two or more it is a grid of test points, each coloured by what the model
+   would predict there — so you see the decision boundary, not just the numbers.
+   =========================================================================== */
+const range = (vals, pad) => {
+  let lo = Math.min(...vals), hi = Math.max(...vals);
+  if (hi - lo < 1e-9) { lo -= 0.5; hi += 0.5; }
+  const m = (hi - lo) * pad;
+  return [lo - m, hi + m];
+};
+const classColour = (p) => (p >= 0.5 ? BLUE : ORANGE);
+const heldIsBinary = () => S.nIn === 3 && S.data.every((r) => r.x[2] === 0 || r.x[2] === 1);
+
+function renderPlot() {
+  const host = $("#plot"), ctl = $("#plot-ctl");
+  ctl.innerHTML = "";
+  const W = 300, H = 240, m = { l: 34, r: 10, t: 10, b: 28 };
+  const plotW = W - m.l - m.r, plotH = H - m.t - m.b;
+
+  if (!S.data.length) { host.innerHTML = ""; return; }
+
+  if (S.nIn === 1) {
+    // ---- function view -------------------------------------------------
+    const xs = S.data.map((r) => r.x[0]);
+    const [x0, x1] = range(xs, 0.15);
+    const curve = [];
+    for (let k = 0; k <= 80; k++) { const x = x0 + (x1 - x0) * (k / 80); curve.push([x, predictRaw([x])]); }
+    const ys = S.data.map((r) => r.y).concat(curve.map((c) => c[1]).filter(isFinite));
+    const [y0, y1] = range(ys, 0.15);
+    const sx = (x) => m.l + ((x - x0) / (x1 - x0)) * plotW;
+    const sy = (y) => m.t + plotH - ((y - y0) / (y1 - y0)) * plotH;
+    const path = curve.filter((c) => isFinite(c[1]))
+      .map((c, i) => (i ? "L" : "M") + sx(c[0]).toFixed(1) + " " + clamp(sy(c[1]), -50, H + 50).toFixed(1)).join(" ");
+    let s = `<svg viewBox="0 0 ${W} ${H}" aria-label="model output against input">`;
+    s += axes(m, plotW, plotH, x0, x1, y0, y1, varName(0), isClassifier() ? "ŷ (probability)" : "ŷ");
+    s += `<path d="${path}" fill="none" stroke="${BLUE}" stroke-width="2.2"/>`;
+    S.data.forEach((r, i) => {
+      s += `<circle cx="${sx(r.x[0]).toFixed(1)}" cy="${sy(r.y).toFixed(1)}" r="5"
+        fill="${RED}" stroke="#fff" stroke-width="1.6" opacity="${i === S.sel ? 1 : 0.75}"><title>point ${i + 1}</title></circle>`;
+    });
+    s += "</svg>";
+    host.innerHTML = s;
+    $("#plot-sub").innerHTML = "The blue line is the model across the whole input range; red dots are your data.";
+    ctl.innerHTML = `<span><span class="dot" style="background:${BLUE}"></span>model</span>
+                     <span><span class="dot" style="background:${RED}"></span>your data</span>`;
+    return;
+  }
+
+  // ---- decision map (2 inputs, or a slice of 3) -------------------------
+  const xs = S.data.map((r) => r.x[0]), ys = S.data.map((r) => r.x[1]);
+  const [x0, x1] = range(xs, 0.18), [y0, y1] = range(ys, 0.18);
+  const sx = (x) => m.l + ((x - x0) / (x1 - x0)) * plotW;
+  const sy = (y) => m.t + plotH - ((y - y0) / (y1 - y0)) * plotH;
+
+  // The colour scale is anchored to the DATA's targets, never to the model's current
+  // output range. A data point must keep its colour for the whole of training — its
+  // true y does not change — and a background dot matching a data point's colour has
+  // to mean "the model would get this one right". Scaling to the model's own range
+  // would move the reference frame on every update and recolour the data underneath it.
+  const ys0 = S.data.map((r) => r.y);
+  let ylo = Math.min(...ys0), yhi = Math.max(...ys0);
+  if (yhi - ylo < 1e-9) { ylo -= 0.5; yhi += 0.5; }
+  const shade = (v) => {
+    const t = clamp((v - ylo) / (yhi - ylo), 0, 1);
+    return { col: t >= 0.5 ? BLUE : ORANGE, op: 0.15 + 0.6 * Math.abs(t - 0.5) * 2 };
+  };
+
+  const G = 21;
+  const preds = [];
+  for (let a = 0; a < G; a++) for (let b = 0; b < G; b++) {
+    const x = x0 + (x1 - x0) * (a / (G - 1)), y = y0 + (y1 - y0) * (b / (G - 1));
+    const vec = [x, y]; if (S.nIn === 3) vec.push(S.hold);
+    preds.push([x, y, predictRaw(vec)]);
+  }
+
+  let s = `<svg viewBox="0 0 ${W} ${H}" aria-label="what the model predicts across the input space">`;
+  s += axes(m, plotW, plotH, x0, x1, y0, y1, varName(0), varName(1));
+  // Background: what the model PREDICTS at each test point — this is what moves.
+  preds.forEach(([x, y, p]) => {
+    if (!isFinite(p)) return;
+    const col = isClassifier() ? classColour(p) : shade(p).col;
+    const op = isClassifier() ? 0.18 + 0.62 * Math.min(1, Math.abs(p - 0.5) * 2) : shade(p).op;
+    s += `<circle cx="${sx(x).toFixed(1)}" cy="${sy(y).toFixed(1)}" r="3.6" fill="${col}" opacity="${op.toFixed(2)}"/>`;
+  });
+  // Data points on top, coloured by their TRUE y — fixed for the whole of training.
+  // With three inputs only the ones in this slice are real here.
+  let shown = 0;
+  S.data.forEach((r, i) => {
+    if (S.nIn === 3 && Math.abs(r.x[2] - S.hold) > 1e-9) return;
+    shown++;
+    const col = isClassifier() ? classColour(r.y) : shade(r.y).col;
+    s += `<circle cx="${sx(r.x[0]).toFixed(1)}" cy="${sy(r.x[1]).toFixed(1)}" r="6" fill="${col}"
+      stroke="${i === S.sel ? "#1B1B1A" : "#fff"}" stroke-width="${i === S.sel ? 2.4 : 1.8}">
+      <title>point ${i + 1} · target ${fmt(r.y, 2)}</title></circle>`;
+  });
+  s += "</svg>";
+  host.innerHTML = s;
+
+  $("#plot-sub").innerHTML = `Small dots are test points coloured by <b>what the model predicts</b> there — they move as it
+    learns. Ringed dots are your data, coloured by their <b>true y</b>, which never changes.
+    ${isClassifier() ? "Where a data point matches the shading under it, the model has that one right."
+                     : "Blue is the top of your targets' range, orange the bottom."}`;
+
+  const legend = el("span");
+  legend.innerHTML = isClassifier()
+    ? `<span><span class="dot" style="background:${BLUE}"></span>y = 1</span>
+       <span style="margin-left:0.6rem"><span class="dot" style="background:${ORANGE}"></span>y = 0</span>
+       <span style="margin-left:0.6rem">· faint = model · ringed = your data</span>`
+    : `<span><span class="dot" style="background:${BLUE}"></span>high y</span>
+       <span style="margin-left:0.6rem"><span class="dot" style="background:${ORANGE}"></span>low y</span>
+       <span style="margin-left:0.6rem">· faint = model · ringed = your data</span>`;
+  ctl.append(legend);
+
+  if (S.nIn === 3) {
+    const wrap = el("span");
+    wrap.style.marginLeft = "auto";
+    wrap.append(el("span", "", varName(2) + " = "));
+    if (heldIsBinary()) {
+      const seg = el("span", "seg");
+      [0, 1].forEach((v) => {
+        const b = el("button", S.hold === v ? "on" : "", String(v));
+        b.onclick = () => { S.hold = v; renderPlot(); };
+        seg.append(b);
+      });
+      wrap.append(seg);
+    } else {
+      const inp = el("input", "num");
+      inp.type = "text"; inp.value = String(S.hold); inp.style.width = "3.2rem";
+      inp.onchange = () => { const v = parseNum(inp.value); if (v != null) { S.hold = v; renderPlot(); } };
+      wrap.append(inp);
+    }
+    wrap.append(el("span", "", ` · ${shown} of ${S.data.length} points`));
+    ctl.append(wrap);
+  }
+}
+
+function axes(m, plotW, plotH, x0, x1, y0, y1, xlab, ylab) {
+  const A = "#6B6459";
+  return `<rect x="${m.l}" y="${m.t}" width="${plotW}" height="${plotH}" fill="none" stroke="rgba(27,27,26,0.13)"/>
+    <text x="${m.l}" y="${m.t + plotH + 12}" font-size="8" fill="${A}">${fmt(x0, 1)}</text>
+    <text x="${m.l + plotW}" y="${m.t + plotH + 12}" text-anchor="end" font-size="8" fill="${A}">${fmt(x1, 1)}</text>
+    <text x="${m.l + plotW / 2}" y="${m.t + plotH + 24}" text-anchor="middle" font-size="9" fill="${A}">${xlab}</text>
+    <text x="${m.l - 4}" y="${m.t + plotH}" text-anchor="end" font-size="8" fill="${A}">${fmt(y0, 1)}</text>
+    <text x="${m.l - 4}" y="${m.t + 8}" text-anchor="end" font-size="8" fill="${A}">${fmt(y1, 1)}</text>
+    <text x="10" y="${m.t + plotH / 2}" text-anchor="middle" font-size="9" fill="${A}"
+      transform="rotate(-90 10 ${m.t + plotH / 2})">${ylab}</text>`;
+}
+
+/* ===========================================================================
+   10 · Gradients panel — the five that matter, then everything on request
+   =========================================================================== */
+function renderGrads() {
+  const host = $("#grad-top"); host.innerHTML = "";
+  const ps = allParams();
+  const gmax = Math.max(1e-12, ...ps.map((p) => Math.abs(p.grad)));
+  $("#allp-sum").textContent = `Show every parameter (${ps.length})`;
+
+  if (!S.gradsLive) {
+    $("#grad-sub").innerHTML = `${ps.length} parameters. Run a <b>backward pass</b> to fill in ∂L/∂θ.`;
+  } else {
+    $("#grad-sub").innerHTML = `A <b style="color:var(--grad)">negative</b> gradient means increase that parameter to reduce
+      the loss; positive means decrease it. One step moves each by −λ × gradient.`;
+    const top = ps.slice().sort((a, b) => Math.abs(b.grad) - Math.abs(a.grad)).slice(0, 6);
+    top.forEach((p) => {
+      const row = el("div", "grow");
+      row.append(el("span", "nm", paramName(p)));
+      row.append(el("span", "vl", fmt(p.data, 2)));
+      const bar = el("div", "gbar"); bar.append(el("div", "mid"));
+      if (isFinite(p.grad)) {
+        const r = Math.min(1, Math.abs(p.grad) / gmax) * 50;
+        const f = el("div", "f");
+        f.style.width = r + "%"; f.style.left = (p.grad >= 0 ? 50 : 50 - r) + "%";
+        bar.append(f);
+      }
+      row.append(bar);
+      row.append(el("span", "gv", sfmt(p.grad, 3)));
+      row.title = `${paramName(p)} = ${fmt(p.data, 4)} · ∂L/∂θ = ${sfmt(p.grad, 4)} · next step: ${sfmt(-S.lr * p.grad, 4)}`;
+      host.append(row);
+    });
+  }
+  if ($("#allp").open) renderAllParams();
+}
+
+function renderAllParams() {
+  const host = $("#params"); host.innerHTML = "";
+  const gmax = Math.max(1e-12, ...allParams().map((p) => Math.abs(p.grad)));
+  const sz = sizes();
+  S.layers.forEach((L, l) => {
+    const block = el("div", "layer-block");
+    const head = el("div", "layer-head");
+    // Name the notation on the header: the narration talks about "w²₁₂", and the
+    // reader has to be able to find that cell without guessing which layer is which.
+    head.append(el("span", "", `${layerLabel(l)} · w${sup(l + 1)}, b${sup(l + 1)}`));
+    head.append(el("span", "tag", `${sz[l]} → ${sz[l + 1]}`));
+    block.append(head);
+    const mat = el("div", "mat");
+    mat.style.gridTemplateColumns = `1.6rem repeat(${sz[l] + 1}, minmax(0, 1fr))`;
+    mat.append(el("div"));
+    // Columns are what this layer READS (the previous layer's units); rows are what it
+    // WRITES. Both are called "h", so they carry the layer number as a superscript.
+    for (let j = 0; j < sz[l]; j++) mat.append(el("div", "mhead", l === 0 ? "x" + SUB[j + 1] : "h" + sup(l) + SUB[j + 1]));
+    mat.append(el("div", "mhead", "bias"));
+    for (let i = 0; i < sz[l + 1]; i++) {
+      mat.append(el("div", "rlabel", l === S.layers.length - 1 ? "ŷ" : "h" + sup(l + 1) + SUB[i + 1]));
+      for (let j = 0; j < sz[l]; j++) mat.append(cell(L.W[i][j], gmax, { k: "w", l, i, j }));
+      mat.append(cell(L.b[i], gmax, { k: "b", l, i }));
+    }
+    block.append(mat); host.append(block);
+  });
+  syncHot();
+}
+
+function cell(p, gmax, meta) {
+  const c = el("div", "cell" + (meta.k === "b" ? " bias" : ""));
+  c.dataset.k = meta.k; c.dataset.l = meta.l; c.dataset.i = meta.i;
+  if (meta.j != null) c.dataset.j = meta.j;
+  const inp = el("input");
+  inp.type = "text"; inp.inputMode = "decimal"; inp.value = fmt(p.data, 3).replace(/−/g, "-");
+  inp.title = paramName(p);
+  inp.onchange = () => {
+    const v = parseNum(inp.value);
+    if (v == null) { inp.value = fmt(p.data, 3).replace(/−/g, "-"); return; }
+    p.data = v; S.stale = true;
+    narrate(`<b>${paramName(p)} set to ${fmt(v, 3)} by hand.</b> Run the forward pass to see what it does to the loss.`);
+    render();
+  };
+  inp.onkeydown = (e) => { if (e.key === "Enter") inp.blur(); };
+  inp.onfocus = () => inp.select();
+  c.append(inp);
+  c.append(el("span", "g" + (S.gradsLive ? "" : " zero"), S.gradsLive ? sfmt(p.grad, 3) : "·"));
+  const bar = el("div", "gbar"); bar.append(el("div", "mid"));
+  if (S.gradsLive && isFinite(p.grad)) {
+    const r = Math.min(1, Math.abs(p.grad) / gmax) * 50;
+    const f = el("div", "f");
+    f.style.width = r + "%"; f.style.left = (p.grad >= 0 ? 50 : 50 - r) + "%";
+    bar.append(f);
+  }
+  c.append(bar);
+  if (meta.k === "w") {
+    c.onmouseenter = () => { S.hot = { l: meta.l, i: meta.i, j: meta.j }; syncHot(); };
+    c.onmouseleave = () => { S.hot = null; syncHot(); };
+  }
+  return c;
+}
+
+/* ---- grad check (the lab's grad_check, over every parameter) ----------- */
+// ReLU has a corner at 0. If a neuron's pre-activation sits exactly on it, a central
+// difference straddles both sides and genuinely cannot agree with the analytic
+// derivative — so report those separately rather than calling them failures.
+function kinkedUnits() {
+  const set = new Set();
+  if (!S.fwd) return set;
+  for (const i of S.fwd.idxs) {
+    const p = S.fwd.per[i];
+    for (let c = 1; c < p.acts.length - 1; c++) {
+      if (S.acts[c - 1] !== "relu") continue;
+      p.acts[c].forEach((n, k) => {
+        const z = n.children.length ? n.children[0] : null;
+        if (z && Math.abs(z.data) < 1e-3) set.add((c - 1) + ":" + k);
+      });
+    }
+  }
+  return set;
+}
+
+function gradCheck() {
+  if (!S.gradsLive) { $("#checkline").innerHTML = `<span class="badge fail">no gradients</span> Run a backward pass first.`; return; }
+  const h = 1e-5, kinked = kinkedUnits();
+  let worst = 0, worstName = "", kinkWorst = 0, kinkName = "";
+  const test = (p, l, i) => {
+    const keep = p.data;
+    p.data = keep + h; const up = lossValueOnly();
+    p.data = keep - h; const dn = lossValueOnly();
+    p.data = keep;
+    const d = Math.abs((up - dn) / (2 * h) - p.grad);
+    if (kinked.has(l + ":" + i)) { if (d > kinkWorst) { kinkWorst = d; kinkName = paramName(p); } }
+    else if (d > worst) { worst = d; worstName = paramName(p); }
+  };
+  S.layers.forEach((L, l) => L.W.forEach((row, i) => { row.forEach((w) => test(w, l, i)); test(L.b[i], l, i); }));
+  const ok = worst < 1e-4;
+  let msg = `<span class="badge ${ok ? "pass" : "fail"}">${ok ? "PASS" : "CHECK"}</span>
+    worst disagreement ${worst.toExponential(1)}${worstName ? " at " + worstName : ""} — the analytic gradients match a
+    central finite difference, <code>(L(θ+h) − L(θ−h)) / 2h</code>.`;
+  if (kinkWorst > 1e-4) {
+    msg += `<br><span style="color:var(--orange-deep)">Except at ${kinkName} (off by ${kinkWorst.toExponential(1)}):</span>
+      a neuron there sits exactly on ReLU's corner at 0, where the slope jumps from 0 to 1. The finite difference
+      straddles both sides, so it cannot agree. That is the kink, not a bug — nudge that input off the corner
+      (a 0 → 0.01 will do) and the disagreement disappears.`;
+  }
+  $("#checkline").innerHTML = msg;
+}
+
+/* ===========================================================================
+   11 · Wiring
+   =========================================================================== */
+function loadPreset(key) {
+  const P = PRESETS[key];
+  S.preset = key;
+  S.nIn = P.nIn; S.outAct = P.outAct; S.lossFn = P.lossFn; S.lr = P.lr;
+  S.labels = P.labels || null;
+  // Every mode opens as one hidden layer of 3 ReLU neurons — small enough to read
+  // every number on screen, and the starting point for adding capacity by hand.
+  S.hidden = [3]; S.acts = ["relu"];
+  initParams(S.seed);
+  // Fixed seed per mode, so the picture is the same in every lecture theatre.
+  S.data = generateData(P.n, P.seed);
+  $("#gen-n").value = String(P.n);          // 🎲 defaults to this mode's own sample size
+  S.hold = 1; S.sel = 0;
+  resetRun();
+  narrate(`<b>${P.name}.</b> ${P.note} Press <b>Forward pass</b> to begin.`);
+  render();
+}
+
+function init() {
+  const host = $("#presets");
+  Object.entries(PRESETS).forEach(([k, P]) => {
+    const b = el("button", "chip", P.name);
+    b.dataset.k = k;
+    b.onclick = () => loadPreset(k);
+    host.append(b);
+  });
+  $("#lossfn").onchange = (e) => {
+    S.lossFn = e.target.value;
+    if (S.lossFn === "bce" && S.outAct !== "sigmoid") {
+      S.outAct = "sigmoid";
+      narrate("<b>Cross-entropy needs a probability</b>, so the output activation switched to sigmoid.", "warn");
+    }
+    invalidate(); render();
+  };
+  $("#lr").onchange = (e) => { const v = parseNum(e.target.value); if (v != null && v >= 0) S.lr = v; render(); };
+  $("#gen").onclick = () => {
+    const n = +$("#gen-n").value;
+    const P = PRESETS[S.preset];
+    S.data = generateData(n);
+    S.sel = 0; invalidate(); resetRun();
+    narrate(`<b>${n} fresh points from the same pattern.</b> ${P ? P.note : ""}
+      The rule behind the data has not changed — only this sample of it — so you can see whether the model finds it again.
+      Press <b>Forward pass</b>.`);
+    render();
+  };
+  $("#add-row").onclick = () => {
+    if (S.data.length >= MAX_ROWS) return;
+    S.data.push({ x: new Array(S.nIn).fill(0), y: 0 });
+    S.sel = S.data.length - 1; onDataChange();
+  };
+
+  $("#cycle").querySelectorAll(".cyc").forEach((b) => {
+    b.onclick = () => ({ forward: doForward, backward: doBackward, update: doUpdate, zero: doZero })[b.dataset.act]();
+  });
+  $("#run-1").onclick = () => runMany(1);
+  $("#run-10").onclick = () => runMany(10);
+  $("#run-100").onclick = () => runMany(100);
+  $("#reset").onclick = () => {
+    initParams(S.seed);
+    if (PRESETS[S.preset] && PRESETS[S.preset].params) setParams(PRESETS[S.preset].params);
+    resetRun();
+    narrate("<b>Weights reset</b> to the same starting point. The data and settings are untouched.");
+    render();
+  };
+  $("#reseed").onclick = () => {
+    S.seed = (Math.random() * 1e9) | 0;
+    initParams(S.seed); resetRun();
+    narrate("<b>New random starting weights.</b> Same problem, different starting point — training does not always land in the same place.");
+    render();
+  };
+  $("#gradcheck").onclick = gradCheck;
+  $("#allp").addEventListener("toggle", () => { if ($("#allp").open) renderAllParams(); });
+
+  document.addEventListener("keydown", (e) => {
+    const t = e.target;
+    if (t && (t.tagName === "INPUT" || t.tagName === "SELECT" || t.isContentEditable)) return;
+    if (e.key === " " || e.key === "Enter") {
+      e.preventDefault();
+      ({ forward: doForward, backward: doBackward, update: doUpdate, zero: doZero })[S.phase]();
+    } else if (e.key === "f") doForward();
+    else if (e.key === "b") doBackward();
+    else if (e.key === "u") doUpdate();
+    else if (e.key === "z") doZero();
+  });
+
+  loadPreset("turnout2");
+}
+init();
+</script>
+</body>
+</html>

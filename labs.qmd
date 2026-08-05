@@ -23,6 +23,14 @@ sets things up; just run top to bottom.
 
 : {.striped .hover tbl-colwidths="[6,50,44]"}
 
+::: {.callout-tip appearance="simple"}
+**[Backprop playground](labs/backprop-playground.html)** — a companion to lecture 4 and lab 4. Type in (or generate) a few
+data points, build a network by adding and removing neurons, then drive the training loop one button at a time: forward
+pass, loss, every gradient, one step of gradient descent. A prediction map shows what the model would say everywhere, not
+just at your data. It runs the same `Value` engine you build in lab 4, so the numbers on screen are the numbers in your
+notebook.
+:::
+
 ::: {.callout-note appearance="simple"}
 **Labs 6–12 will be posted by the end of Week 1.**
 :::
