@@ -1894,7 +1894,7 @@
     "href": "lectures/lecture-03-computational-graphs.html#a-longer-chain",
     "title": "Computational graphs & the maths of AI",
     "section": "A longer chain",
-    "text": "A longer chain\nTake a function with three nested operations:\n\ny = \\left( \\tfrac{1}{n} (a - x)^2 \\right)^{1/2}\n\nDecompose: * u_2 = a - x * u_1 = u_2^2 = (a - x)^2 * y = (u_1 / n)^{1/2}\nApply the chain rule:\n\n\\frac{dy}{dx} = \\underbrace{\\frac{d}{du_1}\\!\\left[\\left(\\tfrac{u_1}{n}\\right)^{1/2}\\right]}_{\\text{outer}} \\cdot\n\\underbrace{\\frac{d}{du_2} [u_2^2]}_{\\text{middle}} \\cdot\n\\underbrace{\\frac{d}{dx} [a - x]}_{\\text{inner}}\n\nThree small derivatives. We don’t even need to expand y to do this."
+    "text": "A longer chain\nTake a function with three nested operations:\n\ny = \\left( \\tfrac{1}{n} (a - x)^2 \\right)^{1/2}\n\nDecompose:\n\nu_2 = a - x\nu_1 = u_2^2 = (a - x)^2\ny = (u_1 / n)^{1/2}\n\nApply the chain rule:\n\n\\frac{dy}{dx} = \\underbrace{\\frac{d}{du_1}\\!\\left[\\left(\\tfrac{u_1}{n}\\right)^{1/2}\\right]}_{\\text{outer}} \\cdot\n\\underbrace{\\frac{d}{du_2} [u_2^2]}_{\\text{middle}} \\cdot\n\\underbrace{\\frac{d}{dx} [a - x]}_{\\text{inner}}\n\nThree small derivatives. We don’t even need to expand y to do this."
   },
   {
     "objectID": "lectures/lecture-03-computational-graphs.html#why-dont-we-just-use-the-central-difference",
@@ -1936,6 +1936,6 @@
     "href": "lectures/lecture-03-computational-graphs.html#scaling-up-three-hidden-layers-of-32",
     "title": "Computational graphs & the maths of AI",
     "section": "Scaling up — three hidden layers of 32",
-    "text": "Scaling up — three hidden layers of 32\nThis is still a tiny deep learning model:\n\n3 inputs,\n3 hidden layers of 32 nodes\nOne output node\n\nTo make it fit, one dot represents a multiply, add, or squash, in running order.\n\n\n\n\n\n\n\n\n\n\n\nFor one prediction:\n\nMultiplies: 96 + 1{,}024 + 1{,}024 + 32 = 2{,}176\nAdds: 2{,}176 (97 of them bias adds)\nSquashes: 97 — one per neuron\nTotal: 4{,}449 operations from 2{,}273 parameters.\n\n\n\nGrouped into matrix operations, this whole ribbon is still 4 \\times (multiply, add, squash) = 12 nodes. The dots are what the computer does underneath.\nFor context, a forward pass of GPT-3 requires about 350 billion floating point operations."
+    "text": "Scaling up — three hidden layers of 32\nThis is still a tiny deep learning model:\n\n3 inputs, 3 hidden layers of 32 nodes, one output node\n\nTo make it fit, one dot represents a multiply, add, or squash, in running order.\n\n\n\n\n\n\n\n\n\n\n\nFor one prediction:\n\nMultiplies: 96 + 1{,}024 + 1{,}024 + 32 = 2{,}176\nAdds: 2{,}176 (97 of them bias adds)\nSquashes: 97 — one per neuron\nTotal: 4{,}449 operations from 2{,}273 parameters.\n\n\n\nFor context, a forward pass of GPT-3 requires about 350 billion floating point operations."
   }
 ]

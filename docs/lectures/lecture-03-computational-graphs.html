@@ -996,7 +996,7 @@ w_2^{(1)} &amp; w_2^{(2)} \\ w_3^{(1)} &amp; w_3^{(2)} \end{bmatrix}</span></p>
 <section id="seeing-the-slope" class="slide level2">
 <h2>Seeing the slope</h2>
 <p><span class="eyebrow">The same worked example, drawn: <span class="math inline">y = 3x^2 + 5</span></span></p>
-<div id="c317bc10" class="cell" data-fig-height="3.9" data-fig-width="9" data-execution_count="1">
+<div id="52dd0de9" class="cell" data-fig-height="3.9" data-fig-width="9" data-execution_count="1">
 <div class="cell-output cell-output-display">
 <div>
 <figure>
@@ -1109,7 +1109,12 @@ w_2^{(1)} &amp; w_2^{(2)} \\ w_3^{(1)} &amp; w_3^{(2)} \end{bmatrix}</span></p>
 <p><span class="math display">
 y = \left( \tfrac{1}{n} (a - x)^2 \right)^{1/2}
 </span></p>
-<p>Decompose: * <span class="math inline">u_2 = a - x</span> * <span class="math inline">u_1 = u_2^2 = (a - x)^2</span> * <span class="math inline">y = (u_1 / n)^{1/2}</span></p>
+<p>Decompose:</p>
+<ul>
+<li><span class="math inline">u_2 = a - x</span></li>
+<li><span class="math inline">u_1 = u_2^2 = (a - x)^2</span></li>
+<li><span class="math inline">y = (u_1 / n)^{1/2}</span></li>
+</ul>
 <p>Apply the chain rule:</p>
 <p><span class="math display">
 \frac{dy}{dx} = \underbrace{\frac{d}{du_1}\!\left[\left(\tfrac{u_1}{n}\right)^{1/2}\right]}_{\text{outer}} \cdot
@@ -2128,12 +2133,10 @@ f'(x) \approx \frac{f(x + \varepsilon) - f(x - \varepsilon)}{2\varepsilon}
 <h2>Scaling up — three hidden layers of 32</h2>
 <p>This is still a <em>tiny</em> deep learning model:</p>
 <ul>
-<li>3 inputs,</li>
-<li>3 hidden layers of 32 nodes</li>
-<li>One output node</li>
+<li>3 inputs, 3 hidden layers of 32 nodes, one output node</li>
 </ul>
 <p>To make it fit, one dot represents a multiply, add, or squash, in running order.</p>
-<div id="41cf7891" class="cell" data-fig-height="2.1" data-fig-width="11.5" data-execution_count="2">
+<div id="d28beb89" class="cell" data-fig-height="2.1" data-fig-width="11.5" data-execution_count="2">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
@@ -2153,7 +2156,6 @@ f'(x) \approx \frac{f(x + \varepsilon) - f(x - \varepsilon)}{2\varepsilon}
 </ul>
 </div><div class="column" style="width:50%;">
 <div class="card">
-<p>Grouped into matrix operations, this whole ribbon is still <span class="math inline">4 \times</span> (multiply, add, squash) <span class="math inline">= 12</span> nodes. The dots are what the computer does underneath.</p>
 <p>For context, a forward pass of GPT-3 requires about <em>350 billion</em> floating point operations.</p>
 </div>
 </div></div>

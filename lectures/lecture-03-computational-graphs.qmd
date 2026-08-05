@@ -788,6 +788,7 @@ y = \left( \tfrac{1}{n} (a - x)^2 \right)^{1/2}
 $$
 
 Decompose:
+
 * $u_2 = a - x$
 * $u_1 = u_2^2 = (a - x)^2$
 * $y = (u_1 / n)^{1/2}$
@@ -1190,9 +1191,7 @@ In **Labs 3–4** you build exactly this, where every single arithmetic operatio
 
 This is still a *tiny* deep learning model:
 
-* 3 inputs, 
-* 3 hidden layers of 32 nodes
-* One output node 
+* 3 inputs, 3 hidden layers of 32 nodes, one output node 
 
 To make it fit, one dot represents a multiply, add, or squash, in running order.
 
@@ -1253,7 +1252,6 @@ For **one prediction**:
 :::
 ::: {.column width="50%"}
 ::: {.card}
-Grouped into matrix operations, this whole ribbon is still $4 \times$ (multiply, add, squash) $= 12$ nodes. The dots are what the computer does underneath.
 
 For context, a forward pass of GPT-3 requires about *350 billion* floating point operations. 
 :::
