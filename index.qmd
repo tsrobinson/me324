@@ -46,19 +46,19 @@ Each day pairs a **3-hour lecture** with a **90-minute lab**. The lectures build
 2. Deep models — a primer
 3. Computational graphs & the maths of AI
 4. Backpropagation
+5. Feed-forward networks in PyTorch
 :::
 
 ::: {.g-col-12 .g-col-md-4}
-### [Week 2]{.week-pill} — Vision & generation
-5. Feed-forward networks in PyTorch
+### [Week 2]{.week-pill} — Vision, generation & text
 6. Classifying images (CNNs)
 7. Generating images (VAEs, diffusion)
 8. Text-gen 1/4 — embeddings & character models
+9. Text-gen 2/4 — recurrent networks
 :::
 
 ::: {.g-col-12 .g-col-md-4}
-### [Week 3]{.week-pill} — Text & LLMs
-9. Text-gen 2/4 — recurrent networks
+### [Week 3]{.week-pill} — Transformers & LLMs
 10. Text-gen 3/4 — attention & transformers
 11. Text-gen 4/4 — tokenisation & sampling
 12. Ethics, limitations & recap

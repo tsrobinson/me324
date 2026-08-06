@@ -2,7 +2,7 @@
 title: "Feed-forward networks in PyTorch"
 subtitle: "Lecture 5 — Real models, real data, real choices"
 author: "Dr Thomas Robinson"
-date: "2026-08-10"
+date: "2026-08-07"
 date-format: long
 bibliography: ../refs.bib
 format: 
@@ -14,7 +14,7 @@ format:
 
 ## Where are we?
 
-[After Thursday's lecture]{.eyebrow}
+[After yesterday's lecture]{.eyebrow}
 
 ::: {.card}
 Four days writing autodifferentiation by hand. **From today, you never have to again** 
@@ -39,14 +39,14 @@ After today, every remaining lecture uses PyTorch.
 [<span class="pause-cue">≈ 5 min</span> · shout it out]{.eyebrow}
 
 ::: {.card}
-[From last week]{.eyebrow}
+[From yesterday]{.eyebrow}
 
 1. One gradient-descent update. $w = 1$, $\frac{\partial L}{\partial w} = 0.5$, learning rate $\lambda = 0.1$. What is the new $w$?
 2. What does a loss function measure — and which loss did we use for regression?
 3. In which direction does backpropagation walk the computational graph, and what does it carry with it?
 :::
 
-[The weekend was long. Everything here is from Thursday's lecture!]{.muted}
+[Everything here is from yesterday's lecture!]{.muted}
 
 ## Warm-up · answers
 
@@ -76,7 +76,7 @@ The mental model is identical to your `Value` library. Same forward pass. Same b
 :::
 
 ::: {.callout-note}
-The point of last week was to demystify what PyTorch does. Now we let it do that work for us — and we focus on **design** instead of bookkeeping.
+The point of the last two days was to demystify what PyTorch does. Now we let it do that work for us — and we focus on **design** instead of bookkeeping.
 :::
 
 ## Tensors — the building block
@@ -1036,7 +1036,7 @@ You can:
 4. Apply dropout and batch norm when appropriate.
 5. Apply the same machinery to a real social-science problem like civil-war forecasting.
 
-**This is the modal neural network used in industry and research for tabular data.** From tomorrow we adapt it for images and text.
+**This is the modal neural network used in industry and research for tabular data.** From Monday we adapt it for images and text.
 :::
 
 ## A check-in on the headline promise
@@ -1103,10 +1103,10 @@ You will:
 
 ## See you next week {background-color="#0E1A2B"}
 
-[Lecture 6 — *Classifying images: convolutional neural networks*]{.eyebrow}
+[Lecture 6 — *Classifying images: convolutional neural networks* — Monday 10 August]{.eyebrow}
 
 ::: {.callout-tip}
-#Optional reading
+# Optional reading
 
 @torres2022learning — *Learning to See: Convolutional Neural Networks for the Analysis of Social Science Data*. A tour of CNNs from a social-science perspective.
 :::

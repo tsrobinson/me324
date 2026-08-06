@@ -108,7 +108,7 @@ We don't teach from a textbook, but if you want one spine alongside the slides:
 
 ## Day 5 · Feed-forward networks in PyTorch {#day-5}
 
-*Mon 10 Aug — tensors, the training loop, activations, dropout, batch-norm, overfitting*
+*Fri 07 Aug — tensors, the training loop, activations, dropout, batch-norm, overfitting*
 
 **Textbook chapters**
 
@@ -127,7 +127,7 @@ We don't teach from a textbook, but if you want one spine alongside the slides:
 
 ## Day 6 · Classifying images (CNNs) {#day-6}
 
-*Tue 11 Aug — images as tensors, convolution, kernels, pooling, AlexNet*
+*Mon 10 Aug — images as tensors, convolution, kernels, pooling, AlexNet*
 
 **Textbook chapters**
 
@@ -146,7 +146,7 @@ We don't teach from a textbook, but if you want one spine alongside the slides:
 
 ## Day 7 · Generating images — autoencoders, VAEs, diffusion {#day-7}
 
-*Wed 12 Aug — the autoencoder trick, the VAE, a glance at diffusion, MIDAS*
+*Tue 11 Aug — the autoencoder trick, the VAE, a glance at diffusion, MIDAS*
 
 **Textbook chapters**
 
@@ -164,7 +164,7 @@ We don't teach from a textbook, but if you want one spine alongside the slides:
 
 ## Day 8 · Text-gen 1/4 — embeddings & character models {#day-8}
 
-*Thu 13 Aug — text as data, embeddings, the bigram language model*
+*Wed 12 Aug — text as data, embeddings, the bigram language model*
 
 **Textbook chapters**
 
@@ -182,7 +182,7 @@ We don't teach from a textbook, but if you want one spine alongside the slides:
 
 ## Day 9 · Text-gen 2/4 — recurrent networks {#day-9}
 
-*Mon 17 Aug — recurrence, the hidden state, vanishing gradients, LSTM/GRU*
+*Thu 13 Aug — recurrence, the hidden state, vanishing gradients, LSTM/GRU*
 
 **Textbook chapters**
 
@@ -199,7 +199,7 @@ We don't teach from a textbook, but if you want one spine alongside the slides:
 
 ## Day 10 · Text-gen 3/4 — attention & transformers {#day-10}
 
-*Tue 18 Aug — attention, the transformer block, scaling, a tiny GPT*
+*Mon 17 Aug — attention, the transformer block, scaling, a tiny GPT*
 
 **Textbook chapters**
 
@@ -217,7 +217,7 @@ We don't teach from a textbook, but if you want one spine alongside the slides:
 
 ## Day 11 · Text-gen 4/4 — tokenisation & sampling {#day-11}
 
-*Wed 19 Aug — byte-pair encoding, sampling strategies, the post-training pipeline*
+*Tue 18 Aug — byte-pair encoding, sampling strategies, the post-training pipeline*
 
 *Tokenisation and sampling are not covered well by the textbooks; this day is
 articles-led.*
@@ -235,7 +235,7 @@ articles-led.*
 
 ## Day 12 · Ethics, limitations, course recap {#day-12}
 
-*Thu 20 Aug*
+*Wed 19 Aug*
 
 **Textbook chapters**
 

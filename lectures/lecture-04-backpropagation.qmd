@@ -1463,9 +1463,9 @@ This is **Karpathy's micrograd**. We've walked it deliberately.
 [Lecture 5 — *Feed-forward networks in PyTorch*]{.eyebrow}
 
 ::: {.callout-tip}
-# **Over the weekend:**
+# **Tonight:**
 
-* Well done! Week 1 is the steepest part of the whole course
+* Well done — today and yesterday were the two steepest lectures of the whole course.
 * If you're curious, watch [Karpathy's *Building micrograd*](https://www.youtube.com/watch?v=VMj-3S1tku0) -- it walks through the exact lab you just did.
 * Optional: install PyTorch locally if you want to run things outside Colab. Setup notes are on Moodle.
 
