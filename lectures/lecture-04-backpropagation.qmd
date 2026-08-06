@@ -396,6 +396,193 @@ $$
 The algorithm found this **without** trying every value 😎
 :::
 
+## The same walk, one click at a time
+
+[One click, one node — the gradient flows right to left through yesterday's graph]{.eyebrow}
+
+::: {.r-stack}
+
+```{dot}
+//| fig-height: 2.6
+digraph BW0 {
+  rankdir="LR"; bgcolor="#FBFAF6"; node [fontname="Inter"];
+  x [shape=box label=<x = 1>]; ytrue [shape=box label=<y = 2>];
+  w [shape=box label=<w = 0<BR/><FONT COLOR="#FBFAF6">&#8706;L/&#8706;w = -4</FONT>> ];
+  b [shape=box label=<b = 0<BR/><FONT COLOR="#FBFAF6">&#8706;L/&#8706;b = -4</FONT>> ];
+  mul [shape=circle label="*" style=filled fillcolor="#F4F1EA"];
+  a [shape=box label=<a = 0<BR/><FONT COLOR="#FBFAF6">&#8706;L/&#8706;a = -4</FONT>> ];
+  add [shape=circle label="+" style=filled fillcolor="#F4F1EA"];
+  z [shape=box label=<z = 0<BR/><FONT COLOR="#FBFAF6">&#8706;L/&#8706;z = -4</FONT>> ];
+  sub [shape=circle label="-" style=filled fillcolor="#F4F1EA"];
+  d [shape=box label=<d = -2<BR/><FONT COLOR="#FBFAF6">&#8706;L/&#8706;d = -4</FONT>> ];
+  sq [shape=circle label="**2" style=filled fillcolor="#F4F1EA"];
+  L [shape=box label=<L = 4<BR/><FONT COLOR="#C9322B">&#8706;L/&#8706;L = 1</FONT>> style=filled fillcolor="#C9322B" fontcolor="#FBFAF6"];
+
+  x -> mul; w -> mul; mul -> a;
+  a -> add; b -> add; add -> z;
+  z -> sub; ytrue -> sub; sub -> d;
+  d -> sq; sq -> L;
+}
+```
+
+::: {.fragment}
+```{dot}
+//| fig-height: 2.6
+digraph BW1 {
+  rankdir="LR"; bgcolor="#FBFAF6"; node [fontname="Inter"];
+  x [shape=box label=<x = 1>]; ytrue [shape=box label=<y = 2>];
+  w [shape=box label=<w = 0<BR/><FONT COLOR="#FBFAF6">&#8706;L/&#8706;w = -4</FONT>> ];
+  b [shape=box label=<b = 0<BR/><FONT COLOR="#FBFAF6">&#8706;L/&#8706;b = -4</FONT>> ];
+  mul [shape=circle label="*" style=filled fillcolor="#F4F1EA"];
+  a [shape=box label=<a = 0<BR/><FONT COLOR="#FBFAF6">&#8706;L/&#8706;a = -4</FONT>> ];
+  add [shape=circle label="+" style=filled fillcolor="#F4F1EA"];
+  z [shape=box label=<z = 0<BR/><FONT COLOR="#FBFAF6">&#8706;L/&#8706;z = -4</FONT>> ];
+  sub [shape=circle label="-" style=filled fillcolor="#F4F1EA"];
+  d [shape=box label=<d = -2<BR/><FONT COLOR="#FBFAF6">&#8706;L/&#8706;d = -4</FONT>> ];
+  sq [shape=circle label="**2" style=filled fillcolor="#F4F1EA"];
+  L [shape=box label=<L = 4<BR/><FONT COLOR="#FBFAF6">&#8706;L/&#8706;L = 1</FONT>> style=filled fillcolor="#C9322B" fontcolor="#FBFAF6"];
+
+  x -> mul; w -> mul; mul -> a;
+  a -> add; b -> add; add -> z;
+  z -> sub; ytrue -> sub; sub -> d;
+  d -> sq; sq -> L;
+}
+```
+:::
+
+::: {.fragment}
+```{dot}
+//| fig-height: 2.6
+digraph BW2 {
+  rankdir="LR"; bgcolor="#FBFAF6"; node [fontname="Inter"];
+  x [shape=box label=<x = 1>]; ytrue [shape=box label=<y = 2>];
+  w [shape=box label=<w = 0<BR/><FONT COLOR="#FBFAF6">&#8706;L/&#8706;w = -4</FONT>> ];
+  b [shape=box label=<b = 0<BR/><FONT COLOR="#FBFAF6">&#8706;L/&#8706;b = -4</FONT>> ];
+  mul [shape=circle label="*" style=filled fillcolor="#F4F1EA"];
+  a [shape=box label=<a = 0<BR/><FONT COLOR="#FBFAF6">&#8706;L/&#8706;a = -4</FONT>> ];
+  add [shape=circle label="+" style=filled fillcolor="#F4F1EA"];
+  z [shape=box label=<z = 0<BR/><FONT COLOR="#FBFAF6">&#8706;L/&#8706;z = -4</FONT>> ];
+  sub [shape=circle label="-" style=filled fillcolor="#F4F1EA"];
+  d [shape=box label=<d = -2<BR/><FONT COLOR="#C9322B">&#8706;L/&#8706;d = -4</FONT>> color="#C9322B" penwidth=2.4];
+  sq [shape=circle label="**2" style=filled fillcolor="#F4F1EA"];
+  L [shape=box label=<L = 4<BR/><FONT COLOR="#FBFAF6">&#8706;L/&#8706;L = 1</FONT>> style=filled fillcolor="#C9322B" fontcolor="#FBFAF6"];
+
+  x -> mul; w -> mul; mul -> a;
+  a -> add; b -> add; add -> z;
+  z -> sub; ytrue -> sub; sub -> d;
+  d -> sq; sq -> L;
+}
+```
+:::
+
+::: {.fragment}
+```{dot}
+//| fig-height: 2.6
+digraph BW3 {
+  rankdir="LR"; bgcolor="#FBFAF6"; node [fontname="Inter"];
+  x [shape=box label=<x = 1>]; ytrue [shape=box label=<y = 2>];
+  w [shape=box label=<w = 0<BR/><FONT COLOR="#FBFAF6">&#8706;L/&#8706;w = -4</FONT>> ];
+  b [shape=box label=<b = 0<BR/><FONT COLOR="#FBFAF6">&#8706;L/&#8706;b = -4</FONT>> ];
+  mul [shape=circle label="*" style=filled fillcolor="#F4F1EA"];
+  a [shape=box label=<a = 0<BR/><FONT COLOR="#FBFAF6">&#8706;L/&#8706;a = -4</FONT>> ];
+  add [shape=circle label="+" style=filled fillcolor="#F4F1EA"];
+  z [shape=box label=<z = 0<BR/><FONT COLOR="#C9322B">&#8706;L/&#8706;z = -4</FONT>> color="#C9322B" penwidth=2.4];
+  sub [shape=circle label="-" style=filled fillcolor="#F4F1EA"];
+  d [shape=box label=<d = -2<BR/><FONT COLOR="#1A6FB4">&#8706;L/&#8706;d = -4</FONT>> ];
+  sq [shape=circle label="**2" style=filled fillcolor="#F4F1EA"];
+  L [shape=box label=<L = 4<BR/><FONT COLOR="#FBFAF6">&#8706;L/&#8706;L = 1</FONT>> style=filled fillcolor="#C9322B" fontcolor="#FBFAF6"];
+
+  x -> mul; w -> mul; mul -> a;
+  a -> add; b -> add; add -> z;
+  z -> sub; ytrue -> sub; sub -> d;
+  d -> sq; sq -> L;
+}
+```
+:::
+
+::: {.fragment}
+```{dot}
+//| fig-height: 2.6
+digraph BW4 {
+  rankdir="LR"; bgcolor="#FBFAF6"; node [fontname="Inter"];
+  x [shape=box label=<x = 1>]; ytrue [shape=box label=<y = 2>];
+  w [shape=box label=<w = 0<BR/><FONT COLOR="#FBFAF6">&#8706;L/&#8706;w = -4</FONT>> ];
+  b [shape=box label=<b = 0<BR/><FONT COLOR="#FBFAF6">&#8706;L/&#8706;b = -4</FONT>> ];
+  mul [shape=circle label="*" style=filled fillcolor="#F4F1EA"];
+  a [shape=box label=<a = 0<BR/><FONT COLOR="#C9322B">&#8706;L/&#8706;a = -4</FONT>> color="#C9322B" penwidth=2.4];
+  add [shape=circle label="+" style=filled fillcolor="#F4F1EA"];
+  z [shape=box label=<z = 0<BR/><FONT COLOR="#1A6FB4">&#8706;L/&#8706;z = -4</FONT>> ];
+  sub [shape=circle label="-" style=filled fillcolor="#F4F1EA"];
+  d [shape=box label=<d = -2<BR/><FONT COLOR="#1A6FB4">&#8706;L/&#8706;d = -4</FONT>> ];
+  sq [shape=circle label="**2" style=filled fillcolor="#F4F1EA"];
+  L [shape=box label=<L = 4<BR/><FONT COLOR="#FBFAF6">&#8706;L/&#8706;L = 1</FONT>> style=filled fillcolor="#C9322B" fontcolor="#FBFAF6"];
+
+  x -> mul; w -> mul; mul -> a;
+  a -> add; b -> add; add -> z;
+  z -> sub; ytrue -> sub; sub -> d;
+  d -> sq; sq -> L;
+}
+```
+:::
+
+::: {.fragment}
+```{dot}
+//| fig-height: 2.6
+digraph BW5 {
+  rankdir="LR"; bgcolor="#FBFAF6"; node [fontname="Inter"];
+  x [shape=box label=<x = 1>]; ytrue [shape=box label=<y = 2>];
+  w [shape=box label=<w = 0<BR/><FONT COLOR="#C9322B">&#8706;L/&#8706;w = -4</FONT>> color="#C9322B" penwidth=2.4];
+  b [shape=box label=<b = 0<BR/><FONT COLOR="#FBFAF6">&#8706;L/&#8706;b = -4</FONT>> ];
+  mul [shape=circle label="*" style=filled fillcolor="#F4F1EA"];
+  a [shape=box label=<a = 0<BR/><FONT COLOR="#1A6FB4">&#8706;L/&#8706;a = -4</FONT>> ];
+  add [shape=circle label="+" style=filled fillcolor="#F4F1EA"];
+  z [shape=box label=<z = 0<BR/><FONT COLOR="#1A6FB4">&#8706;L/&#8706;z = -4</FONT>> ];
+  sub [shape=circle label="-" style=filled fillcolor="#F4F1EA"];
+  d [shape=box label=<d = -2<BR/><FONT COLOR="#1A6FB4">&#8706;L/&#8706;d = -4</FONT>> ];
+  sq [shape=circle label="**2" style=filled fillcolor="#F4F1EA"];
+  L [shape=box label=<L = 4<BR/><FONT COLOR="#FBFAF6">&#8706;L/&#8706;L = 1</FONT>> style=filled fillcolor="#C9322B" fontcolor="#FBFAF6"];
+
+  x -> mul; w -> mul; mul -> a;
+  a -> add; b -> add; add -> z;
+  z -> sub; ytrue -> sub; sub -> d;
+  d -> sq; sq -> L;
+}
+```
+:::
+
+::: {.fragment}
+```{dot}
+//| fig-height: 2.6
+digraph BW6 {
+  rankdir="LR"; bgcolor="#FBFAF6"; node [fontname="Inter"];
+  x [shape=box label=<x = 1>]; ytrue [shape=box label=<y = 2>];
+  w [shape=box label=<w = 0<BR/><FONT COLOR="#1A6FB4">&#8706;L/&#8706;w = -4</FONT>> ];
+  b [shape=box label=<b = 0<BR/><FONT COLOR="#C9322B">&#8706;L/&#8706;b = -4</FONT>> color="#C9322B" penwidth=2.4];
+  mul [shape=circle label="*" style=filled fillcolor="#F4F1EA"];
+  a [shape=box label=<a = 0<BR/><FONT COLOR="#1A6FB4">&#8706;L/&#8706;a = -4</FONT>> ];
+  add [shape=circle label="+" style=filled fillcolor="#F4F1EA"];
+  z [shape=box label=<z = 0<BR/><FONT COLOR="#1A6FB4">&#8706;L/&#8706;z = -4</FONT>> ];
+  sub [shape=circle label="-" style=filled fillcolor="#F4F1EA"];
+  d [shape=box label=<d = -2<BR/><FONT COLOR="#1A6FB4">&#8706;L/&#8706;d = -4</FONT>> ];
+  sq [shape=circle label="**2" style=filled fillcolor="#F4F1EA"];
+  L [shape=box label=<L = 4<BR/><FONT COLOR="#FBFAF6">&#8706;L/&#8706;L = 1</FONT>> style=filled fillcolor="#C9322B" fontcolor="#FBFAF6"];
+
+  x -> mul; w -> mul; mul -> a;
+  a -> add; b -> add; add -> z;
+  z -> sub; ytrue -> sub; sub -> d;
+  d -> sq; sq -> L;
+}
+```
+:::
+
+:::
+
+::: {.card}
+Each click is one application of the chain rule: read the gradient arriving from the right, multiply by one local derivative, write the result into the node.
+
+Every gradient lands on $-4$ here only because each local derivative after the first ($2d$) is $1$ — and $x = 1$. Make $x = 3$ and $\frac{\partial L}{\partial w} = 2d \cdot x$ becomes $-12$, while $\frac{\partial L}{\partial b}$ stays at $-4$.
+:::
+
 ## Stop and check — what about an activation function?
 
 [<span class="pause-cue">Stop & check</span>]{.eyebrow}
@@ -478,6 +665,38 @@ It is the **single algorithm** that powers every modern neural network. It was p
 
 [We will use backpropagation every single day for the rest of the course.]{.muted}
 
+## Why walk backwards, not forwards?
+
+[Reverse-mode has a mirror image — and the choice between them is just counting passes]{.eyebrow}
+
+::: {.columns}
+::: {.column width="50%"}
+[Forward-mode]{.pill-amber}
+
+Pick **one parameter**, say $w$. Push "how does a nudge to $w$ ripple onwards?" through the graph, left to right, alongside the values.
+
+* One pass computes $\frac{\partial L}{\partial w}$ — for that **one** $w$.
+* Exact, and it uses the same local-derivative cheat-sheet.
+* $k$ parameters → $k$ passes.
+:::
+::: {.column width="50%"}
+[Reverse-mode]{.pill-blue}
+
+Start at the **one output**, $L$, and walk right to left.
+
+* One pass computes $\frac{\partial L}{\partial \cdot}$ for **every** node it passes.
+* $k$ parameters → still **one** backward pass.
+:::
+:::
+
+::: {.reveal-box}
+[Match the walk to the shape of the function]{.reveal-label}
+A network is a function with **millions of inputs** (the parameters) and **one output** (the loss).
+
+* Forward-mode: one pass per *input*. For GPT-2 small, that is 124,000,000 passes.
+* Reverse-mode: one pass per *output* — one, for any network, plus the forward pass that stores the values.
+
+That is the two-pass promise from earlier, kept. If you ever meet the opposite shape — one input, many outputs — forward-mode is the right tool instead.
 :::
 
 # Plenary · backward pass by hand {background-color="#0E1A2B"}
@@ -1138,7 +1357,7 @@ The point isn't the formula — it's that the update is **adaptive per parameter
 In practice, **default to Adam with $\lambda = 10^{-3}$** for most projects. We'll do exactly that next week.
 :::
 
-## The training loop — preview of next week
+## The training loop — preview of tomorrow
 
 ```{python}
 #| eval: false
@@ -1214,9 +1433,9 @@ The deep-learning idea you just learned is **applicable** to social-science prob
 :::
 :::
 
-# Lab brief · today's afternoon {background-color="#0E1A2B"}
+# Lab brief {background-color="#0E1A2B"}
 
-## Today's lab — 90 minutes
+## Tomorrow's lab — 90 minutes
 
 [Goals]{.eyebrow}
 
