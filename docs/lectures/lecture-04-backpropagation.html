@@ -2206,7 +2206,7 @@ L(\hat{y}, y) = -\big(y \ln \hat{y} + (1-y) \ln (1-\hat{y})\big)
 <p><span class="reveal-label">Sending loss gradients from right to left</span></p>
 <p>We walk backwards through a graph, applying the chain rule at every node, and reading off <span class="math inline">\frac{\partial L}{\partial w}</span> — without ever expanding the full expression of <span class="math inline">L</span>.</p>
 <p>This is called reverse-mode automatic differentiation — or, more normally, <em>backpropagation</em>.</p>
-<p>It is the <strong>single algorithm</strong> that powers every modern neural network. It was published by Rumelhart, Hinton &amp; Williams in 1986 <span class="citation" data-cites="rumelhart1986learning">(<a href="#/see-you-next-week" role="doc-biblioref" onclick="">Rumelhart et al., 1986</a>)</span>.</p>
+<p>It is the <strong>single algorithm</strong> that powers every modern neural network. It was published by Rumelhart, Hinton &amp; Williams in 1986 <span class="citation" data-cites="rumelhart1986learning">(<a href="#/see-you-tomorrow" role="doc-biblioref" onclick="">Rumelhart et al., 1986</a>)</span>.</p>
 <ul>
 <li>Scales linearly with the size of the graph (i.e.&nbsp;number of parameters)</li>
 <li>Works for arbitrary architectures (including vision models, LLMs, etc.)</li>
@@ -2449,7 +2449,7 @@ y = (3x + 2)(x - 1) \quad \text{with } x = 4.
 <section id="the-same-descent-as-a-picture" class="slide level2">
 <h2>The same descent, as a picture</h2>
 <p><span class="eyebrow"><span class="math inline">w</span> and <span class="math inline">b</span> start equal and get the same gradient, so they move together — one axis shows both</span></p>
-<div id="443e3558" class="cell" data-fig-height="3.6" data-fig-width="9" data-execution_count="1">
+<div id="acf68524" class="cell" data-fig-height="3.6" data-fig-width="9" data-execution_count="1">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
@@ -2464,7 +2464,7 @@ y = (3x + 2)(x - 1) \quad \text{with } x = 4.
 </section>
 <section id="the-learning-rate-the-one-toggle-you-always-tune" class="slide level2">
 <h2>The learning rate — the one toggle you always tune</h2>
-<div id="e7d22111" class="cell" data-fig-height="3.5" data-fig-width="9" data-execution_count="2">
+<div id="c49c7a20" class="cell" data-fig-height="3.5" data-fig-width="9" data-execution_count="2">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
@@ -2521,9 +2521,9 @@ y = (3x + 2)(x - 1) \quad \text{with } x = 4.
 <li>2 directions → <span class="math inline">2^2 = 4</span> patterns. One is a minimum (all up), one a maximum (all down), and the other 2 are <strong>saddle points</strong>.</li>
 <li>20 directions → <span class="math inline">2^{20} = 1{,}048{,}576</span> patterns; 1,048,574 are saddles.</li>
 </ul>
-<p>In a big network, almost every critical point has at least one downhill direction — a saddle, not a minimum <span class="citation" data-cites="dauphin2014identifying">(<a href="#/see-you-next-week" role="doc-biblioref" onclick="">Dauphin et al., 2014</a>)</span>.</p>
+<p>In a big network, almost every critical point has at least one downhill direction — a saddle, not a minimum <span class="citation" data-cites="dauphin2014identifying">(<a href="#/see-you-tomorrow" role="doc-biblioref" onclick="">Dauphin et al., 2014</a>)</span>.</p>
 </div><div class="column" style="width:50%;">
-<div id="f0492228" class="cell" data-fig-height="4.4" data-fig-width="5.4" data-execution_count="3">
+<div id="5b6a1921" class="cell" data-fig-height="4.4" data-fig-width="5.4" data-execution_count="3">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
@@ -2699,7 +2699,7 @@ Loss stops decreasing meaningfully.
 </ul>
 </div><div class="column" style="width:50%;">
 <p><span class="pill-green">The modern fix</span></p>
-<p><em>Adaptive</em> optimisers adjust <span class="math inline">\lambda</span> per parameter — most often using <strong>Adam</strong> <span class="citation" data-cites="kingma2014adam">(<a href="#/see-you-next-week" role="doc-biblioref" onclick="">Kingma, 2014</a>)</span> and its sibling <strong>AdamW</strong>.</p>
+<p><em>Adaptive</em> optimisers adjust <span class="math inline">\lambda</span> per parameter — most often using <strong>Adam</strong> <span class="citation" data-cites="kingma2014adam">(<a href="#/see-you-tomorrow" role="doc-biblioref" onclick="">Kingma, 2014</a>)</span> and its sibling <strong>AdamW</strong>.</p>
 <p>We’ll use these in every PyTorch model from Day 5.</p>
 <ul>
 <li>They are a good default for most DL projects</li>
@@ -2771,7 +2771,7 @@ v \leftarrow \gamma v + g, \qquad w \leftarrow w - \lambda v
 </section>
 <section id="the-training-loop-preview-of-tomorrow" class="slide level2">
 <h2>The training loop — preview of tomorrow</h2>
-<div id="337dd680" class="cell" data-execution_count="4">
+<div id="e217e705" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> epoch <span class="kw">in</span> <span class="bu">range</span>(num_epochs):</span>
 <span id="cb1-2"><a aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> x_batch, y_batch <span class="kw">in</span> train_loader:</span>
 <span id="cb1-3"><a aria-hidden="true" tabindex="-1"></a>        optimizer.zero_grad()              <span class="co"># clear last step's gradients</span></span>
@@ -2832,7 +2832,7 @@ v \leftarrow \gamma v + g, \qquad w \leftarrow w - \lambda v
 <p><span class="eyebrow">An aside on a piece of work you can read</span></p>
 <div class="columns">
 <div class="column" style="width:55%;">
-<p><strong>MIDAS</strong> <span class="citation" data-cites="lall2022midas">(<a href="#/see-you-next-week" role="doc-biblioref" onclick="">Lall &amp; Robinson, 2022</a>)</span> is a missing-data imputation method built on a <em>denoising autoencoder</em> trained with backprop and Adam.</p>
+<p><strong>MIDAS</strong> <span class="citation" data-cites="lall2022midas">(<a href="#/see-you-tomorrow" role="doc-biblioref" onclick="">Lall &amp; Robinson, 2022</a>)</span> is a missing-data imputation method built on a <em>denoising autoencoder</em> trained with backprop and Adam.</p>
 <ul>
 <li>It’s used in political science / development economics for surveys with missing entries.</li>
 <li>The core algorithm — forward pass, loss, backward pass, update — is the same as today’s.</li>
@@ -2869,9 +2869,9 @@ v \leftarrow \gamma v + g, \qquad w \leftarrow w - \lambda v
 <p>This is <strong>Karpathy’s micrograd</strong>. We’ve walked it deliberately.</p>
 </div>
 </section>
-<section id="see-you-next-week" class="slide level2 smaller scrollable" data-background-color="#0E1A2B">
-<h2>See you next week</h2>
-<p><span class="eyebrow">Lecture 5 — <em>Feed-forward networks in PyTorch</em> — Monday 10 August</span></p>
+<section id="see-you-tomorrow" class="slide level2 smaller scrollable" data-background-color="#0E1A2B">
+<h2>See you tomorrow</h2>
+<p><span class="eyebrow">Lecture 5 — <em>Feed-forward networks in PyTorch</em></span></p>
 <div class="callout callout-tip callout-titled callout-style-default">
 <div class="callout-body">
 <div class="callout-title">

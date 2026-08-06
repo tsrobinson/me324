@@ -1458,9 +1458,9 @@ You'll then use it to train a tiny one-layer model on a small dataset — and wa
 This is **Karpathy's micrograd**. We've walked it deliberately.
 :::
 
-## See you next week {background-color="#0E1A2B"}
+## See you tomorrow {background-color="#0E1A2B"}
 
-[Lecture 5 — *Feed-forward networks in PyTorch* — Monday 10 August]{.eyebrow}
+[Lecture 5 — *Feed-forward networks in PyTorch*]{.eyebrow}
 
 ::: {.callout-tip}
 # **Over the weekend:**
