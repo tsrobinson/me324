@@ -2133,5 +2133,12 @@
     "title": "Feed-forward networks in PyTorch",
     "section": "We’re surprisingly close to generative AI already",
     "text": "We’re surprisingly close to generative AI already\nWhere we are on the road to building a GPT\n\nWhere we are right now, end of Day 5:\n\n✅ You can write a forward pass.\n✅ You can write backprop (by hand, then in PyTorch).\n✅ You can train a feed-forward classifier on real data.\n⏳ Next week: vision (CNNs, generative).\n⏳ Week 3: language. Embeddings, attention, transformers — your tiny GPT.\n\nA third of the way in"
+  },
+  {
+    "objectID": "lectures/lecture-05-feedforward.html#mondays-lab-90-minutes",
+    "href": "lectures/lecture-05-feedforward.html#mondays-lab-90-minutes",
+    "title": "Feed-forward networks in PyTorch",
+    "section": "Monday’s lab — 90 minutes",
+    "text": "Monday’s lab — 90 minutes\nGoals\nIn Colab (or local), build a small feed-forward classifier on a real social-science dataset.\nYou will:\n\nLoad data and create train / validation / test splits.\nDefine a model with nn.Sequential (linear → ReLU → linear → ReLU → linear).\nTrain with Adam + cross-entropy.\nPlot loss curves.\nAdd dropout and batch norm. Re-train. Compare.\n\n\nStretch goals\n\nTry replacing ReLU with Sigmoid. Watch what happens to the loss curve.\nTry a learning rate of 10^{-1}. Watch what happens to the loss.\nIncrease model depth to 4 layers. Watch validation accuracy."
   }
 ]

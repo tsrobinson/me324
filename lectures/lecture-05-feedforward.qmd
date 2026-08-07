@@ -1475,7 +1475,7 @@ Where we are right now, end of Day 5:
 
 # Lab brief · Monday afternoon {background-color="#0E1A2B"}
 
-## Today's lab — 90 minutes
+## Monday's lab — 90 minutes
 
 [Goals]{.eyebrow}
 
