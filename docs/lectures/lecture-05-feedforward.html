@@ -450,7 +450,7 @@ Dr Thomas Robinson
 <div class="card">
 <p>Four days writing autodifferentiation by hand. <strong>From today, you never have to again</strong></p>
 <ul>
-<li>(except maybe in an exam 😉)</li>
+<li>(except maybe in an exam 😉 )</li>
 </ul>
 <p><strong>Question for today:</strong></p>
 <p>How do we build neural networks at scale – in PyTorch, on real data, with a working classifier?</p>
@@ -477,8 +477,8 @@ Dr Thomas Robinson
 <p><span class="eyebrow">From yesterday</span></p>
 <ol type="1">
 <li>One gradient-descent update. <span class="math inline">w = 1</span>, <span class="math inline">\frac{\partial L}{\partial w} = 0.5</span>, learning rate <span class="math inline">\lambda = 0.1</span>. What is the new <span class="math inline">w</span>?</li>
-<li>What does a loss function measure — and which loss did we use for regression?</li>
-<li>In which direction does backpropagation walk the computational graph, and what does it carry with it?</li>
+<li>What does a loss function measure — and which loss did we use for continuous outcomes?</li>
+<li>What do you backpropagate?</li>
 </ol>
 </div>
 <p><span class="muted">Everything here is from yesterday’s lecture!</span></p>
@@ -491,10 +491,9 @@ Dr Thomas Robinson
 w_{\text{new}} = w - \lambda \frac{\partial L}{\partial w} = 1 - 0.1 \times 0.5 = 1 - 0.05 = 0.95
 </span></li>
 <li>How wrong the model’s predictions are on the data, as a single number — lower is better. For regression we used <strong>mean squared error</strong>.</li>
-<li><strong>Backwards</strong> — from the loss to the inputs, multiplying local derivatives along the way. That is the chain rule.</li>
+<li>Often “the loss” but more technically you backpropagate the <em>gradient</em> of the loss</li>
 </ol>
 </div>
-<p>All three are about to become one line of PyTorch each.</p>
 </section>
 <section>
 <section id="part-1-from-value-to-pytorch" class="title-slide slide level1 center" data-background-color="#0E1A2B">
@@ -569,8 +568,8 @@ w_{\text{new}} = w - \lambda \frac{\partial L}{\partial w} = 1 - 0.1 \times 0.5 
 </ul>
 </div>
 </section>
-<section id="models-the-pytorch-way-nn.module" class="slide level2">
-<h2>Models, the PyTorch way — <code>nn.Module</code></h2>
+<section id="pytorch-models-nn.module" class="slide level2">
+<h2>PyTorch models — <code>nn.Module</code></h2>
 <div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn <span class="im">as</span> nn</span>
 <span id="cb3-2"><a aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-3"><a aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> TurnoutModel(nn.Module):</span>
@@ -645,8 +644,8 @@ w_{\text{new}} = w - \lambda \frac{\partial L}{\partial w} = 1 - 0.1 \times 0.5 
 </div>
 </div>
 </section>
-<section id="the-same-pattern-in-plain-english" class="slide level2">
-<h2>The same pattern, in plain English</h2>
+<section id="the-same-pattern" class="slide level2">
+<h2>The same pattern</h2>
 <div class="card">
 <ol type="1">
 <li><strong>Define a model</strong> (a <code>Module</code> whose <code>forward()</code> you wrote).</li>
@@ -705,7 +704,7 @@ w_{\text{new}} = w - \lambda \frac{\partial L}{\partial w} = 1 - 0.1 \times 0.5 
 \sigma_{\text{GELU}}(x) = x \cdot \Phi(x)
 </span></p>
 <p><span class="smaller"><span class="math inline">\Phi</span> is the <strong>standard-normal cumulative distribution function</strong>. GELU is just a softer version of ReLU.</span></p>
-<div id="d6259514" class="cell" data-fig-height="2.95" data-fig-width="9" data-execution_count="1">
+<div id="d743d18a" class="cell" data-fig-height="2.95" data-fig-width="9" data-execution_count="1">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
@@ -857,18 +856,17 @@ e^2 = 7.39, \quad e^1 = 2.72, \quad e^0 = 1.00, \quad \textstyle\sum = 11.11
 </table>
 </div>
 <div class="reveal-box">
-<p><span class="reveal-label">The lesson</span> On the negative side at <span class="math inline">|z| = 3.5</span>:</p>
+<p><span class="reveal-label">Takeaways</span> On the negative side at <span class="math inline">|z| = 3.5</span>:</p>
 <ul>
 <li><strong>Identity</strong> passes through, with derivative 1 → great for gradient flow.</li>
 <li><strong>ReLU</strong> zeroes out — and its gradient is also zero on this example. If the unit stays negative for <em>every</em> input, it becomes a <em>dead ReLU</em> and stops learning permanently.</li>
 <li><strong>Sigmoid / tanh</strong> are nearly flat — derivative <span class="math inline">\to 0</span>. <strong>Vanishing gradient.</strong> Backprop through many such nodes shrinks gradients to nothing.</li>
 </ul>
-<p>That is <em>why</em> most modern hidden layers use ReLU.</p>
 </div>
 </section></section>
 <section>
-<section id="part-2-training-properly" class="title-slide slide level1 center" data-background-color="#0E1A2B">
-<h1>Part 2 · Training, properly</h1>
+<section id="part-2-training-models-properly" class="title-slide slide level1 center" data-background-color="#0E1A2B">
+<h1>Part 2 · Training models properly</h1>
 
 </section>
 <section id="loss-functions-by-problem-type" class="slide level2">
@@ -948,7 +946,7 @@ e^2 = 7.39, \quad e^1 = 2.72, \quad e^0 = 1.00, \quad \textstyle\sum = 11.11
 <p><span class="pill-blue">Xavier (Glorot)</span></p>
 <p>For sigmoid / tanh: <span class="math display"> W^{(l)} \sim \mathcal{N}\!\left(0, \tfrac{2}{n^{(l-1)} + n^{(l)}}\right) </span></p>
 <p>Keeps the variance of activations stable across layers.</p>
-<p>When the layer’s fan-in and fan-out are similar this reduces to the fan-in (LeCun) form <span class="math inline">\tfrac{1}{n^{(l-1)}}</span>.</p>
+<p>When the layer’s input and output dimensions are similar this reduces to the “fan-in” (LeCun) form <span class="math inline">\tfrac{1}{n^{(l-1)}}</span>.</p>
 </div><div class="column" style="width:50%;">
 <p><span class="pill">He (Kaiming)</span></p>
 <p>For ReLU: <span class="math display"> W^{(l)} \sim \mathcal{N}(0, \tfrac{2}{n^{(l-1)}}) </span></p>
@@ -1005,9 +1003,9 @@ e^2 = 7.39, \quad e^1 = 2.72, \quad e^0 = 1.00, \quad \textstyle\sum = 11.11
 </div>
 </div>
 </section>
-<section id="the-full-training-loop-revisited" class="slide level2">
-<h2>The full training loop, revisited</h2>
-<div id="ed708515" class="cell" data-execution_count="2">
+<section id="monitoring-training" class="slide level2">
+<h2>Monitoring training</h2>
+<div id="5762b2b9" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
 <span id="cb6-2"><a aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torch.utils.data <span class="im">import</span> DataLoader</span>
 <span id="cb6-3"><a aria-hidden="true" tabindex="-1"></a></span>
@@ -1090,18 +1088,18 @@ e^2 = 7.39, \quad e^1 = 2.72, \quad e^0 = 1.00, \quad \textstyle\sum = 11.11
 <h1>Part 3 · When training fails</h1>
 
 </section>
-<section id="stop-check-before-we-go-on" class="slide level2">
-<h2>Stop &amp; check before we go on</h2>
+<section id="what-you-need-to-know" class="slide level2">
+<h2>What you need to know</h2>
 <p><span class="eyebrow"><span class="pause-cue">Stop &amp; check</span></span></p>
 <div class="card">
-<p>Before we go on to understand when models break, make sure you’re happy with the following:</p>
+<p>Before we go on to understand when models <em>break</em>, make sure you’re happy with the following:</p>
 <ol type="1">
 <li>Why does <strong>initialising every weight to zero</strong> stop the network from learning?</li>
 <li>What does <strong><code>model.eval()</code></strong> change about dropout and batch norm?</li>
 <li>Which optimiser and learning rate are the sensible <strong>first try</strong>?</li>
 </ol>
 </div>
-<p><span class="muted">If any of these is still fuzzy, flag it now!</span></p>
+<p><span class="muted">If any of these are still fuzzy, flag it now!</span></p>
 </section>
 <section id="neural-networks-are-fickle" class="slide level2">
 <h2>Neural networks are fickle</h2>
@@ -1349,59 +1347,666 @@ e^2 = 7.39, \quad e^1 = 2.72, \quad e^0 = 1.00, \quad \textstyle\sum = 11.11
 </section>
 <section id="batch-normalisation-example" class="slide level2">
 <h2>Batch normalisation example</h2>
-<p>Take one feature’s pre-activations across a batch of three examples: <span class="math inline">z = [2,\ 4,\ 6]</span>, with <span class="math inline">\gamma = 1</span> and <span class="math inline">\beta = 0</span>.</p>
-<div class="card">
-<p><span class="eyebrow">Step 1 · the batch mean</span> <span class="math inline">\quad \mu_B = \dfrac{2 + 4 + 6}{3} = 4</span></p>
-<p><span class="eyebrow">Step 2 · the batch variance</span> <span class="math inline">\quad \sigma_B^2 = \dfrac{(2-4)^2 + (4-4)^2 + (6-4)^2}{3} = \dfrac{4 + 0 + 4}{3} = \dfrac{8}{3} \approx 2.67</span>, so <span class="math inline">\sigma_B \approx 1.63</span></p>
-<p><span class="eyebrow">Step 3 · standardise</span> <span class="math inline">\quad \text{BN}(z) \approx \left[\tfrac{2-4}{1.63},\ \tfrac{4-4}{1.63},\ \tfrac{6-4}{1.63}\right] = [-1.22,\ 0,\ 1.22]</span></p>
+<p><span class="eyebrow">One click per step — batch norm reads <strong>down a column</strong></span></p>
+<p>A batch of three examples (rows), each with four features (columns). Take feature 1, with <span class="math inline">\gamma = 1</span> and <span class="math inline">\beta = 0</span>.</p>
+<div class="r-stack">
+<div class="cell" data-fig-height="3.1" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class=""><p></p>
+<div>
+<svg width="960" height="298" viewbox="0.00 0.00 544.00 244.00" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" style="; max-width: none; max-height: none; display: block; margin: auto auto auto auto">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 240)">
+<title>BN0</title>
+<polygon fill="#fbfaf6" stroke="transparent" points="-4,4 -4,-240 540,-240 540,4 -4,4"></polygon>
+<!-- m -->
+<g id="node1" class="node">
+<title>m</title>
+<polygon fill="#f4f1ea" stroke="transparent" points="207,-200 207,-232 289,-232 289,-200 207,-200"></polygon>
+<polygon fill="none" stroke="#d7d2c5" stroke-width="2" points="208,-201 208,-231 288,-231 288,-201 208,-201"></polygon>
+<text text-anchor="start" x="242.17" y="-212.4" font-family="Inter" font-size="14.00" fill="#0e1a2b">f</text>
+<text text-anchor="start" x="246.83" y="-212.4" font-family="Inter" baseline-shift="sub" font-size="14.00" fill="#0e1a2b">1</text>
+<polygon fill="#f4f1ea" stroke="transparent" stroke-width="2" points="289,-200 289,-232 314,-232 314,-200 289,-200"></polygon>
+<polygon fill="none" stroke="#d7d2c5" points="289,-200 289,-232 314,-232 314,-200 289,-200"></polygon>
+<text text-anchor="start" x="295.67" y="-212.8" font-family="Inter" font-size="14.00" fill="#0e1a2b">f</text>
+<text text-anchor="start" x="300.33" y="-212.8" font-family="Inter" baseline-shift="sub" font-size="14.00" fill="#0e1a2b">2</text>
+<polygon fill="#f4f1ea" stroke="transparent" points="314,-200 314,-232 339,-232 339,-200 314,-200"></polygon>
+<polygon fill="none" stroke="#d7d2c5" points="314,-200 314,-232 339,-232 339,-200 314,-200"></polygon>
+<text text-anchor="start" x="320.67" y="-212.8" font-family="Inter" font-size="14.00" fill="#0e1a2b">f</text>
+<text text-anchor="start" x="325.33" y="-212.8" font-family="Inter" baseline-shift="sub" font-size="14.00" fill="#0e1a2b">3</text>
+<polygon fill="#f4f1ea" stroke="transparent" points="339,-200 339,-232 364,-232 364,-200 339,-200"></polygon>
+<polygon fill="none" stroke="#d7d2c5" points="339,-200 339,-232 364,-232 364,-200 339,-200"></polygon>
+<text text-anchor="start" x="345.67" y="-212.8" font-family="Inter" font-size="14.00" fill="#0e1a2b">f</text>
+<text text-anchor="start" x="350.33" y="-212.8" font-family="Inter" baseline-shift="sub" font-size="14.00" fill="#0e1a2b">4</text>
+<text text-anchor="start" x="177.64" y="-179.8" font-family="Inter" font-size="14.00" fill="#5c6473">ex 1</text>
+<polygon fill="none" stroke="#d7d2c5" stroke-width="2" points="208,-169 208,-199 288,-199 288,-169 208,-169"></polygon>
+<text text-anchor="start" x="214.75" y="-180.4" font-family="Inter" font-size="14.00" fill="#0e1a2b">2</text>
+<text text-anchor="start" x="221.75" y="-180.4" font-family="Inter" font-size="14.00" fill="#fbfaf6">&nbsp;→&nbsp;−1.22</text>
+<polygon fill="none" stroke="#d7d2c5" points="289,-168 289,-200 314,-200 314,-168 289,-168"></polygon>
+<text text-anchor="start" x="298" y="-179.8" font-family="Inter" font-size="14.00" fill="#0e1a2b">4</text>
+<polygon fill="none" stroke="#d7d2c5" points="314,-168 314,-200 339,-200 339,-168 314,-168"></polygon>
+<text text-anchor="start" x="323" y="-179.8" font-family="Inter" font-size="14.00" fill="#0e1a2b">6</text>
+<polygon fill="none" stroke="#d7d2c5" points="339,-168 339,-200 364,-200 364,-168 339,-168"></polygon>
+<text text-anchor="start" x="348" y="-179.8" font-family="Inter" font-size="14.00" fill="#0e1a2b">8</text>
+<text text-anchor="start" x="177.64" y="-147.8" font-family="Inter" font-size="14.00" fill="#5c6473">ex 2</text>
+<polygon fill="none" stroke="#d7d2c5" stroke-width="2" points="208,-137 208,-167 288,-167 288,-137 208,-137"></polygon>
+<text text-anchor="start" x="215" y="-148.4" font-family="Inter" font-size="14.00" fill="#0e1a2b">4</text>
+<text text-anchor="start" x="222" y="-148.4" font-family="Inter" font-size="14.00" fill="#fbfaf6">&nbsp;→&nbsp;0.00</text>
+<polygon fill="none" stroke="#d7d2c5" points="289,-136 289,-168 314,-168 314,-136 289,-136"></polygon>
+<text text-anchor="start" x="298" y="-147.8" font-family="Inter" font-size="14.00" fill="#0e1a2b">0</text>
+<polygon fill="none" stroke="#d7d2c5" points="314,-136 314,-168 339,-168 339,-136 314,-136"></polygon>
+<text text-anchor="start" x="323" y="-147.8" font-family="Inter" font-size="14.00" fill="#0e1a2b">2</text>
+<polygon fill="none" stroke="#d7d2c5" points="339,-136 339,-168 364,-168 364,-136 339,-136"></polygon>
+<text text-anchor="start" x="348" y="-147.8" font-family="Inter" font-size="14.00" fill="#0e1a2b">6</text>
+<text text-anchor="start" x="177.64" y="-115.8" font-family="Inter" font-size="14.00" fill="#5c6473">ex 3</text>
+<polygon fill="none" stroke="#d7d2c5" stroke-width="2" points="208,-105 208,-135 288,-135 288,-105 208,-105"></polygon>
+<text text-anchor="start" x="215" y="-116.4" font-family="Inter" font-size="14.00" fill="#0e1a2b">6</text>
+<text text-anchor="start" x="222" y="-116.4" font-family="Inter" font-size="14.00" fill="#fbfaf6">&nbsp;→&nbsp;+1.22</text>
+<polygon fill="none" stroke="#d7d2c5" points="289,-104 289,-136 314,-136 314,-104 289,-104"></polygon>
+<text text-anchor="start" x="298" y="-115.8" font-family="Inter" font-size="14.00" fill="#0e1a2b">2</text>
+<polygon fill="none" stroke="#d7d2c5" points="314,-104 314,-136 339,-136 339,-104 314,-104"></polygon>
+<text text-anchor="start" x="323" y="-115.8" font-family="Inter" font-size="14.00" fill="#0e1a2b">4</text>
+<polygon fill="none" stroke="#d7d2c5" points="339,-104 339,-136 364,-136 364,-104 339,-104"></polygon>
+<text text-anchor="start" x="348" y="-115.8" font-family="Inter" font-size="14.00" fill="#0e1a2b">4</text>
+</g>
+<!-- cap -->
+<g id="node2" class="node">
+<title>cap</title>
+<text text-anchor="start" x="12" y="-59.4" font-family="Inter" font-size="14.00" fill="#fbfaf6">Step 1 · the batch mean:&nbsp; (2 + 4 + 6) / 3 = 4</text>
+<text text-anchor="start" x="12" y="-35.4" font-family="Inter" font-size="14.00" fill="#fbfaf6">Step 2 · the batch variance:&nbsp; ((−2)² + 0² + (+2)²) / 3 = 8/3 ≈ 2.67,&nbsp; so the sd ≈ 1.63</text>
+<text text-anchor="start" x="11.51" y="-11.4" font-family="Inter" font-size="14.00" fill="#fbfaf6">Step 3 · standardise:&nbsp; (2 − 4)/1.63 = −1.22,&nbsp;&nbsp; (4 − 4)/1.63 = 0.00,&nbsp;&nbsp; (6 − 4)/1.63 = +1.22</text>
+</g>
+<!-- m&#45;&gt;cap -->
+</g>
+</svg>
 </div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+<div class="fragment">
+<div class="cell" data-fig-height="3.1" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class=""><p></p>
+<div>
+<svg width="960" height="298" viewbox="0.00 0.00 544.00 244.00" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" style="; max-width: none; max-height: none; display: block; margin: auto auto auto auto">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 240)">
+<title>BN1</title>
+<polygon fill="#fbfaf6" stroke="transparent" points="-4,4 -4,-240 540,-240 540,4 -4,4"></polygon>
+<!-- m -->
+<g id="node1" class="node">
+<title>m</title>
+<polygon fill="#f4f1ea" stroke="transparent" points="207,-200 207,-232 289,-232 289,-200 207,-200"></polygon>
+<polygon fill="none" stroke="#c9322b" stroke-width="2" points="208,-201 208,-231 288,-231 288,-201 208,-201"></polygon>
+<text text-anchor="start" x="242.17" y="-212.4" font-family="Inter" font-size="14.00" fill="#0e1a2b">f</text>
+<text text-anchor="start" x="246.83" y="-212.4" font-family="Inter" baseline-shift="sub" font-size="14.00" fill="#0e1a2b">1</text>
+<polygon fill="#f4f1ea" stroke="transparent" stroke-width="2" points="289,-200 289,-232 314,-232 314,-200 289,-200"></polygon>
+<polygon fill="none" stroke="#d7d2c5" points="289,-200 289,-232 314,-232 314,-200 289,-200"></polygon>
+<text text-anchor="start" x="295.67" y="-212.8" font-family="Inter" font-size="14.00" fill="#0e1a2b">f</text>
+<text text-anchor="start" x="300.33" y="-212.8" font-family="Inter" baseline-shift="sub" font-size="14.00" fill="#0e1a2b">2</text>
+<polygon fill="#f4f1ea" stroke="transparent" points="314,-200 314,-232 339,-232 339,-200 314,-200"></polygon>
+<polygon fill="none" stroke="#d7d2c5" points="314,-200 314,-232 339,-232 339,-200 314,-200"></polygon>
+<text text-anchor="start" x="320.67" y="-212.8" font-family="Inter" font-size="14.00" fill="#0e1a2b">f</text>
+<text text-anchor="start" x="325.33" y="-212.8" font-family="Inter" baseline-shift="sub" font-size="14.00" fill="#0e1a2b">3</text>
+<polygon fill="#f4f1ea" stroke="transparent" points="339,-200 339,-232 364,-232 364,-200 339,-200"></polygon>
+<polygon fill="none" stroke="#d7d2c5" points="339,-200 339,-232 364,-232 364,-200 339,-200"></polygon>
+<text text-anchor="start" x="345.67" y="-212.8" font-family="Inter" font-size="14.00" fill="#0e1a2b">f</text>
+<text text-anchor="start" x="350.33" y="-212.8" font-family="Inter" baseline-shift="sub" font-size="14.00" fill="#0e1a2b">4</text>
+<text text-anchor="start" x="177.64" y="-179.8" font-family="Inter" font-size="14.00" fill="#5c6473">ex 1</text>
+<polygon fill="none" stroke="#c9322b" stroke-width="2" points="208,-169 208,-199 288,-199 288,-169 208,-169"></polygon>
+<text text-anchor="start" x="214.75" y="-180.4" font-family="Inter" font-size="14.00" fill="#c9322b">2</text>
+<text text-anchor="start" x="221.75" y="-180.4" font-family="Inter" font-size="14.00" fill="#fbfaf6">&nbsp;→&nbsp;−1.22</text>
+<polygon fill="none" stroke="#d7d2c5" points="289,-168 289,-200 314,-200 314,-168 289,-168"></polygon>
+<text text-anchor="start" x="298" y="-179.8" font-family="Inter" font-size="14.00" fill="#0e1a2b">4</text>
+<polygon fill="none" stroke="#d7d2c5" points="314,-168 314,-200 339,-200 339,-168 314,-168"></polygon>
+<text text-anchor="start" x="323" y="-179.8" font-family="Inter" font-size="14.00" fill="#0e1a2b">6</text>
+<polygon fill="none" stroke="#d7d2c5" points="339,-168 339,-200 364,-200 364,-168 339,-168"></polygon>
+<text text-anchor="start" x="348" y="-179.8" font-family="Inter" font-size="14.00" fill="#0e1a2b">8</text>
+<text text-anchor="start" x="177.64" y="-147.8" font-family="Inter" font-size="14.00" fill="#5c6473">ex 2</text>
+<polygon fill="none" stroke="#c9322b" stroke-width="2" points="208,-137 208,-167 288,-167 288,-137 208,-137"></polygon>
+<text text-anchor="start" x="215" y="-148.4" font-family="Inter" font-size="14.00" fill="#c9322b">4</text>
+<text text-anchor="start" x="222" y="-148.4" font-family="Inter" font-size="14.00" fill="#fbfaf6">&nbsp;→&nbsp;0.00</text>
+<polygon fill="none" stroke="#d7d2c5" points="289,-136 289,-168 314,-168 314,-136 289,-136"></polygon>
+<text text-anchor="start" x="298" y="-147.8" font-family="Inter" font-size="14.00" fill="#0e1a2b">0</text>
+<polygon fill="none" stroke="#d7d2c5" points="314,-136 314,-168 339,-168 339,-136 314,-136"></polygon>
+<text text-anchor="start" x="323" y="-147.8" font-family="Inter" font-size="14.00" fill="#0e1a2b">2</text>
+<polygon fill="none" stroke="#d7d2c5" points="339,-136 339,-168 364,-168 364,-136 339,-136"></polygon>
+<text text-anchor="start" x="348" y="-147.8" font-family="Inter" font-size="14.00" fill="#0e1a2b">6</text>
+<text text-anchor="start" x="177.64" y="-115.8" font-family="Inter" font-size="14.00" fill="#5c6473">ex 3</text>
+<polygon fill="none" stroke="#c9322b" stroke-width="2" points="208,-105 208,-135 288,-135 288,-105 208,-105"></polygon>
+<text text-anchor="start" x="215" y="-116.4" font-family="Inter" font-size="14.00" fill="#c9322b">6</text>
+<text text-anchor="start" x="222" y="-116.4" font-family="Inter" font-size="14.00" fill="#fbfaf6">&nbsp;→&nbsp;+1.22</text>
+<polygon fill="none" stroke="#d7d2c5" points="289,-104 289,-136 314,-136 314,-104 289,-104"></polygon>
+<text text-anchor="start" x="298" y="-115.8" font-family="Inter" font-size="14.00" fill="#0e1a2b">2</text>
+<polygon fill="none" stroke="#d7d2c5" points="314,-104 314,-136 339,-136 339,-104 314,-104"></polygon>
+<text text-anchor="start" x="323" y="-115.8" font-family="Inter" font-size="14.00" fill="#0e1a2b">4</text>
+<polygon fill="none" stroke="#d7d2c5" points="339,-104 339,-136 364,-136 364,-104 339,-104"></polygon>
+<text text-anchor="start" x="348" y="-115.8" font-family="Inter" font-size="14.00" fill="#0e1a2b">4</text>
+</g>
+<!-- cap -->
+<g id="node2" class="node">
+<title>cap</title>
+<text text-anchor="start" x="12" y="-59.4" font-family="Inter" font-size="14.00" fill="#0e1a2b">Step 1 · the batch mean:&nbsp; (2 + 4 + 6) / 3 = 4</text>
+<text text-anchor="start" x="12" y="-35.4" font-family="Inter" font-size="14.00" fill="#fbfaf6">Step 2 · the batch variance:&nbsp; ((−2)² + 0² + (+2)²) / 3 = 8/3 ≈ 2.67,&nbsp; so the sd ≈ 1.63</text>
+<text text-anchor="start" x="11.51" y="-11.4" font-family="Inter" font-size="14.00" fill="#fbfaf6">Step 3 · standardise:&nbsp; (2 − 4)/1.63 = −1.22,&nbsp;&nbsp; (4 − 4)/1.63 = 0.00,&nbsp;&nbsp; (6 − 4)/1.63 = +1.22</text>
+</g>
+<!-- m&#45;&gt;cap -->
+</g>
+</svg>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+</div>
+<div class="fragment">
+<div class="cell" data-fig-height="3.1" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class=""><p></p>
+<div>
+<svg width="960" height="298" viewbox="0.00 0.00 544.00 244.00" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" style="; max-width: none; max-height: none; display: block; margin: auto auto auto auto">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 240)">
+<title>BN2</title>
+<polygon fill="#fbfaf6" stroke="transparent" points="-4,4 -4,-240 540,-240 540,4 -4,4"></polygon>
+<!-- m -->
+<g id="node1" class="node">
+<title>m</title>
+<polygon fill="#f4f1ea" stroke="transparent" points="207,-200 207,-232 289,-232 289,-200 207,-200"></polygon>
+<polygon fill="none" stroke="#c9322b" stroke-width="2" points="208,-201 208,-231 288,-231 288,-201 208,-201"></polygon>
+<text text-anchor="start" x="242.17" y="-212.4" font-family="Inter" font-size="14.00" fill="#0e1a2b">f</text>
+<text text-anchor="start" x="246.83" y="-212.4" font-family="Inter" baseline-shift="sub" font-size="14.00" fill="#0e1a2b">1</text>
+<polygon fill="#f4f1ea" stroke="transparent" stroke-width="2" points="289,-200 289,-232 314,-232 314,-200 289,-200"></polygon>
+<polygon fill="none" stroke="#d7d2c5" points="289,-200 289,-232 314,-232 314,-200 289,-200"></polygon>
+<text text-anchor="start" x="295.67" y="-212.8" font-family="Inter" font-size="14.00" fill="#0e1a2b">f</text>
+<text text-anchor="start" x="300.33" y="-212.8" font-family="Inter" baseline-shift="sub" font-size="14.00" fill="#0e1a2b">2</text>
+<polygon fill="#f4f1ea" stroke="transparent" points="314,-200 314,-232 339,-232 339,-200 314,-200"></polygon>
+<polygon fill="none" stroke="#d7d2c5" points="314,-200 314,-232 339,-232 339,-200 314,-200"></polygon>
+<text text-anchor="start" x="320.67" y="-212.8" font-family="Inter" font-size="14.00" fill="#0e1a2b">f</text>
+<text text-anchor="start" x="325.33" y="-212.8" font-family="Inter" baseline-shift="sub" font-size="14.00" fill="#0e1a2b">3</text>
+<polygon fill="#f4f1ea" stroke="transparent" points="339,-200 339,-232 364,-232 364,-200 339,-200"></polygon>
+<polygon fill="none" stroke="#d7d2c5" points="339,-200 339,-232 364,-232 364,-200 339,-200"></polygon>
+<text text-anchor="start" x="345.67" y="-212.8" font-family="Inter" font-size="14.00" fill="#0e1a2b">f</text>
+<text text-anchor="start" x="350.33" y="-212.8" font-family="Inter" baseline-shift="sub" font-size="14.00" fill="#0e1a2b">4</text>
+<text text-anchor="start" x="177.64" y="-179.8" font-family="Inter" font-size="14.00" fill="#5c6473">ex 1</text>
+<polygon fill="none" stroke="#c9322b" stroke-width="2" points="208,-169 208,-199 288,-199 288,-169 208,-169"></polygon>
+<text text-anchor="start" x="214.75" y="-180.4" font-family="Inter" font-size="14.00" fill="#c9322b">2</text>
+<text text-anchor="start" x="221.75" y="-180.4" font-family="Inter" font-size="14.00" fill="#fbfaf6">&nbsp;→&nbsp;−1.22</text>
+<polygon fill="none" stroke="#d7d2c5" points="289,-168 289,-200 314,-200 314,-168 289,-168"></polygon>
+<text text-anchor="start" x="298" y="-179.8" font-family="Inter" font-size="14.00" fill="#0e1a2b">4</text>
+<polygon fill="none" stroke="#d7d2c5" points="314,-168 314,-200 339,-200 339,-168 314,-168"></polygon>
+<text text-anchor="start" x="323" y="-179.8" font-family="Inter" font-size="14.00" fill="#0e1a2b">6</text>
+<polygon fill="none" stroke="#d7d2c5" points="339,-168 339,-200 364,-200 364,-168 339,-168"></polygon>
+<text text-anchor="start" x="348" y="-179.8" font-family="Inter" font-size="14.00" fill="#0e1a2b">8</text>
+<text text-anchor="start" x="177.64" y="-147.8" font-family="Inter" font-size="14.00" fill="#5c6473">ex 2</text>
+<polygon fill="none" stroke="#c9322b" stroke-width="2" points="208,-137 208,-167 288,-167 288,-137 208,-137"></polygon>
+<text text-anchor="start" x="215" y="-148.4" font-family="Inter" font-size="14.00" fill="#c9322b">4</text>
+<text text-anchor="start" x="222" y="-148.4" font-family="Inter" font-size="14.00" fill="#fbfaf6">&nbsp;→&nbsp;0.00</text>
+<polygon fill="none" stroke="#d7d2c5" points="289,-136 289,-168 314,-168 314,-136 289,-136"></polygon>
+<text text-anchor="start" x="298" y="-147.8" font-family="Inter" font-size="14.00" fill="#0e1a2b">0</text>
+<polygon fill="none" stroke="#d7d2c5" points="314,-136 314,-168 339,-168 339,-136 314,-136"></polygon>
+<text text-anchor="start" x="323" y="-147.8" font-family="Inter" font-size="14.00" fill="#0e1a2b">2</text>
+<polygon fill="none" stroke="#d7d2c5" points="339,-136 339,-168 364,-168 364,-136 339,-136"></polygon>
+<text text-anchor="start" x="348" y="-147.8" font-family="Inter" font-size="14.00" fill="#0e1a2b">6</text>
+<text text-anchor="start" x="177.64" y="-115.8" font-family="Inter" font-size="14.00" fill="#5c6473">ex 3</text>
+<polygon fill="none" stroke="#c9322b" stroke-width="2" points="208,-105 208,-135 288,-135 288,-105 208,-105"></polygon>
+<text text-anchor="start" x="215" y="-116.4" font-family="Inter" font-size="14.00" fill="#c9322b">6</text>
+<text text-anchor="start" x="222" y="-116.4" font-family="Inter" font-size="14.00" fill="#fbfaf6">&nbsp;→&nbsp;+1.22</text>
+<polygon fill="none" stroke="#d7d2c5" points="289,-104 289,-136 314,-136 314,-104 289,-104"></polygon>
+<text text-anchor="start" x="298" y="-115.8" font-family="Inter" font-size="14.00" fill="#0e1a2b">2</text>
+<polygon fill="none" stroke="#d7d2c5" points="314,-104 314,-136 339,-136 339,-104 314,-104"></polygon>
+<text text-anchor="start" x="323" y="-115.8" font-family="Inter" font-size="14.00" fill="#0e1a2b">4</text>
+<polygon fill="none" stroke="#d7d2c5" points="339,-104 339,-136 364,-136 364,-104 339,-104"></polygon>
+<text text-anchor="start" x="348" y="-115.8" font-family="Inter" font-size="14.00" fill="#0e1a2b">4</text>
+</g>
+<!-- cap -->
+<g id="node2" class="node">
+<title>cap</title>
+<text text-anchor="start" x="12" y="-59.4" font-family="Inter" font-size="14.00" fill="#5c6473">Step 1 · the batch mean:&nbsp; (2 + 4 + 6) / 3 = 4</text>
+<text text-anchor="start" x="12" y="-35.4" font-family="Inter" font-size="14.00" fill="#0e1a2b">Step 2 · the batch variance:&nbsp; ((−2)² + 0² + (+2)²) / 3 = 8/3 ≈ 2.67,&nbsp; so the sd ≈ 1.63</text>
+<text text-anchor="start" x="11.51" y="-11.4" font-family="Inter" font-size="14.00" fill="#fbfaf6">Step 3 · standardise:&nbsp; (2 − 4)/1.63 = −1.22,&nbsp;&nbsp; (4 − 4)/1.63 = 0.00,&nbsp;&nbsp; (6 − 4)/1.63 = +1.22</text>
+</g>
+<!-- m&#45;&gt;cap -->
+</g>
+</svg>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+</div>
+<div class="fragment">
+<div class="cell" data-fig-height="3.1" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class=""><p></p>
+<div>
+<svg width="960" height="298" viewbox="0.00 0.00 544.00 244.00" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" style="; max-width: none; max-height: none; display: block; margin: auto auto auto auto">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 240)">
+<title>BN3</title>
+<polygon fill="#fbfaf6" stroke="transparent" points="-4,4 -4,-240 540,-240 540,4 -4,4"></polygon>
+<!-- m -->
+<g id="node1" class="node">
+<title>m</title>
+<polygon fill="#f4f1ea" stroke="transparent" points="207,-200 207,-232 289,-232 289,-200 207,-200"></polygon>
+<polygon fill="none" stroke="#1a6fb4" stroke-width="2" points="208,-201 208,-231 288,-231 288,-201 208,-201"></polygon>
+<text text-anchor="start" x="242.17" y="-212.4" font-family="Inter" font-size="14.00" fill="#0e1a2b">f</text>
+<text text-anchor="start" x="246.83" y="-212.4" font-family="Inter" baseline-shift="sub" font-size="14.00" fill="#0e1a2b">1</text>
+<polygon fill="#f4f1ea" stroke="transparent" stroke-width="2" points="289,-200 289,-232 314,-232 314,-200 289,-200"></polygon>
+<polygon fill="none" stroke="#d7d2c5" points="289,-200 289,-232 314,-232 314,-200 289,-200"></polygon>
+<text text-anchor="start" x="295.67" y="-212.8" font-family="Inter" font-size="14.00" fill="#0e1a2b">f</text>
+<text text-anchor="start" x="300.33" y="-212.8" font-family="Inter" baseline-shift="sub" font-size="14.00" fill="#0e1a2b">2</text>
+<polygon fill="#f4f1ea" stroke="transparent" points="314,-200 314,-232 339,-232 339,-200 314,-200"></polygon>
+<polygon fill="none" stroke="#d7d2c5" points="314,-200 314,-232 339,-232 339,-200 314,-200"></polygon>
+<text text-anchor="start" x="320.67" y="-212.8" font-family="Inter" font-size="14.00" fill="#0e1a2b">f</text>
+<text text-anchor="start" x="325.33" y="-212.8" font-family="Inter" baseline-shift="sub" font-size="14.00" fill="#0e1a2b">3</text>
+<polygon fill="#f4f1ea" stroke="transparent" points="339,-200 339,-232 364,-232 364,-200 339,-200"></polygon>
+<polygon fill="none" stroke="#d7d2c5" points="339,-200 339,-232 364,-232 364,-200 339,-200"></polygon>
+<text text-anchor="start" x="345.67" y="-212.8" font-family="Inter" font-size="14.00" fill="#0e1a2b">f</text>
+<text text-anchor="start" x="350.33" y="-212.8" font-family="Inter" baseline-shift="sub" font-size="14.00" fill="#0e1a2b">4</text>
+<text text-anchor="start" x="177.64" y="-179.8" font-family="Inter" font-size="14.00" fill="#5c6473">ex 1</text>
+<polygon fill="none" stroke="#1a6fb4" stroke-width="2" points="208,-169 208,-199 288,-199 288,-169 208,-169"></polygon>
+<text text-anchor="start" x="214.75" y="-180.4" font-family="Inter" font-size="14.00" fill="#0e1a2b">2</text>
+<text text-anchor="start" x="221.75" y="-180.4" font-family="Inter" font-size="14.00" fill="#1a6fb4">&nbsp;→&nbsp;−1.22</text>
+<polygon fill="none" stroke="#d7d2c5" points="289,-168 289,-200 314,-200 314,-168 289,-168"></polygon>
+<text text-anchor="start" x="298" y="-179.8" font-family="Inter" font-size="14.00" fill="#0e1a2b">4</text>
+<polygon fill="none" stroke="#d7d2c5" points="314,-168 314,-200 339,-200 339,-168 314,-168"></polygon>
+<text text-anchor="start" x="323" y="-179.8" font-family="Inter" font-size="14.00" fill="#0e1a2b">6</text>
+<polygon fill="none" stroke="#d7d2c5" points="339,-168 339,-200 364,-200 364,-168 339,-168"></polygon>
+<text text-anchor="start" x="348" y="-179.8" font-family="Inter" font-size="14.00" fill="#0e1a2b">8</text>
+<text text-anchor="start" x="177.64" y="-147.8" font-family="Inter" font-size="14.00" fill="#5c6473">ex 2</text>
+<polygon fill="none" stroke="#1a6fb4" stroke-width="2" points="208,-137 208,-167 288,-167 288,-137 208,-137"></polygon>
+<text text-anchor="start" x="215" y="-148.4" font-family="Inter" font-size="14.00" fill="#0e1a2b">4</text>
+<text text-anchor="start" x="222" y="-148.4" font-family="Inter" font-size="14.00" fill="#1a6fb4">&nbsp;→&nbsp;0.00</text>
+<polygon fill="none" stroke="#d7d2c5" points="289,-136 289,-168 314,-168 314,-136 289,-136"></polygon>
+<text text-anchor="start" x="298" y="-147.8" font-family="Inter" font-size="14.00" fill="#0e1a2b">0</text>
+<polygon fill="none" stroke="#d7d2c5" points="314,-136 314,-168 339,-168 339,-136 314,-136"></polygon>
+<text text-anchor="start" x="323" y="-147.8" font-family="Inter" font-size="14.00" fill="#0e1a2b">2</text>
+<polygon fill="none" stroke="#d7d2c5" points="339,-136 339,-168 364,-168 364,-136 339,-136"></polygon>
+<text text-anchor="start" x="348" y="-147.8" font-family="Inter" font-size="14.00" fill="#0e1a2b">6</text>
+<text text-anchor="start" x="177.64" y="-115.8" font-family="Inter" font-size="14.00" fill="#5c6473">ex 3</text>
+<polygon fill="none" stroke="#1a6fb4" stroke-width="2" points="208,-105 208,-135 288,-135 288,-105 208,-105"></polygon>
+<text text-anchor="start" x="215" y="-116.4" font-family="Inter" font-size="14.00" fill="#0e1a2b">6</text>
+<text text-anchor="start" x="222" y="-116.4" font-family="Inter" font-size="14.00" fill="#1a6fb4">&nbsp;→&nbsp;+1.22</text>
+<polygon fill="none" stroke="#d7d2c5" points="289,-104 289,-136 314,-136 314,-104 289,-104"></polygon>
+<text text-anchor="start" x="298" y="-115.8" font-family="Inter" font-size="14.00" fill="#0e1a2b">2</text>
+<polygon fill="none" stroke="#d7d2c5" points="314,-104 314,-136 339,-136 339,-104 314,-104"></polygon>
+<text text-anchor="start" x="323" y="-115.8" font-family="Inter" font-size="14.00" fill="#0e1a2b">4</text>
+<polygon fill="none" stroke="#d7d2c5" points="339,-104 339,-136 364,-136 364,-104 339,-104"></polygon>
+<text text-anchor="start" x="348" y="-115.8" font-family="Inter" font-size="14.00" fill="#0e1a2b">4</text>
+</g>
+<!-- cap -->
+<g id="node2" class="node">
+<title>cap</title>
+<text text-anchor="start" x="12" y="-59.4" font-family="Inter" font-size="14.00" fill="#5c6473">Step 1 · the batch mean:&nbsp; (2 + 4 + 6) / 3 = 4</text>
+<text text-anchor="start" x="12" y="-35.4" font-family="Inter" font-size="14.00" fill="#5c6473">Step 2 · the batch variance:&nbsp; ((−2)² + 0² + (+2)²) / 3 = 8/3 ≈ 2.67,&nbsp; so the sd ≈ 1.63</text>
+<text text-anchor="start" x="11.51" y="-11.4" font-family="Inter" font-size="14.00" fill="#0e1a2b">Step 3 · standardise:&nbsp; (2 − 4)/1.63 = −1.22,&nbsp;&nbsp; (4 − 4)/1.63 = 0.00,&nbsp;&nbsp; (6 − 4)/1.63 = +1.22</text>
+</g>
+<!-- m&#45;&gt;cap -->
+</g>
+</svg>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<p><span class="smaller muted">Features 2–4 get the same treatment, each with its own <span class="math inline">\mu_B</span> and <span class="math inline">\sigma_B</span> — 64 features means 64 means.</span></p>
+</section>
+<section id="what-batch-norm-buys-you" class="slide level2">
+<h2>What batch norm buys you</h2>
 <ul>
-<li>Because <span class="math inline">\gamma, \beta</span> are <em>learned</em>, the network can <strong>undo</strong> this if the original scale was useful!</li>
+<li>Because <span class="math inline">\gamma, \beta</span> are <em>learned</em>, the network can <strong>undo</strong> the standardisation if the original scale was useful!</li>
 </ul>
 <div class="card">
 <p><span class="eyebrow">Why it helps</span></p>
 <p>Stabilises activations across layers, stops distributions drifting during training, makes initialisation less critical, lets you use a larger learning rate.</p>
 </div>
-<div class="callout callout-warning callout-style-simple">
+<div class="callout callout-warning callout-titled callout-style-simple">
 <div class="callout-body">
+<div class="callout-title">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
+<p><strong>At test time there is no batch to average over</strong></p>
+</div>
 <div class="callout-content">
-<p>At test time there is no batch to average over, so batch norm switches to <strong>running averages</strong> collected during training. That is one of the two things <code>model.eval()</code> toggles — and why forgetting it changes your numbers.</p>
+<p>During prediction, batch norm switches to <strong>running averages</strong> collected during training. That is one of the two things <code>model.eval()</code> toggles — and why forgetting it changes your numbers.</p>
 </div>
 </div>
 </div>
 </section>
 <section id="layer-normalisation" class="slide level2">
 <h2>Layer normalisation</h2>
-<p><span class="eyebrow">Same arithmetic. Different direction.</span></p>
-<p>Batch norm averages <strong>down a column</strong> — one feature, across the examples in the batch. Layer norm averages <strong>along a row</strong> — one example, across its own features.</p>
+<p><span class="eyebrow">Same arithmetic. Same matrix. Different direction — layer norm reads <strong>along a row</strong>.</span></p>
 <p><span class="math display">
 \text{LN}(h) = \gamma \cdot \frac{h - \mu_L}{\sqrt{\sigma_L^2 + \epsilon}} + \beta
 </span></p>
-<p><span class="smaller"><span class="math inline">\mu_L, \sigma_L^2</span> — the mean and variance of the <span class="math inline">d</span> features <strong>of this single example</strong>. Nothing is shared across the batch.</span></p>
-<div class="card">
-<p><span class="eyebrow">Worked: one example’s activations <span class="math inline">h = [2,\ 4,\ 6,\ 8]</span></span></p>
-<p><span class="math inline">\mu_L = \dfrac{2+4+6+8}{4} = 5</span>;&nbsp; <span class="math inline">\sigma_L^2 = \dfrac{9 + 1 + 1 + 9}{4} = 5</span>, so <span class="math inline">\sigma_L \approx 2.24</span></p>
-<p><span class="math inline">\text{LN}(h) \approx \left[\tfrac{-3}{2.24},\ \tfrac{-1}{2.24},\ \tfrac{1}{2.24},\ \tfrac{3}{2.24}\right] = [-1.34,\ -0.45,\ 0.45,\ 1.34]</span></p>
+<p><span class="smaller"><span class="math inline">\mu_L, \sigma_L^2</span> come from the <span class="math inline">d</span> features <strong>of one example</strong> — here <span class="math inline">h = [2,\ 4,\ 6,\ 8]</span>. Nothing is shared across the batch.</span></p>
+<div class="r-stack">
+<div class="cell" data-fig-height="3" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class=""><p></p>
+<div>
+<svg width="960" height="288" viewbox="0.00 0.00 594.00 238.00" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" style="; max-width: none; max-height: none; display: block; margin: auto auto auto auto">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 234)">
+<title>LN0</title>
+<polygon fill="#fbfaf6" stroke="transparent" points="-4,4 -4,-234 590,-234 590,4 -4,4"></polygon>
+<!-- m -->
+<g id="node1" class="node">
+<title>m</title>
+<polygon fill="#f4f1ea" stroke="transparent" points="150,-196 150,-226 232,-226 232,-196 150,-196"></polygon>
+<polygon fill="none" stroke="#d7d2c5" points="150,-196 150,-226 232,-226 232,-196 150,-196"></polygon>
+<text text-anchor="start" x="185.17" y="-207.4" font-family="Inter" font-size="14.00" fill="#0e1a2b">f</text>
+<text text-anchor="start" x="189.83" y="-207.4" font-family="Inter" baseline-shift="sub" font-size="14.00" fill="#0e1a2b">1</text>
+<polygon fill="#f4f1ea" stroke="transparent" points="232,-196 232,-226 314,-226 314,-196 232,-196"></polygon>
+<polygon fill="none" stroke="#d7d2c5" points="232,-196 232,-226 314,-226 314,-196 232,-196"></polygon>
+<text text-anchor="start" x="267.17" y="-207.4" font-family="Inter" font-size="14.00" fill="#0e1a2b">f</text>
+<text text-anchor="start" x="271.83" y="-207.4" font-family="Inter" baseline-shift="sub" font-size="14.00" fill="#0e1a2b">2</text>
+<polygon fill="#f4f1ea" stroke="transparent" points="314,-196 314,-226 393,-226 393,-196 314,-196"></polygon>
+<polygon fill="none" stroke="#d7d2c5" points="314,-196 314,-226 393,-226 393,-196 314,-196"></polygon>
+<text text-anchor="start" x="347.67" y="-207.4" font-family="Inter" font-size="14.00" fill="#0e1a2b">f</text>
+<text text-anchor="start" x="352.33" y="-207.4" font-family="Inter" baseline-shift="sub" font-size="14.00" fill="#0e1a2b">3</text>
+<polygon fill="#f4f1ea" stroke="transparent" points="393,-196 393,-226 472,-226 472,-196 393,-196"></polygon>
+<polygon fill="none" stroke="#d7d2c5" points="393,-196 393,-226 472,-226 472,-196 393,-196"></polygon>
+<text text-anchor="start" x="426.67" y="-207.4" font-family="Inter" font-size="14.00" fill="#0e1a2b">f</text>
+<text text-anchor="start" x="431.33" y="-207.4" font-family="Inter" baseline-shift="sub" font-size="14.00" fill="#0e1a2b">4</text>
+<text text-anchor="start" x="120.64" y="-175.8" font-family="Inter" font-size="14.00" fill="#d7d2c5">ex 1</text>
+<polygon fill="none" stroke="#d7d2c5" stroke-width="2" points="151,-165 151,-195 231,-195 231,-165 151,-165"></polygon>
+<text text-anchor="start" x="157.75" y="-176.4" font-family="Inter" font-size="14.00" fill="#0e1a2b">2</text>
+<text text-anchor="start" x="164.75" y="-176.4" font-family="Inter" font-size="14.00" fill="#fbfaf6">&nbsp;→&nbsp;−1.34</text>
+<polygon fill="none" stroke="#d7d2c5" stroke-width="2" points="233,-165 233,-195 313,-195 313,-165 233,-165"></polygon>
+<text text-anchor="start" x="239.75" y="-176.4" font-family="Inter" font-size="14.00" fill="#0e1a2b">4</text>
+<text text-anchor="start" x="246.75" y="-176.4" font-family="Inter" font-size="14.00" fill="#fbfaf6">&nbsp;→&nbsp;−0.45</text>
+<polygon fill="none" stroke="#d7d2c5" stroke-width="2" points="315,-165 315,-195 392,-195 392,-165 315,-165"></polygon>
+<text text-anchor="start" x="321.55" y="-176.4" font-family="Inter" font-size="14.00" fill="#0e1a2b">6</text>
+<text text-anchor="start" x="328.55" y="-176.4" font-family="Inter" font-size="14.00" fill="#fbfaf6">&nbsp;→&nbsp;+0.45</text>
+<polygon fill="none" stroke="#d7d2c5" stroke-width="2" points="394,-165 394,-195 471,-195 471,-165 394,-165"></polygon>
+<text text-anchor="start" x="400.55" y="-176.4" font-family="Inter" font-size="14.00" fill="#0e1a2b">8</text>
+<text text-anchor="start" x="407.55" y="-176.4" font-family="Inter" font-size="14.00" fill="#fbfaf6">&nbsp;→&nbsp;+1.34</text>
+<text text-anchor="start" x="120.64" y="-144.8" font-family="Inter" font-size="14.00" fill="#5c6473">ex 2</text>
+<polygon fill="none" stroke="#d7d2c5" points="150,-134 150,-164 232,-164 232,-134 150,-134"></polygon>
+<text text-anchor="start" x="187.5" y="-144.4" font-family="Inter" font-size="14.00" fill="#0e1a2b">4</text>
+<polygon fill="none" stroke="#d7d2c5" points="232,-134 232,-164 314,-164 314,-134 232,-134"></polygon>
+<text text-anchor="start" x="269.5" y="-144.4" font-family="Inter" font-size="14.00" fill="#0e1a2b">0</text>
+<polygon fill="none" stroke="#d7d2c5" points="314,-134 314,-164 393,-164 393,-134 314,-134"></polygon>
+<text text-anchor="start" x="350" y="-144.4" font-family="Inter" font-size="14.00" fill="#0e1a2b">2</text>
+<polygon fill="none" stroke="#d7d2c5" points="393,-134 393,-164 472,-164 472,-134 393,-134"></polygon>
+<text text-anchor="start" x="429" y="-144.4" font-family="Inter" font-size="14.00" fill="#0e1a2b">6</text>
+<text text-anchor="start" x="120.64" y="-114.8" font-family="Inter" font-size="14.00" fill="#5c6473">ex 3</text>
+<polygon fill="none" stroke="#d7d2c5" points="150,-104 150,-134 232,-134 232,-104 150,-104"></polygon>
+<text text-anchor="start" x="187.5" y="-114.4" font-family="Inter" font-size="14.00" fill="#0e1a2b">6</text>
+<polygon fill="none" stroke="#d7d2c5" points="232,-104 232,-134 314,-134 314,-104 232,-104"></polygon>
+<text text-anchor="start" x="269.5" y="-114.4" font-family="Inter" font-size="14.00" fill="#0e1a2b">2</text>
+<polygon fill="none" stroke="#d7d2c5" points="314,-104 314,-134 393,-134 393,-104 314,-104"></polygon>
+<text text-anchor="start" x="350" y="-114.4" font-family="Inter" font-size="14.00" fill="#0e1a2b">4</text>
+<polygon fill="none" stroke="#d7d2c5" points="393,-104 393,-134 472,-134 472,-104 393,-104"></polygon>
+<text text-anchor="start" x="429" y="-114.4" font-family="Inter" font-size="14.00" fill="#0e1a2b">4</text>
+</g>
+<!-- cap -->
+<g id="node2" class="node">
+<title>cap</title>
+<text text-anchor="start" x="12" y="-59.4" font-family="Inter" font-size="14.00" fill="#fbfaf6">Step 1 · the feature mean:&nbsp; (2 + 4 + 6 + 8) / 4 = 5</text>
+<text text-anchor="start" x="12" y="-35.4" font-family="Inter" font-size="14.00" fill="#fbfaf6">Step 2 · the feature variance:&nbsp; ((−3)² + (−1)² + (+1)² + (+3)²) / 4 = 20/4 = 5,&nbsp; so the sd ≈ 2.24</text>
+<text text-anchor="start" x="11.76" y="-11.4" font-family="Inter" font-size="14.00" fill="#fbfaf6">Step 3 · standardise:&nbsp; −3/2.24 = −1.34,&nbsp;&nbsp; −1/2.24 = −0.45,&nbsp;&nbsp; +1/2.24 = +0.45,&nbsp;&nbsp; +3/2.24 = +1.34</text>
+</g>
+<!-- m&#45;&gt;cap -->
+</g>
+</svg>
 </div>
-<div class="reveal-box">
-<p><span class="reveal-label">Why sequences need it</span> The statistics come from <strong>one example</strong>, so layer norm is <em>independent of batch size</em>. This will be useful for transformer (Day 10).</p>
+<p></p></figure><p></p>
 </div>
+</div>
+</div>
+<div class="fragment">
+<div class="cell" data-fig-height="3" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class=""><p></p>
+<div>
+<svg width="960" height="288" viewbox="0.00 0.00 594.00 238.00" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" style="; max-width: none; max-height: none; display: block; margin: auto auto auto auto">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 234)">
+<title>LN1</title>
+<polygon fill="#fbfaf6" stroke="transparent" points="-4,4 -4,-234 590,-234 590,4 -4,4"></polygon>
+<!-- m -->
+<g id="node1" class="node">
+<title>m</title>
+<polygon fill="#f4f1ea" stroke="transparent" points="150,-196 150,-226 232,-226 232,-196 150,-196"></polygon>
+<polygon fill="none" stroke="#d7d2c5" points="150,-196 150,-226 232,-226 232,-196 150,-196"></polygon>
+<text text-anchor="start" x="185.17" y="-207.4" font-family="Inter" font-size="14.00" fill="#0e1a2b">f</text>
+<text text-anchor="start" x="189.83" y="-207.4" font-family="Inter" baseline-shift="sub" font-size="14.00" fill="#0e1a2b">1</text>
+<polygon fill="#f4f1ea" stroke="transparent" points="232,-196 232,-226 314,-226 314,-196 232,-196"></polygon>
+<polygon fill="none" stroke="#d7d2c5" points="232,-196 232,-226 314,-226 314,-196 232,-196"></polygon>
+<text text-anchor="start" x="267.17" y="-207.4" font-family="Inter" font-size="14.00" fill="#0e1a2b">f</text>
+<text text-anchor="start" x="271.83" y="-207.4" font-family="Inter" baseline-shift="sub" font-size="14.00" fill="#0e1a2b">2</text>
+<polygon fill="#f4f1ea" stroke="transparent" points="314,-196 314,-226 393,-226 393,-196 314,-196"></polygon>
+<polygon fill="none" stroke="#d7d2c5" points="314,-196 314,-226 393,-226 393,-196 314,-196"></polygon>
+<text text-anchor="start" x="347.67" y="-207.4" font-family="Inter" font-size="14.00" fill="#0e1a2b">f</text>
+<text text-anchor="start" x="352.33" y="-207.4" font-family="Inter" baseline-shift="sub" font-size="14.00" fill="#0e1a2b">3</text>
+<polygon fill="#f4f1ea" stroke="transparent" points="393,-196 393,-226 472,-226 472,-196 393,-196"></polygon>
+<polygon fill="none" stroke="#d7d2c5" points="393,-196 393,-226 472,-226 472,-196 393,-196"></polygon>
+<text text-anchor="start" x="426.67" y="-207.4" font-family="Inter" font-size="14.00" fill="#0e1a2b">f</text>
+<text text-anchor="start" x="431.33" y="-207.4" font-family="Inter" baseline-shift="sub" font-size="14.00" fill="#0e1a2b">4</text>
+<text text-anchor="start" x="120.64" y="-175.8" font-family="Inter" font-size="14.00" fill="#c9322b">ex 1</text>
+<polygon fill="none" stroke="#c9322b" stroke-width="2" points="151,-165 151,-195 231,-195 231,-165 151,-165"></polygon>
+<text text-anchor="start" x="157.75" y="-176.4" font-family="Inter" font-size="14.00" fill="#c9322b">2</text>
+<text text-anchor="start" x="164.75" y="-176.4" font-family="Inter" font-size="14.00" fill="#fbfaf6">&nbsp;→&nbsp;−1.34</text>
+<polygon fill="none" stroke="#c9322b" stroke-width="2" points="233,-165 233,-195 313,-195 313,-165 233,-165"></polygon>
+<text text-anchor="start" x="239.75" y="-176.4" font-family="Inter" font-size="14.00" fill="#c9322b">4</text>
+<text text-anchor="start" x="246.75" y="-176.4" font-family="Inter" font-size="14.00" fill="#fbfaf6">&nbsp;→&nbsp;−0.45</text>
+<polygon fill="none" stroke="#c9322b" stroke-width="2" points="315,-165 315,-195 392,-195 392,-165 315,-165"></polygon>
+<text text-anchor="start" x="321.55" y="-176.4" font-family="Inter" font-size="14.00" fill="#c9322b">6</text>
+<text text-anchor="start" x="328.55" y="-176.4" font-family="Inter" font-size="14.00" fill="#fbfaf6">&nbsp;→&nbsp;+0.45</text>
+<polygon fill="none" stroke="#c9322b" stroke-width="2" points="394,-165 394,-195 471,-195 471,-165 394,-165"></polygon>
+<text text-anchor="start" x="400.55" y="-176.4" font-family="Inter" font-size="14.00" fill="#c9322b">8</text>
+<text text-anchor="start" x="407.55" y="-176.4" font-family="Inter" font-size="14.00" fill="#fbfaf6">&nbsp;→&nbsp;+1.34</text>
+<text text-anchor="start" x="120.64" y="-144.8" font-family="Inter" font-size="14.00" fill="#5c6473">ex 2</text>
+<polygon fill="none" stroke="#d7d2c5" points="150,-134 150,-164 232,-164 232,-134 150,-134"></polygon>
+<text text-anchor="start" x="187.5" y="-144.4" font-family="Inter" font-size="14.00" fill="#0e1a2b">4</text>
+<polygon fill="none" stroke="#d7d2c5" points="232,-134 232,-164 314,-164 314,-134 232,-134"></polygon>
+<text text-anchor="start" x="269.5" y="-144.4" font-family="Inter" font-size="14.00" fill="#0e1a2b">0</text>
+<polygon fill="none" stroke="#d7d2c5" points="314,-134 314,-164 393,-164 393,-134 314,-134"></polygon>
+<text text-anchor="start" x="350" y="-144.4" font-family="Inter" font-size="14.00" fill="#0e1a2b">2</text>
+<polygon fill="none" stroke="#d7d2c5" points="393,-134 393,-164 472,-164 472,-134 393,-134"></polygon>
+<text text-anchor="start" x="429" y="-144.4" font-family="Inter" font-size="14.00" fill="#0e1a2b">6</text>
+<text text-anchor="start" x="120.64" y="-114.8" font-family="Inter" font-size="14.00" fill="#5c6473">ex 3</text>
+<polygon fill="none" stroke="#d7d2c5" points="150,-104 150,-134 232,-134 232,-104 150,-104"></polygon>
+<text text-anchor="start" x="187.5" y="-114.4" font-family="Inter" font-size="14.00" fill="#0e1a2b">6</text>
+<polygon fill="none" stroke="#d7d2c5" points="232,-104 232,-134 314,-134 314,-104 232,-104"></polygon>
+<text text-anchor="start" x="269.5" y="-114.4" font-family="Inter" font-size="14.00" fill="#0e1a2b">2</text>
+<polygon fill="none" stroke="#d7d2c5" points="314,-104 314,-134 393,-134 393,-104 314,-104"></polygon>
+<text text-anchor="start" x="350" y="-114.4" font-family="Inter" font-size="14.00" fill="#0e1a2b">4</text>
+<polygon fill="none" stroke="#d7d2c5" points="393,-104 393,-134 472,-134 472,-104 393,-104"></polygon>
+<text text-anchor="start" x="429" y="-114.4" font-family="Inter" font-size="14.00" fill="#0e1a2b">4</text>
+</g>
+<!-- cap -->
+<g id="node2" class="node">
+<title>cap</title>
+<text text-anchor="start" x="12" y="-59.4" font-family="Inter" font-size="14.00" fill="#0e1a2b">Step 1 · the feature mean:&nbsp; (2 + 4 + 6 + 8) / 4 = 5</text>
+<text text-anchor="start" x="12" y="-35.4" font-family="Inter" font-size="14.00" fill="#fbfaf6">Step 2 · the feature variance:&nbsp; ((−3)² + (−1)² + (+1)² + (+3)²) / 4 = 20/4 = 5,&nbsp; so the sd ≈ 2.24</text>
+<text text-anchor="start" x="11.76" y="-11.4" font-family="Inter" font-size="14.00" fill="#fbfaf6">Step 3 · standardise:&nbsp; −3/2.24 = −1.34,&nbsp;&nbsp; −1/2.24 = −0.45,&nbsp;&nbsp; +1/2.24 = +0.45,&nbsp;&nbsp; +3/2.24 = +1.34</text>
+</g>
+<!-- m&#45;&gt;cap -->
+</g>
+</svg>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+</div>
+<div class="fragment">
+<div class="cell" data-fig-height="3" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class=""><p></p>
+<div>
+<svg width="960" height="288" viewbox="0.00 0.00 594.00 238.00" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" style="; max-width: none; max-height: none; display: block; margin: auto auto auto auto">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 234)">
+<title>LN2</title>
+<polygon fill="#fbfaf6" stroke="transparent" points="-4,4 -4,-234 590,-234 590,4 -4,4"></polygon>
+<!-- m -->
+<g id="node1" class="node">
+<title>m</title>
+<polygon fill="#f4f1ea" stroke="transparent" points="150,-196 150,-226 232,-226 232,-196 150,-196"></polygon>
+<polygon fill="none" stroke="#d7d2c5" points="150,-196 150,-226 232,-226 232,-196 150,-196"></polygon>
+<text text-anchor="start" x="185.17" y="-207.4" font-family="Inter" font-size="14.00" fill="#0e1a2b">f</text>
+<text text-anchor="start" x="189.83" y="-207.4" font-family="Inter" baseline-shift="sub" font-size="14.00" fill="#0e1a2b">1</text>
+<polygon fill="#f4f1ea" stroke="transparent" points="232,-196 232,-226 314,-226 314,-196 232,-196"></polygon>
+<polygon fill="none" stroke="#d7d2c5" points="232,-196 232,-226 314,-226 314,-196 232,-196"></polygon>
+<text text-anchor="start" x="267.17" y="-207.4" font-family="Inter" font-size="14.00" fill="#0e1a2b">f</text>
+<text text-anchor="start" x="271.83" y="-207.4" font-family="Inter" baseline-shift="sub" font-size="14.00" fill="#0e1a2b">2</text>
+<polygon fill="#f4f1ea" stroke="transparent" points="314,-196 314,-226 393,-226 393,-196 314,-196"></polygon>
+<polygon fill="none" stroke="#d7d2c5" points="314,-196 314,-226 393,-226 393,-196 314,-196"></polygon>
+<text text-anchor="start" x="347.67" y="-207.4" font-family="Inter" font-size="14.00" fill="#0e1a2b">f</text>
+<text text-anchor="start" x="352.33" y="-207.4" font-family="Inter" baseline-shift="sub" font-size="14.00" fill="#0e1a2b">3</text>
+<polygon fill="#f4f1ea" stroke="transparent" points="393,-196 393,-226 472,-226 472,-196 393,-196"></polygon>
+<polygon fill="none" stroke="#d7d2c5" points="393,-196 393,-226 472,-226 472,-196 393,-196"></polygon>
+<text text-anchor="start" x="426.67" y="-207.4" font-family="Inter" font-size="14.00" fill="#0e1a2b">f</text>
+<text text-anchor="start" x="431.33" y="-207.4" font-family="Inter" baseline-shift="sub" font-size="14.00" fill="#0e1a2b">4</text>
+<text text-anchor="start" x="120.64" y="-175.8" font-family="Inter" font-size="14.00" fill="#c9322b">ex 1</text>
+<polygon fill="none" stroke="#c9322b" stroke-width="2" points="151,-165 151,-195 231,-195 231,-165 151,-165"></polygon>
+<text text-anchor="start" x="157.75" y="-176.4" font-family="Inter" font-size="14.00" fill="#c9322b">2</text>
+<text text-anchor="start" x="164.75" y="-176.4" font-family="Inter" font-size="14.00" fill="#fbfaf6">&nbsp;→&nbsp;−1.34</text>
+<polygon fill="none" stroke="#c9322b" stroke-width="2" points="233,-165 233,-195 313,-195 313,-165 233,-165"></polygon>
+<text text-anchor="start" x="239.75" y="-176.4" font-family="Inter" font-size="14.00" fill="#c9322b">4</text>
+<text text-anchor="start" x="246.75" y="-176.4" font-family="Inter" font-size="14.00" fill="#fbfaf6">&nbsp;→&nbsp;−0.45</text>
+<polygon fill="none" stroke="#c9322b" stroke-width="2" points="315,-165 315,-195 392,-195 392,-165 315,-165"></polygon>
+<text text-anchor="start" x="321.55" y="-176.4" font-family="Inter" font-size="14.00" fill="#c9322b">6</text>
+<text text-anchor="start" x="328.55" y="-176.4" font-family="Inter" font-size="14.00" fill="#fbfaf6">&nbsp;→&nbsp;+0.45</text>
+<polygon fill="none" stroke="#c9322b" stroke-width="2" points="394,-165 394,-195 471,-195 471,-165 394,-165"></polygon>
+<text text-anchor="start" x="400.55" y="-176.4" font-family="Inter" font-size="14.00" fill="#c9322b">8</text>
+<text text-anchor="start" x="407.55" y="-176.4" font-family="Inter" font-size="14.00" fill="#fbfaf6">&nbsp;→&nbsp;+1.34</text>
+<text text-anchor="start" x="120.64" y="-144.8" font-family="Inter" font-size="14.00" fill="#5c6473">ex 2</text>
+<polygon fill="none" stroke="#d7d2c5" points="150,-134 150,-164 232,-164 232,-134 150,-134"></polygon>
+<text text-anchor="start" x="187.5" y="-144.4" font-family="Inter" font-size="14.00" fill="#0e1a2b">4</text>
+<polygon fill="none" stroke="#d7d2c5" points="232,-134 232,-164 314,-164 314,-134 232,-134"></polygon>
+<text text-anchor="start" x="269.5" y="-144.4" font-family="Inter" font-size="14.00" fill="#0e1a2b">0</text>
+<polygon fill="none" stroke="#d7d2c5" points="314,-134 314,-164 393,-164 393,-134 314,-134"></polygon>
+<text text-anchor="start" x="350" y="-144.4" font-family="Inter" font-size="14.00" fill="#0e1a2b">2</text>
+<polygon fill="none" stroke="#d7d2c5" points="393,-134 393,-164 472,-164 472,-134 393,-134"></polygon>
+<text text-anchor="start" x="429" y="-144.4" font-family="Inter" font-size="14.00" fill="#0e1a2b">6</text>
+<text text-anchor="start" x="120.64" y="-114.8" font-family="Inter" font-size="14.00" fill="#5c6473">ex 3</text>
+<polygon fill="none" stroke="#d7d2c5" points="150,-104 150,-134 232,-134 232,-104 150,-104"></polygon>
+<text text-anchor="start" x="187.5" y="-114.4" font-family="Inter" font-size="14.00" fill="#0e1a2b">6</text>
+<polygon fill="none" stroke="#d7d2c5" points="232,-104 232,-134 314,-134 314,-104 232,-104"></polygon>
+<text text-anchor="start" x="269.5" y="-114.4" font-family="Inter" font-size="14.00" fill="#0e1a2b">2</text>
+<polygon fill="none" stroke="#d7d2c5" points="314,-104 314,-134 393,-134 393,-104 314,-104"></polygon>
+<text text-anchor="start" x="350" y="-114.4" font-family="Inter" font-size="14.00" fill="#0e1a2b">4</text>
+<polygon fill="none" stroke="#d7d2c5" points="393,-104 393,-134 472,-134 472,-104 393,-104"></polygon>
+<text text-anchor="start" x="429" y="-114.4" font-family="Inter" font-size="14.00" fill="#0e1a2b">4</text>
+</g>
+<!-- cap -->
+<g id="node2" class="node">
+<title>cap</title>
+<text text-anchor="start" x="12" y="-59.4" font-family="Inter" font-size="14.00" fill="#5c6473">Step 1 · the feature mean:&nbsp; (2 + 4 + 6 + 8) / 4 = 5</text>
+<text text-anchor="start" x="12" y="-35.4" font-family="Inter" font-size="14.00" fill="#0e1a2b">Step 2 · the feature variance:&nbsp; ((−3)² + (−1)² + (+1)² + (+3)²) / 4 = 20/4 = 5,&nbsp; so the sd ≈ 2.24</text>
+<text text-anchor="start" x="11.76" y="-11.4" font-family="Inter" font-size="14.00" fill="#fbfaf6">Step 3 · standardise:&nbsp; −3/2.24 = −1.34,&nbsp;&nbsp; −1/2.24 = −0.45,&nbsp;&nbsp; +1/2.24 = +0.45,&nbsp;&nbsp; +3/2.24 = +1.34</text>
+</g>
+<!-- m&#45;&gt;cap -->
+</g>
+</svg>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+</div>
+<div class="fragment">
+<div class="cell" data-fig-height="3" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class=""><p></p>
+<div>
+<svg width="960" height="288" viewbox="0.00 0.00 594.00 238.00" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" style="; max-width: none; max-height: none; display: block; margin: auto auto auto auto">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 234)">
+<title>LN3</title>
+<polygon fill="#fbfaf6" stroke="transparent" points="-4,4 -4,-234 590,-234 590,4 -4,4"></polygon>
+<!-- m -->
+<g id="node1" class="node">
+<title>m</title>
+<polygon fill="#f4f1ea" stroke="transparent" points="150,-196 150,-226 232,-226 232,-196 150,-196"></polygon>
+<polygon fill="none" stroke="#d7d2c5" points="150,-196 150,-226 232,-226 232,-196 150,-196"></polygon>
+<text text-anchor="start" x="185.17" y="-207.4" font-family="Inter" font-size="14.00" fill="#0e1a2b">f</text>
+<text text-anchor="start" x="189.83" y="-207.4" font-family="Inter" baseline-shift="sub" font-size="14.00" fill="#0e1a2b">1</text>
+<polygon fill="#f4f1ea" stroke="transparent" points="232,-196 232,-226 314,-226 314,-196 232,-196"></polygon>
+<polygon fill="none" stroke="#d7d2c5" points="232,-196 232,-226 314,-226 314,-196 232,-196"></polygon>
+<text text-anchor="start" x="267.17" y="-207.4" font-family="Inter" font-size="14.00" fill="#0e1a2b">f</text>
+<text text-anchor="start" x="271.83" y="-207.4" font-family="Inter" baseline-shift="sub" font-size="14.00" fill="#0e1a2b">2</text>
+<polygon fill="#f4f1ea" stroke="transparent" points="314,-196 314,-226 393,-226 393,-196 314,-196"></polygon>
+<polygon fill="none" stroke="#d7d2c5" points="314,-196 314,-226 393,-226 393,-196 314,-196"></polygon>
+<text text-anchor="start" x="347.67" y="-207.4" font-family="Inter" font-size="14.00" fill="#0e1a2b">f</text>
+<text text-anchor="start" x="352.33" y="-207.4" font-family="Inter" baseline-shift="sub" font-size="14.00" fill="#0e1a2b">3</text>
+<polygon fill="#f4f1ea" stroke="transparent" points="393,-196 393,-226 472,-226 472,-196 393,-196"></polygon>
+<polygon fill="none" stroke="#d7d2c5" points="393,-196 393,-226 472,-226 472,-196 393,-196"></polygon>
+<text text-anchor="start" x="426.67" y="-207.4" font-family="Inter" font-size="14.00" fill="#0e1a2b">f</text>
+<text text-anchor="start" x="431.33" y="-207.4" font-family="Inter" baseline-shift="sub" font-size="14.00" fill="#0e1a2b">4</text>
+<text text-anchor="start" x="120.64" y="-175.8" font-family="Inter" font-size="14.00" fill="#1a6fb4">ex 1</text>
+<polygon fill="none" stroke="#1a6fb4" stroke-width="2" points="151,-165 151,-195 231,-195 231,-165 151,-165"></polygon>
+<text text-anchor="start" x="157.75" y="-176.4" font-family="Inter" font-size="14.00" fill="#0e1a2b">2</text>
+<text text-anchor="start" x="164.75" y="-176.4" font-family="Inter" font-size="14.00" fill="#1a6fb4">&nbsp;→&nbsp;−1.34</text>
+<polygon fill="none" stroke="#1a6fb4" stroke-width="2" points="233,-165 233,-195 313,-195 313,-165 233,-165"></polygon>
+<text text-anchor="start" x="239.75" y="-176.4" font-family="Inter" font-size="14.00" fill="#0e1a2b">4</text>
+<text text-anchor="start" x="246.75" y="-176.4" font-family="Inter" font-size="14.00" fill="#1a6fb4">&nbsp;→&nbsp;−0.45</text>
+<polygon fill="none" stroke="#1a6fb4" stroke-width="2" points="315,-165 315,-195 392,-195 392,-165 315,-165"></polygon>
+<text text-anchor="start" x="321.55" y="-176.4" font-family="Inter" font-size="14.00" fill="#0e1a2b">6</text>
+<text text-anchor="start" x="328.55" y="-176.4" font-family="Inter" font-size="14.00" fill="#1a6fb4">&nbsp;→&nbsp;+0.45</text>
+<polygon fill="none" stroke="#1a6fb4" stroke-width="2" points="394,-165 394,-195 471,-195 471,-165 394,-165"></polygon>
+<text text-anchor="start" x="400.55" y="-176.4" font-family="Inter" font-size="14.00" fill="#0e1a2b">8</text>
+<text text-anchor="start" x="407.55" y="-176.4" font-family="Inter" font-size="14.00" fill="#1a6fb4">&nbsp;→&nbsp;+1.34</text>
+<text text-anchor="start" x="120.64" y="-144.8" font-family="Inter" font-size="14.00" fill="#5c6473">ex 2</text>
+<polygon fill="none" stroke="#d7d2c5" points="150,-134 150,-164 232,-164 232,-134 150,-134"></polygon>
+<text text-anchor="start" x="187.5" y="-144.4" font-family="Inter" font-size="14.00" fill="#0e1a2b">4</text>
+<polygon fill="none" stroke="#d7d2c5" points="232,-134 232,-164 314,-164 314,-134 232,-134"></polygon>
+<text text-anchor="start" x="269.5" y="-144.4" font-family="Inter" font-size="14.00" fill="#0e1a2b">0</text>
+<polygon fill="none" stroke="#d7d2c5" points="314,-134 314,-164 393,-164 393,-134 314,-134"></polygon>
+<text text-anchor="start" x="350" y="-144.4" font-family="Inter" font-size="14.00" fill="#0e1a2b">2</text>
+<polygon fill="none" stroke="#d7d2c5" points="393,-134 393,-164 472,-164 472,-134 393,-134"></polygon>
+<text text-anchor="start" x="429" y="-144.4" font-family="Inter" font-size="14.00" fill="#0e1a2b">6</text>
+<text text-anchor="start" x="120.64" y="-114.8" font-family="Inter" font-size="14.00" fill="#5c6473">ex 3</text>
+<polygon fill="none" stroke="#d7d2c5" points="150,-104 150,-134 232,-134 232,-104 150,-104"></polygon>
+<text text-anchor="start" x="187.5" y="-114.4" font-family="Inter" font-size="14.00" fill="#0e1a2b">6</text>
+<polygon fill="none" stroke="#d7d2c5" points="232,-104 232,-134 314,-134 314,-104 232,-104"></polygon>
+<text text-anchor="start" x="269.5" y="-114.4" font-family="Inter" font-size="14.00" fill="#0e1a2b">2</text>
+<polygon fill="none" stroke="#d7d2c5" points="314,-104 314,-134 393,-134 393,-104 314,-104"></polygon>
+<text text-anchor="start" x="350" y="-114.4" font-family="Inter" font-size="14.00" fill="#0e1a2b">4</text>
+<polygon fill="none" stroke="#d7d2c5" points="393,-104 393,-134 472,-134 472,-104 393,-104"></polygon>
+<text text-anchor="start" x="429" y="-114.4" font-family="Inter" font-size="14.00" fill="#0e1a2b">4</text>
+</g>
+<!-- cap -->
+<g id="node2" class="node">
+<title>cap</title>
+<text text-anchor="start" x="12" y="-59.4" font-family="Inter" font-size="14.00" fill="#5c6473">Step 1 · the feature mean:&nbsp; (2 + 4 + 6 + 8) / 4 = 5</text>
+<text text-anchor="start" x="12" y="-35.4" font-family="Inter" font-size="14.00" fill="#5c6473">Step 2 · the feature variance:&nbsp; ((−3)² + (−1)² + (+1)² + (+3)²) / 4 = 20/4 = 5,&nbsp; so the sd ≈ 2.24</text>
+<text text-anchor="start" x="11.76" y="-11.4" font-family="Inter" font-size="14.00" fill="#0e1a2b">Step 3 · standardise:&nbsp; −3/2.24 = −1.34,&nbsp;&nbsp; −1/2.24 = −0.45,&nbsp;&nbsp; +1/2.24 = +0.45,&nbsp;&nbsp; +3/2.24 = +1.34</text>
+</g>
+<!-- m&#45;&gt;cap -->
+</g>
+</svg>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<p><span class="smaller muted">Examples 2 and 3 get the same treatment, each from its own row.</span></p>
 </section>
 <section id="batch-vs-layer-norm" class="slide level2">
 <h2>Batch vs layer norm</h2>
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="../assets/images/batchnorm.jpg" class="quarto-figure quarto-figure-center" style="width:33.0%"></p>
+<p><img data-src="../assets/images/batchnorm.jpg" class="quarto-figure quarto-figure-center" style="width:26.0%"></p>
 </figure>
 </div>
 <div class="columns">
 <div class="column" style="width:50%;">
 <p><span class="pill-blue">Batch norm</span> one <span class="math inline">\mu</span> per <strong>feature</strong>, averaged down the batch. Needs a decent batch size. Predominantly used in <strong>CNNs</strong>.</p>
 </div><div class="column" style="width:50%;">
-<p><span class="pill">Layer norm</span> one <span class="math inline">\mu</span> per <strong>example</strong>, averaged across its features. Batch-size independent. Predominantly used in <strong>transformers</strong>.</p>
+<p><span class="pill">Layer norm</span> one <span class="math inline">\mu</span> per <strong>example</strong>, averaged across its features. Batch-size independent — which is exactly why <strong>transformers</strong> use it (Day 10).</p>
 </div></div>
 </section>
 <section id="diagnosing-a-run-from-its-loss-curves" class="slide level2">
@@ -1409,7 +2014,7 @@ e^2 = 7.39, \quad e^1 = 2.72, \quad e^0 = 1.00, \quad \textstyle\sum = 11.11
 <p><span class="eyebrow"><span class="pause-cue">≈ 3 min</span> · in pairs</span></p>
 <div class="columns">
 <div class="column" style="width:58%;">
-<div id="867160ec" class="cell" data-fig-height="4.4" data-fig-width="5.6" data-execution_count="3">
+<div id="76257c0a" class="cell" data-fig-height="4.4" data-fig-width="5.6" data-execution_count="3">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
@@ -1443,18 +2048,16 @@ e^2 = 7.39, \quad e^1 = 2.72, \quad e^0 = 1.00, \quad \textstyle\sum = 11.11
 <li><strong>D — underfitting.</strong> Both curves flat and high from the first epoch. <em>Fix:</em> a bigger model, or train for longer.</li>
 </ul>
 </div>
-<div title="One habit to keep">
 <div class="callout callout-tip callout-titled callout-style-default">
 <div class="callout-body">
 <div class="callout-title">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
-<p><strong>One habit to keep</strong></p>
+<p><strong>Always inspect your loss curves!</strong></p>
 </div>
 <div class="callout-content">
 <p>When a run misbehaves, plot these two curves before touching anything else. The shape tells you <em>which</em> problem you have — and each problem has a different fix.</p>
-</div>
 </div>
 </div>
 </div>
@@ -1481,6 +2084,288 @@ e^2 = 7.39, \quad e^1 = 2.72, \quad e^0 = 1.00, \quad \textstyle\sum = 11.11
 <li>Increase model size <em>gradually</em>.</li>
 </ul>
 </div></div>
+</section></section>
+<section>
+<section id="part-4-tips-tricks-and-traps" class="title-slide slide level1 center" data-background-color="#0E1A2B">
+<h1>Part 4 · Tips, tricks and traps</h1>
+
+</section>
+<section id="what-the-textbooks-dont-tell-you" class="slide level2">
+<h2>What the textbooks don’t tell you…</h2>
+<div class="card">
+<p>Everything so far has been about <strong>what to build</strong>.</p>
+<ul>
+<li>But of course, as humans, we are prone to error</li>
+<li>Programmers are no different</li>
+</ul>
+<p>The <em>worst kind of error</em> is one you don’t spot:</p>
+<ul>
+<li><strong>The code runs</strong></li>
+<li>No exception is reported</li>
+<li>Maybe the model even has slightly declining loss</li>
+</ul>
+</div>
+<p><span class="muted">We have to figure out what is intrinsically hard, from what we have ourselves made hard through our mistakes!</span></p>
+</section>
+<section id="how-to-read-a-pytorch-error" class="slide level2">
+<h2>How to read a PyTorch error</h2>
+<p>The most common error you will see, and it tells you more than it looks:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> nn.Linear(<span class="dv">3</span>, <span class="dv">16</span>)      <span class="co"># expects 3 features</span></span>
+<span id="cb7-2"><a aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> torch.randn(<span class="dv">32</span>, <span class="dv">10</span>)       <span class="co"># but we hand it 10</span></span>
+<span id="cb7-3"><a aria-hidden="true" tabindex="-1"></a>model(x)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="card">
+<p><span class="eyebrow">PyTorch stops with</span></p>
+<p><code>RuntimeError: mat1 and mat2 shapes cannot be multiplied (32x10 and 3x16)</code></p>
+</div>
+<div class="card">
+<p><span class="eyebrow">Decoding it</span></p>
+<ul>
+<li><code>mat1</code> is <strong>your data</strong>: 32 rows (the batch), 10 features.</li>
+<li><code>mat2</code> is <strong>the layer’s weight matrix</strong>: 3 in, 16 out.</li>
+<li>Matrix multiplication needs the inner numbers to match. <span class="math inline">10 \neq 3</span>.</li>
+</ul>
+<p>So: the layer wanted 3 features per example and you gave it 10. Fix the layer, or fix the data — but the message has already told you which two numbers disagree.</p>
+</div>
+<div class="callout callout-tip callout-style-simple">
+<div class="callout-body">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-content">
+<p>When a shape error appears, <code>print(x.shape)</code> on the line above.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="incorrect-broadcasting" class="slide level2">
+<h2>Incorrect broadcasting</h2>
+<p>Remember <code>.squeeze(-1)</code> from the training script? Here is what it was protecting you from.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a aria-hidden="true" tabindex="-1"></a>y_pred <span class="op">=</span> model(x_batch)        <span class="co"># shape (32, 1) — a column</span></span>
+<span id="cb8-2"><a aria-hidden="true" tabindex="-1"></a>y_true <span class="op">=</span> y_batch               <span class="co"># shape (32,)   — a flat vector</span></span>
+<span id="cb8-3"><a aria-hidden="true" tabindex="-1"></a>loss <span class="op">=</span> nn.MSELoss()(y_pred, y_true)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="try-box">
+<p><span class="try-label">Predict</span> <strong>PyTorch broadcasts these two shapes rather than complaining. What shape does the subtraction inside MSE produce — and how many numbers does the mean get averaged over?</strong></p>
+</div>
+<div class="fragment">
+<div class="reveal-box">
+<p><span class="reveal-label">Answer — <span class="math inline">(32, 32)</span>, and 1,024 numbers</span></p>
+<p>Broadcasting pads the shorter shape on the left: <code>(32,)</code> becomes <code>(1, 32)</code>. Then <code>(32, 1)</code> against <code>(1, 32)</code> stretches <strong>both</strong> into <span class="math inline">(32, 32)</span>.</p>
+<p>This will compare <strong>every prediction against every label</strong> — all 1,024 pairs — and averaged the them. But only the 32 numbers on the diagonal were ever meaningful.</p>
+<p>The loss still comes out as a plausible-looking number</p>
+<ul>
+<li>It falls during training…</li>
+<li>But the model learns nothing useful.</li>
+</ul>
+</div>
+</div>
+<div class="callout callout-warning callout-style-simple">
+<div class="callout-body">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-content">
+<p>MSE does print a <code>UserWarning</code> (target size that is different to the input size). <strong>Read your warnings.</strong></p>
+</div>
+</div>
+</div>
+</section>
+<section id="forgetting-zero_grad" class="slide level2">
+<h2>Forgetting <code>zero_grad()</code></h2>
+<p>PyTorch <strong>accumulates</strong> gradients — every <code>.backward()</code> adds to <code>.grad</code> rather than replacing it.</p>
+<div class="columns">
+<div class="column" style="width:52%;">
+<div class="card">
+<p><span class="eyebrow">Two batches, one weight, <span class="math inline">\lambda = 0.1</span></span></p>
+<p>Batch 1 gives <span class="math inline">\frac{\partial L}{\partial w} = 0.5</span>; batch 2 gives <span class="math inline">0.3</span>.</p>
+<p><strong>With <code>zero_grad()</code></strong> — the second step uses <span class="math inline">0.3</span>: <span class="math display">w \leftarrow w - 0.1 \times 0.3 = w - 0.03</span></p>
+<p><strong>Without it</strong> — <code>.grad</code> still holds batch 1’s number: <span class="math display">w \leftarrow w - 0.1 \times \underbrace{(0.5 + 0.3)}_{0.8} = w - 0.08</span></p>
+</div>
+</div><div class="column" style="width:48%;">
+<p>Batch 1’s gradient is still steering the model several batches later.</p>
+<ul>
+<li>Unlike momentum, the gradient grows without limit</li>
+<li>The loss curve looks like a learning rate set far too high.</li>
+</ul>
+<div class="callout callout-note callout-style-simple">
+<div class="callout-body">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-content">
+<p><span class="eyebrow">Why doesn’t PyTorch just do it for you?</span></p>
+<p>Because accumulation is sometimes what you want! E.g. running four small batches and stepping once simulates a batch four times the size on a GPU that can’t hold one</p>
+</div>
+</div>
+</div>
+</div></div>
+</section>
+<section id="consuming-all-your-memory" class="slide level2">
+<h2>Consuming all your memory</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><span class="pill-amber">The bug</span></p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a aria-hidden="true" tabindex="-1"></a>losses <span class="op">=</span> []</span>
+<span id="cb9-2"><a aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> x, y <span class="kw">in</span> train_loader:</span>
+<span id="cb9-3"><a aria-hidden="true" tabindex="-1"></a>    loss <span class="op">=</span> loss_fn(model(x), y)</span>
+<span id="cb9-4"><a aria-hidden="true" tabindex="-1"></a>    ...</span>
+<span id="cb9-5"><a aria-hidden="true" tabindex="-1"></a>    losses.append(loss)      <span class="co"># a tensor</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><code>loss</code> is a <strong>node in the graph</strong>. Keeping it keeps every activation that produced it — for every batch of the epoch. Memory climbs until the run dies (you might see a <code>segfault</code> error)</p>
+</div><div class="column" style="width:50%;">
+<p><span class="pill-green">The fix</span></p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a aria-hidden="true" tabindex="-1"></a>losses <span class="op">=</span> []</span>
+<span id="cb10-2"><a aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> x, y <span class="kw">in</span> train_loader:</span>
+<span id="cb10-3"><a aria-hidden="true" tabindex="-1"></a>    loss <span class="op">=</span> loss_fn(model(x), y)</span>
+<span id="cb10-4"><a aria-hidden="true" tabindex="-1"></a>    ...</span>
+<span id="cb10-5"><a aria-hidden="true" tabindex="-1"></a>    losses.append(loss.item())   <span class="co"># a float</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><code>.item()</code> pulls a one-element tensor out as a plain Python number and drops the graph with it.</p>
+</div></div>
+<div class="card">
+<p>Two related tools worth knowing:</p>
+<ul>
+<li><strong><code>.detach()</code></strong> — same tensor, cut loose from the graph. Use when you want the values but not the history.</li>
+<li><strong><code>torch.no_grad()</code></strong> — a block where no graph is built at all. Use for validation and inference.</li>
+</ul>
+</div>
+</section>
+<section id="having-data-on-different-devices" class="slide level2">
+<h2>Having data on different devices</h2>
+<div class="card">
+<p><span class="eyebrow">The error you will meet the first time you use a GPU</span></p>
+<p><code>RuntimeError: Expected all tensors to be on the same device, but found at least two devices, cuda:0 and cpu!</code></p>
+</div>
+<div class="card">
+<p><span class="eyebrow">The rule</span> <strong>The model and the data it is fed must sit on the same device.</strong> Move the model once, outside the loop. Move each batch as it arrives.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a aria-hidden="true" tabindex="-1"></a>device <span class="op">=</span> <span class="st">"cuda"</span> <span class="cf">if</span> torch.cuda.is_available() <span class="cf">else</span> <span class="st">"cpu"</span></span>
+<span id="cb11-2"><a aria-hidden="true" tabindex="-1"></a>model.to(device)                                  <span class="co"># once</span></span>
+<span id="cb11-3"><a aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-4"><a aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> x, y <span class="kw">in</span> train_loader:</span>
+<span id="cb11-5"><a aria-hidden="true" tabindex="-1"></a>    x, y <span class="op">=</span> x.to(device), y.to(device)             <span class="co"># every batch</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="callout callout-warning callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>An annoying asymmetry that catches everyone</strong></p>
+</div>
+<div class="callout-content">
+<p><code>model.to(device)</code> moves the model <strong>in place</strong>. <code>x.to(device)</code> does <strong>not</strong> — it returns a <em>new</em> tensor and leaves the original alone. So <code>model.to(device)</code> on its own works, and <code>x.to(device)</code> on its own silently does nothing. Tensors need the assignment: <code>x = x.to(device)</code>.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="always-smoketest-your-training" class="slide level2">
+<h2>Always “smoketest” your training</h2>
+<p><span class="eyebrow">The best debugging trick in deep learning, and it takes thirty seconds</span></p>
+<div class="card">
+<p>Before training on the full dataset, take <strong>eight examples</strong> and train on those same eight, over and over:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a aria-hidden="true" tabindex="-1"></a>x, y <span class="op">=</span> <span class="bu">next</span>(<span class="bu">iter</span>(train_loader))</span>
+<span id="cb12-2"><a aria-hidden="true" tabindex="-1"></a>x, y <span class="op">=</span> x[:<span class="dv">8</span>], y[:<span class="dv">8</span>]</span>
+<span id="cb12-3"><a aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-4"><a aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> step <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">200</span>):</span>
+<span id="cb12-5"><a aria-hidden="true" tabindex="-1"></a>    optimizer.zero_grad()</span>
+<span id="cb12-6"><a aria-hidden="true" tabindex="-1"></a>    loss <span class="op">=</span> loss_fn(model(x), y)</span>
+<span id="cb12-7"><a aria-hidden="true" tabindex="-1"></a>    loss.backward()</span>
+<span id="cb12-8"><a aria-hidden="true" tabindex="-1"></a>    optimizer.step()</span>
+<span id="cb12-9"><a aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> step <span class="op">%</span> <span class="dv">50</span> <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb12-10"><a aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(step, loss.item())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><span class="pill-green">Loss goes to almost zero</span></p>
+<p>Your forward pass, loss, and optimiser all work. Any remaining problem is about <strong>generalisation</strong>.</p>
+</div><div class="column" style="width:50%;">
+<p><span class="pill-amber">Loss stays flat</span></p>
+<p>You have a <strong>bug</strong>, not a hyperparameter problem. Eight examples is enough capacity for any network to memorise/overfit.</p>
+</div></div>
+</section>
+<section id="seeds-what-they-buy-and-what-they-dont" class="slide level2">
+<h2>Seeds — what they buy, and what they don’t</h2>
+<div class="sourceCode" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch, numpy <span class="im">as</span> np, random</span>
+<span id="cb13-2"><a aria-hidden="true" tabindex="-1"></a>SEED <span class="op">=</span> <span class="dv">324</span></span>
+<span id="cb13-3"><a aria-hidden="true" tabindex="-1"></a>torch.manual_seed(SEED)<span class="op">;</span> np.random.seed(SEED)<span class="op">;</span> random.seed(SEED)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><span class="pill-green">What you get</span></p>
+<ul>
+<li>The same weight initialisation.</li>
+<li>The same shuffling and dropout masks.</li>
+<li>The same numbers when you re-run <strong>on the same machine, same versions</strong>.</li>
+</ul>
+</div><div class="column" style="width:50%;">
+<p><span class="pill-amber">What you don’t</span></p>
+<ul>
+<li>Reproducibility across different hardware, or a different PyTorch version.</li>
+<li>Determinism on GPU by default — some CUDA kernels sum in a non-fixed order.</li>
+<li>Anything at all if you seed <em>after</em> building the model.</li>
+</ul>
+</div></div>
+<div class="callout callout-tip callout-style-simple">
+<div class="callout-body">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-content">
+<p>Set the seed as the <strong>first thing</strong> in the script, and log it alongside the results.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="saving-a-model" class="slide level2">
+<h2>Saving a model</h2>
+<div class="card">
+<p><span class="eyebrow">Save the weights, not the object</span></p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a aria-hidden="true" tabindex="-1"></a>torch.save(model.state_dict(), <span class="st">"model.pt"</span>)            <span class="co"># save</span></span>
+<span id="cb14-2"><a aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-3"><a aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> TurnoutModel()                                <span class="co"># rebuild the architecture</span></span>
+<span id="cb14-4"><a aria-hidden="true" tabindex="-1"></a>model.load_state_dict(torch.load(<span class="st">"model.pt"</span>))         <span class="co"># load the weights</span></span>
+<span id="cb14-5"><a aria-hidden="true" tabindex="-1"></a>model.<span class="bu">eval</span>()                                          <span class="co"># inference mode</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>A <code>state_dict</code> is a dictionary of tensors, one per parameter. <code>torch.save(model, ...)</code> also works — it pickles the whole object, including the <em>path to your class</em>, so it breaks the moment you rename a file or move a class. Save the dictionary.</p>
+<div class="callout callout-note callout-style-simple">
+<div class="callout-body">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-content">
+<p>Checkpoint every epoch where validation loss improves. That is early stopping, implemented: keep training, but keep the best weights you have seen.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="activity-find-the-bugs" class="slide level2">
+<h2>Activity · find the bugs</h2>
+<p><span class="eyebrow"><span class="pause-cue">≈ 8 min</span> · in pairs</span></p>
+<p><strong>This loop runs without error. It also trains badly, and eventually crashes the machine. Find three problems.</strong></p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a aria-hidden="true" tabindex="-1"></a>model     <span class="op">=</span> TurnoutModel()</span>
+<span id="cb15-2"><a aria-hidden="true" tabindex="-1"></a>optimizer <span class="op">=</span> torch.optim.Adam(model.parameters(), lr<span class="op">=</span><span class="fl">1e-3</span>)</span>
+<span id="cb15-3"><a aria-hidden="true" tabindex="-1"></a>loss_fn   <span class="op">=</span> nn.MSELoss()</span>
+<span id="cb15-4"><a aria-hidden="true" tabindex="-1"></a>history   <span class="op">=</span> []</span>
+<span id="cb15-5"><a aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-6"><a aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> epoch <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">100</span>):</span>
+<span id="cb15-7"><a aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> x, y <span class="kw">in</span> train_loader:</span>
+<span id="cb15-8"><a aria-hidden="true" tabindex="-1"></a>        y_pred <span class="op">=</span> model(x)</span>
+<span id="cb15-9"><a aria-hidden="true" tabindex="-1"></a>        loss   <span class="op">=</span> loss_fn(y_pred, y)</span>
+<span id="cb15-10"><a aria-hidden="true" tabindex="-1"></a>        loss.backward()</span>
+<span id="cb15-11"><a aria-hidden="true" tabindex="-1"></a>        optimizer.step()</span>
+<span id="cb15-12"><a aria-hidden="true" tabindex="-1"></a>        history.append(loss)</span>
+<span id="cb15-13"><a aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-14"><a aria-hidden="true" tabindex="-1"></a>    val <span class="op">=</span> <span class="bu">sum</span>(loss_fn(model(x), y) <span class="cf">for</span> x, y <span class="kw">in</span> val_loader) <span class="op">/</span> <span class="bu">len</span>(val_loader)</span>
+<span id="cb15-15"><a aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"epoch </span><span class="sc">{</span>epoch<span class="sc">}</span><span class="ss">: val = </span><span class="sc">{</span>val<span class="sc">:.3f}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="activity-answers-1" class="slide level2">
+<h2>Activity · answers</h2>
+<div class="card">
+<ol type="1">
+<li><p><strong>No <code>optimizer.zero_grad()</code></strong> before <code>loss.backward()</code>. Gradients accumulate across every batch of every epoch, so each step is driven by a growing sum of stale gradients.</p></li>
+<li><p><strong><code>history.append(loss)</code></strong> stores the tensor, not <code>loss.item()</code>. Every graph in the epoch is kept alive; memory climbs until the process is killed.</p></li>
+<li><p><strong>No <code>model.train()</code> / <code>model.eval()</code>, and no <code>torch.no_grad()</code></strong> around validation. Dropout and batch norm stay in training mode while you evaluate, so the validation number is wrong — and building graphs you never backpropagate wastes memory and time.</p></li>
+</ol>
+</div>
+<div class="reveal-box">
+<p><span class="reveal-label">A fourth, if you spotted it</span> <code>TurnoutModel</code> outputs shape <code>(B, 1)</code> and the labels arrive as <code>(B,)</code>. That is the broadcasting trap from earlier — it needs <code>y_pred.squeeze(-1)</code>, and MSE will warn you about it exactly once per run.</p>
+</div>
 </section>
 <section id="take-stock" class="slide level2">
 <h2>Take stock</h2>
@@ -1492,13 +2377,14 @@ e^2 = 7.39, \quad e^1 = 2.72, \quad e^0 = 1.00, \quad \textstyle\sum = 11.11
 <li>Pick a sensible loss, optimiser, and learning rate.</li>
 <li>Diagnose overfitting, vanishing gradients, and dead ReLUs from training curves.</li>
 <li>Apply dropout and batch norm when appropriate.</li>
+<li>Debug a loop that runs but doesn’t learn — shapes, <code>zero_grad()</code>, devices, <code>eval()</code>.</li>
 <li>Apply the same machinery to a real social-science problem like civil-war forecasting.</li>
 </ol>
 <p><strong>This is the modal neural network used in industry and research for tabular data.</strong> From Monday we adapt it for images and text.</p>
 </div>
 </section>
-<section id="a-check-in-on-the-headline-promise" class="slide level2">
-<h2>A check-in on the headline promise</h2>
+<section id="were-surprisingly-close-to-generative-ai-already" class="slide level2">
+<h2>We’re surprisingly close to generative AI already</h2>
 <p><span class="eyebrow">Where we are on the road to building a GPT</span></p>
 <div class="card">
 <p>Where we are right now, end of Day 5:</p>
@@ -1526,8 +2412,8 @@ e^2 = 7.39, \quad e^1 = 2.72, \quad e^0 = 1.00, \quad \textstyle\sum = 11.11
 <!-- ::: -->
 </section></section>
 <section>
-<section id="lab-brief-todays-afternoon" class="title-slide slide level1 center" data-background-color="#0E1A2B">
-<h1>Lab brief · today’s afternoon</h1>
+<section id="lab-brief-monday-afternoon" class="title-slide slide level1 center" data-background-color="#0E1A2B">
+<h1>Lab brief · Monday afternoon</h1>
 
 </section>
 <section id="todays-lab-90-minutes" class="slide level2">

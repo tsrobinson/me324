@@ -1208,7 +1208,7 @@
     "href": "lectures/lecture-05-feedforward.html#where-are-we",
     "title": "Feed-forward networks in PyTorch",
     "section": "Where are we?",
-    "text": "Where are we?\nAfter yesterday’s lecture\n\nFour days writing autodifferentiation by hand. From today, you never have to again\n\n(except maybe in an exam 😉)\n\nQuestion for today:\nHow do we build neural networks at scale – in PyTorch, on real data, with a working classifier?\n\n\n\n\n\n\n\nConcepts in practise\n\n\nMoving from “understanding the algorithm” to “building a useful model”.\n\n\n\nAfter today, every remaining lecture uses PyTorch."
+    "text": "Where are we?\nAfter yesterday’s lecture\n\nFour days writing autodifferentiation by hand. From today, you never have to again\n\n(except maybe in an exam 😉 )\n\nQuestion for today:\nHow do we build neural networks at scale – in PyTorch, on real data, with a working classifier?\n\n\n\n\n\n\n\nConcepts in practise\n\n\nMoving from “understanding the algorithm” to “building a useful model”.\n\n\n\nAfter today, every remaining lecture uses PyTorch."
   },
   {
     "objectID": "lectures/lecture-05-feedforward.html#what-pytorch-gives-us",
@@ -1313,7 +1313,7 @@
     "href": "lectures/lecture-05-feedforward.html#plenary-answers",
     "title": "Feed-forward networks in PyTorch",
     "section": "Plenary · answers",
-    "text": "Plenary · answers\n\n\n\n\nActivation\n\\sigma(-3.5)\n\\sigma'(-3.5)\n\n\n\n\nIdentity\n-3.5\n1\n\n\nReLU\n0\n0\n\n\nSigmoid\n\\approx 0.029\n\\approx 0.028\n\n\ntanh\n\\approx -0.998\n\\approx 0.004\n\n\n\n\n\nThe lesson On the negative side at |z| = 3.5:\n\nIdentity passes through, with derivative 1 → great for gradient flow.\nReLU zeroes out — and its gradient is also zero on this example. If the unit stays negative for every input, it becomes a dead ReLU and stops learning permanently.\nSigmoid / tanh are nearly flat — derivative \\to 0. Vanishing gradient. Backprop through many such nodes shrinks gradients to nothing.\n\nThat is why most modern hidden layers use ReLU."
+    "text": "Plenary · answers\n\n\n\n\nActivation\n\\sigma(-3.5)\n\\sigma'(-3.5)\n\n\n\n\nIdentity\n-3.5\n1\n\n\nReLU\n0\n0\n\n\nSigmoid\n\\approx 0.029\n\\approx 0.028\n\n\ntanh\n\\approx -0.998\n\\approx 0.004\n\n\n\n\n\nTakeaways On the negative side at |z| = 3.5:\n\nIdentity passes through, with derivative 1 → great for gradient flow.\nReLU zeroes out — and its gradient is also zero on this example. If the unit stays negative for every input, it becomes a dead ReLU and stops learning permanently.\nSigmoid / tanh are nearly flat — derivative \\to 0. Vanishing gradient. Backprop through many such nodes shrinks gradients to nothing."
   },
   {
     "objectID": "lectures/lecture-05-feedforward.html#loss-functions-by-problem-type",
@@ -1334,7 +1334,7 @@
     "href": "lectures/lecture-05-feedforward.html#xavier-and-he-initialisation",
     "title": "Feed-forward networks in PyTorch",
     "section": "Xavier and He initialisation",
-    "text": "Xavier and He initialisation\n\n\nXavier (Glorot)\nFor sigmoid / tanh:  W^{(l)} \\sim \\mathcal{N}\\!\\left(0, \\tfrac{2}{n^{(l-1)} + n^{(l)}}\\right) \nKeeps the variance of activations stable across layers.\nWhen the layer’s fan-in and fan-out are similar this reduces to the fan-in (LeCun) form \\tfrac{1}{n^{(l-1)}}.\n\nHe (Kaiming)\nFor ReLU:  W^{(l)} \\sim \\mathcal{N}(0, \\tfrac{2}{n^{(l-1)}}) \nThe factor of 2 compensates for the half of the distribution ReLU zeroes out.\n\n\n\n\n\n\n\nYou won’t usually set this by hand.\n\n\nPyTorch’s nn.Linear defaults to a Kaiming-uniform variant. You should know this is happening but only override it if you have a reason."
+    "text": "Xavier and He initialisation\n\n\nXavier (Glorot)\nFor sigmoid / tanh:  W^{(l)} \\sim \\mathcal{N}\\!\\left(0, \\tfrac{2}{n^{(l-1)} + n^{(l)}}\\right) \nKeeps the variance of activations stable across layers.\nWhen the layer’s input and output dimensions are similar this reduces to the “fan-in” (LeCun) form \\tfrac{1}{n^{(l-1)}}.\n\nHe (Kaiming)\nFor ReLU:  W^{(l)} \\sim \\mathcal{N}(0, \\tfrac{2}{n^{(l-1)}}) \nThe factor of 2 compensates for the half of the distribution ReLU zeroes out.\n\n\n\n\n\n\n\nYou won’t usually set this by hand.\n\n\nPyTorch’s nn.Linear defaults to a Kaiming-uniform variant. You should know this is happening but only override it if you have a reason."
   },
   {
     "objectID": "lectures/lecture-05-feedforward.html#optimisers-what-well-actually-use",
@@ -1418,21 +1418,21 @@
     "href": "lectures/lecture-05-feedforward.html#batch-normalisation-example",
     "title": "Feed-forward networks in PyTorch",
     "section": "Batch normalisation example",
-    "text": "Batch normalisation example\nTake one feature’s pre-activations across a batch of three examples: z = [2,\\ 4,\\ 6], with \\gamma = 1 and \\beta = 0.\n\nStep 1 · the batch mean \\quad \\mu_B = \\dfrac{2 + 4 + 6}{3} = 4\nStep 2 · the batch variance \\quad \\sigma_B^2 = \\dfrac{(2-4)^2 + (4-4)^2 + (6-4)^2}{3} = \\dfrac{4 + 0 + 4}{3} = \\dfrac{8}{3} \\approx 2.67, so \\sigma_B \\approx 1.63\nStep 3 · standardise \\quad \\text{BN}(z) \\approx \\left[\\tfrac{2-4}{1.63},\\ \\tfrac{4-4}{1.63},\\ \\tfrac{6-4}{1.63}\\right] = [-1.22,\\ 0,\\ 1.22]\n\n\nBecause \\gamma, \\beta are learned, the network can undo this if the original scale was useful!\n\n\nWhy it helps\nStabilises activations across layers, stops distributions drifting during training, makes initialisation less critical, lets you use a larger learning rate.\n\n\n\n\n\n\n\nAt test time there is no batch to average over, so batch norm switches to running averages collected during training. That is one of the two things model.eval() toggles — and why forgetting it changes your numbers."
+    "text": "Batch normalisation example\nOne click per step — batch norm reads down a column\nA batch of three examples (rows), each with four features (columns). Take feature 1, with \\gamma = 1 and \\beta = 0.\n\n\n\n\n\n\n\n\nBN0\n\n\n\nm\n\n\nf\n1\n\n\nf\n2\n\n\nf\n3\n\n\nf\n4\nex 1\n\n2\n → −1.22\n\n4\n\n6\n\n8\nex 2\n\n4\n → 0.00\n\n0\n\n2\n\n6\nex 3\n\n6\n → +1.22\n\n2\n\n4\n\n4\n\n\n\ncap\nStep 1 · the batch mean:  (2 + 4 + 6) / 3 = 4\nStep 2 · the batch variance:  ((−2)² + 0² + (+2)²) / 3 = 8/3 ≈ 2.67,  so the sd ≈ 1.63\nStep 3 · standardise:  (2 − 4)/1.63 = −1.22,   (4 − 4)/1.63 = 0.00,   (6 − 4)/1.63 = +1.22\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nBN1\n\n\n\nm\n\n\nf\n1\n\n\nf\n2\n\n\nf\n3\n\n\nf\n4\nex 1\n\n2\n → −1.22\n\n4\n\n6\n\n8\nex 2\n\n4\n → 0.00\n\n0\n\n2\n\n6\nex 3\n\n6\n → +1.22\n\n2\n\n4\n\n4\n\n\n\ncap\nStep 1 · the batch mean:  (2 + 4 + 6) / 3 = 4\nStep 2 · the batch variance:  ((−2)² + 0² + (+2)²) / 3 = 8/3 ≈ 2.67,  so the sd ≈ 1.63\nStep 3 · standardise:  (2 − 4)/1.63 = −1.22,   (4 − 4)/1.63 = 0.00,   (6 − 4)/1.63 = +1.22\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nBN2\n\n\n\nm\n\n\nf\n1\n\n\nf\n2\n\n\nf\n3\n\n\nf\n4\nex 1\n\n2\n → −1.22\n\n4\n\n6\n\n8\nex 2\n\n4\n → 0.00\n\n0\n\n2\n\n6\nex 3\n\n6\n → +1.22\n\n2\n\n4\n\n4\n\n\n\ncap\nStep 1 · the batch mean:  (2 + 4 + 6) / 3 = 4\nStep 2 · the batch variance:  ((−2)² + 0² + (+2)²) / 3 = 8/3 ≈ 2.67,  so the sd ≈ 1.63\nStep 3 · standardise:  (2 − 4)/1.63 = −1.22,   (4 − 4)/1.63 = 0.00,   (6 − 4)/1.63 = +1.22\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nBN3\n\n\n\nm\n\n\nf\n1\n\n\nf\n2\n\n\nf\n3\n\n\nf\n4\nex 1\n\n2\n → −1.22\n\n4\n\n6\n\n8\nex 2\n\n4\n → 0.00\n\n0\n\n2\n\n6\nex 3\n\n6\n → +1.22\n\n2\n\n4\n\n4\n\n\n\ncap\nStep 1 · the batch mean:  (2 + 4 + 6) / 3 = 4\nStep 2 · the batch variance:  ((−2)² + 0² + (+2)²) / 3 = 8/3 ≈ 2.67,  so the sd ≈ 1.63\nStep 3 · standardise:  (2 − 4)/1.63 = −1.22,   (4 − 4)/1.63 = 0.00,   (6 − 4)/1.63 = +1.22\n\n\n\n\n\n\n\n\n\n\n\nFeatures 2–4 get the same treatment, each with its own \\mu_B and \\sigma_B — 64 features means 64 means."
   },
   {
     "objectID": "lectures/lecture-05-feedforward.html#layer-normalisation",
     "href": "lectures/lecture-05-feedforward.html#layer-normalisation",
     "title": "Feed-forward networks in PyTorch",
     "section": "Layer normalisation",
-    "text": "Layer normalisation\nSame arithmetic. Different direction.\nBatch norm averages down a column — one feature, across the examples in the batch. Layer norm averages along a row — one example, across its own features.\n\n\\text{LN}(h) = \\gamma \\cdot \\frac{h - \\mu_L}{\\sqrt{\\sigma_L^2 + \\epsilon}} + \\beta\n\n\\mu_L, \\sigma_L^2 — the mean and variance of the d features of this single example. Nothing is shared across the batch.\n\nWorked: one example’s activations h = [2,\\ 4,\\ 6,\\ 8]\n\\mu_L = \\dfrac{2+4+6+8}{4} = 5;  \\sigma_L^2 = \\dfrac{9 + 1 + 1 + 9}{4} = 5, so \\sigma_L \\approx 2.24\n\\text{LN}(h) \\approx \\left[\\tfrac{-3}{2.24},\\ \\tfrac{-1}{2.24},\\ \\tfrac{1}{2.24},\\ \\tfrac{3}{2.24}\\right] = [-1.34,\\ -0.45,\\ 0.45,\\ 1.34]\n\n\nWhy sequences need it The statistics come from one example, so layer norm is independent of batch size. This will be useful for transformer (Day 10)."
+    "text": "Layer normalisation\nSame arithmetic. Same matrix. Different direction — layer norm reads along a row.\n\n\\text{LN}(h) = \\gamma \\cdot \\frac{h - \\mu_L}{\\sqrt{\\sigma_L^2 + \\epsilon}} + \\beta\n\n\\mu_L, \\sigma_L^2 come from the d features of one example — here h = [2,\\ 4,\\ 6,\\ 8]. Nothing is shared across the batch.\n\n\n\n\n\n\n\n\nLN0\n\n\n\nm\n\n\nf\n1\n\n\nf\n2\n\n\nf\n3\n\n\nf\n4\nex 1\n\n2\n → −1.34\n\n4\n → −0.45\n\n6\n → +0.45\n\n8\n → +1.34\nex 2\n\n4\n\n0\n\n2\n\n6\nex 3\n\n6\n\n2\n\n4\n\n4\n\n\n\ncap\nStep 1 · the feature mean:  (2 + 4 + 6 + 8) / 4 = 5\nStep 2 · the feature variance:  ((−3)² + (−1)² + (+1)² + (+3)²) / 4 = 20/4 = 5,  so the sd ≈ 2.24\nStep 3 · standardise:  −3/2.24 = −1.34,   −1/2.24 = −0.45,   +1/2.24 = +0.45,   +3/2.24 = +1.34\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nLN1\n\n\n\nm\n\n\nf\n1\n\n\nf\n2\n\n\nf\n3\n\n\nf\n4\nex 1\n\n2\n → −1.34\n\n4\n → −0.45\n\n6\n → +0.45\n\n8\n → +1.34\nex 2\n\n4\n\n0\n\n2\n\n6\nex 3\n\n6\n\n2\n\n4\n\n4\n\n\n\ncap\nStep 1 · the feature mean:  (2 + 4 + 6 + 8) / 4 = 5\nStep 2 · the feature variance:  ((−3)² + (−1)² + (+1)² + (+3)²) / 4 = 20/4 = 5,  so the sd ≈ 2.24\nStep 3 · standardise:  −3/2.24 = −1.34,   −1/2.24 = −0.45,   +1/2.24 = +0.45,   +3/2.24 = +1.34\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nLN2\n\n\n\nm\n\n\nf\n1\n\n\nf\n2\n\n\nf\n3\n\n\nf\n4\nex 1\n\n2\n → −1.34\n\n4\n → −0.45\n\n6\n → +0.45\n\n8\n → +1.34\nex 2\n\n4\n\n0\n\n2\n\n6\nex 3\n\n6\n\n2\n\n4\n\n4\n\n\n\ncap\nStep 1 · the feature mean:  (2 + 4 + 6 + 8) / 4 = 5\nStep 2 · the feature variance:  ((−3)² + (−1)² + (+1)² + (+3)²) / 4 = 20/4 = 5,  so the sd ≈ 2.24\nStep 3 · standardise:  −3/2.24 = −1.34,   −1/2.24 = −0.45,   +1/2.24 = +0.45,   +3/2.24 = +1.34\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nLN3\n\n\n\nm\n\n\nf\n1\n\n\nf\n2\n\n\nf\n3\n\n\nf\n4\nex 1\n\n2\n → −1.34\n\n4\n → −0.45\n\n6\n → +0.45\n\n8\n → +1.34\nex 2\n\n4\n\n0\n\n2\n\n6\nex 3\n\n6\n\n2\n\n4\n\n4\n\n\n\ncap\nStep 1 · the feature mean:  (2 + 4 + 6 + 8) / 4 = 5\nStep 2 · the feature variance:  ((−3)² + (−1)² + (+1)² + (+3)²) / 4 = 20/4 = 5,  so the sd ≈ 2.24\nStep 3 · standardise:  −3/2.24 = −1.34,   −1/2.24 = −0.45,   +1/2.24 = +0.45,   +3/2.24 = +1.34\n\n\n\n\n\n\n\n\n\n\n\nExamples 2 and 3 get the same treatment, each from its own row."
   },
   {
     "objectID": "lectures/lecture-05-feedforward.html#batch-vs-layer-norm",
     "href": "lectures/lecture-05-feedforward.html#batch-vs-layer-norm",
     "title": "Feed-forward networks in PyTorch",
     "section": "Batch vs layer norm",
-    "text": "Batch vs layer norm\n\n\n\n\n\n\n\nBatch norm one \\mu per feature, averaged down the batch. Needs a decent batch size. Predominantly used in CNNs.\n\nLayer norm one \\mu per example, averaged across its features. Batch-size independent. Predominantly used in transformers."
+    "text": "Batch vs layer norm\n\n\n\n\n\n\n\nBatch norm one \\mu per feature, averaged down the batch. Needs a decent batch size. Predominantly used in CNNs.\n\nLayer norm one \\mu per example, averaged across its features. Batch-size independent — which is exactly why transformers use it (Day 10)."
   },
   {
     "objectID": "lectures/lecture-05-feedforward.html#a-practical-checklist-for-week-2-onwards",
@@ -1446,7 +1446,7 @@
     "href": "lectures/lecture-05-feedforward.html#take-stock",
     "title": "Feed-forward networks in PyTorch",
     "section": "Take stock",
-    "text": "Take stock\nWhere you are at the end of Day 5\n\nYou can:\n\nWrite a working feed-forward network in PyTorch.\nPick a sensible loss, optimiser, and learning rate.\nDiagnose overfitting, vanishing gradients, and dead ReLUs from training curves.\nApply dropout and batch norm when appropriate.\nApply the same machinery to a real social-science problem like civil-war forecasting.\n\nThis is the modal neural network used in industry and research for tabular data. From Monday we adapt it for images and text."
+    "text": "Take stock\nWhere you are at the end of Day 5\n\nYou can:\n\nWrite a working feed-forward network in PyTorch.\nPick a sensible loss, optimiser, and learning rate.\nDiagnose overfitting, vanishing gradients, and dead ReLUs from training curves.\nApply dropout and batch norm when appropriate.\nDebug a loop that runs but doesn’t learn — shapes, zero_grad(), devices, eval().\nApply the same machinery to a real social-science problem like civil-war forecasting.\n\nThis is the modal neural network used in industry and research for tabular data. From Monday we adapt it for images and text."
   },
   {
     "objectID": "lectures/lecture-05-feedforward.html#a-check-in-on-the-headline-promise",
@@ -1789,14 +1789,14 @@
     "href": "lectures/lecture-05-feedforward.html#warm-up-three-questions-from-last-time",
     "title": "Feed-forward networks in PyTorch",
     "section": "Warm-up · three questions from last time",
-    "text": "Warm-up · three questions from last time\n≈ 5 min · shout it out\n\nFrom yesterday\n\nOne gradient-descent update. w = 1, \\frac{\\partial L}{\\partial w} = 0.5, learning rate \\lambda = 0.1. What is the new w?\nWhat does a loss function measure — and which loss did we use for regression?\nIn which direction does backpropagation walk the computational graph, and what does it carry with it?\n\n\nEverything here is from yesterday’s lecture!"
+    "text": "Warm-up · three questions from last time\n≈ 5 min · shout it out\n\nFrom yesterday\n\nOne gradient-descent update. w = 1, \\frac{\\partial L}{\\partial w} = 0.5, learning rate \\lambda = 0.1. What is the new w?\nWhat does a loss function measure — and which loss did we use for continuous outcomes?\nWhat do you backpropagate?\n\n\nEverything here is from yesterday’s lecture!"
   },
   {
     "objectID": "lectures/lecture-05-feedforward.html#warm-up-answers",
     "href": "lectures/lecture-05-feedforward.html#warm-up-answers",
     "title": "Feed-forward networks in PyTorch",
     "section": "Warm-up · answers",
-    "text": "Warm-up · answers\n\n\nStep against the gradient, scaled by \\lambda: \nw_{\\text{new}} = w - \\lambda \\frac{\\partial L}{\\partial w} = 1 - 0.1 \\times 0.5 = 1 - 0.05 = 0.95\n\nHow wrong the model’s predictions are on the data, as a single number — lower is better. For regression we used mean squared error.\nBackwards — from the loss to the inputs, multiplying local derivatives along the way. That is the chain rule.\n\n\nAll three are about to become one line of PyTorch each."
+    "text": "Warm-up · answers\n\n\nStep against the gradient, scaled by \\lambda: \nw_{\\text{new}} = w - \\lambda \\frac{\\partial L}{\\partial w} = 1 - 0.1 \\times 0.5 = 1 - 0.05 = 0.95\n\nHow wrong the model’s predictions are on the data, as a single number — lower is better. For regression we used mean squared error.\nOften “the loss” but more technically you backpropagate the gradient of the loss"
   },
   {
     "objectID": "lectures/lecture-05-feedforward.html#diagnosing-a-run-from-its-loss-curves",
@@ -1810,7 +1810,7 @@
     "href": "lectures/lecture-05-feedforward.html#diagnosing-a-run-answers",
     "title": "Feed-forward networks in PyTorch",
     "section": "Diagnosing a run · answers",
-    "text": "Diagnosing a run · answers\n\n\nA — overfitting. Training keeps falling; validation bottoms out, then climbs. Fix: dropout or weight decay, early stopping, or more data — the defences from the overfitting slide.\nB — healthy. Both curves fall together and the gap stays small. Fix: none. Leave it alone.\nC — learning rate too high. The loss jumps around and drifts upwards. Fix: lower the learning rate — from 10^{-1} back towards 10^{-3}.\nD — underfitting. Both curves flat and high from the first epoch. Fix: a bigger model, or train for longer.\n\n\n\n\n\n\n\n\n\nOne habit to keep\n\n\nWhen a run misbehaves, plot these two curves before touching anything else. The shape tells you which problem you have — and each problem has a different fix."
+    "text": "Diagnosing a run · answers\n\n\nA — overfitting. Training keeps falling; validation bottoms out, then climbs. Fix: dropout or weight decay, early stopping, or more data — the defences from the overfitting slide.\nB — healthy. Both curves fall together and the gap stays small. Fix: none. Leave it alone.\nC — learning rate too high. The loss jumps around and drifts upwards. Fix: lower the learning rate — from 10^{-1} back towards 10^{-3}.\nD — underfitting. Both curves flat and high from the first epoch. Fix: a bigger model, or train for longer.\n\n\n\n\n\n\n\n\nAlways inspect your loss curves!\n\n\nWhen a run misbehaves, plot these two curves before touching anything else. The shape tells you which problem you have — and each problem has a different fix."
   },
   {
     "objectID": "lectures/lecture-04-backpropagation.html#warm-up-three-questions-from-last-time",
@@ -1972,5 +1972,166 @@
     "title": "Backpropagation",
     "section": "See you tomorrow",
     "text": "See you tomorrow\nLecture 5 — Feed-forward networks in PyTorch\n\n\n\n\n\n\nTonight:\n\n\n\nWell done — today and yesterday were the two steepest lectures of the whole course.\nIf you’re curious, watch Karpathy’s Building micrograd – it walks through the exact lab you just did.\nOptional: install PyTorch locally if you want to run things outside Colab. Setup notes are on Moodle.\n\n\n\n\n\n\n\nME324 · AI and Deep Learning · LSE Summer School\n\n\n\n\nDauphin, Y. N., Pascanu, R., Gulcehre, C., Cho, K., Ganguli, S., & Bengio, Y. (2014). Identifying and attacking the saddle point problem in high-dimensional non-convex optimization. Advances in Neural Information Processing Systems, 27.\n\n\nKingma, D. P. (2014). Adam: A method for stochastic optimization. arXiv Preprint arXiv:1412.6980.\n\n\nLall, R., & Robinson, T. (2022). The MIDAS touch: Accurate and scalable missing-data imputation with deep learning. Political Analysis, 30(2), 179–196.\n\n\nRumelhart, D. E., Hinton, G. E., & Williams, R. J. (1986). Learning representations by back-propagating errors. Nature, 323(6088), 533–536."
+  },
+  {
+    "objectID": "lectures/lecture-05-feedforward.html#what-batch-norm-buys-you",
+    "href": "lectures/lecture-05-feedforward.html#what-batch-norm-buys-you",
+    "title": "Feed-forward networks in PyTorch",
+    "section": "What batch norm buys you",
+    "text": "What batch norm buys you\n\nBecause \\gamma, \\beta are learned, the network can undo the standardisation if the original scale was useful!\n\n\nWhy it helps\nStabilises activations across layers, stops distributions drifting during training, makes initialisation less critical, lets you use a larger learning rate.\n\n\n\n\n\n\n\nAt test time there is no batch to average over\n\n\nDuring prediction, batch norm switches to running averages collected during training. That is one of the two things model.eval() toggles — and why forgetting it changes your numbers."
+  },
+  {
+    "objectID": "lectures/lecture-05-feedforward.html#the-things-nobody-puts-in-the-textbook",
+    "href": "lectures/lecture-05-feedforward.html#the-things-nobody-puts-in-the-textbook",
+    "title": "Feed-forward networks in PyTorch",
+    "section": "The things nobody puts in the textbook",
+    "text": "The things nobody puts in the textbook\n\nEverything so far has been about what to build. This part is about what goes wrong when you build it — the handful of mistakes that every PyTorch programmer makes, usually more than once.\nMost of them share a family resemblance: the code runs. No exception, no stack trace, just a model that quietly learns nothing.\n\nI have made every single one of these. Some of them this year."
+  },
+  {
+    "objectID": "lectures/lecture-05-feedforward.html#how-to-read-a-pytorch-error",
+    "href": "lectures/lecture-05-feedforward.html#how-to-read-a-pytorch-error",
+    "title": "Feed-forward networks in PyTorch",
+    "section": "How to read a PyTorch error",
+    "text": "How to read a PyTorch error\nThe most common error you will see, and it tells you more than it looks:\nmodel = nn.Linear(3, 16)      # expects 3 features\nx = torch.randn(32, 10)       # but we hand it 10\nmodel(x)\n\nPyTorch stops with\nRuntimeError: mat1 and mat2 shapes cannot be multiplied (32x10 and 3x16)\n\n\nDecoding it\n\nmat1 is your data: 32 rows (the batch), 10 features.\nmat2 is the layer’s weight matrix: 3 in, 16 out.\nMatrix multiplication needs the inner numbers to match. 10 \\neq 3.\n\nSo: the layer wanted 3 features per example and you gave it 10. Fix the layer, or fix the data — but the message has already told you which two numbers disagree.\n\n\n\n\n\n\n\nWhen a shape error appears, print(x.shape) on the line above."
+  },
+  {
+    "objectID": "lectures/lecture-05-feedforward.html#the-bug-that-doesnt-crash",
+    "href": "lectures/lecture-05-feedforward.html#the-bug-that-doesnt-crash",
+    "title": "Feed-forward networks in PyTorch",
+    "section": "The bug that doesn’t crash",
+    "text": "The bug that doesn’t crash\nRemember .squeeze(-1) from the training script? Here is what it was protecting you from.\ny_pred = model(x_batch)        # shape (32, 1) — a column\ny_true = y_batch               # shape (32,)   — a flat vector\nloss = nn.MSELoss()(y_pred, y_true)\n\nPredict PyTorch broadcasts these two shapes rather than complaining. What shape does the subtraction inside MSE produce — and how many numbers does the mean get averaged over?\n\n\n\nAnswer — (32, 32), and 1,024 numbers\nBroadcasting pads the shorter shape on the left: (32,) becomes (1, 32). Then (32, 1) against (1, 32) stretches both into (32, 32).\nYou have just compared every prediction against every label — all 1,024 pairs — and averaged the lot. Only the 32 numbers on the diagonal were ever meaningful.\nThe loss still comes out as a plausible-looking number. It falls during training. The model learns nothing useful.\n\n\n\n\n\n\n\n\nMSE does print UserWarning: Using a target size that is different to the input size. It scrolls past in a wall of epoch output. Read your warnings."
+  },
+  {
+    "objectID": "lectures/lecture-05-feedforward.html#forgetting-zero_grad",
+    "href": "lectures/lecture-05-feedforward.html#forgetting-zero_grad",
+    "title": "Feed-forward networks in PyTorch",
+    "section": "Forgetting zero_grad()",
+    "text": "Forgetting zero_grad()\nPyTorch accumulates gradients — every .backward() adds to .grad rather than replacing it.\n\n\n\nTwo batches, one weight, \\lambda = 0.1\nBatch 1 gives \\frac{\\partial L}{\\partial w} = 0.5; batch 2 gives 0.3.\nWith zero_grad() — the second step uses 0.3: w \\leftarrow w - 0.1 \\times 0.3 = w - 0.03\nWithout it — .grad still holds batch 1’s number: w \\leftarrow w - 0.1 \\times \\underbrace{(0.5 + 0.3)}_{0.8} = w - 0.08\n\n\nBatch 1’s gradient is still steering the model several batches later.\n\nUnlike momentum, the gradient grows without limit\nThe loss curve looks like a learning rate set far too high.\n\n\n\n\n\n\n\nWhy doesn’t PyTorch just do it for you?\nBecause accumulation is sometimes what you want! E.g. running four small batches and stepping once simulates a batch four times the size on a GPU that can’t hold one"
+  },
+  {
+    "objectID": "lectures/lecture-05-feedforward.html#item-and-the-loop-that-eats-your-memory",
+    "href": "lectures/lecture-05-feedforward.html#item-and-the-loop-that-eats-your-memory",
+    "title": "Feed-forward networks in PyTorch",
+    "section": ".item(), and the loop that eats your memory",
+    "text": ".item(), and the loop that eats your memory\n\n\nThe bug\nlosses = []\nfor x, y in train_loader:\n    loss = loss_fn(model(x), y)\n    ...\n    losses.append(loss)      # a tensor\nloss is a node in the graph. Keeping it keeps every activation that produced it — for every batch of the epoch. Memory climbs until the run dies.\n\nThe fix\nlosses = []\nfor x, y in train_loader:\n    loss = loss_fn(model(x), y)\n    ...\n    losses.append(loss.item())   # a float\n.item() pulls a one-element tensor out as a plain Python number and drops the graph with it.\n\n\nTwo related tools worth knowing:\n\n.detach() — same tensor, cut loose from the graph. Use when you want the values but not the history.\ntorch.no_grad() — a block where no graph is built at all. Use for validation and inference."
+  },
+  {
+    "objectID": "lectures/lecture-05-feedforward.html#one-device-one-rule",
+    "href": "lectures/lecture-05-feedforward.html#one-device-one-rule",
+    "title": "Feed-forward networks in PyTorch",
+    "section": "One device, one rule",
+    "text": "One device, one rule\n\nThe error you will meet the first time you use a GPU\nRuntimeError: Expected all tensors to be on the same device, but found at least two devices, cuda:0 and cpu!\n\n\nThe rule The model and the data it is fed must sit on the same device. Move the model once, outside the loop; move each batch as it arrives.\ndevice = \"cuda\" if torch.cuda.is_available() else \"cpu\"\nmodel.to(device)                                  # once\n\nfor x, y in train_loader:\n    x, y = x.to(device), y.to(device)             # every batch\n\n\n\n\n\n\n\nThe asymmetry that catches everyone\n\n\nmodel.to(device) moves the model in place. x.to(device) does not — it returns a new tensor and leaves the original alone. So model.to(device) on its own works, and x.to(device) on its own silently does nothing. Tensors need the assignment: x = x.to(device)."
+  },
+  {
+    "objectID": "lectures/lecture-05-feedforward.html#overfit-a-single-batch-first",
+    "href": "lectures/lecture-05-feedforward.html#overfit-a-single-batch-first",
+    "title": "Feed-forward networks in PyTorch",
+    "section": "Overfit a single batch first",
+    "text": "Overfit a single batch first\nThe best debugging trick in deep learning, and it takes thirty seconds\n\nBefore training on the full dataset, take eight examples and train on those same eight, over and over:\nx, y = next(iter(train_loader))\nx, y = x[:8], y[:8]\n\nfor step in range(200):\n    optimizer.zero_grad()\n    loss = loss_fn(model(x), y)\n    loss.backward()\n    optimizer.step()\n    if step % 50 == 0:\n        print(step, loss.item())\n\n\n\nLoss goes to almost zero\nYour forward pass, loss, and optimiser all work. Any remaining problem is about generalisation — the things in Part 3.\n\nLoss stays flat\nYou have a bug, not a hyperparameter problem. Eight examples is enough capacity for any network to memorise. Go and find it."
+  },
+  {
+    "objectID": "lectures/lecture-05-feedforward.html#seeds-what-they-buy-and-what-they-dont",
+    "href": "lectures/lecture-05-feedforward.html#seeds-what-they-buy-and-what-they-dont",
+    "title": "Feed-forward networks in PyTorch",
+    "section": "Seeds — what they buy, and what they don’t",
+    "text": "Seeds — what they buy, and what they don’t\nimport torch, numpy as np, random\nSEED = 324\ntorch.manual_seed(SEED); np.random.seed(SEED); random.seed(SEED)\n\n\nWhat you get\n\nThe same weight initialisation.\nThe same shuffling and dropout masks.\nThe same numbers when you re-run on the same machine, same versions.\n\n\nWhat you don’t\n\nReproducibility across different hardware, or a different PyTorch version.\nDeterminism on GPU by default — some CUDA kernels sum in a non-fixed order.\nAnything at all if you seed after building the model.\n\n\n\n\n\n\n\n\nSet the seed as the first thing in the script, and log it alongside the results."
+  },
+  {
+    "objectID": "lectures/lecture-05-feedforward.html#saving-a-model",
+    "href": "lectures/lecture-05-feedforward.html#saving-a-model",
+    "title": "Feed-forward networks in PyTorch",
+    "section": "Saving a model",
+    "text": "Saving a model\n\nSave the weights, not the object\ntorch.save(model.state_dict(), \"model.pt\")            # save\n\nmodel = TurnoutModel()                                # rebuild the architecture\nmodel.load_state_dict(torch.load(\"model.pt\"))         # load the weights\nmodel.eval()                                          # inference mode\n\nA state_dict is a dictionary of tensors, one per parameter. torch.save(model, ...) also works — it pickles the whole object, including the path to your class, so it breaks the moment you rename a file or move a class. Save the dictionary.\n\n\n\n\n\n\nCheckpoint every epoch where validation loss improves. That is early stopping, implemented: keep training, but keep the best weights you have seen."
+  },
+  {
+    "objectID": "lectures/lecture-05-feedforward.html#activity-find-the-bugs",
+    "href": "lectures/lecture-05-feedforward.html#activity-find-the-bugs",
+    "title": "Feed-forward networks in PyTorch",
+    "section": "Activity · find the bugs",
+    "text": "Activity · find the bugs\n≈ 8 min · in pairs\nThis loop runs without error. It also trains badly, and eventually crashes the machine. Find three problems.\nmodel     = TurnoutModel()\noptimizer = torch.optim.Adam(model.parameters(), lr=1e-3)\nloss_fn   = nn.MSELoss()\nhistory   = []\n\nfor epoch in range(100):\n    for x, y in train_loader:\n        y_pred = model(x)\n        loss   = loss_fn(y_pred, y)\n        loss.backward()\n        optimizer.step()\n        history.append(loss)\n\n    val = sum(loss_fn(model(x), y) for x, y in val_loader) / len(val_loader)\n    print(f\"epoch {epoch}: val = {val:.3f}\")"
+  },
+  {
+    "objectID": "lectures/lecture-05-feedforward.html#activity-answers-1",
+    "href": "lectures/lecture-05-feedforward.html#activity-answers-1",
+    "title": "Feed-forward networks in PyTorch",
+    "section": "Activity · answers",
+    "text": "Activity · answers\n\n\nNo optimizer.zero_grad() before loss.backward(). Gradients accumulate across every batch of every epoch, so each step is driven by a growing sum of stale gradients.\nhistory.append(loss) stores the tensor, not loss.item(). Every graph in the epoch is kept alive; memory climbs until the process is killed.\nNo model.train() / model.eval(), and no torch.no_grad() around validation. Dropout and batch norm stay in training mode while you evaluate, so the validation number is wrong — and building graphs you never backpropagate wastes memory and time.\n\n\n\nA fourth, if you spotted it TurnoutModel outputs shape (B, 1) and the labels arrive as (B,). That is the broadcasting trap from earlier — it needs y_pred.squeeze(-1), and MSE will warn you about it exactly once per run."
+  },
+  {
+    "objectID": "lectures/lecture-05-feedforward.html#the-loop-that-eats-your-memory",
+    "href": "lectures/lecture-05-feedforward.html#the-loop-that-eats-your-memory",
+    "title": "Feed-forward networks in PyTorch",
+    "section": "The loop that eats your memory",
+    "text": "The loop that eats your memory\n\n\nThe bug\nlosses = []\nfor x, y in train_loader:\n    loss = loss_fn(model(x), y)\n    ...\n    losses.append(loss)      # a tensor\nloss is a node in the graph. Keeping it keeps every activation that produced it — for every batch of the epoch. Memory climbs until the run dies.\n\nThe fix\nlosses = []\nfor x, y in train_loader:\n    loss = loss_fn(model(x), y)\n    ...\n    losses.append(loss.item())   # a float\n.item() pulls a one-element tensor out as a plain Python number and drops the graph with it.\n\n\nTwo related tools worth knowing:\n\n.detach() — same tensor, cut loose from the graph. Use when you want the values but not the history.\ntorch.no_grad() — a block where no graph is built at all. Use for validation and inference."
+  },
+  {
+    "objectID": "lectures/lecture-05-feedforward.html#pytorch-models-nn.module",
+    "href": "lectures/lecture-05-feedforward.html#pytorch-models-nn.module",
+    "title": "Feed-forward networks in PyTorch",
+    "section": "PyTorch models — nn.Module",
+    "text": "PyTorch models — nn.Module\nimport torch.nn as nn\n\nclass TurnoutModel(nn.Module):\n    def __init__(self):\n        super().__init__()\n        self.fc1 = nn.Linear(3, 16)     # 3 inputs → 16 hidden neurons\n        self.fc2 = nn.Linear(16, 1)     # 16 hidden → 1 output\n\n    def forward(self, x):\n        h = torch.relu(self.fc1(x))     # hidden layer with ReLU\n        return self.fc2(h)              # output (logit)\n\n\nnn.Linear(k, h) — a fully-connected layer with k \\cdot h weights and h biases. Initialised for you.\nnn.Module — is a base class that tracks parameters and provides key methods like .parameters(), .train(), .eval(), .to(device).\nforward() — defines what you mean by “run the model forward”. PyTorch auto-builds the backward pass."
+  },
+  {
+    "objectID": "lectures/lecture-05-feedforward.html#the-same-pattern",
+    "href": "lectures/lecture-05-feedforward.html#the-same-pattern",
+    "title": "Feed-forward networks in PyTorch",
+    "section": "The same pattern",
+    "text": "The same pattern\n\n\nDefine a model (a Module whose forward() you wrote).\nPick a loss function (cross-entropy, MSE, …).\nPick an optimiser (Adam, SGD, …).\nFor each batch in your training data:\n\nZero the gradients.\nForward pass.\nCompute the loss.\nBackward pass.\nOne optimiser step."
+  },
+  {
+    "objectID": "lectures/lecture-05-feedforward.html#monitoring-training",
+    "href": "lectures/lecture-05-feedforward.html#monitoring-training",
+    "title": "Feed-forward networks in PyTorch",
+    "section": "Monitoring training",
+    "text": "Monitoring training\n\nimport torch\nfrom torch.utils.data import DataLoader\n\nmodel     = MyModel()                                    # nn.Module\nloss_fn   = nn.CrossEntropyLoss()\noptimizer = torch.optim.Adam(model.parameters(), lr=1e-3)\n\ntrain_loader = DataLoader(train_set, batch_size=64, shuffle=True)\nval_loader   = DataLoader(val_set,   batch_size=64)\n\nfor epoch in range(num_epochs):\n    model.train()\n    for x_batch, y_batch in train_loader:\n        optimizer.zero_grad()\n        y_pred = model(x_batch)\n        loss   = loss_fn(y_pred, y_batch)\n        loss.backward()\n        optimizer.step()\n\n    model.eval()\n    with torch.no_grad():\n        val_loss = sum(loss_fn(model(x), y) for x, y in val_loader) / len(val_loader)\n    print(f\"Epoch {epoch:02d}: train={loss.item():.3f} val={val_loss.item():.3f}\")"
+  },
+  {
+    "objectID": "lectures/lecture-05-feedforward.html#what-you-need-to-know",
+    "href": "lectures/lecture-05-feedforward.html#what-you-need-to-know",
+    "title": "Feed-forward networks in PyTorch",
+    "section": "What you need to know",
+    "text": "What you need to know\nStop & check\n\nBefore we go on to understand when models break, make sure you’re happy with the following:\n\nWhy does initialising every weight to zero stop the network from learning?\nWhat does model.eval() change about dropout and batch norm?\nWhich optimiser and learning rate are the sensible first try?\n\n\nIf any of these are still fuzzy, flag it now!"
+  },
+  {
+    "objectID": "lectures/lecture-05-feedforward.html#what-the-textbooks-dont-tell-you",
+    "href": "lectures/lecture-05-feedforward.html#what-the-textbooks-dont-tell-you",
+    "title": "Feed-forward networks in PyTorch",
+    "section": "What the textbooks don’t tell you…",
+    "text": "What the textbooks don’t tell you…\n\nEverything so far has been about what to build.\n\nBut of course, as humans, we are prone to error\nProgrammers are no different\n\nThe worst kind of error is one you don’t spot:\n\nThe code runs\nNo exception is reported\nMaybe the model even has slightly declining loss\n\n\nWe have to figure out what is intrinsically hard, from what we have ourselves made hard through our mistakes!"
+  },
+  {
+    "objectID": "lectures/lecture-05-feedforward.html#incorrect-broadcasting",
+    "href": "lectures/lecture-05-feedforward.html#incorrect-broadcasting",
+    "title": "Feed-forward networks in PyTorch",
+    "section": "Incorrect broadcasting",
+    "text": "Incorrect broadcasting\nRemember .squeeze(-1) from the training script? Here is what it was protecting you from.\ny_pred = model(x_batch)        # shape (32, 1) — a column\ny_true = y_batch               # shape (32,)   — a flat vector\nloss = nn.MSELoss()(y_pred, y_true)\n\nPredict PyTorch broadcasts these two shapes rather than complaining. What shape does the subtraction inside MSE produce — and how many numbers does the mean get averaged over?\n\n\n\nAnswer — (32, 32), and 1,024 numbers\nBroadcasting pads the shorter shape on the left: (32,) becomes (1, 32). Then (32, 1) against (1, 32) stretches both into (32, 32).\nThis will compare every prediction against every label — all 1,024 pairs — and averaged the them. But only the 32 numbers on the diagonal were ever meaningful.\nThe loss still comes out as a plausible-looking number\n\nIt falls during training…\nBut the model learns nothing useful.\n\n\n\n\n\n\n\n\n\nMSE does print a UserWarning (target size that is different to the input size). Read your warnings."
+  },
+  {
+    "objectID": "lectures/lecture-05-feedforward.html#consuming-all-your-memory",
+    "href": "lectures/lecture-05-feedforward.html#consuming-all-your-memory",
+    "title": "Feed-forward networks in PyTorch",
+    "section": "Consuming all your memory",
+    "text": "Consuming all your memory\n\n\nThe bug\nlosses = []\nfor x, y in train_loader:\n    loss = loss_fn(model(x), y)\n    ...\n    losses.append(loss)      # a tensor\nloss is a node in the graph. Keeping it keeps every activation that produced it — for every batch of the epoch. Memory climbs until the run dies (you might see a segfault error)\n\nThe fix\nlosses = []\nfor x, y in train_loader:\n    loss = loss_fn(model(x), y)\n    ...\n    losses.append(loss.item())   # a float\n.item() pulls a one-element tensor out as a plain Python number and drops the graph with it.\n\n\nTwo related tools worth knowing:\n\n.detach() — same tensor, cut loose from the graph. Use when you want the values but not the history.\ntorch.no_grad() — a block where no graph is built at all. Use for validation and inference."
+  },
+  {
+    "objectID": "lectures/lecture-05-feedforward.html#having-data-on-different-devices",
+    "href": "lectures/lecture-05-feedforward.html#having-data-on-different-devices",
+    "title": "Feed-forward networks in PyTorch",
+    "section": "Having data on different devices",
+    "text": "Having data on different devices\n\nThe error you will meet the first time you use a GPU\nRuntimeError: Expected all tensors to be on the same device, but found at least two devices, cuda:0 and cpu!\n\n\nThe rule The model and the data it is fed must sit on the same device. Move the model once, outside the loop. Move each batch as it arrives.\ndevice = \"cuda\" if torch.cuda.is_available() else \"cpu\"\nmodel.to(device)                                  # once\n\nfor x, y in train_loader:\n    x, y = x.to(device), y.to(device)             # every batch\n\n\n\n\n\n\n\nAn annoying asymmetry that catches everyone\n\n\nmodel.to(device) moves the model in place. x.to(device) does not — it returns a new tensor and leaves the original alone. So model.to(device) on its own works, and x.to(device) on its own silently does nothing. Tensors need the assignment: x = x.to(device)."
+  },
+  {
+    "objectID": "lectures/lecture-05-feedforward.html#always-smoketest-your-training",
+    "href": "lectures/lecture-05-feedforward.html#always-smoketest-your-training",
+    "title": "Feed-forward networks in PyTorch",
+    "section": "Always “smoketest” your training",
+    "text": "Always “smoketest” your training\nThe best debugging trick in deep learning, and it takes thirty seconds\n\nBefore training on the full dataset, take eight examples and train on those same eight, over and over:\nx, y = next(iter(train_loader))\nx, y = x[:8], y[:8]\n\nfor step in range(200):\n    optimizer.zero_grad()\n    loss = loss_fn(model(x), y)\n    loss.backward()\n    optimizer.step()\n    if step % 50 == 0:\n        print(step, loss.item())\n\n\n\nLoss goes to almost zero\nYour forward pass, loss, and optimiser all work. Any remaining problem is about generalisation.\n\nLoss stays flat\nYou have a bug, not a hyperparameter problem. Eight examples is enough capacity for any network to memorise/overfit."
+  },
+  {
+    "objectID": "lectures/lecture-05-feedforward.html#were-surprisingly-close-to-generative-ai-already",
+    "href": "lectures/lecture-05-feedforward.html#were-surprisingly-close-to-generative-ai-already",
+    "title": "Feed-forward networks in PyTorch",
+    "section": "We’re surprisingly close to generative AI already",
+    "text": "We’re surprisingly close to generative AI already\nWhere we are on the road to building a GPT\n\nWhere we are right now, end of Day 5:\n\n✅ You can write a forward pass.\n✅ You can write backprop (by hand, then in PyTorch).\n✅ You can train a feed-forward classifier on real data.\n⏳ Next week: vision (CNNs, generative).\n⏳ Week 3: language. Embeddings, attention, transformers — your tiny GPT.\n\nA third of the way in"
   }
 ]

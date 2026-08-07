@@ -19,7 +19,7 @@ format:
 ::: {.card}
 Four days writing autodifferentiation by hand. **From today, you never have to again** 
 
-  * (except maybe in an exam 😉)
+  * (except maybe in an exam 😉 )
 
 **Question for today:**
 
@@ -42,8 +42,8 @@ After today, every remaining lecture uses PyTorch.
 [From yesterday]{.eyebrow}
 
 1. One gradient-descent update. $w = 1$, $\frac{\partial L}{\partial w} = 0.5$, learning rate $\lambda = 0.1$. What is the new $w$?
-2. What does a loss function measure — and which loss did we use for regression?
-3. In which direction does backpropagation walk the computational graph, and what does it carry with it?
+2. What does a loss function measure — and which loss did we use for continuous outcomes?
+3. What do you backpropagate?
 :::
 
 [Everything here is from yesterday's lecture!]{.muted}
@@ -56,10 +56,8 @@ $$
 w_{\text{new}} = w - \lambda \frac{\partial L}{\partial w} = 1 - 0.1 \times 0.5 = 1 - 0.05 = 0.95
 $$
 2. How wrong the model's predictions are on the data, as a single number — lower is better. For regression we used **mean squared error**.
-3. **Backwards** — from the loss to the inputs, multiplying local derivatives along the way. That is the chain rule.
+3. Often "the loss" but more technically you backpropagate the *gradient* of the loss
 :::
-
-All three are about to become one line of PyTorch each.
 
 # Part 1 · From `Value` to PyTorch {background-color="#0E1A2B"}
 
@@ -130,7 +128,7 @@ print(x.grad)                       # → 16.0   (which is 3x² + 4 evaluated at
 * This is exactly the algorithm you have been working on by hand.
 :::
 
-## Models, the PyTorch way — `nn.Module`
+## PyTorch models — `nn.Module`
 
 ```python
 import torch.nn as nn
@@ -211,7 +209,7 @@ The last layer is $16 \to 1$, so a batch of 32 comes out as shape **`(32, 1)`**.
 * [This is annoying, but we need to "squeeze" the output so it is also `(32,)`.]{.smaller}
 :::
 
-## The same pattern, in plain English
+## The same pattern
 
 ::: {.card}
 1. **Define a model** (a `Module` whose `forward()` you wrote).
@@ -499,17 +497,16 @@ Then for each, give the **derivative** at $z = -3.5$.
 :::
 
 ::: {.reveal-box}
-[The lesson]{.reveal-label}
+[Takeaways]{.reveal-label}
 On the negative side at $|z| = 3.5$:
 
 * **Identity** passes through, with derivative 1 → great for gradient flow.
 * **ReLU** zeroes out — and its gradient is also zero on this example. If the unit stays negative for *every* input, it becomes a *dead ReLU* and stops learning permanently.
 * **Sigmoid / tanh** are nearly flat — derivative $\to 0$. **Vanishing gradient.** Backprop through many such nodes shrinks gradients to nothing.
 
-That is *why* most modern hidden layers use ReLU.
 :::
 
-# Part 2 · Training, properly {background-color="#0E1A2B"}
+# Part 2 · Training models properly {background-color="#0E1A2B"}
 
 ## Loss functions, by problem type
 
@@ -557,7 +554,7 @@ $$ W^{(l)} \sim \mathcal{N}\!\left(0, \tfrac{2}{n^{(l-1)} + n^{(l)}}\right) $$
 
 Keeps the variance of activations stable across layers. 
 
-When the layer's fan-in and fan-out are similar this reduces to the fan-in (LeCun) form $\tfrac{1}{n^{(l-1)}}$.
+When the layer's input and output dimensions are similar this reduces to the "fan-in" (LeCun) form $\tfrac{1}{n^{(l-1)}}$.
 :::
 ::: {.column width="50%"}
 [He (Kaiming)]{.pill}
@@ -600,7 +597,7 @@ PyTorch's `nn.Linear` defaults to a Kaiming-uniform variant. You should know thi
 Use Adam with $\lambda = 10^{-3}$, then tune as needed.
 :::
 
-## The full training loop, revisited
+## Monitoring training
 
 ```{python}
 #| eval: false
@@ -675,19 +672,19 @@ For each change, **predict** what happens to (a) training loss and (b) validatio
 
 # Part 3 · When training fails {background-color="#0E1A2B"}
 
-## Stop & check before we go on
+## What you need to know
 
 [<span class="pause-cue">Stop & check</span>]{.eyebrow}
 
 ::: {.card}
-Before we go on to understand when models break, make sure you're happy with the following:
+Before we go on to understand when models *break*, make sure you're happy with the following:
 
 1. Why does **initialising every weight to zero** stop the network from learning?
 2. What does **`model.eval()`** change about dropout and batch norm?
 3. Which optimiser and learning rate are the sensible **first try**?
 :::
 
-[If any of these is still fuzzy, flag it now!]{.muted}
+[If any of these are still fuzzy, flag it now!]{.muted}
 
 ## Neural networks are fickle
 
@@ -823,20 +820,69 @@ A batch of **32** examples enters a hidden layer of width **64**. How many means
 
 ## Batch normalisation example
 
-Take one feature's pre-activations across a batch of three examples: $z = [2,\ 4,\ 6]$, with $\gamma = 1$ and $\beta = 0$.
+[One click per step — batch norm reads **down a column**]{.eyebrow}
 
-::: {.card}
-[Step 1 · the batch mean]{.eyebrow}
-$\quad \mu_B = \dfrac{2 + 4 + 6}{3} = 4$
+A batch of three examples (rows), each with four features (columns). Take feature 1, with $\gamma = 1$ and $\beta = 0$.
 
-[Step 2 · the batch variance]{.eyebrow}
-$\quad \sigma_B^2 = \dfrac{(2-4)^2 + (4-4)^2 + (6-4)^2}{3} = \dfrac{4 + 0 + 4}{3} = \dfrac{8}{3} \approx 2.67$, so $\sigma_B \approx 1.63$
+::: {.r-stack}
 
-[Step 3 · standardise]{.eyebrow}
-$\quad \text{BN}(z) \approx \left[\tfrac{2-4}{1.63},\ \tfrac{4-4}{1.63},\ \tfrac{6-4}{1.63}\right] = [-1.22,\ 0,\ 1.22]$
+```{dot}
+//| fig-height: 3.1
+digraph BN0 {
+  bgcolor="#FBFAF6"; nodesep=0.1; ranksep=0.28;
+  node [fontname="Inter" shape=plaintext fontcolor="#0E1A2B"];
+  m [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="6"><TR><TD BORDER="0"></TD><TD BGCOLOR="#F4F1EA" COLOR="#D7D2C5" BORDER="2">f<SUB>1</SUB></TD><TD BGCOLOR="#F4F1EA" COLOR="#D7D2C5">f<SUB>2</SUB></TD><TD BGCOLOR="#F4F1EA" COLOR="#D7D2C5">f<SUB>3</SUB></TD><TD BGCOLOR="#F4F1EA" COLOR="#D7D2C5">f<SUB>4</SUB></TD></TR><TR><TD BORDER="0"><FONT COLOR="#5C6473">ex 1</FONT></TD><TD BORDER="2" ALIGN="LEFT" COLOR="#D7D2C5"><FONT COLOR="#0E1A2B">2</FONT><FONT COLOR="#FBFAF6">&#160;&#8594;&#160;&#8722;1.22</FONT></TD><TD COLOR="#D7D2C5">4</TD><TD COLOR="#D7D2C5">6</TD><TD COLOR="#D7D2C5">8</TD></TR><TR><TD BORDER="0"><FONT COLOR="#5C6473">ex 2</FONT></TD><TD BORDER="2" ALIGN="LEFT" COLOR="#D7D2C5"><FONT COLOR="#0E1A2B">4</FONT><FONT COLOR="#FBFAF6">&#160;&#8594;&#160;0.00</FONT></TD><TD COLOR="#D7D2C5">0</TD><TD COLOR="#D7D2C5">2</TD><TD COLOR="#D7D2C5">6</TD></TR><TR><TD BORDER="0"><FONT COLOR="#5C6473">ex 3</FONT></TD><TD BORDER="2" ALIGN="LEFT" COLOR="#D7D2C5"><FONT COLOR="#0E1A2B">6</FONT><FONT COLOR="#FBFAF6">&#160;&#8594;&#160;+1.22</FONT></TD><TD COLOR="#D7D2C5">2</TD><TD COLOR="#D7D2C5">4</TD><TD COLOR="#D7D2C5">4</TD></TR></TABLE>>];
+  cap [label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4"><TR><TD ALIGN="LEFT"><FONT COLOR="#FBFAF6">Step 1 &#183; the batch mean:&#160; (2 + 4 + 6) / 3 = 4</FONT></TD></TR><TR><TD ALIGN="LEFT"><FONT COLOR="#FBFAF6">Step 2 &#183; the batch variance:&#160; ((&#8722;2)&#178; + 0&#178; + (+2)&#178;) / 3 = 8/3 &#8776; 2.67,&#160; so the sd &#8776; 1.63</FONT></TD></TR><TR><TD ALIGN="LEFT"><FONT COLOR="#FBFAF6">Step 3 &#183; standardise:&#160; (2 &#8722; 4)/1.63 = &#8722;1.22,&#160;&#160; (4 &#8722; 4)/1.63 = 0.00,&#160;&#160; (6 &#8722; 4)/1.63 = +1.22</FONT></TD></TR></TABLE>>];
+  m -> cap [style=invis];
+}
+```
+
+::: {.fragment}
+```{dot}
+//| fig-height: 3.1
+digraph BN1 {
+  bgcolor="#FBFAF6"; nodesep=0.1; ranksep=0.28;
+  node [fontname="Inter" shape=plaintext fontcolor="#0E1A2B"];
+  m [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="6"><TR><TD BORDER="0"></TD><TD BGCOLOR="#F4F1EA" COLOR="#C9322B" BORDER="2">f<SUB>1</SUB></TD><TD BGCOLOR="#F4F1EA" COLOR="#D7D2C5">f<SUB>2</SUB></TD><TD BGCOLOR="#F4F1EA" COLOR="#D7D2C5">f<SUB>3</SUB></TD><TD BGCOLOR="#F4F1EA" COLOR="#D7D2C5">f<SUB>4</SUB></TD></TR><TR><TD BORDER="0"><FONT COLOR="#5C6473">ex 1</FONT></TD><TD BORDER="2" ALIGN="LEFT" COLOR="#C9322B"><FONT COLOR="#C9322B">2</FONT><FONT COLOR="#FBFAF6">&#160;&#8594;&#160;&#8722;1.22</FONT></TD><TD COLOR="#D7D2C5">4</TD><TD COLOR="#D7D2C5">6</TD><TD COLOR="#D7D2C5">8</TD></TR><TR><TD BORDER="0"><FONT COLOR="#5C6473">ex 2</FONT></TD><TD BORDER="2" ALIGN="LEFT" COLOR="#C9322B"><FONT COLOR="#C9322B">4</FONT><FONT COLOR="#FBFAF6">&#160;&#8594;&#160;0.00</FONT></TD><TD COLOR="#D7D2C5">0</TD><TD COLOR="#D7D2C5">2</TD><TD COLOR="#D7D2C5">6</TD></TR><TR><TD BORDER="0"><FONT COLOR="#5C6473">ex 3</FONT></TD><TD BORDER="2" ALIGN="LEFT" COLOR="#C9322B"><FONT COLOR="#C9322B">6</FONT><FONT COLOR="#FBFAF6">&#160;&#8594;&#160;+1.22</FONT></TD><TD COLOR="#D7D2C5">2</TD><TD COLOR="#D7D2C5">4</TD><TD COLOR="#D7D2C5">4</TD></TR></TABLE>>];
+  cap [label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4"><TR><TD ALIGN="LEFT"><FONT COLOR="#0E1A2B">Step 1 &#183; the batch mean:&#160; (2 + 4 + 6) / 3 = 4</FONT></TD></TR><TR><TD ALIGN="LEFT"><FONT COLOR="#FBFAF6">Step 2 &#183; the batch variance:&#160; ((&#8722;2)&#178; + 0&#178; + (+2)&#178;) / 3 = 8/3 &#8776; 2.67,&#160; so the sd &#8776; 1.63</FONT></TD></TR><TR><TD ALIGN="LEFT"><FONT COLOR="#FBFAF6">Step 3 &#183; standardise:&#160; (2 &#8722; 4)/1.63 = &#8722;1.22,&#160;&#160; (4 &#8722; 4)/1.63 = 0.00,&#160;&#160; (6 &#8722; 4)/1.63 = +1.22</FONT></TD></TR></TABLE>>];
+  m -> cap [style=invis];
+}
+```
 :::
 
-* Because $\gamma, \beta$ are *learned*, the network can **undo** this if the original scale was useful!
+::: {.fragment}
+```{dot}
+//| fig-height: 3.1
+digraph BN2 {
+  bgcolor="#FBFAF6"; nodesep=0.1; ranksep=0.28;
+  node [fontname="Inter" shape=plaintext fontcolor="#0E1A2B"];
+  m [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="6"><TR><TD BORDER="0"></TD><TD BGCOLOR="#F4F1EA" COLOR="#C9322B" BORDER="2">f<SUB>1</SUB></TD><TD BGCOLOR="#F4F1EA" COLOR="#D7D2C5">f<SUB>2</SUB></TD><TD BGCOLOR="#F4F1EA" COLOR="#D7D2C5">f<SUB>3</SUB></TD><TD BGCOLOR="#F4F1EA" COLOR="#D7D2C5">f<SUB>4</SUB></TD></TR><TR><TD BORDER="0"><FONT COLOR="#5C6473">ex 1</FONT></TD><TD BORDER="2" ALIGN="LEFT" COLOR="#C9322B"><FONT COLOR="#C9322B">2</FONT><FONT COLOR="#FBFAF6">&#160;&#8594;&#160;&#8722;1.22</FONT></TD><TD COLOR="#D7D2C5">4</TD><TD COLOR="#D7D2C5">6</TD><TD COLOR="#D7D2C5">8</TD></TR><TR><TD BORDER="0"><FONT COLOR="#5C6473">ex 2</FONT></TD><TD BORDER="2" ALIGN="LEFT" COLOR="#C9322B"><FONT COLOR="#C9322B">4</FONT><FONT COLOR="#FBFAF6">&#160;&#8594;&#160;0.00</FONT></TD><TD COLOR="#D7D2C5">0</TD><TD COLOR="#D7D2C5">2</TD><TD COLOR="#D7D2C5">6</TD></TR><TR><TD BORDER="0"><FONT COLOR="#5C6473">ex 3</FONT></TD><TD BORDER="2" ALIGN="LEFT" COLOR="#C9322B"><FONT COLOR="#C9322B">6</FONT><FONT COLOR="#FBFAF6">&#160;&#8594;&#160;+1.22</FONT></TD><TD COLOR="#D7D2C5">2</TD><TD COLOR="#D7D2C5">4</TD><TD COLOR="#D7D2C5">4</TD></TR></TABLE>>];
+  cap [label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4"><TR><TD ALIGN="LEFT"><FONT COLOR="#5C6473">Step 1 &#183; the batch mean:&#160; (2 + 4 + 6) / 3 = 4</FONT></TD></TR><TR><TD ALIGN="LEFT"><FONT COLOR="#0E1A2B">Step 2 &#183; the batch variance:&#160; ((&#8722;2)&#178; + 0&#178; + (+2)&#178;) / 3 = 8/3 &#8776; 2.67,&#160; so the sd &#8776; 1.63</FONT></TD></TR><TR><TD ALIGN="LEFT"><FONT COLOR="#FBFAF6">Step 3 &#183; standardise:&#160; (2 &#8722; 4)/1.63 = &#8722;1.22,&#160;&#160; (4 &#8722; 4)/1.63 = 0.00,&#160;&#160; (6 &#8722; 4)/1.63 = +1.22</FONT></TD></TR></TABLE>>];
+  m -> cap [style=invis];
+}
+```
+:::
+
+::: {.fragment}
+```{dot}
+//| fig-height: 3.1
+digraph BN3 {
+  bgcolor="#FBFAF6"; nodesep=0.1; ranksep=0.28;
+  node [fontname="Inter" shape=plaintext fontcolor="#0E1A2B"];
+  m [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="6"><TR><TD BORDER="0"></TD><TD BGCOLOR="#F4F1EA" COLOR="#1A6FB4" BORDER="2">f<SUB>1</SUB></TD><TD BGCOLOR="#F4F1EA" COLOR="#D7D2C5">f<SUB>2</SUB></TD><TD BGCOLOR="#F4F1EA" COLOR="#D7D2C5">f<SUB>3</SUB></TD><TD BGCOLOR="#F4F1EA" COLOR="#D7D2C5">f<SUB>4</SUB></TD></TR><TR><TD BORDER="0"><FONT COLOR="#5C6473">ex 1</FONT></TD><TD BORDER="2" ALIGN="LEFT" COLOR="#1A6FB4"><FONT COLOR="#0E1A2B">2</FONT><FONT COLOR="#1A6FB4">&#160;&#8594;&#160;&#8722;1.22</FONT></TD><TD COLOR="#D7D2C5">4</TD><TD COLOR="#D7D2C5">6</TD><TD COLOR="#D7D2C5">8</TD></TR><TR><TD BORDER="0"><FONT COLOR="#5C6473">ex 2</FONT></TD><TD BORDER="2" ALIGN="LEFT" COLOR="#1A6FB4"><FONT COLOR="#0E1A2B">4</FONT><FONT COLOR="#1A6FB4">&#160;&#8594;&#160;0.00</FONT></TD><TD COLOR="#D7D2C5">0</TD><TD COLOR="#D7D2C5">2</TD><TD COLOR="#D7D2C5">6</TD></TR><TR><TD BORDER="0"><FONT COLOR="#5C6473">ex 3</FONT></TD><TD BORDER="2" ALIGN="LEFT" COLOR="#1A6FB4"><FONT COLOR="#0E1A2B">6</FONT><FONT COLOR="#1A6FB4">&#160;&#8594;&#160;+1.22</FONT></TD><TD COLOR="#D7D2C5">2</TD><TD COLOR="#D7D2C5">4</TD><TD COLOR="#D7D2C5">4</TD></TR></TABLE>>];
+  cap [label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4"><TR><TD ALIGN="LEFT"><FONT COLOR="#5C6473">Step 1 &#183; the batch mean:&#160; (2 + 4 + 6) / 3 = 4</FONT></TD></TR><TR><TD ALIGN="LEFT"><FONT COLOR="#5C6473">Step 2 &#183; the batch variance:&#160; ((&#8722;2)&#178; + 0&#178; + (+2)&#178;) / 3 = 8/3 &#8776; 2.67,&#160; so the sd &#8776; 1.63</FONT></TD></TR><TR><TD ALIGN="LEFT"><FONT COLOR="#0E1A2B">Step 3 &#183; standardise:&#160; (2 &#8722; 4)/1.63 = &#8722;1.22,&#160;&#160; (4 &#8722; 4)/1.63 = 0.00,&#160;&#160; (6 &#8722; 4)/1.63 = +1.22</FONT></TD></TR></TABLE>>];
+  m -> cap [style=invis];
+}
+```
+:::
+
+:::
+
+[Features 2–4 get the same treatment, each with its own $\mu_B$ and $\sigma_B$ — 64 features means 64 means.]{.smaller .muted}
+
+## What batch norm buys you
+
+* Because $\gamma, \beta$ are *learned*, the network can **undo** the standardisation if the original scale was useful!
 
 ::: {.card}
 [Why it helps]{.eyebrow}
@@ -845,45 +891,87 @@ Stabilises activations across layers, stops distributions drifting during traini
 :::
 
 ::: {.callout-warning appearance="simple"}
-At test time there is no batch to average over, so batch norm switches to **running averages** collected during training. That is one of the two things `model.eval()` toggles — and why forgetting it changes your numbers.
+# At test time there is no batch to average over
+
+During prediction, batch norm switches to **running averages** collected during training. That is one of the two things `model.eval()` toggles — and why forgetting it changes your numbers.
 :::
 
 ## Layer normalisation
 
-[Same arithmetic. Different direction.]{.eyebrow}
-
-Batch norm averages **down a column** — one feature, across the examples in the batch. Layer norm averages **along a row** — one example, across its own features.
+[Same arithmetic. Same matrix. Different direction — layer norm reads **along a row**.]{.eyebrow}
 
 $$
 \text{LN}(h) = \gamma \cdot \frac{h - \mu_L}{\sqrt{\sigma_L^2 + \epsilon}} + \beta
 $$
 
-[$\mu_L, \sigma_L^2$ — the mean and variance of the $d$ features **of this single example**. Nothing is shared across the batch.]{.smaller}
+[$\mu_L, \sigma_L^2$ come from the $d$ features **of one example** — here $h = [2,\ 4,\ 6,\ 8]$. Nothing is shared across the batch.]{.smaller}
 
-::: {.card}
-[Worked: one example's activations $h = [2,\ 4,\ 6,\ 8]$]{.eyebrow}
+::: {.r-stack}
 
-$\mu_L = \dfrac{2+4+6+8}{4} = 5$;&nbsp; $\sigma_L^2 = \dfrac{9 + 1 + 1 + 9}{4} = 5$, so $\sigma_L \approx 2.24$
+```{dot}
+//| fig-height: 3.0
+digraph LN0 {
+  bgcolor="#FBFAF6"; nodesep=0.1; ranksep=0.28;
+  node [fontname="Inter" shape=plaintext fontcolor="#0E1A2B"];
+  m [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="6"><TR><TD BORDER="0"></TD><TD BGCOLOR="#F4F1EA" COLOR="#D7D2C5">f<SUB>1</SUB></TD><TD BGCOLOR="#F4F1EA" COLOR="#D7D2C5">f<SUB>2</SUB></TD><TD BGCOLOR="#F4F1EA" COLOR="#D7D2C5">f<SUB>3</SUB></TD><TD BGCOLOR="#F4F1EA" COLOR="#D7D2C5">f<SUB>4</SUB></TD></TR><TR><TD BORDER="0"><FONT COLOR="#D7D2C5">ex 1</FONT></TD><TD BORDER="2" COLOR="#D7D2C5"><FONT COLOR="#0E1A2B">2</FONT><FONT COLOR="#FBFAF6">&#160;&#8594;&#160;&#8722;1.34</FONT></TD><TD BORDER="2" COLOR="#D7D2C5"><FONT COLOR="#0E1A2B">4</FONT><FONT COLOR="#FBFAF6">&#160;&#8594;&#160;&#8722;0.45</FONT></TD><TD BORDER="2" COLOR="#D7D2C5"><FONT COLOR="#0E1A2B">6</FONT><FONT COLOR="#FBFAF6">&#160;&#8594;&#160;+0.45</FONT></TD><TD BORDER="2" COLOR="#D7D2C5"><FONT COLOR="#0E1A2B">8</FONT><FONT COLOR="#FBFAF6">&#160;&#8594;&#160;+1.34</FONT></TD></TR><TR><TD BORDER="0"><FONT COLOR="#5C6473">ex 2</FONT></TD><TD COLOR="#D7D2C5">4</TD><TD COLOR="#D7D2C5">0</TD><TD COLOR="#D7D2C5">2</TD><TD COLOR="#D7D2C5">6</TD></TR><TR><TD BORDER="0"><FONT COLOR="#5C6473">ex 3</FONT></TD><TD COLOR="#D7D2C5">6</TD><TD COLOR="#D7D2C5">2</TD><TD COLOR="#D7D2C5">4</TD><TD COLOR="#D7D2C5">4</TD></TR></TABLE>>];
+  cap [label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4"><TR><TD ALIGN="LEFT"><FONT COLOR="#FBFAF6">Step 1 &#183; the feature mean:&#160; (2 + 4 + 6 + 8) / 4 = 5</FONT></TD></TR><TR><TD ALIGN="LEFT"><FONT COLOR="#FBFAF6">Step 2 &#183; the feature variance:&#160; ((&#8722;3)&#178; + (&#8722;1)&#178; + (+1)&#178; + (+3)&#178;) / 4 = 20/4 = 5,&#160; so the sd &#8776; 2.24</FONT></TD></TR><TR><TD ALIGN="LEFT"><FONT COLOR="#FBFAF6">Step 3 &#183; standardise:&#160; &#8722;3/2.24 = &#8722;1.34,&#160;&#160; &#8722;1/2.24 = &#8722;0.45,&#160;&#160; +1/2.24 = +0.45,&#160;&#160; +3/2.24 = +1.34</FONT></TD></TR></TABLE>>];
+  m -> cap [style=invis];
+}
+```
 
-$\text{LN}(h) \approx \left[\tfrac{-3}{2.24},\ \tfrac{-1}{2.24},\ \tfrac{1}{2.24},\ \tfrac{3}{2.24}\right] = [-1.34,\ -0.45,\ 0.45,\ 1.34]$
+::: {.fragment}
+```{dot}
+//| fig-height: 3.0
+digraph LN1 {
+  bgcolor="#FBFAF6"; nodesep=0.1; ranksep=0.28;
+  node [fontname="Inter" shape=plaintext fontcolor="#0E1A2B"];
+  m [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="6"><TR><TD BORDER="0"></TD><TD BGCOLOR="#F4F1EA" COLOR="#D7D2C5">f<SUB>1</SUB></TD><TD BGCOLOR="#F4F1EA" COLOR="#D7D2C5">f<SUB>2</SUB></TD><TD BGCOLOR="#F4F1EA" COLOR="#D7D2C5">f<SUB>3</SUB></TD><TD BGCOLOR="#F4F1EA" COLOR="#D7D2C5">f<SUB>4</SUB></TD></TR><TR><TD BORDER="0"><FONT COLOR="#C9322B">ex 1</FONT></TD><TD BORDER="2" COLOR="#C9322B"><FONT COLOR="#C9322B">2</FONT><FONT COLOR="#FBFAF6">&#160;&#8594;&#160;&#8722;1.34</FONT></TD><TD BORDER="2" COLOR="#C9322B"><FONT COLOR="#C9322B">4</FONT><FONT COLOR="#FBFAF6">&#160;&#8594;&#160;&#8722;0.45</FONT></TD><TD BORDER="2" COLOR="#C9322B"><FONT COLOR="#C9322B">6</FONT><FONT COLOR="#FBFAF6">&#160;&#8594;&#160;+0.45</FONT></TD><TD BORDER="2" COLOR="#C9322B"><FONT COLOR="#C9322B">8</FONT><FONT COLOR="#FBFAF6">&#160;&#8594;&#160;+1.34</FONT></TD></TR><TR><TD BORDER="0"><FONT COLOR="#5C6473">ex 2</FONT></TD><TD COLOR="#D7D2C5">4</TD><TD COLOR="#D7D2C5">0</TD><TD COLOR="#D7D2C5">2</TD><TD COLOR="#D7D2C5">6</TD></TR><TR><TD BORDER="0"><FONT COLOR="#5C6473">ex 3</FONT></TD><TD COLOR="#D7D2C5">6</TD><TD COLOR="#D7D2C5">2</TD><TD COLOR="#D7D2C5">4</TD><TD COLOR="#D7D2C5">4</TD></TR></TABLE>>];
+  cap [label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4"><TR><TD ALIGN="LEFT"><FONT COLOR="#0E1A2B">Step 1 &#183; the feature mean:&#160; (2 + 4 + 6 + 8) / 4 = 5</FONT></TD></TR><TR><TD ALIGN="LEFT"><FONT COLOR="#FBFAF6">Step 2 &#183; the feature variance:&#160; ((&#8722;3)&#178; + (&#8722;1)&#178; + (+1)&#178; + (+3)&#178;) / 4 = 20/4 = 5,&#160; so the sd &#8776; 2.24</FONT></TD></TR><TR><TD ALIGN="LEFT"><FONT COLOR="#FBFAF6">Step 3 &#183; standardise:&#160; &#8722;3/2.24 = &#8722;1.34,&#160;&#160; &#8722;1/2.24 = &#8722;0.45,&#160;&#160; +1/2.24 = +0.45,&#160;&#160; +3/2.24 = +1.34</FONT></TD></TR></TABLE>>];
+  m -> cap [style=invis];
+}
+```
 :::
 
-::: {.reveal-box}
-[Why sequences need it]{.reveal-label}
-The statistics come from **one example**, so layer norm is *independent of batch size*. This will be useful for transformer (Day 10).
+::: {.fragment}
+```{dot}
+//| fig-height: 3.0
+digraph LN2 {
+  bgcolor="#FBFAF6"; nodesep=0.1; ranksep=0.28;
+  node [fontname="Inter" shape=plaintext fontcolor="#0E1A2B"];
+  m [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="6"><TR><TD BORDER="0"></TD><TD BGCOLOR="#F4F1EA" COLOR="#D7D2C5">f<SUB>1</SUB></TD><TD BGCOLOR="#F4F1EA" COLOR="#D7D2C5">f<SUB>2</SUB></TD><TD BGCOLOR="#F4F1EA" COLOR="#D7D2C5">f<SUB>3</SUB></TD><TD BGCOLOR="#F4F1EA" COLOR="#D7D2C5">f<SUB>4</SUB></TD></TR><TR><TD BORDER="0"><FONT COLOR="#C9322B">ex 1</FONT></TD><TD BORDER="2" COLOR="#C9322B"><FONT COLOR="#C9322B">2</FONT><FONT COLOR="#FBFAF6">&#160;&#8594;&#160;&#8722;1.34</FONT></TD><TD BORDER="2" COLOR="#C9322B"><FONT COLOR="#C9322B">4</FONT><FONT COLOR="#FBFAF6">&#160;&#8594;&#160;&#8722;0.45</FONT></TD><TD BORDER="2" COLOR="#C9322B"><FONT COLOR="#C9322B">6</FONT><FONT COLOR="#FBFAF6">&#160;&#8594;&#160;+0.45</FONT></TD><TD BORDER="2" COLOR="#C9322B"><FONT COLOR="#C9322B">8</FONT><FONT COLOR="#FBFAF6">&#160;&#8594;&#160;+1.34</FONT></TD></TR><TR><TD BORDER="0"><FONT COLOR="#5C6473">ex 2</FONT></TD><TD COLOR="#D7D2C5">4</TD><TD COLOR="#D7D2C5">0</TD><TD COLOR="#D7D2C5">2</TD><TD COLOR="#D7D2C5">6</TD></TR><TR><TD BORDER="0"><FONT COLOR="#5C6473">ex 3</FONT></TD><TD COLOR="#D7D2C5">6</TD><TD COLOR="#D7D2C5">2</TD><TD COLOR="#D7D2C5">4</TD><TD COLOR="#D7D2C5">4</TD></TR></TABLE>>];
+  cap [label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4"><TR><TD ALIGN="LEFT"><FONT COLOR="#5C6473">Step 1 &#183; the feature mean:&#160; (2 + 4 + 6 + 8) / 4 = 5</FONT></TD></TR><TR><TD ALIGN="LEFT"><FONT COLOR="#0E1A2B">Step 2 &#183; the feature variance:&#160; ((&#8722;3)&#178; + (&#8722;1)&#178; + (+1)&#178; + (+3)&#178;) / 4 = 20/4 = 5,&#160; so the sd &#8776; 2.24</FONT></TD></TR><TR><TD ALIGN="LEFT"><FONT COLOR="#FBFAF6">Step 3 &#183; standardise:&#160; &#8722;3/2.24 = &#8722;1.34,&#160;&#160; &#8722;1/2.24 = &#8722;0.45,&#160;&#160; +1/2.24 = +0.45,&#160;&#160; +3/2.24 = +1.34</FONT></TD></TR></TABLE>>];
+  m -> cap [style=invis];
+}
+```
+:::
+
+::: {.fragment}
+```{dot}
+//| fig-height: 3.0
+digraph LN3 {
+  bgcolor="#FBFAF6"; nodesep=0.1; ranksep=0.28;
+  node [fontname="Inter" shape=plaintext fontcolor="#0E1A2B"];
+  m [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="6"><TR><TD BORDER="0"></TD><TD BGCOLOR="#F4F1EA" COLOR="#D7D2C5">f<SUB>1</SUB></TD><TD BGCOLOR="#F4F1EA" COLOR="#D7D2C5">f<SUB>2</SUB></TD><TD BGCOLOR="#F4F1EA" COLOR="#D7D2C5">f<SUB>3</SUB></TD><TD BGCOLOR="#F4F1EA" COLOR="#D7D2C5">f<SUB>4</SUB></TD></TR><TR><TD BORDER="0"><FONT COLOR="#1A6FB4">ex 1</FONT></TD><TD BORDER="2" COLOR="#1A6FB4"><FONT COLOR="#0E1A2B">2</FONT><FONT COLOR="#1A6FB4">&#160;&#8594;&#160;&#8722;1.34</FONT></TD><TD BORDER="2" COLOR="#1A6FB4"><FONT COLOR="#0E1A2B">4</FONT><FONT COLOR="#1A6FB4">&#160;&#8594;&#160;&#8722;0.45</FONT></TD><TD BORDER="2" COLOR="#1A6FB4"><FONT COLOR="#0E1A2B">6</FONT><FONT COLOR="#1A6FB4">&#160;&#8594;&#160;+0.45</FONT></TD><TD BORDER="2" COLOR="#1A6FB4"><FONT COLOR="#0E1A2B">8</FONT><FONT COLOR="#1A6FB4">&#160;&#8594;&#160;+1.34</FONT></TD></TR><TR><TD BORDER="0"><FONT COLOR="#5C6473">ex 2</FONT></TD><TD COLOR="#D7D2C5">4</TD><TD COLOR="#D7D2C5">0</TD><TD COLOR="#D7D2C5">2</TD><TD COLOR="#D7D2C5">6</TD></TR><TR><TD BORDER="0"><FONT COLOR="#5C6473">ex 3</FONT></TD><TD COLOR="#D7D2C5">6</TD><TD COLOR="#D7D2C5">2</TD><TD COLOR="#D7D2C5">4</TD><TD COLOR="#D7D2C5">4</TD></TR></TABLE>>];
+  cap [label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4"><TR><TD ALIGN="LEFT"><FONT COLOR="#5C6473">Step 1 &#183; the feature mean:&#160; (2 + 4 + 6 + 8) / 4 = 5</FONT></TD></TR><TR><TD ALIGN="LEFT"><FONT COLOR="#5C6473">Step 2 &#183; the feature variance:&#160; ((&#8722;3)&#178; + (&#8722;1)&#178; + (+1)&#178; + (+3)&#178;) / 4 = 20/4 = 5,&#160; so the sd &#8776; 2.24</FONT></TD></TR><TR><TD ALIGN="LEFT"><FONT COLOR="#0E1A2B">Step 3 &#183; standardise:&#160; &#8722;3/2.24 = &#8722;1.34,&#160;&#160; &#8722;1/2.24 = &#8722;0.45,&#160;&#160; +1/2.24 = +0.45,&#160;&#160; +3/2.24 = +1.34</FONT></TD></TR></TABLE>>];
+  m -> cap [style=invis];
+}
+```
+:::
 
 :::
+
+[Examples 2 and 3 get the same treatment, each from its own row.]{.smaller .muted}
 
 ## Batch vs layer norm
 
-![](../assets/images/batchnorm.jpg){fig-align="center" width="33%"}
+![](../assets/images/batchnorm.jpg){fig-align="center" width="26%"}
 
 ::: {.columns}
 ::: {.column width="50%"}
 [Batch norm]{.pill-blue} one $\mu$ per **feature**, averaged down the batch. Needs a decent batch size. Predominantly used in **CNNs**.
 :::
 ::: {.column width="50%"}
-[Layer norm]{.pill} one $\mu$ per **example**, averaged across its features. Batch-size independent. Predominantly used in **transformers**.
+[Layer norm]{.pill} one $\mu$ per **example**, averaged across its features. Batch-size independent — which is exactly why **transformers** use it (Day 10).
 :::
 :::
 
@@ -996,7 +1084,9 @@ Four training runs. Same model, same data — four different outcomes:
 * **D — underfitting.** Both curves flat and high from the first epoch. *Fix:* a bigger model, or train for longer.
 :::
 
-::: {.callout-tip title="One habit to keep"}
+::: {.callout-tip}
+# Always inspect your loss curves!
+
 When a run misbehaves, plot these two curves before touching anything else. The shape tells you *which* problem you have — and each problem has a different fix.
 :::
 
@@ -1023,6 +1113,311 @@ When a run misbehaves, plot these two curves before touching anything else. The 
 :::
 :::
 
+# Part 4 · Tips, tricks and traps {background-color="#0E1A2B"}
+
+## What the textbooks don't tell you...
+
+::: {.card}
+Everything so far has been about **what to build**. 
+
+* But of course, as humans, we are prone to error
+* Programmers are no different
+
+The *worst kind of error* is one you don't spot:
+
+* **The code runs**
+* No exception is reported
+* Maybe the model even has slightly declining loss
+
+:::
+
+
+[We have to figure out what is intrinsically hard, from what we have ourselves made hard through our mistakes!]{.muted}
+
+## How to read a PyTorch error
+
+The most common error you will see, and it tells you more than it looks:
+
+```python
+model = nn.Linear(3, 16)      # expects 3 features
+x = torch.randn(32, 10)       # but we hand it 10
+model(x)
+```
+
+::: {.card}
+[PyTorch stops with]{.eyebrow}
+
+`RuntimeError: mat1 and mat2 shapes cannot be multiplied (32x10 and 3x16)`
+:::
+
+::: {.card}
+[Decoding it]{.eyebrow}
+
+* `mat1` is **your data**: 32 rows (the batch), 10 features.
+* `mat2` is **the layer's weight matrix**: 3 in, 16 out.
+* Matrix multiplication needs the inner numbers to match. $10 \neq 3$.
+
+So: the layer wanted 3 features per example and you gave it 10. Fix the layer, or fix the data — but the message has already told you which two numbers disagree.
+:::
+
+::: {.callout-tip appearance="simple"}
+When a shape error appears, `print(x.shape)` on the line above.
+:::
+
+## Incorrect broadcasting
+
+Remember `.squeeze(-1)` from the training script? Here is what it was protecting you from.
+
+```python
+y_pred = model(x_batch)        # shape (32, 1) — a column
+y_true = y_batch               # shape (32,)   — a flat vector
+loss = nn.MSELoss()(y_pred, y_true)
+```
+
+::: {.try-box}
+[Predict]{.try-label}
+**PyTorch broadcasts these two shapes rather than complaining. What shape does the subtraction inside MSE produce — and how many numbers does the mean get averaged over?**
+:::
+
+::: {.fragment}
+::: {.reveal-box}
+[Answer — $(32, 32)$, and 1,024 numbers]{.reveal-label}
+
+Broadcasting pads the shorter shape on the left: `(32,)` becomes `(1, 32)`. Then `(32, 1)` against `(1, 32)` stretches **both** into $(32, 32)$.
+
+This will compare **every prediction against every label** — all 1,024 pairs — and averaged the them. But only the 32 numbers on the diagonal were ever meaningful.
+
+The loss still comes out as a plausible-looking number
+  
+* It falls during training...
+* But the model learns nothing useful.
+
+:::
+:::
+
+::: {.callout-warning appearance="simple"}
+MSE does print a `UserWarning` (target size that is different to the input size).  **Read your warnings.**
+:::
+
+## Forgetting `zero_grad()`
+
+PyTorch **accumulates** gradients — every `.backward()` adds to `.grad` rather than replacing it.
+
+::: {.columns}
+::: {.column width="52%"}
+::: {.card}
+[Two batches, one weight, $\lambda = 0.1$]{.eyebrow}
+
+Batch 1 gives $\frac{\partial L}{\partial w} = 0.5$; batch 2 gives $0.3$.
+
+**With `zero_grad()`** — the second step uses $0.3$:
+$$w \leftarrow w - 0.1 \times 0.3 = w - 0.03$$
+
+**Without it** — `.grad` still holds batch 1's number:
+$$w \leftarrow w - 0.1 \times \underbrace{(0.5 + 0.3)}_{0.8} = w - 0.08$$
+:::
+:::
+::: {.column width="48%"}
+Batch 1's gradient is still steering the model several batches later. 
+
+* Unlike momentum, the gradient grows without limit
+* The loss curve looks like a learning rate set far too high.
+
+::: {.callout-note appearance="simple"}
+[Why doesn't PyTorch just do it for you?]{.eyebrow}
+
+Because accumulation is sometimes what you want! E.g. running four small batches and stepping once simulates a batch four times the size on a GPU that can't hold one
+:::
+:::
+:::
+
+## Consuming all your memory
+
+::: {.columns}
+::: {.column width="50%"}
+[The bug]{.pill-amber}
+
+```python
+losses = []
+for x, y in train_loader:
+    loss = loss_fn(model(x), y)
+    ...
+    losses.append(loss)      # a tensor
+```
+
+`loss` is a **node in the graph**. Keeping it keeps every activation that produced it — for every batch of the epoch. Memory climbs until the run dies (you might see a `segfault` error)
+
+:::
+::: {.column width="50%"}
+[The fix]{.pill-green}
+
+```python
+losses = []
+for x, y in train_loader:
+    loss = loss_fn(model(x), y)
+    ...
+    losses.append(loss.item())   # a float
+```
+
+`.item()` pulls a one-element tensor out as a plain Python number and drops the graph with it.
+:::
+:::
+
+::: {.card}
+Two related tools worth knowing:
+
+* **`.detach()`** — same tensor, cut loose from the graph. Use when you want the values but not the history.
+* **`torch.no_grad()`** — a block where no graph is built at all. Use for validation and inference.
+:::
+
+## Having data on different devices
+
+::: {.card}
+[The error you will meet the first time you use a GPU]{.eyebrow}
+
+`RuntimeError: Expected all tensors to be on the same device, but found at least two devices, cuda:0 and cpu!`
+:::
+
+::: {.card}
+[The rule]{.eyebrow}
+**The model and the data it is fed must sit on the same device.** Move the model once, outside the loop. Move each batch as it arrives.
+
+```python
+device = "cuda" if torch.cuda.is_available() else "cpu"
+model.to(device)                                  # once
+
+for x, y in train_loader:
+    x, y = x.to(device), y.to(device)             # every batch
+```
+:::
+
+::: {.callout-warning}
+# An annoying asymmetry that catches everyone
+`model.to(device)` moves the model **in place**. `x.to(device)` does **not** — it returns a *new* tensor and leaves the original alone. So `model.to(device)` on its own works, and `x.to(device)` on its own silently does nothing. Tensors need the assignment: `x = x.to(device)`.
+:::
+
+## Always "smoketest" your training
+
+[The best debugging trick in deep learning, and it takes thirty seconds]{.eyebrow}
+
+::: {.card}
+Before training on the full dataset, take **eight examples** and train on those same eight, over and over:
+
+```python
+x, y = next(iter(train_loader))
+x, y = x[:8], y[:8]
+
+for step in range(200):
+    optimizer.zero_grad()
+    loss = loss_fn(model(x), y)
+    loss.backward()
+    optimizer.step()
+    if step % 50 == 0:
+        print(step, loss.item())
+```
+:::
+
+::: {.columns}
+::: {.column width="50%"}
+[Loss goes to almost zero]{.pill-green}
+
+Your forward pass, loss, and optimiser all work. Any remaining problem is about **generalisation**.
+:::
+::: {.column width="50%"}
+[Loss stays flat]{.pill-amber}
+
+You have a **bug**, not a hyperparameter problem. Eight examples is enough capacity for any network to memorise/overfit.
+:::
+:::
+
+## Seeds — what they buy, and what they don't
+
+```python
+import torch, numpy as np, random
+SEED = 324
+torch.manual_seed(SEED); np.random.seed(SEED); random.seed(SEED)
+```
+
+::: {.columns}
+::: {.column width="50%"}
+[What you get]{.pill-green}
+
+* The same weight initialisation.
+* The same shuffling and dropout masks.
+* The same numbers when you re-run **on the same machine, same versions**.
+:::
+::: {.column width="50%"}
+[What you don't]{.pill-amber}
+
+* Reproducibility across different hardware, or a different PyTorch version.
+* Determinism on GPU by default — some CUDA kernels sum in a non-fixed order.
+* Anything at all if you seed *after* building the model.
+:::
+:::
+
+::: {.callout-tip appearance="simple"}
+Set the seed as the **first thing** in the script, and log it alongside the results. 
+:::
+
+## Saving a model
+
+::: {.card}
+[Save the weights, not the object]{.eyebrow}
+
+```python
+torch.save(model.state_dict(), "model.pt")            # save
+
+model = TurnoutModel()                                # rebuild the architecture
+model.load_state_dict(torch.load("model.pt"))         # load the weights
+model.eval()                                          # inference mode
+```
+:::
+
+A `state_dict` is a dictionary of tensors, one per parameter. `torch.save(model, ...)` also works — it pickles the whole object, including the *path to your class*, so it breaks the moment you rename a file or move a class. Save the dictionary.
+
+::: {.callout-note appearance="simple"}
+Checkpoint every epoch where validation loss improves. That is early stopping, implemented: keep training, but keep the best weights you have seen.
+:::
+
+## Activity · find the bugs
+
+[<span class="pause-cue">≈ 8 min</span> · in pairs]{.eyebrow}
+
+**This loop runs without error. It also trains badly, and eventually crashes the machine. Find three problems.**
+
+```python
+model     = TurnoutModel()
+optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
+loss_fn   = nn.MSELoss()
+history   = []
+
+for epoch in range(100):
+    for x, y in train_loader:
+        y_pred = model(x)
+        loss   = loss_fn(y_pred, y)
+        loss.backward()
+        optimizer.step()
+        history.append(loss)
+
+    val = sum(loss_fn(model(x), y) for x, y in val_loader) / len(val_loader)
+    print(f"epoch {epoch}: val = {val:.3f}")
+```
+
+## Activity · answers
+
+::: {.card}
+1. **No `optimizer.zero_grad()`** before `loss.backward()`. Gradients accumulate across every batch of every epoch, so each step is driven by a growing sum of stale gradients.
+
+2. **`history.append(loss)`** stores the tensor, not `loss.item()`. Every graph in the epoch is kept alive; memory climbs until the process is killed.
+
+3. **No `model.train()` / `model.eval()`, and no `torch.no_grad()`** around validation. Dropout and batch norm stay in training mode while you evaluate, so the validation number is wrong — and building graphs you never backpropagate wastes memory and time.
+:::
+
+::: {.reveal-box}
+[A fourth, if you spotted it]{.reveal-label}
+`TurnoutModel` outputs shape `(B, 1)` and the labels arrive as `(B,)`. That is the broadcasting trap from earlier — it needs `y_pred.squeeze(-1)`, and MSE will warn you about it exactly once per run.
+:::
+
 ## Take stock
 
 [<span class="pause-cue">Where you are at the end of Day 5</span>]{.eyebrow}
@@ -1034,12 +1429,13 @@ You can:
 2. Pick a sensible loss, optimiser, and learning rate.
 3. Diagnose overfitting, vanishing gradients, and dead ReLUs from training curves.
 4. Apply dropout and batch norm when appropriate.
-5. Apply the same machinery to a real social-science problem like civil-war forecasting.
+5. Debug a loop that runs but doesn't learn — shapes, `zero_grad()`, devices, `eval()`.
+6. Apply the same machinery to a real social-science problem like civil-war forecasting.
 
 **This is the modal neural network used in industry and research for tabular data.** From Monday we adapt it for images and text.
 :::
 
-## A check-in on the headline promise
+## We're surprisingly close to generative AI already
 
 [Where we are on the road to building a GPT]{.eyebrow}
 
@@ -1077,7 +1473,7 @@ Where we are right now, end of Day 5:
 <!-- The technical work is the same. The **deployment context** is what makes a forecasting tool helpful, harmful, or neutral. We pick this up properly on Day 12. -->
 <!-- ::: -->
 
-# Lab brief · today's afternoon {background-color="#0E1A2B"}
+# Lab brief · Monday afternoon {background-color="#0E1A2B"}
 
 ## Today's lab — 90 minutes
 
