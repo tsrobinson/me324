@@ -1,0 +1,1316 @@
+---
+title: "Generating images"
+subtitle: "Lecture 7 — Autoencoders, VAEs, and a glance at diffusion"
+author: "Dr Thomas Robinson"
+date: "2026-08-11"
+date-format: long
+bibliography: ../refs.bib
+format: 
+  revealjs:
+    smaller: true
+---
+
+## Warm-up · three questions from last time
+
+[<span class="pause-cue">≈ 5 min</span> · shout it out]{.eyebrow}
+
+::: {.card}
+1. A 28×28 grayscale image goes through a 5×5 convolution, stride 1, no padding. What size is the output?
+2. How many parameters does one 3×3 kernel on a grayscale input have? Count the bias.
+3. Why does a convolutional layer need so many fewer parameters than a fully-connected layer on the same image?
+:::
+
+## Warm-up · answers
+
+::: {.card}
+[Worked answers]{.eyebrow}
+
+1. **24×24.** With stride 1 and no padding, each side shrinks by the kernel width minus one: $28 - 5 + 1 = 24$.
+2. **10.** Nine weights in the 3×3 grid, plus one bias: $9 + 1 = 10$.
+3. **Weight sharing.** A kernel looks at one small window at a time, and the *same* weights slide across the whole image. A fully-connected layer gives every pixel its own weight; the kernel reuses its 10 numbers everywhere.
+:::
+
+# Part 1 · Generative vs predictive {background-color="#0E1A2B"}
+
+## Two flavours of modelling — quick reminder
+
+::: {.columns}
+::: {.column width="50%"}
+[Discriminative]{.pill-blue}
+
+Estimate $P(\mathbf{y} \mid \mathbf{X})$.
+
+* Given features, predict the label.
+* The CNN classifier from yesterday: $P(\text{class} \mid \text{image})$.
+* Logistic regression, random forests, most "applied ML".
+:::
+::: {.column width="50%"}
+[Generative]{.pill}
+
+Estimate $P(\mathbf{X})$ — and sample from it.
+
+* Learn the *distribution of the data*.
+* Sample from it to make new examples.
+* DALL·E, Stable Diffusion, ChatGPT.
+:::
+:::
+
+::: {.card}
+**Generative modelling is harder** -- it's a bigger ask. But it's how we make new images, text, audio, molecules, and code.
+:::
+
+## Examples — across CS and social science
+
+::: {.columns}
+::: {.column width="50%"}
+[CS / industry]{.pill-blue}
+
+* DALL·E / Stable Diffusion — text-to-image.
+* ChatGPT / Claude — text generation.
+* MusicLM — audio.
+* AlphaFold 2 — protein structures.
+* Genie/Sora — video.
+:::
+::: {.column width="50%"}
+[Social science]{.pill-green}
+
+* **Synthetic survey data** -- privacy-preserving release.
+* **MIDAS** -- missing-data imputation [@lall2022midas].
+* **Data augmentation** -- generate extra training examples for small-N studies.
+* **Counterfactual scenarios** -- "what would this image look like under different lighting / demographics?"
+:::
+:::
+
+## Why we care
+
+::: {.card}
+A model that can sample from $P(\mathbf{X})$ -- the data distribution itself -- is *also* a model that:
+
+* Knows what's "in-distribution" vs unusual
+* Can fill in missing parts of a partial observation
+* Provides a principled basis for **simulation** in social science
+
+Generative modelling is a *richer* object than discrimination. It is also harder to evaluate, which we'll return to in Part 3.
+:::
+
+## A first attempt — dimensionality reduction
+
+[Build up to generation, slowly, with a familiar task]{.eyebrow}
+
+Suppose we have 5-feature data and we want to compress to **2 dimensions**.
+
+::: {.try-box}
+[Try]{.try-label}
+**Sketch a neural network that takes a 5-feature input and produces a 2-feature output.** What's the obvious architecture?
+:::
+
+::: {.fragment}
+::: {.reveal-box}
+[The natural shape]{.reveal-label}
+A network with **decreasing widths** — 5 → 3 → 2. The end becomes a "bottleneck".
+
+*But there's a problem*
+
+ * Where do we get the **target labels** for those 2 latent features?
+
+We don't observe them and they don't exist in the dataset. 
+
+**No labels = no loss = no backprop.**
+:::
+:::
+
+## The autoencoder trick
+
+::: {.card}
+**Use the input as its own target.**
+
+Train the network to **reconstruct** its input *through* a narrow bottleneck. 
+
+The smaller number of features in the middle force the model to learn a compressed representation.
+:::
+
+```{dot}
+//| fig-height: 3
+digraph G {
+  rankdir="LR"; ranksep=0.7; bgcolor="transparent"; node [fontname="Inter"];
+  subgraph cluster_enc { label="Encoder"; style=filled; fillcolor="#FBF4F3";
+    x [shape=box label="x ∈ ℝᵈ" style=filled fillcolor="#C9322B" fontcolor="white"];
+    e1 [shape=circle label=""]; e2 [shape=circle label=""];
+  }
+  subgraph cluster_z { label="Bottleneck"; style=filled; fillcolor="#F0F3F8";
+    z [shape=box label="z ∈ ℝᵇ\n(b ≪ d)" style=filled fillcolor="#1A6FB4" fontcolor="white"];
+  }
+  subgraph cluster_dec { label="Decoder"; style=filled; fillcolor="#F1F8F4";
+    d1 [shape=circle label=""]; d2 [shape=circle label=""];
+    xhat [shape=box label="x̂ ∈ ℝᵈ" style=filled fillcolor="#2F8F6C" fontcolor="white"];
+  }
+  x -> e1; x -> e2; e1 -> z; e2 -> z;
+  z -> d1; z -> d2; d1 -> xhat; d2 -> xhat;
+}
+```
+
+## Reconstruction loss
+
+::: {.card}
+**Loss** — how close is the reconstruction to the input?
+
+$$
+\mathcal{L}_{\text{recon}}(\mathbf{x}, \hat{\mathbf{x}}) = \frac{1}{d} \sum_{j=1}^d (x_j - \hat{x}_j)^2
+$$
+
+[Here $d$ is the number of features.]{.muted}
+
+Still, we train end-to-end with backprop, just like any other network.
+
+**At inference time:**
+
+* We can run the encoder to get the latent representation ($\mathbf{z}$)
+
+:::
+
+## Autoencoders are brittle
+
+[An uncomfortable observation]{.eyebrow}
+
+::: {.try-box}
+[Try]{.try-label}
+**What's the *easiest* function for an autoencoder to learn?**
+:::
+
+::: {.fragment}
+::: {.reveal-box}
+[The honest answer]{.reveal-label}
+**The identity function.** Reconstruction loss = 0 when $\hat{\mathbf{x}} = \mathbf{x}$.
+
+If the bottleneck isn't tight enough, the model finds shortcuts and the latent space becomes uninformative.
+
+ * *Deep nets are lazy!*
+
+The latent space has **no structure we can sample from** so the anything not in the training data is out-of-distribution.
+:::
+:::
+
+## Seeing the latent space
+
+[A real one: 784 → 128 → 32 → **2** → 32 → 128 → 784, trained on MNIST]{.eyebrow}
+
+::: {.columns}
+::: {.column width="48%"}
+```{python}
+#| echo: false
+#| fig-width: 4.8
+#| fig-height: 4.5
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.patheffects as pe
+import matplotlib_inline.backend_inline as backend_inline
+
+# SVG keeps the figure vector-sharp when the deck is projected.
+backend_inline.set_matplotlib_formats("svg")
+
+# ME324 deck palette (see assets/theme/me324.scss), plus a 10-hue categorical
+# set for the digits, spread in OKLab so no two classes collapse together
+# under red-green colour-vision deficiency.
+INK, MUTED, RULE, PAPER = "#0E1A2B", "#5C6473", "#D7D2C5", "#FBFAF6"
+DIGIT_COLOURS = ["#B71E03", "#016998", "#0E9E42", "#DB6803", "#5C33A4",
+                 "#1B6621", "#AA41BA", "#119FB2", "#900364", "#787EE8"]
+# Hand-placed label anchors: the class medoids pile up near the origin.
+LABEL_AT = {0: (11.0, 1.8), 1: (-10.1, 13.3), 2: (7.6, 6.8), 3: (3.8, 1.2),
+            4: (7.4, 14.2), 5: (0.6, 4.2), 6: (-1.2, -0.8), 7: (0.4, 13.2),
+            8: (-0.5, 7.0), 9: (6.2, 10.4)}
+
+plt.rcParams.update({
+    "font.family": "sans-serif",
+    "font.sans-serif": ["Inter", "Helvetica Neue", "Arial", "DejaVu Sans"],
+    "text.color": INK, "axes.labelcolor": INK,
+    "xtick.color": MUTED, "ytick.color": MUTED, "axes.edgecolor": RULE,
+})
+
+# Latent codes from tools/make-ae-latents.py (seeded; rerun it to reproduce).
+D = np.load("../assets/data/ae-mnist-latents.npz")
+z, y = D["z_test"], D["y_test"]
+
+fig, ax = plt.subplots(figsize=(4.8, 4.5))
+fig.patch.set_alpha(0)          # sit on the slide's own background
+ax.patch.set_alpha(0)
+for d in range(10):
+    m = y == d
+    ax.scatter(z[m, 0], z[m, 1], s=4, c=DIGIT_COLOURS[d],
+               alpha=0.55, lw=0, rasterized=True)
+for d, xy in LABEL_AT.items():
+    ax.annotate(str(d), xy=xy, color=INK, fontsize=14, fontweight="bold",
+                ha="center", va="center",
+                path_effects=[pe.withStroke(linewidth=3.5, foreground=PAPER)])
+ax.set_xlabel("$z_1$", fontsize=11)
+ax.set_ylabel("$z_2$", fontsize=11)
+ax.grid(True, color=RULE, lw=0.8, alpha=0.5)
+ax.set_axisbelow(True)
+ax.set_aspect("equal")
+for side in ("top", "right"):
+    ax.spines[side].set_visible(False)
+plt.tight_layout()
+plt.show()
+```
+:::
+::: {.column width="52%"}
+Train the autoencoder, then run the 10,000 held-out digits through the **encoder**. Each image is now a point $(z_1, z_2)$ — coloured by its label:
+
+* **Clusters** appear suggesting the model has found structure! 
+
+  * The labels were **never shown to the model**.
+  
+* The clusters are **uneven and elongated**; they overlap near the origin, with **gaps** elsewhere.
+
+* The space *outside* the point cloud has never been seen by the decoder.
+
+[Ten epochs of Adam on the 60,000 training images; held-out reconstruction MSE 0.045.]{.muted}
+:::
+:::
+
+## Decoding the gaps
+
+[Let's try sample from the gaps]{.eyebrow}
+
+```{python}
+#| echo: false
+#| fig-width: 9.6
+#| fig-height: 3.6
+D = np.load("../assets/data/ae-mnist-latents.npz")
+z, y = D["z_test"], D["y_test"]
+zc, zg = D["z_cluster"], D["z_gap"]
+BLUE, RED = "#1A6FB4", "#C9322B"
+halo = [pe.withStroke(linewidth=3, foreground=PAPER)]
+
+fig, axes = plt.subplots(1, 3, figsize=(9.6, 3.6), width_ratios=[1.5, 1, 1])
+fig.patch.set_alpha(0)
+ax = axes[0]
+ax.patch.set_alpha(0)
+ax.scatter(z[:, 0], z[:, 1], s=3, c=MUTED, alpha=0.25, lw=0, rasterized=True)
+ax.plot(*zc, "o", color=BLUE, ms=11, mec=PAPER, mew=2, zorder=5)
+ax.plot(*zg, "X", color=RED, ms=13, mec=PAPER, mew=1.5, zorder=5)
+ax.annotate(f"$\\mathbf{{z}} = ({zc[0]:.0f}, {zc[1]:.0f})$", xy=zc, xytext=(4, 12),
+            textcoords="offset points", color=BLUE, fontsize=11,
+            fontweight="bold", ha="left", path_effects=halo)
+ax.annotate(f"$\\mathbf{{z}} = ({zg[0]:.0f}, {zg[1]:.0f})$", xy=zg, xytext=(2, -18),
+            textcoords="offset points", color=RED, fontsize=11,
+            fontweight="bold", ha="left", path_effects=halo)
+ax.set_xlabel("$z_1$", fontsize=11)
+ax.set_ylabel("$z_2$", fontsize=11)
+ax.grid(True, color=RULE, lw=0.8, alpha=0.5)
+ax.set_axisbelow(True)
+ax.set_aspect("equal")
+for side in ("top", "right"):
+    ax.spines[side].set_visible(False)
+ax.set_title("the same latent space", fontsize=12, color=MUTED)
+
+panels = [(axes[1], D["img_cluster"], f"decode $({zc[0]:.0f}, {zc[1]:.0f})$ — a clean 1", BLUE),
+          (axes[2], D["img_gap"], f"decode $({zg[0]:.0f}, {zg[1]:.0f})$ — not a digit", RED)]
+for ax, img, title, col in panels:
+    ax.imshow(img, cmap="gray_r", vmin=0, vmax=1)
+    ax.set_xticks([])
+    ax.set_yticks([])
+    for s in ax.spines.values():
+        s.set_edgecolor(col)
+        s.set_linewidth(2)
+    ax.set_title(title, fontsize=12, color=col, fontweight="bold")
+plt.tight_layout()
+plt.show()
+```
+
+::: {.card}
+The blue point sits in the middle of the **1 cluster** — the decoder turns it into a clean 1. 
+
+The red point sits in a **gap** and it returns garbage.
+:::
+
+::: {.callout-note}
+An autoencoder's latent space is a *consequence* of training. It happens to compress -- it doesn't necessarily mean it is sampleable.
+
+The VAE will *engineer* the latent space into something we can sample from.
+:::
+
+## Denoising autoencoders
+
+[A first fix — gives a stepping stone to two huge ideas]{.eyebrow}
+
+```{dot}
+//| fig-height: 1.6
+digraph G {
+  rankdir="LR"; bgcolor="transparent"; node [fontname="Inter"];
+  x [shape=box label="x" style=filled fillcolor="#C9322B" fontcolor="white"];
+  noise [shape=box label="x + ε\n(noisy)" style=filled fillcolor="#C58A12" fontcolor="white"];
+  ae [shape=box label="Autoencoder" style=filled fillcolor="#F4F1EA"];
+  xhat [shape=box label="x̂ ≈ x" style=filled fillcolor="#2F8F6C" fontcolor="white"];
+  x -> noise -> ae -> xhat;
+  x -> xhat [label="target" style=dashed];
+}
+```
+
+::: {.card}
+**Corrupt the input. Ask the model to reconstruct the *clean* version.**
+
+* Forces the network to learn **structure**, not memorisation.
+* Useful in its own right (denoising old photographs).
+* A stepping stone to **VAEs** (next) and **diffusion** (later).
+:::
+
+# Plenary · autoencoder forward pass {background-color="#0E1A2B"}
+
+## Plenary · autoencoder forward pass
+
+[<span class="pause-cue">≈ 8 min</span> · in pairs]{.eyebrow}
+
+::: {.card}
+[A tiny autoencoder]{.eyebrow}
+
+Input: $\mathbf{x} = \begin{bmatrix} 2 & 4 \end{bmatrix}$ (2 features).
+
+Encoder: $\mathbf{W}_e = \begin{bmatrix} 0.5 & -0.5 \end{bmatrix}$, $b_e = 0$, identity activation.
+
+So $\mathbf{z}$ is a **single number** — a 2D-to-1D bottleneck.
+
+Decoder: $\mathbf{W}_d = \begin{bmatrix} 1 \\ 0.5 \end{bmatrix}$, $\mathbf{b}_d = \begin{bmatrix} 0 & 1 \end{bmatrix}$, identity.
+
+[Compute:]{.eyebrow}
+
+1. The latent value $\mathbf{z}$.
+2. The reconstruction $\hat{\mathbf{x}}$.
+3. The reconstruction loss $\mathcal{L} = \tfrac{1}{2} \sum (x_j - \hat{x}_j)^2$.
+:::
+
+[Five minutes.]{.muted}
+
+## Plenary · answers
+
+::: {.card}
+[Encoder]{.eyebrow}
+
+$$
+\mathbf{z} = \mathbf{x} \mathbf{W}_e^\mathsf T + b_e = \begin{bmatrix} 2 & 4 \end{bmatrix} \begin{bmatrix} 0.5 \\ -0.5 \end{bmatrix} = (1) + (-2) = -1
+$$
+:::
+
+::: {.card}
+[Decoder]{.eyebrow}
+
+$$
+\hat{\mathbf{x}} = \mathbf{z} \mathbf{W}_d^\mathsf T + \mathbf{b}_d = -1 \begin{bmatrix} 1 & 0.5 \end{bmatrix} + \begin{bmatrix} 0 & 1 \end{bmatrix} = \begin{bmatrix} -1 & 0.5 \end{bmatrix}
+$$
+:::
+
+::: {.card}
+[Loss]{.eyebrow}
+
+$$
+\mathcal{L} = \tfrac{1}{2}\big[(2-(-1))^2 + (4 - 0.5)^2\big] = \tfrac{1}{2}[9 + 12.25] = 10.625
+$$
+:::
+
+::: {.callout-tip}
+A poorly-fit autoencoder. Backprop would update both $\mathbf{W}_e$ and $\mathbf{W}_d$ to lower this. The mechanics are the **same** as last week — just a different output node and loss function.
+:::
+
+# Part 2 · Variational autoencoders {background-color="#0E1A2B"}
+
+## What we want — and why a plain AE doesn't give it
+
+::: {.columns}
+::: {.column width="50%"}
+[Goal]{.pill}
+
+A latent space such that:
+
+* Every point in it decodes to something **plausible**.
+* Nearby points decode to similar examples.
+* We can **sample randomly** to generate new examples.
+:::
+::: {.column width="50%"}
+[Plain autoencoder]{.pill-amber}
+
+* Latent space has whatever shape the encoder chooses.
+* Most points outside the "training cloud" decode to garbage.
+* No sampling distribution we can rely on.
+:::
+:::
+
+## From AE to VAE — three changes
+
+[We are about to change three things and nothing else.]{.eyebrow}
+
+::: {.card}
+[Change 1 — encoder output]{.eyebrow}
+
+Instead of a single point $\mathbf{z}$, the encoder outputs **two vectors**: a mean $\boldsymbol{\mu}$ and a standard deviation $\boldsymbol{\sigma}$.
+
+[In practice the encoder emits $\log \sigma^2$ rather than $\sigma$ — it keeps the variance positive and is numerically stabler.]{.muted}
+:::
+
+::: {.card}
+[Change 2 — sample, don't pass]{.eyebrow}
+
+Instead of sending $\boldsymbol{\mu}$ to the decoder, sample a $\mathbf{z}$ from $\mathcal{N}(\boldsymbol{\mu}, \boldsymbol{\sigma}^2)$ and decode *that*. 
+
+* Every forward pass is now slightly randomised.
+
+:::
+
+::: {.card}
+[Change 3 — regularise the latent]{.eyebrow}
+
+Add a second loss term that pulls the encoder's $(\boldsymbol{\mu}, \boldsymbol{\sigma})$ output towards $\mathcal{N}(\mathbf{0}, \mathbf{I})$ -— so that *any* draw from a standard Gaussian is a plausible latent code.
+
+:::
+
+## The VAE idea [@kingma2013auto]
+
+::: {.card}
+**Force the latent space to look like a standard Gaussian** $\mathcal{N}(\mathbf{0}, \mathbf{I})$.
+
+Now we can sample $\mathbf{z} \sim \mathcal{N}(\mathbf{0}, \mathbf{I})$, pass it through the decoder, and get a new example.
+:::
+
+How does that look at the network level?
+
+::: {.columns}
+::: {.column width="60%"}
+1. The encoder outputs **two** vectors: $\boldsymbol{\mu}$ and $\boldsymbol{\sigma}$ — the parameters of a Gaussian.
+2. Sample $\mathbf{z} \sim \mathcal{N}(\boldsymbol{\mu}, \boldsymbol{\sigma}^2)$ — the latent code.
+3. Decode $\mathbf{z}$ to a reconstruction.
+4. **Penalise** the encoder if its output distribution drifts far from $\mathcal{N}(\mathbf{0}, \mathbf{I})$.
+:::
+::: {.column width="40%"}
+::: {.callout-note}
+# Introducing stochastic network components
+Every part of the network is still a deterministic function of its inputs *except* the sampling step.
+:::
+:::
+:::
+
+## What is KL divergence — informally
+
+[We meet it now because the VAE loss on the next slide is built from it.]{.eyebrow}
+
+::: {.card}
+**KL divergence** $\text{KL}(p \,\|\, q)$ measures *how different* two probability distributions are.
+
+* $\text{KL}(p \,\|\, p) = 0$ (no difference).
+* Large when $p$ is concentrated where $q$ is small.
+* **Asymmetric**: $\text{KL}(p \,\|\, q) \neq \text{KL}(q \,\|\, p)$.
+:::
+
+::: {.card}
+[The one closed form we need]{.eyebrow}
+
+For a 1-D Gaussian measured against the unit Gaussian $\mathcal{N}(0, 1)$, the KL has a tidy closed form:
+
+$$
+\text{KL}\!\left(\mathcal{N}(\mu, \sigma^2) \,\big\Vert\, \mathcal{N}(0, 1)\right) = \tfrac{1}{2}\big(\mu^2 + \sigma^2 - 1 - \ln \sigma^2\big)
+$$
+
+Plug in $\mu = 0.5$ and $\sigma = 0.3$:
+
+$$
+\text{KL} = \tfrac{1}{2}\big(0.25 + 0.09 - 1 + 2.408\big) = \tfrac{1}{2}(1.748) \approx 0.87
+$$
+:::
+
+::: {.callout-note}
+**We won't *derive* this formula** and you're not expected to know how to. The key *concept* is that KL-divergence measures the "distance between two distributions".
+:::
+
+## KL divergence with real numbers
+
+[Two coins]{.eyebrow}
+
+For discrete distributions, KL is a weighted sum of log-ratios:
+
+$$
+\text{KL}(P \,\|\, Q) = \sum_i p_i \ln \frac{p_i}{q_i}
+$$
+
+Take a fair coin $P = [0.5, 0.5]$ and a biased coin $Q = [0.9, 0.1]$:
+
+$$
+\text{KL}(P \,\|\, Q) = 0.5 \ln\tfrac{0.5}{0.9} + 0.5 \ln\tfrac{0.5}{0.1} = -0.294 + 0.805 \approx 0.511 \text{ nats}
+$$
+
+Swap the arguments and the answer changes:
+
+$$
+\text{KL}(Q \,\|\, P) = 0.9 \ln\tfrac{0.9}{0.5} + 0.1 \ln\tfrac{0.1}{0.5} = 0.529 - 0.161 \approx 0.368 \text{ nats}
+$$
+
+Different in each direction. That asymmetry is why we say **divergence**, not distance. [A "nat" is one natural-log unit of information — base $e$'s answer to the bit.]{.muted}
+
+::: {.try-box}
+[Try it yourself]{.try-label}
+**What is $\text{KL}(P \,\|\, P)$?**
+:::
+
+::: {.fragment}
+::: {.reveal-box}
+[Answer]{.reveal-label}
+**Zero.** Every ratio inside the log is $\tfrac{0.5}{0.5} = 1$, and $\ln 1 = 0$.
+:::
+:::
+
+## What this buys the VAE
+
+Since we're using a normal distribution, the closed form is what we'll use inside the VAE:
+
+$$
+\text{KL}\!\left(\mathcal{N}(\mu, \sigma^2) \,\big\Vert\, \mathcal{N}(0, 1)\right) = \tfrac{1}{2}\big(\mu^2 + \sigma^2 - 1 - \ln \sigma^2\big)
+$$
+
+This is just four arithmetic operations on the encoder's own outputs:
+
+::: {.columns}
+::: {.column width="50%"}
+::: {.card}
+[Drifted mean]{.eyebrow}
+
+$\mu = 1$, $\sigma = 1$:
+
+$$
+\tfrac{1}{2}(1 + 1 - 1 - \ln 1) = \tfrac{1}{2}(1) = 0.5
+$$
+
+Right spread, wrong centre. Penalty: 0.5 nats.
+:::
+:::
+::: {.column width="50%"}
+::: {.card}
+[On target]{.eyebrow}
+
+$\mu = 0$, $\sigma = 1$:
+
+$$
+\tfrac{1}{2}(0 + 1 - 1 - 0) = 0
+$$
+
+The encoder's output *is* the unit Gaussian. No penalty.
+:::
+:::
+:::
+
+## Combining two loss terms
+
+$$
+\mathcal{L}_{\text{VAE}} = \underbrace{\mathcal{L}_{\text{recon}}(\mathbf{x}, \hat{\mathbf{x}})}_{\text{decoder does its job}} + \underbrace{\beta \cdot \text{KL}\!\left(\mathcal{N}(\boldsymbol{\mu}, \boldsymbol{\sigma}^2) \,\big\Vert\, \mathcal{N}(\mathbf{0}, \mathbf{I})\right)}_{\text{latent stays close to a unit Gaussian}}
+$$
+
+::: {.columns}
+::: {.column width="50%"}
+[Reconstruction term]{.pill-blue}
+
+Same as a plain autoencoder. Wants the decoded image to match the input.
+:::
+::: {.column width="50%"}
+[KL term]{.pill}
+
+The **regulariser** — the KL divergence we just met. Wants the encoder's output distribution to look like a unit Gaussian.
+
+Without it, the network ignores the latent variability — collapses back to a plain autoencoder.
+:::
+:::
+
+::: {.callout-tip}
+The $\beta$ weight (*hyperparameter*) trades off reconstruction quality vs latent space organisation.
+:::
+
+## Tuning $\beta$ — fidelity vs structure
+
+::: {.columns}
+::: {.column width="50%"}
+[$\beta \to 0$]{.pill-amber}
+
+KL term vanishes. The model is essentially a plain autoencoder. Reconstructions are sharp; the latent space is unstructured and not sampleable.
+:::
+::: {.column width="50%"}
+[$\beta$ large]{.pill-amber}
+
+Reconstruction term is dwarfed. The encoder is forced to output something close to $\mathcal{N}(\mathbf{0}, \mathbf{I})$ regardless of the input. The latent space is very normal but reconstruction become **blurry**.
+:::
+:::
+
+::: {.card}
+[The trade-off]{.eyebrow}
+
+**Higher $\beta$ = smoother latent + blurrier samples.**
+
+The "$\beta$-VAE" literature (Higgins et al., 2017) shows that pushing $\beta$ up has a side-effect: latent dimensions tend to **disentangle** — one dimension controls rotation, another lighting, etc.
+:::
+
+## The reparameterisation trick
+
+[A problem in the backpropagation]{.eyebrow}
+
+::: {.columns}
+::: {.column width="50%"}
+[Problem]{.pill-amber}
+
+Sampling $\mathbf{z} \sim \mathcal{N}(\boldsymbol{\mu}, \boldsymbol{\sigma}^2)$ is **non-differentiable** — you can't backprop through "randomly draw a sample".
+
+* Without backprop, we can't train the encoder.
+
+:::
+::: {.column width="50%"}
+[Fix]{.pill-green}
+
+Rewrite the sample as:
+$$
+\mathbf{z} = \boldsymbol{\mu} + \boldsymbol{\sigma} \odot \boldsymbol{\epsilon}, \quad \boldsymbol{\epsilon} \sim \mathcal{N}(\mathbf{0}, \mathbf{I})
+$$
+
+* $\boldsymbol{\mu}, \boldsymbol{\sigma}$ are produced by the encoder — **differentiable**.
+* $\boldsymbol{\epsilon}$ is randomness — but it's an **input**, not a parameter.
+* Gradients flow through $\boldsymbol{\mu}$ and $\boldsymbol{\sigma}$ as usual.
+:::
+:::
+
+::: {.card}
+This trick makes the entire model trainable with ordinary backprop.
+
+Almost every modern generative model uses some version of it.
+:::
+
+## A VAE forward pass
+
+[A toy example with concrete numbers]{.eyebrow}
+
+::: {.columns}
+::: {.column width="50%"}
+[Setup]{.eyebrow}
+
+* Input: $\mathbf{x} = \begin{bmatrix} 1 & 2 \end{bmatrix}$
+* Latent dim: 1
+* Encoder produces $\mu = 0.5$, $\sigma = 0.3$
+* Sample $\epsilon = 0.7$
+* Decoder weights $\mathbf{W}_d = \begin{bmatrix} 1 & 0.5 \end{bmatrix}$, bias 0
+:::
+::: {.column width="50%"}
+[Step-by-step]{.eyebrow}
+
+1. **Reparameterise:** $z = \mu + \sigma \epsilon = 0.5 + 0.3(0.7) = 0.71$.
+2. **Decode:** $\hat{\mathbf{x}} = z \mathbf{W}_d = \begin{bmatrix} 0.71 & 0.355 \end{bmatrix}$.
+3. **Recon loss:** $\frac{1}{2}\big[(1-0.71)^2 + (2-0.355)^2\big] \approx 1.39$.
+4. **KL term:** with $\mu = 0.5,\ \sigma = 0.3$, the closed form gives $\tfrac{1}{2}(0.25 + 0.09 - 1 + 2.408) \approx 0.87$.
+5. **Total:** $\mathcal{L} \approx 2.26$.
+:::
+:::
+
+::: {.callout-note}
+# Where the randomness sits
+Step 1's $\epsilon$ is the only stochastic element. Once it's drawn, everything else is deterministic
+:::
+
+## Generating with a trained VAE
+
+::: {.card}
+[Sampling]{.eyebrow}
+
+1. Sample $\mathbf{z} \sim \mathcal{N}(\mathbf{0}, \mathbf{I})$.
+2. Pass through the **decoder** (ignore the encoder).
+3. Get a new image.
+
+[Interpolation]{.eyebrow}
+
+1. Encode two real images to $\mathbf{z}_1, \mathbf{z}_2$.
+2. Walk the line $\mathbf{z}(t) = (1-t)\mathbf{z}_1 + t \mathbf{z}_2$, $t \in [0, 1]$.
+3. Decode at each step. Watch the image morph smoothly between the two.
+:::
+
+::: {.callout-tip}
+**Smooth interpolation is the signature of a well-trained VAE.** It tells you the latent space is *meaningful* — not just a clever lookup table.
+:::
+
+## Walking the latent space
+
+[Interpolation with a real VAE — 2-D latent, trained on MNIST]{.eyebrow}
+
+Encode two real test images with a small trained VAE: a 3 becomes $\mathbf{z}_A = (1.1, -0.9)$, an 8 becomes $\mathbf{z}_B = (-1.0, -0.2)$. Decode nine points along the line $\mathbf{z}(t) = (1-t)\,\mathbf{z}_A + t\,\mathbf{z}_B$:
+
+```{python}
+#| echo: false
+#| fig-width: 9.6
+#| fig-height: 1.55
+# Frames from tools/make-vae-interp.py (seeded; rerun it to reproduce).
+V = np.load("../assets/data/vae-mnist-interp.npz")
+frames, ts = V["frames"], V["ts"]
+AMBER = "#C58A12"
+
+fig, axes = plt.subplots(1, 9, figsize=(9.6, 1.55))
+fig.patch.set_alpha(0)
+for k, (ax, img, t) in enumerate(zip(axes, frames, ts)):
+    ax.imshow(img, cmap="gray_r", vmin=0, vmax=1)
+    ax.set_xticks([])
+    ax.set_yticks([])
+    endpoint = k in (0, len(ts) - 1)
+    col = INK if endpoint else (AMBER if t == 0.5 else RULE)
+    for s in ax.spines.values():
+        s.set_edgecolor(col)
+        s.set_linewidth(1.8 if (endpoint or t == 0.5) else 1)
+    ax.set_title(f"$t={t:g}$", fontsize=10,
+                 color=INK if endpoint else MUTED)
+plt.tight_layout()
+plt.show()
+```
+
+::: {.card}
+Two things to notice:
+
+* **Every stop is a plausible digit.** No garbage anywhere on the path — compare the plain autoencoder's gap point earlier. This is the KL term at work: the whole region around the origin decodes to digits.
+* The halfway point is not "half a 3, half an 8". It is a clean **2**, and around $t = 0.75$ you pass a **6**: the straight line from the 3s to the 8s crosses their patches of the plane. In a latent space this small, a long walk greets the neighbours.
+:::
+
+[Both codes sit within about one unit of the origin — the plain AE's scatter spanned roughly $-15$ to $+30$. The KL term has pulled everything in around $\mathcal{N}(\mathbf{0}, \mathbf{I})$.]{.muted}
+
+## Latent arithmetic on complex features
+
+[The classic faces result]{.eyebrow}
+
+Train a VAE on photos of faces. Then:
+
+1. Average the codes of smiling faces: $\bar{\mathbf{z}}_{\text{smile}}$.
+2. Average the codes of neutral faces: $\bar{\mathbf{z}}_{\text{neutral}}$.
+3. Their difference is a **direction**: $\mathbf{v} = \bar{\mathbf{z}}_{\text{smile}} - \bar{\mathbf{z}}_{\text{neutral}}$.
+4. Encode a new neutral face to $\mathbf{z}$, decode $\mathbf{z} + \mathbf{v}$ — the face smiles.
+
+::: {.card}
+"Smiling" exists as a *line* in the latent space, which we can move along
+:::
+
+::: {.callout-note}
+# Why the KL term makes this work
+
+It packs the latents into one connected region around the origin, so lines between points stay on the data.
+
+:::
+
+## One thing a plain VAE cannot do
+
+[Generate a *chosen* digit]{.eyebrow}
+
+Sample $\mathbf{z} \sim \mathcal{N}(\mathbf{0}, \mathbf{I})$ and decode — you get *a* digit. You cannot ask for a 7. You sample and take what comes.
+
+The fix is the **conditional VAE** (CVAE): concatenate the label $y$ to the encoder input *and* to the decoder input. The decoder now learns "reconstruct an image of THIS digit".
+
+```{dot}
+//| fig-height: 2.2
+digraph G {
+  rankdir="LR"; bgcolor="transparent"; node [fontname="Inter"];
+  x [shape=box label="x" style=filled fillcolor="#C9322B" fontcolor="white"];
+  y1 [shape=box label="y (label)" style=filled fillcolor="#C58A12" fontcolor="white"];
+  enc [shape=box label="Encoder" style=filled fillcolor="#F4F1EA"];
+  z [shape=box label="z" style=filled fillcolor="#1A6FB4" fontcolor="white"];
+  y2 [shape=box label="y (label)" style=filled fillcolor="#C58A12" fontcolor="white"];
+  dec [shape=box label="Decoder" style=filled fillcolor="#F4F1EA"];
+  xhat [shape=box label="x̂" style=filled fillcolor="#2F8F6C" fontcolor="white"];
+  x -> enc; y1 -> enc; enc -> z; z -> dec; y2 -> dec; dec -> xhat;
+}
+```
+
+[Everything else — the sampling, the reparameterisation, the two losses — is unchanged.]{.muted}
+
+## Generating with a CVAE
+
+::: {.card}
+[At generation time]{.eyebrow}
+
+1. **Pick** the label — say $y = 7$.
+2. **Sample** $\mathbf{z} \sim \mathcal{N}(\mathbf{0}, \mathbf{I})$.
+3. **Decode** the pair $(\mathbf{z}, y)$.
+:::
+
+The roles split: $y$ carries *which* digit; $\mathbf{z}$ carries *how it is written* — slant, stroke width, loop size. Sample ten $\mathbf{z}$ values with $y = 7$ and you get ten different handwritten 7s.
+
+::: {.callout-tip}
+If we replace the digit label with a (embedded) sentence of text, we can do text-to-image generation.
+:::
+
+# Activity · VAE training step {background-color="#0E1A2B"}
+
+## Activity · VAE training step
+
+[<span class="pause-cue">≈ 8 min</span> · in pairs]{.eyebrow}
+
+::: {.card}
+[The pieces of a VAE forward pass]{.eyebrow}
+
+Order these steps **correctly** for a single training step on a single image $\mathbf{x}$:
+
+* (A) Compute reconstruction loss $\mathcal{L}_{\text{recon}}(\mathbf{x}, \hat{\mathbf{x}})$.
+* (B) Sample $\boldsymbol{\epsilon} \sim \mathcal{N}(\mathbf{0}, \mathbf{I})$.
+* (C) Decode $\mathbf{z}$ to get $\hat{\mathbf{x}}$.
+* (D) Update parameters.
+* (E) Compute $\mathbf{z} = \boldsymbol{\mu} + \boldsymbol{\sigma} \odot \boldsymbol{\epsilon}$.
+* (F) Compute KL($\mathcal{N}(\boldsymbol{\mu}, \boldsymbol{\sigma}^2) \,\|\, \mathcal{N}(\mathbf{0}, \mathbf{I}))$.
+* (G) Run the encoder on $\mathbf{x}$ to get $\boldsymbol{\mu}, \boldsymbol{\sigma}$.
+* (H) `loss.backward()`.
+:::
+
+[Discuss in pairs. Then we'll line them up.]{.muted}
+
+## Activity · answer
+
+::: {.card}
+[The correct order]{.eyebrow}
+
+1. **G** — encode $\mathbf{x}$ → $\boldsymbol{\mu}, \boldsymbol{\sigma}$.
+2. **B** — sample $\boldsymbol{\epsilon}$.
+3. **E** — reparameterise to $\mathbf{z}$.
+4. **C** — decode $\mathbf{z}$ → $\hat{\mathbf{x}}$.
+5. **A** + **F** — compute both losses; sum to total $\mathcal{L}$.
+6. **H** — `loss.backward()` — fills gradients across encoder + decoder.
+7. **D** — `optimizer.step()` — apply updates.
+:::
+
+::: {.callout-tip}
+Notice the **forward pass** is now stochastic (it samples). The **backward pass** is still deterministic — gradients flow through $\boldsymbol{\mu}, \boldsymbol{\sigma}$ thanks to reparameterisation.
+
+:::
+
+# Part 3 · Diffusion + social-science use {background-color="#0E1A2B"}
+
+## Why VAEs aren't the end of the story
+
+VAEs work and they sample, but their outputs are often **blurry**. 
+
+* The reconstruction loss (MSE) averages over plausible decodings — and "average of plausible faces" looks "soft".
+
+::: {.card}
+By 2020 two other families had taken over the cutting edge:
+
+* **GANs** (Goodfellow et al. 2014) — adversarial training. Sharp images but *really, really* hard to train.
+* **Diffusion** (Ho et al. 2020) — denoising over many steps. Sharp and stable but slow.
+
+:::
+
+## Generative Adversarial Networks
+
+::: {.columns}
+::: {.column width="55%"}
+[The idea]{.pill-amber}
+
+Two networks play a game:
+
+* The **generator** tries to make fake images that look real
+* The **discriminator** tries to tell fakes from real
+* They train *against* each other -- one's gradient is the other's penalty
+
+When the discriminator can't tell, the generator has learned the data distribution.
+:::
+::: {.column width="45%"}
+::: {.callout-warning}
+# Why GANs lost steam
+
+* **Mode collapse** — the generator finds one good fake and exploits it.
+* **Training instability** — too-clever discriminator leads to useless gradients.
+* **No likelihood** — you can't ask "how likely is this image?"
+
+The 2014–2020 GAN era produced photorealistic images (StyleGAN, BigGAN, …). But after 2020, diffusion was simpler and worked better.
+:::
+:::
+:::
+
+## Diffusion
+
+```{dot}
+//| fig-height: 1.4
+digraph G {
+  rankdir="LR"; bgcolor="transparent"; node [fontname="Inter"];
+  x0 [shape=box label="clean\nimage" style=filled fillcolor="#2F8F6C" fontcolor="white"];
+  x1 [shape=box label="+ noise" style=filled fillcolor="#F4F1EA"];
+  x2 [shape=box label="+ more" style=filled fillcolor="#F4F1EA"];
+  xN [shape=box label="pure\nnoise" style=filled fillcolor="#C58A12" fontcolor="white"];
+  net [shape=box label="trained network:\npredict the noise" style=filled fillcolor="#C9322B" fontcolor="white"];
+
+  x0 -> x1 -> x2 -> xN [label="forward (fixed)"];
+  xN -> x2 -> x1 -> x0 [label="reverse (learned)" color="#C9322B"];
+}
+```
+
+::: {.card}
+* **Forward**: add a small amount of noise, repeatedly, until the image is pure noise.
+* **Reverse**: train a network to predict the noise at each step and *subtract* it.
+* **To generate**: start from random noise. Run the reverse process. Out comes an image.
+:::
+
+## Why diffusion works
+
+::: {.card}
+* **Denoising is easier than generation.** 
+
+  * Predicting "a little less noise" is a tractable supervised problem.
+  
+* **The forward process is fixed**
+
+  * Doesn't require training
+  
+* **Each reverse step is small** 
+
+  * The model can be huge without becoming unstable
+  
+* A generalisation of the **denoising autoencoder**
+
+:::
+
+::: {.callout-note}
+
+# Denoising AE → diffusion model
+Rather than "denoise in one shot", we "denoise over $T$ small steps". The latter turns out to be more tractable.
+:::
+
+## Training diffusion — cheaper than it looks
+
+[The fitting algorithm, up close [@ho2020denoising]]{.eyebrow}
+
+Two facts keep training affordable. **First, you never run the noising chain.** A sum of Gaussians is one bigger Gaussian, so there is a one-line shortcut to any step $t$:
+
+$$
+\mathbf{x}_t = \sqrt{\bar{\alpha}_t}\,\mathbf{x}_0 + \sqrt{1 - \bar{\alpha}_t}\,\boldsymbol{\epsilon}, \qquad \boldsymbol{\epsilon} \sim \mathcal{N}(\mathbf{0}, \mathbf{I})
+$$
+
+[$\bar{\alpha}_t$ slides from ≈1 to ≈0 on a fixed schedule. Early on ($\bar{\alpha}_t = 0.99$): $\mathbf{x}_t = 0.995\,\mathbf{x}_0 + 0.1\,\boldsymbol{\epsilon}$, mostly image. Late ($\bar{\alpha}_t = 0.01$): $0.1\,\mathbf{x}_0 + 0.995\,\boldsymbol{\epsilon}$, mostly noise.]{.muted}
+
+**Second, one network handles every noise level** — $t$ goes in as an extra input. The whole loop:
+
+::: {.card}
+1. Draw an image $\mathbf{x}_0$ from the data, a random step $t$, and noise $\boldsymbol{\epsilon}$.
+2. Form $\mathbf{x}_t$ with the one-liner above.
+3. Loss $= \lVert \boldsymbol{\epsilon} - \boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t) \rVert^2$ — predict the noise, plain MSE.
+4. Backprop, Adam step, repeat.
+
+This is the Lecture 5 loop with a different target: no adversary to balance, no KL term in the loss you compute. One training step costs one forward + backward pass — the same as yesterday's CNN classifier.
+:::
+
+::: {.callout-note}
+**The bill arrives at sampling time.** Generating one image runs the network $T \approx 1{,}000$ times *in sequence*. Hence fast samplers — and Stable Diffusion's trick of running the whole chain inside an autoencoder's *latent space*, where every pass is much smaller.
+:::
+
+## Conditional generation — text-to-image
+
+[How does "a cat wearing a top hat" become an image?]{.eyebrow}
+
+::: {.columns}
+::: {.column width="55%"}
+The diffusion model needs **two inputs** at each reverse step:
+
+1. The current noisy image.
+2. A **text embedding** of the prompt.
+
+The model is trained to denoise *while staying true* to the text. 
+
+  * Internally it uses **cross-attention** (Day 10) to inject the prompt into every denoising step.
+  
+:::
+::: {.column width="45%"}
+::: {.card}
+Same architecture; one extra input.
+
+* **Stable Diffusion** — UNet denoiser + CLIP text encoder.
+* **DALL·E 3** — diffusion + OpenAI's text encoder.
+* **Sora** — same idea, applied to video.
+
+The text encoder is itself a (frozen) transformer. We come back to those on Day 10.
+:::
+:::
+:::
+
+## Classifier-free guidance [@ho2022classifier]
+
+Stable Diffusion and Midjourney both have a *guidance scale* setting. 
+
+::: {.card}
+[Training]{.eyebrow}
+
+Train **one** denoiser both with and without the caption: at random (say 10% of training steps), replace the caption with a blank. The model learns a conditional prediction *and* an unconditional one.
+:::
+
+::: {.card}
+[Sampling]{.eyebrow}
+
+At each reverse step, run the model twice and "push" the prediction *away* from the unconditional one:
+
+$$
+\hat{\epsilon} = \epsilon_{\text{uncond}} + s\,(\epsilon_{\text{cond}} - \epsilon_{\text{uncond}})
+$$
+
+* $\epsilon_{\text{cond}}$ — the predicted noise *with* the caption.
+* $\epsilon_{\text{uncond}}$ — the predicted noise with the caption blanked.
+* $s$ — the **guidance scale**, chosen at sampling time.
+* $\hat{\epsilon}$ — the prediction the sampler subtracts at this step.
+
+The difference $\epsilon_{\text{cond}} - \epsilon_{\text{uncond}}$ is the part of the prediction the caption is responsible for. Setting $s > 1$ amplifies that part.
+:::
+
+## Guidance scale in one dimension
+
+Suppose at one denoising step the two predictions are $\epsilon_{\text{uncond}} = 0.2$ and $\epsilon_{\text{cond}} = 0.8$.
+
+::: {.card}
+$s = 3$:
+
+$$
+\hat{\epsilon} = 0.2 + 3 \times (0.8 - 0.2) = 0.2 + 3 \times 0.6 = 0.2 + 1.8 = 2.0
+$$
+
+The caption moved the prediction by $0.6$; guidance moves it by $1.8$ — the caption's influence is amplified three-fold.
+:::
+
+::: {.card}
+$s = 1$
+
+$$
+\hat{\epsilon} = 0.2 + 1 \times 0.6 = 0.8 = \epsilon_{\text{cond}}
+$$
+
+Plain conditional generation — no amplification.
+:::
+
+::: {.callout-warning}
+**The dial has a cost.** Very high $s$ trades variety + realism for prompt-adherence. Stable Diffusion uses $s = 7.5$ as its default.
+:::
+
+## Comparing the generative families
+
+::: {.card}
+| Family | Year | Quality | Speed | Likelihood? | Used for |
+|---|---|---|---|---|---|
+| **VAE** | 2014 | Blurry | Fast | Approximate | Compression, anomaly detection, imputation |
+| **GAN** | 2014 | Sharp | Fast | No | Faces (StyleGAN), inpainting |
+| **Diffusion** | 2020 | Sharpest | Slow | Approximate (variational bound); exact via probability-flow ODE | DALL·E, Stable Diffusion, Sora |
+| **Autoregressive** | — | Excellent for text | Token-by-token | Yes | GPT, Claude — Day 10 |
+:::
+
+[The VAE first appeared as an arXiv preprint in 2013 and was published at ICLR 2014; the GAN in 2014; diffusion (DDPM) in 2020.]{.muted}
+
+::: {.callout-tip}
+# There is no single best strategy
+
+VAEs remain the right tool for many social-science applications (small data, need for likelihoods). Diffusion dominates image generation.
+
+It depends on the **shape of your data** and **what you need from the model**.
+:::
+
+## Social-science application — MIDAS
+
+::: {.columns}
+::: {.column width="55%"}
+@lall2022midas — *The MIDAS Touch: Accurate and Scalable Missing-Data Imputation with Deep Learning*.
+
+* The substantive problem: most real-world survey data has missing values. Common fixes (listwise deletion, MICE) are biased, slow, or both.
+* MIDAS uses a **denoising autoencoder** trained on observed data.
+* The network learns to "fill in" missing entries by recovering the structure of complete observations.
+
+::: {.card}
+Empirically — more accurate than MICE on most datasets, dramatically faster on large ones, and handles time-series + mixed data types.
+:::
+:::
+::: {.column width="45%"}
+::: {.callout-tip}
+**The pipeline you've now seen all the pieces for**:
+
+* Dropout
+* Loss (reconstruction)
+* Backprop
+* Adam optimiser
+* Denoising structure
+
+:::
+:::
+:::
+
+## Synthetic data — privacy, fairness, robustness
+
+::: {.columns}
+::: {.column width="50%"}
+[Privacy]{.pill-blue}
+
+* Researchers can't always share raw individual-level data
+* A VAE trained on the data can produce **synthetic observations** that preserve statistics without exposing real ones
+* Adoption is growing but there are questions about how well "private-by-design" holds in practice.
+
+:::
+::: {.column width="50%"}
+[Fairness]{.pill}
+
+* Train a classifier on **augmented** data with rebalanced subgroups.
+* Test for disparate impact
+* Generate counterfactuals: "what would this image look like if the demographic feature changed?"a
+:::
+:::
+
+::: {.callout-warning}
+# Synthetic data also enables **misuse** 
+Deepfakes, non-consensual imagery, fabricated evidence.
+:::
+
+## Evaluating generative models — open problem
+
+::: {.card}
+**Generative models are harder to evaluate** than discriminative ones
+
+* There's no simple "accuracy" number.
+
+Common approaches:
+
+* **Reconstruction loss** — measures fidelity but ignores diversity.
+* **FID (Fréchet Inception Distance)** — distance between the *generated* and *real* distributions but needs real data to compare against.
+* **Inception Score** — rewards images a pretrained classifier labels confidently (quality) while spreading across many classes (diversity), but no reference to real data.
+* **Human evaluation** — gold standard, very expensive.
+* **Downstream-task performance** — generate synthetic data, train a classifier on it, evaluate on real data.
+:::
+
+::: {.callout-warning}
+# The "right" metric depends on the use case. 
+A model that's good at reconstruction may be terrible at generating new samples. A model that's good at sampling may have a misaligned latent space.
+:::
+
+## Can synthetic people stand in for real ones?
+
+[A live methods debate [@robinson2026synthetic]]{.eyebrow}
+
+The tempting shortcut, "**silicon sampling**" [@argyle2023out]:
+
+* Conditional generation using a demographic profile — *"a 52-year-old woman in Germany, secondary education, middle income…"* — and record the survey answers it gives back.
+
+* Repeat 10,000 times: a "free" survey of any population
+
+::: {.card}
+Before asking "is the model *good enough*?", ask **where the information would come from**.
+
+* A generator fit to **your own data** can only re-use what your sample already holds. 
+
+  * Analysing its output can never beat analysing the sample directly.
+  
+* An LLM **imports from outside** -- whatever its training corpus says about people like the one in your prompt. 
+
+  * So the real question is: is that import *right for the population you're targeting*?
+:::
+
+## The ecological fallacy, at scale
+
+::: {.try-box}
+[Try — 60 seconds]{.try-label}
+Across countries, richer countries trust their police more. **Does it follow that, within a country, richer people trust the police more?**
+:::
+
+::: {.fragment}
+::: {.reveal-box}
+[Answer]{.reveal-label}
+No — that is the **ecological fallacy**: a between-group pattern need not hold within groups. In ~700,000 harmonised ESS/WVS responses, the within-country correlation of household income with trust in police is **0.03**. Across country *averages* it is **0.48**.
+:::
+:::
+
+::: {.card}
+Ask an LLM for survey respondents country by country, and its respondents show a within-country correlation of **0.49** -- the between-country value, stamped onto individuals. 
+
+The model builds each fake person *from the country profile*, so group-level patterns bleed into individual-level observations. 
+
+* Every one of the four LLMs we tested (four different developers) inflate the same way: 0.03 becomes 0.49–0.75.
+
+:::
+
+## When does synthetic data actually help?
+
+[A checklist for your own projects]{.eyebrow}
+
+Judged against the thing you want to estimate, a generator can do one of three things:
+
+* **Recover** information your incomplete data already identify
+
+* **Re-express** a sample you already hold -- automating a simulation you could have specified by hand. Convenient, but never informative
+
+* **Distort** — by importing the wrong population, as silicon sampling does.
+
+The output *looks* equally plausible in all three cases.
+
+::: {.card}
+[Three rules of thumb]{.eyebrow}
+
+1. LLMs are fine where only **plausibility** matters: pretesting questions, personas, piloting open-ended text.
+
+2. For **estimation**, synthetic output enters only when *disciplined by real data*. 
+
+* E.g. using just 200 real respondents, silicon sample estimates $\to$ correct coverage with a tighter interval than empirical data alone.
+
+3. Before trusting any synthetic distribution, **compare its within-group correlations to real data**
+
+:::
+
+## Remember!
+
+[Synthetic media is no longer a research curiosity]{.eyebrow}
+
+::: {.card}
+The architecture you'll train in today's lab is a (much smaller) version of what produces:
+
+* **Non-consensual deepfake imagery** — Disproportionately affects women, including teenagers
+
+* **AI-generated political ads** 
+
+* **Fabricated evidence**
+
+* **Identity-laundering**
+
+There are also enormous legitimate uses:
+
+* Privacy-preserving health data
+* Creative tools
+* Scientific imaging
+
+:::
+
+## Take stock
+
+[<span class="pause-cue">Where you are at the end of Day 7</span>]{.eyebrow}
+
+::: {.card}
+You can:
+
+1. State the discriminative / generative distinction precisely.
+2. Build a plain autoencoder for compression / denoising.
+3. Explain why a plain AE is not a generative model.
+4. Describe the VAE trick — Gaussian latent + KL regulariser + reparameterisation.
+5. Explain the diffusion idea (denoising over steps).
+6. Cite a concrete social-science generative model — MIDAS — and the evaluation problem.
+7. Say when synthetic data helps — recover, re-express, or distort — and name the within-group check that separates the cases.
+:::
+
+
+
+
+# Lab brief · today's afternoon {background-color="#0E1A2B"}
+
+## Today's lab — 90 minutes
+
+[Goals]{.eyebrow}
+
+Train a small VAE on MNIST and **generate new digits**.
+
+You will:
+
+1. Define a CNN encoder that outputs $\boldsymbol{\mu}, \boldsymbol{\sigma}$.
+2. Sample $\mathbf{z}$ using the reparameterisation trick.
+3. Define a (transposed-convolution) decoder back to 28×28.
+4. Train with reconstruction + KL loss.
+5. Sample from $\mathcal{N}(\mathbf{0}, \mathbf{I})$. Plot the resulting digits.
+
+::: {.card}
+[Stretch goal]{.eyebrow}
+
+**Interpolate** between two MNIST digits in latent space. Plot the morph as a grid of 10 images.
+
+The smoothness of this morph is the most satisfying visual confirmation that the VAE has learned a meaningful latent space.
+:::
+
+## See you tomorrow {background-color="#0E1A2B"}
+
+[Lecture 8 — *Word embeddings & character models (1/4)*]{.eyebrow}
+
+We leave images behind and turn to **text**. We'll ask how a network can turn a word into a vector — a **word embedding** — and build our first **character-level** model that generates text one letter at a time. It's the first of four lectures that build, step by step, towards a working GPT.
+
+::: {.callout-tip}
+**Optional reading tonight.** Andrej Karpathy, [*The Unreasonable Effectiveness of Recurrent Neural Networks*](https://karpathy.github.io/2015/05/21/rnn-effectiveness/) — a 2015 blog post that's still the best introduction to next-character generation.
+:::

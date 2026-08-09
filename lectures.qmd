@@ -18,6 +18,12 @@ listing:
       pdf: "lectures/pdf/lecture-04-backpropagation.pdf"
     - path: "lectures/lecture-05-feedforward.qmd"
       pdf: "lectures/pdf/lecture-05-feedforward.pdf"
+    - path: "lectures/lecture-06-cnns.qmd"
+      pdf: "lectures/pdf/lecture-06-cnns.pdf"
+    - path: "lectures/lecture-07-generative-images.qmd"
+      pdf: "lectures/pdf/lecture-07-generative-images.pdf"
+    - path: "lectures/lecture-08-text-embeddings.qmd"
+      pdf: "lectures/pdf/lecture-08-text-embeddings.pdf"
   template: assets/lecture-grid.ejs
   sort: "date"
 ---
@@ -30,7 +36,7 @@ and **?** for the full list of shortcuts.
 :::
 
 ::: {.callout-note appearance="simple"}
-**Weeks 2 and 3 are not posted yet.** Week 2 will be uploaded by the end of Week 1 etc. The full twelve-lecture outline is on the
+**Later lectures are not posted yet.** Lecture 9 and week 3 will appear as we reach them. The full twelve-lecture outline is on the
 [home page](index.qmd), and the [reading list](readings.qmd) covers all three weeks if you want to read ahead.
 :::
 

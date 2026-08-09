@@ -1,59 +1,71 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>https://ts-robinson.com/me324/lectures/lecture-04-backpropagation.html</loc>
+    <lastmod>2026-08-06T16:12:00.525Z</lastmod>
+  </url>
+  <url>
     <loc>https://ts-robinson.com/me324/lectures/lecture-03-computational-graphs.html</loc>
     <lastmod>2026-08-05T11:30:51.513Z</lastmod>
   </url>
   <url>
-    <loc>https://ts-robinson.com/me324/lectures/lecture-02-deep-models-primer.html</loc>
-    <lastmod>2026-08-04T17:05:46.592Z</lastmod>
+    <loc>https://ts-robinson.com/me324/lectures/lecture-07-generative-images.html</loc>
+    <lastmod>2026-08-08T20:19:23.362Z</lastmod>
   </url>
   <url>
-    <loc>https://ts-robinson.com/me324/index.html</loc>
-    <lastmod>2026-08-06T16:12:00.541Z</lastmod>
-  </url>
-  <url>
-    <loc>https://ts-robinson.com/me324/readings.html</loc>
-    <lastmod>2026-08-06T16:12:00.540Z</lastmod>
-  </url>
-  <url>
-    <loc>https://ts-robinson.com/me324/lectures.html</loc>
-    <lastmod>2026-08-04T13:59:38.131Z</lastmod>
-  </url>
-  <url>
-    <loc>https://ts-robinson.com/me324/labs/lab-04-backprop-autograd.html</loc>
-    <lastmod>2026-08-02T13:38:17.637Z</lastmod>
-  </url>
-  <url>
-    <loc>https://ts-robinson.com/me324/labs/lab-02-perceptron-numpy.html</loc>
-    <lastmod>2026-08-02T13:27:27.366Z</lastmod>
-  </url>
-  <url>
-    <loc>https://ts-robinson.com/me324/labs/lab-01-setup-and-tensors.html</loc>
-    <lastmod>2026-08-02T13:38:17.634Z</lastmod>
-  </url>
-  <url>
-    <loc>https://ts-robinson.com/me324/labs/lab-03-value-forward.html</loc>
-    <lastmod>2026-08-02T13:27:27.367Z</lastmod>
-  </url>
-  <url>
-    <loc>https://ts-robinson.com/me324/labs/lab-05-pytorch-feedforward.html</loc>
-    <lastmod>2026-08-06T16:12:14.298Z</lastmod>
-  </url>
-  <url>
-    <loc>https://ts-robinson.com/me324/labs.html</loc>
-    <lastmod>2026-08-02T14:28:31.025Z</lastmod>
+    <loc>https://ts-robinson.com/me324/lectures/lecture-06-cnns.html</loc>
+    <lastmod>2026-08-08T15:54:08.980Z</lastmod>
   </url>
   <url>
     <loc>https://ts-robinson.com/me324/lectures/lecture-01-what-is-ai.html</loc>
     <lastmod>2026-08-04T11:52:06.825Z</lastmod>
   </url>
   <url>
-    <loc>https://ts-robinson.com/me324/lectures/lecture-05-feedforward.html</loc>
-    <lastmod>2026-08-07T12:45:31.148Z</lastmod>
+    <loc>https://ts-robinson.com/me324/labs.html</loc>
+    <lastmod>2026-08-02T14:28:31.025Z</lastmod>
   </url>
   <url>
-    <loc>https://ts-robinson.com/me324/lectures/lecture-04-backpropagation.html</loc>
-    <lastmod>2026-08-06T16:12:00.525Z</lastmod>
+    <loc>https://ts-robinson.com/me324/labs/lab-05-pytorch-feedforward.html</loc>
+    <lastmod>2026-08-06T16:12:14.298Z</lastmod>
+  </url>
+  <url>
+    <loc>https://ts-robinson.com/me324/labs/lab-03-value-forward.html</loc>
+    <lastmod>2026-08-02T13:27:27.367Z</lastmod>
+  </url>
+  <url>
+    <loc>https://ts-robinson.com/me324/labs/lab-01-setup-and-tensors.html</loc>
+    <lastmod>2026-08-02T13:38:17.634Z</lastmod>
+  </url>
+  <url>
+    <loc>https://ts-robinson.com/me324/labs/lab-02-perceptron-numpy.html</loc>
+    <lastmod>2026-08-02T13:27:27.366Z</lastmod>
+  </url>
+  <url>
+    <loc>https://ts-robinson.com/me324/labs/lab-04-backprop-autograd.html</loc>
+    <lastmod>2026-08-02T13:38:17.637Z</lastmod>
+  </url>
+  <url>
+    <loc>https://ts-robinson.com/me324/lectures.html</loc>
+    <lastmod>2026-08-09T18:05:58.657Z</lastmod>
+  </url>
+  <url>
+    <loc>https://ts-robinson.com/me324/readings.html</loc>
+    <lastmod>2026-08-06T16:12:00.540Z</lastmod>
+  </url>
+  <url>
+    <loc>https://ts-robinson.com/me324/index.html</loc>
+    <lastmod>2026-08-06T16:12:00.541Z</lastmod>
+  </url>
+  <url>
+    <loc>https://ts-robinson.com/me324/lectures/lecture-02-deep-models-primer.html</loc>
+    <lastmod>2026-08-04T17:05:46.592Z</lastmod>
+  </url>
+  <url>
+    <loc>https://ts-robinson.com/me324/lectures/lecture-08-text-embeddings.html</loc>
+    <lastmod>2026-08-09T14:06:09.195Z</lastmod>
+  </url>
+  <url>
+    <loc>https://ts-robinson.com/me324/lectures/lecture-05-feedforward.html</loc>
+    <lastmod>2026-08-07T12:45:31.148Z</lastmod>
   </url>
 </urlset>

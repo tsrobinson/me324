@@ -1,0 +1,2282 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-html/tabby.min.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/light-border.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-html.min.css" rel="stylesheet" data-mode="light">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
+  <meta name="generator" content="quarto-1.5.57">
+
+  <meta name="author" content="Dr Thomas Robinson">
+  <meta name="dcterms.date" content="2026-08-10">
+  <title>ME324 · AI &amp; Deep Learning – Classifying images</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+  <link rel="stylesheet" href="../site_libs/revealjs/dist/reset.css">
+  <link rel="stylesheet" href="../site_libs/revealjs/dist/reveal.css">
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+      vertical-align: middle;
+    }
+    /* CSS for syntax highlighting */
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+      }
+    pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+    div.sourceCode
+      { color: #e1e4e8; background-color: #24292e; }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span { color: #e1e4e8; } /* Normal */
+    code span.al { color: #ff5555; font-weight: bold; } /* Alert */
+    code span.an { color: #6a737d; } /* Annotation */
+    code span.at { color: #f97583; } /* Attribute */
+    code span.bn { color: #79b8ff; } /* BaseN */
+    code span.bu { color: #f97583; } /* BuiltIn */
+    code span.cf { color: #f97583; } /* ControlFlow */
+    code span.ch { color: #9ecbff; } /* Char */
+    code span.cn { color: #79b8ff; } /* Constant */
+    code span.co { color: #6a737d; } /* Comment */
+    code span.cv { color: #6a737d; } /* CommentVar */
+    code span.do { color: #6a737d; } /* Documentation */
+    code span.dt { color: #f97583; } /* DataType */
+    code span.dv { color: #79b8ff; } /* DecVal */
+    code span.er { color: #ff5555; text-decoration: underline; } /* Error */
+    code span.ex { color: #f97583; font-weight: bold; } /* Extension */
+    code span.fl { color: #79b8ff; } /* Float */
+    code span.fu { color: #b392f0; } /* Function */
+    code span.im { color: #9ecbff; } /* Import */
+    code span.in { color: #6a737d; } /* Information */
+    code span.kw { color: #f97583; } /* Keyword */
+    code span.op { color: #e1e4e8; } /* Operator */
+    code span.ot { color: #b392f0; } /* Other */
+    code span.pp { color: #f97583; } /* Preprocessor */
+    code span.re { color: #6a737d; } /* RegionMarker */
+    code span.sc { color: #79b8ff; } /* SpecialChar */
+    code span.ss { color: #9ecbff; } /* SpecialString */
+    code span.st { color: #9ecbff; } /* String */
+    code span.va { color: #ffab70; } /* Variable */
+    code span.vs { color: #9ecbff; } /* VerbatimString */
+    code span.wa { color: #ff5555; } /* Warning */
+    /* CSS for citations */
+    div.csl-bib-body { }
+    div.csl-entry {
+      clear: both;
+      margin-bottom: 0em;
+    }
+    .hanging-indent div.csl-entry {
+      margin-left:2em;
+      text-indent:-2em;
+    }
+    div.csl-left-margin {
+      min-width:2em;
+      float:left;
+    }
+    div.csl-right-inline {
+      margin-left:2em;
+      padding-left:1em;
+    }
+    div.csl-indent {
+      margin-left: 2em;
+    }  </style>
+  <link rel="stylesheet" href="../site_libs/revealjs/dist/theme/quarto.css">
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
+  <link href="../site_libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
+  <link href="../site_libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
+  <link href="../site_libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
+  <link href="../site_libs/revealjs/plugin/quarto-support/footer.css" rel="stylesheet">
+  <style type="text/css">
+
+  .callout {
+    margin-top: 1em;
+    margin-bottom: 1em;  
+    border-radius: .25rem;
+  }
+
+  .callout.callout-style-simple { 
+    padding: 0em 0.5em;
+    border-left: solid #acacac .3rem;
+    border-right: solid 1px silver;
+    border-top: solid 1px silver;
+    border-bottom: solid 1px silver;
+    display: flex;
+  }
+
+  .callout.callout-style-default {
+    border-left: solid #acacac .3rem;
+    border-right: solid 1px silver;
+    border-top: solid 1px silver;
+    border-bottom: solid 1px silver;
+  }
+
+  .callout .callout-body-container {
+    flex-grow: 1;
+  }
+
+  .callout.callout-style-simple .callout-body {
+    font-size: 1rem;
+    font-weight: 400;
+  }
+
+  .callout.callout-style-default .callout-body {
+    font-size: 0.9rem;
+    font-weight: 400;
+  }
+
+  .callout.callout-titled.callout-style-simple .callout-body {
+    margin-top: 0.2em;
+  }
+
+  .callout:not(.callout-titled) .callout-body {
+      display: flex;
+  }
+
+  .callout:not(.no-icon).callout-titled.callout-style-simple .callout-content {
+    padding-left: 1.6em;
+  }
+
+  .callout.callout-titled .callout-header {
+    padding-top: 0.2em;
+    margin-bottom: -0.2em;
+  }
+
+  .callout.callout-titled .callout-title  p {
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+  }
+    
+  .callout.callout-titled.callout-style-simple .callout-content  p {
+    margin-top: 0;
+  }
+
+  .callout.callout-titled.callout-style-default .callout-content  p {
+    margin-top: 0.7em;
+  }
+
+  .callout.callout-style-simple div.callout-title {
+    border-bottom: none;
+    font-size: .9rem;
+    font-weight: 600;
+    opacity: 75%;
+  }
+
+  .callout.callout-style-default  div.callout-title {
+    border-bottom: none;
+    font-weight: 600;
+    opacity: 85%;
+    font-size: 0.9rem;
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+  }
+
+  .callout.callout-style-default div.callout-content {
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+  }
+
+  .callout.callout-style-simple .callout-icon::before {
+    height: 1rem;
+    width: 1rem;
+    display: inline-block;
+    content: "";
+    background-repeat: no-repeat;
+    background-size: 1rem 1rem;
+  }
+
+  .callout.callout-style-default .callout-icon::before {
+    height: 0.9rem;
+    width: 0.9rem;
+    display: inline-block;
+    content: "";
+    background-repeat: no-repeat;
+    background-size: 0.9rem 0.9rem;
+  }
+
+  .callout-title {
+    display: flex
+  }
+    
+  .callout-icon::before {
+    margin-top: 1rem;
+    padding-right: .5rem;
+  }
+
+  .callout.no-icon::before {
+    display: none !important;
+  }
+
+  .callout.callout-titled .callout-body > .callout-content > :last-child {
+    padding-bottom: 0.5rem;
+    margin-bottom: 0;
+  }
+
+  .callout.callout-titled .callout-icon::before {
+    margin-top: .5rem;
+    padding-right: .5rem;
+  }
+
+  .callout:not(.callout-titled) .callout-icon::before {
+    margin-top: 1rem;
+    padding-right: .5rem;
+  }
+
+  /* Callout Types */
+
+  div.callout-note {
+    border-left-color: #4582ec !important;
+  }
+
+  div.callout-note .callout-icon::before {
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAIKADAAQAAAABAAAAIAAAAACshmLzAAAEU0lEQVRYCcVXTWhcVRQ+586kSUMMxkyaElstCto2SIhitS5Ek8xUKV2poatCcVHtUlFQk8mbaaziwpWgglJwVaquitBOfhQXFlqlzSJpFSpIYyXNjBNiTCck7x2/8/LeNDOZxDuEkgOXe++553zfefee+/OYLOXFk3+1LLrRdiO81yNqZ6K9cG0P3MeFaMIQjXssE8Z1JzLO9ls20MBZX7oG8w9GxB0goaPrW5aNMp1yOZIa7Wv6o2ykpLtmAPs/vrG14Z+6d4jpbSKuhdcSyq9wGMPXjonwmESXrriLzFGOdDBLB8Y6MNYBu0dRokSygMA/mrun8MGFN3behm6VVAwg4WR3i6FvYK1T7MHo9BK7ydH+1uurECoouk5MPRyVSBrBHMYwVobG2aOXM07sWrn5qgB60rc6mcwIDJtQrnrEr44kmy+UO9r0u9O5/YbkS9juQckLed3DyW2XV/qWBBB3ptvI8EUY3I9p/67OW+g967TNr3Sotn3IuVlfMLVnsBwH4fsnebJvyGm5GeIUA3jljERmrv49SizPYuq+z7c2H/jlGC+Ghhupn/hcapqmcudB9jwJ/3jvnvu6vu5lVzF1fXyZuZZ7U8nRmVzytvT+H3kilYvH09mLWrQdwFSsFEsxFVs5fK7A0g8gMZjbif4ACpKbjv7gNGaD8bUrlk8x+KRflttr22JEMRUbTUwwDQScyzPgedQHZT0xnx7ujw2jfVfExwYHwOsDTjLdJ2ebmeQIlJ7neo41s/DrsL3kl+W2lWvAga0tR3zueGr6GL78M3ifH0rGXrBC2aAR8uYcIA5gwV8zIE8onoh8u0Fca/ciF7j1uOzEnqcIm59sEXoGc0+z6+H45V1CvAvHcD7THztu669cnp+L0okAeIc6zjbM/24LgGM1gZk7jnRu1aQWoU9sfUOuhrmtaPIO3YY1KLLWZaEO5TKUbMY5zx8W9UJ6elpLwKXbsaZ4EFl7B4bMtDv0iRipKoDQT2sNQI9b1utXFdYisi+wzZ/ri/1m7QfDgEuvgUUEIJPq3DhX/5DWNqIXDOweC2wvIR90Oq3lDpdMIgD2r0dXvGdsEW5H6x6HLRJYU7C69VefO1x8Gde1ZFSJLfWS1jbCnhtOPxmpfv2LXOA2Xk2tvnwKKPFuZ/oRmwBwqRQDcKNeVQkYcOjtWVBuM/JuYw5b6isojIkYxyYAFn5K7ZBF10fea52y8QltAg6jnMqNHFBmGkQ1j+U43HMi2xMar1Nv0zGsf1s8nUsmUtPOOrbFIR8bHFDMB5zL13Gmr/kGlCkUzedTzzmzsaJXhYawnA3UmARpiYj5ooJZiUoxFRtK3X6pgNPv+IZVPcnwbOl6f+aBaO1CNvPW9n9LmCp01nuSaTRF2YxHqZ8DYQT6WsXT+RD6eUztwYLZ8rM+rcPxamv1VQzFUkzFXvkiVrySGQgJNvXHJAxiU3/NwiC03rSf05VBaPtu/Z7/B8Yn/w7eguloAAAAAElFTkSuQmCC');
+  }
+
+  div.callout-note.callout-style-default .callout-title {
+    background-color: #dae6fb
+  }
+
+  div.callout-important {
+    border-left-color: #d9534f !important;
+  }
+
+  div.callout-important .callout-icon::before {
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAIKADAAQAAAABAAAAIAAAAACshmLzAAAEKklEQVRYCcVXTWhcVRS+575MJym48A+hSRFr00ySRQhURRfd2HYjk2SSTokuBCkU2o0LoSKKraKIBTcuFCoidGFD08nkBzdREbpQ1EDNIv8qSGMFUboImMSZd4/f9zJv8ibJMC8xJQfO3HPPPef7zrvvvnvviIkpC9nsw0UttFunbUhpFzFtarSd6WJkStVMw5xyVqYTvkwfzuf/5FgtkVoB0729j1rjXwThS7Vio+Mo6DNnvLfahoZ+i/o32lULuJ3NNiz7q6+pyAUkJaFF6JwaM2lUJlV0MlnQn5aTRbEu0SEqHUa0A4AdiGuB1kFXRfVyg5d87+Dg4DL6m2TLAub60ilj7A1Ec4odSAc8X95sHh7+ZRPCFo6Fnp7HfU/fBng/hi10CjCnWnJjsxvDNxWw0NfV6Rv5GgP3I3jGWXumdTD/3cbEOP2ZbOZp69yniG3FQ9z1jD7bnBu9Fc2tKGC2q+uAJOQHBDRiZX1x36o7fWBs7J9ownbtO+n0/qWkvW7UPIfc37WgT6ZGR++EOJyeQDSb9UB+DZ1G6DdLDzyS+b/kBCYGsYgJbSQHuThGKRcw5xdeQf8YdNHsc6ePXrlSYMBuSIAFTGAtQo+VuALo4BX83N190NWZWbynBjhOHsmNfFWLeL6v+ynsA58zDvvAC8j5PkbOcXCMg2PZFk3q8MjI7WAG/Dp9AwP7jdGBOOQkAvlFUB+irtm16I1Zw9YBcpGTGXYmk3kQIC/Cds55l+iMI3jqhjAuaoe+am2Jw5GT3Nbz3CkE12NavmzN5+erJW7046n/CH1RO/RVa8lBLozXk9uqykkGAyRXLWlLv5jyp4RFsG5vGVzpDLnIjTWgnRy2Rr+tDKvRc7Y8AyZq10jj8DqXdnIRNtFZb+t/ZRtXcDiVnzpqx8mPcDWxgARUqx0W1QB9MeUZiNrV4qP+Ehc+BpNgATsTX8ozYKL2NtFYAHc84fG7ndxUPr+AR/iQSns7uSUufAymwDOb2+NjK27lEFocm/EE2WpyIy/Hi66MWuMKJn8RvxIcj87IM5Vh9663ziW36kR0HNenXuxmfaD8JC7tfKbrhFr7LiZCrMjrzTeGx+PmkosrkNzW94ObzwocJ7A1HokLolY+AvkTiD/q1H0cN48c5EL8Crkttsa/AXQVDmutfyku0E7jShx49XqV3MFK8IryDhYVbj7Sj2P2eBxwcXoe8T8idsKKPRcnZw1b+slFTubwUwhktrfnAt7J++jwQtLZcm3sr9LQrjRzz6cfMv9aLvgmnAGvpoaGLxM4mAEaLV7iAzQ3oU0IvD5x9ix3yF2RAAuYAOO2f7PEFWCXZ4C9Pb2UsgDeVnFSpbFK7/IWu7TPTvBqzbGdCHOJQSxiEjt6IyZmxQyEJHv6xyQsYk//moVFsN2zP6fRImjfq7/n/wFDguUQFNEwugAAAABJRU5ErkJggg==');
+  }
+
+  div.callout-important.callout-style-default .callout-title {
+    background-color: #f7dddc
+  }
+
+  div.callout-warning {
+    border-left-color: #f0ad4e !important;
+  }
+
+  div.callout-warning .callout-icon::before {
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAIKADAAQAAAABAAAAIAAAAACshmLzAAAETklEQVRYCeVWW2gcVRg+58yaTUnizqbipZeX4uWhBEniBaoUX1Ioze52t7sRq6APio9V9MEaoWlVsFasRq0gltaAPuxms8lu0gcviE/FFOstVbSIxgcv6SU7EZqmdc7v9+9mJtNks51NTUH84ed889/PP+cmxP+d5FIbMJmNbpREu4WUkiTtCicKny0l1pIKmBzovF2S+hIJHX8iEu3hZJ5lNZGqyRrGSIQpq15AzF28jgpeY6yk6GVdrfFqdrD6Iw+QlB8g0YS2g7dyQmXM/IDhBhT0UCiRf59lfqmmDvzRt6kByV/m4JjtzuaujMUM2c5Z2d6JdKrRb3K2q6mA+oYVz8JnDdKPmmNthzkAk/lN63sYPgevrguc72aZX/L9C6x09GYyxBgCX4NlvyGUHOKELlm5rXeR1kchuChJt4SSwyddZRXgvwMGvYo4QSlk3/zkHD8UHxwVJA6zjZZqP8v8kK8OWLnIZtLyCAJagYC4rTGW/9Pqj92N/c+LUaAj27movwbi19tk/whRCIE7Q9vyI6yvRpftAKVTdUjOW40X3h5OXsKCdmFcx0xlLJoSuQngnrJe7Kcjm4OMq9FlC7CMmScQANuNvjfP3PjGXDBaUQmbp296S5L4DrpbrHN1T87ZVEZVCzg1FF0Ft+dKrlLukI+/c9ENo+TvlTDbYFvuKPtQ9+l052rXrgKoWkDAFnvh0wTOmYn8R5f4k/jN/fZiCM1tQx9jQQ4ANhqG4hiL0qIFTGViG9DKB7GYzgubnpofgYRwO+DFjh0Zin2m4b/97EDkXkc+f6xYAPX0KK2I/7fUQuwzuwo/L3AkcjugPNixC8cHf0FyPjWlItmLxWw4Ou9YsQCr5fijMGoD/zpdRy95HRysyXA74MWOnscpO4j2y3HAVisw85hX5+AFBRSHt4ShfLFkIMXTqyKFc46xdzQM6XbAi702a7sy04J0+feReMFKp5q9esYLCqAZYw/k14E/xcLLsFElaornTuJB0svMuJINy8xkIYuL+xPAlWRceH6+HX7THJ0djLUom46zREu7tTkxwmf/FdOZ/sh6Q8qvEAiHpm4PJ4a/doJe0gH1t+aHRgCzOvBvJedEK5OFE5jpm4AGP2a8Dxe3gGJ/pAutug9Gp6he92CsSsWBaEcxGx0FHytmIpuqGkOpldqNYQK8cSoXvd+xLxXADw0kf6UkJNFtdo5MOgaLjiQOQHcn+A6h5NuL2s0qsC2LOM75PcF3yr5STuBSAcGG+meA14K/CI21HcS4LBT6tv0QAh8Dr5l93AhZzG5ZJ4VxAqdZUEl9z7WJ4aN+svMvwHHL21UKTd1mqvChH7/Za5xzXBBKrUcB0TQ+Ulgkfbi/H/YT5EptrGzsEK7tR1B7ln9BBwckYfMiuSqklSznIuoIIOM42MQO+QnduCoFCI0bpkzjCjddHPN/F+2Yu+sd9bKNpVwHhbS3LluK/0zgfwD0xYI5dXuzlQAAAABJRU5ErkJggg==');
+  }
+
+  div.callout-warning.callout-style-default .callout-title {
+    background-color: #fcefdc
+  }
+
+  div.callout-tip {
+    border-left-color: #02b875 !important;
+  }
+
+  div.callout-tip .callout-icon::before {
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAIKADAAQAAAABAAAAIAAAAACshmLzAAADr0lEQVRYCe1XTWgTQRj9ZjZV8a9SPIkKgj8I1bMHsUWrqYLVg4Ue6v9BwZOxSYsIerFao7UiUryIqJcqgtpimhbBXoSCVxUFe9CTiogUrUp2Pt+3aUI2u5vdNh4dmMzOzHvvezuz8xNFM0mjnbXaNu1MvFWRXkXEyE6aYOYJpdW4IXuA4r0fo8qqSMDBU0v1HJUgVieAXxzCsdE/YJTdFcVIZQNMyhruOMJKXYFoLfIfIvVIMWdsrd+Rpd86ZmyzzjJmLStqRn0v8lzkb4rVIXvnpScOJuAn2ACC65FkPzEdEy4TPWRLJ2h7z4cArXzzaOdKlbOvKKX25Wl00jSnrwVxAg3o4dRxhO13RBSdNvH0xSARv3adTXbBdTf64IWO2vH0LT+cv4GR1DJt+DUItaQogeBX/chhbTBxEiZ6gftlDNXTrvT7co4ub5A6gp9HIcHvzTa46OS5fBeP87Qm0fQkr4FsYgVQ7Qg+ZayaDg9jhg1GkWj8RG6lkeSacrrHgDaxdoBiZPg+NXV/KifMuB6//JmYH4CntVEHy/keA6x4h4CU5oFy8GzrBS18cLJMXcljAKB6INjWsRcuZBWVaS3GDrqB7rdapVIeA+isQ57Eev9eCqzqOa81CY05VLd6SamW2wA2H3SiTbnbSxmzfp7WtKZkqy4mdyAlGx7ennghYf8voqp9cLSgKdqNfa6RdRsAAkPwRuJZNbpByn+RrJi1RXTwdi8RQF6ymDwGMAtZ6TVE+4uoKh+MYkcLsT0Hk8eAienbiGdjJHZTpmNjlbFJNKDVAp2fJlYju6IreQxQ08UJDNYdoLSl6AadO+fFuCQqVMB1NJwPm69T04Wv5WhfcWyfXQB+wXRs1pt+nCknRa0LVzSA/2B+a9+zQJadb7IyyV24YAxKp2Jqs3emZTuNnKxsah+uabKbMk7CbTgJx/zIgQYErIeTKRQ9yD9wxVof5YolPHqaWo7TD6tJlh7jQnK5z2n3+fGdggIOx2kaa2YI9QWarc5Ce1ipNWMKeSG4DysFF52KBmTNMmn5HqCFkwy34rDg05gDwgH3bBi+sgFhN/e8QvRn8kbamCOhgrZ9GJhFDgfcMHzFb6BAtjKpFhzTjwv1KCVuxHvCbsSiEz4CANnj84cwHdFXAbAOJ4LTSAawGWFn5tDhLMYz6nWeU2wJfIhmIJBefcd/A5FWQWGgrWzyORZ3Q6HuV+Jf0Bj+BTX69fm1zWgK7By1YTXchFDORywnfQ7GpzOo6S+qECrsx2ifVQAAAABJRU5ErkJggg==');
+  }
+
+  div.callout-tip.callout-style-default .callout-title {
+    background-color: #ccf1e3
+  }
+
+  div.callout-caution {
+    border-left-color: #fd7e14 !important;
+  }
+
+  div.callout-caution .callout-icon::before {
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAIKADAAQAAAABAAAAIAAAAACshmLzAAACV0lEQVRYCdVWzWoUQRCuqp2ICBLJXgITZL1EfQDBW/bkzUMUD7klD+ATSHBEfAIfQO+iXsWDxJsHL96EHAwhgzlkg8nBg25XWb0zIb0zs9muYYWkoKeru+vn664fBqElyZNuyh167NXJ8Ut8McjbmEraKHkd7uAnAFku+VWdb3reSmRV8PKSLfZ0Gjn3a6Xlcq9YGb6tADjn+lUfTXtVmaZ1KwBIvFI11rRXlWlatwIAAv2asaa9mlB9wwygiDX26qaw1yYPzFXg2N1GgG0FMF8Oj+VIx7E/03lHx8UhvYyNZLN7BwSPgekXXLribw7w5/c8EF+DBK5idvDVYtEEwMeYefjjLAdEyQ3M9nfOkgnPTEkYU+sxMq0BxNR6jExrAI31H1rzvLEfRIdgcv1XEdj6QTQAS2wtstEALLG1yEZ3QhH6oDX7ExBSFEkFINXH98NTrme5IOaaA7kIfiu2L8A3qhH9zRbukdCqdsA98TdElyeMe5BI8Rs2xHRIsoTSSVFfCFCWGPn9XHb4cdobRIWABNf0add9jakDjQJpJ1bTXOJXnnRXHRf+dNL1ZV1MBRCXhMbaHqGI1JkKIL7+i8uffuP6wVQAzO7+qVEbF6NbS0LJureYcWXUUhH66nLR5rYmva+2tjRFtojkM2aD76HEGAD3tPtKM309FJg5j/K682ywcWJ3PASCcycH/22u+Bh7Aa0ehM2Fu4z0SAE81HF9RkB21c5bEn4Dzw+/qNOyXr3DCTQDMBOdhi4nAgiFDGCinIa2owCEChUwD8qzd03PG+qdW/4fDzjUMcE1ZpIAAAAASUVORK5CYII=');
+  }
+
+  div.callout-caution.callout-style-default .callout-title {
+    background-color: #ffe5d0
+  }
+
+  </style>
+  <style type="text/css">
+    .reveal div.sourceCode {
+      margin: 0;
+      overflow: auto;
+    }
+    .reveal div.hanging-indent {
+      margin-left: 1em;
+      text-indent: -1em;
+    }
+    .reveal .slide:not(.center) {
+      height: 100%;
+    }
+    .reveal .slide.scrollable {
+      overflow-y: auto;
+    }
+    .reveal .footnotes {
+      height: 100%;
+      overflow-y: auto;
+    }
+    .reveal .slide .absolute {
+      position: absolute;
+      display: block;
+    }
+    .reveal .footnotes ol {
+      counter-reset: ol;
+      list-style-type: none; 
+      margin-left: 0;
+    }
+    .reveal .footnotes ol li:before {
+      counter-increment: ol;
+      content: counter(ol) ". "; 
+    }
+    .reveal .footnotes ol li > p:first-child {
+      display: inline-block;
+    }
+    .reveal .slide ul,
+    .reveal .slide ol {
+      margin-bottom: 0.5em;
+    }
+    .reveal .slide ul li,
+    .reveal .slide ol li {
+      margin-top: 0.4em;
+      margin-bottom: 0.2em;
+    }
+    .reveal .slide ul[role="tablist"] li {
+      margin-bottom: 0;
+    }
+    .reveal .slide ul li > *:first-child,
+    .reveal .slide ol li > *:first-child {
+      margin-block-start: 0;
+    }
+    .reveal .slide ul li > *:last-child,
+    .reveal .slide ol li > *:last-child {
+      margin-block-end: 0;
+    }
+    .reveal .slide .columns:nth-child(3) {
+      margin-block-start: 0.8em;
+    }
+    .reveal blockquote {
+      box-shadow: none;
+    }
+    .reveal .tippy-content>* {
+      margin-top: 0.2em;
+      margin-bottom: 0.7em;
+    }
+    .reveal .tippy-content>*:last-child {
+      margin-bottom: 0.2em;
+    }
+    .reveal .slide > img.stretch.quarto-figure-center,
+    .reveal .slide > img.r-stretch.quarto-figure-center {
+      display: block;
+      margin-left: auto;
+      margin-right: auto; 
+    }
+    .reveal .slide > img.stretch.quarto-figure-left,
+    .reveal .slide > img.r-stretch.quarto-figure-left  {
+      display: block;
+      margin-left: 0;
+      margin-right: auto; 
+    }
+    .reveal .slide > img.stretch.quarto-figure-right,
+    .reveal .slide > img.r-stretch.quarto-figure-right  {
+      display: block;
+      margin-left: auto;
+      margin-right: 0; 
+    }
+  </style>
+<meta property="og:title" content="Classifying images – ME324 · AI &amp; Deep Learning">
+<meta property="og:description" content="Lecture 6 — Convolutional neural networks">
+<meta property="og:site_name" content="ME324 · AI &amp; Deep Learning">
+</head>
+<body class="quarto-light">
+  <div class="reveal">
+    <div class="slides">
+
+<section id="title-slide" class="quarto-title-block center">
+  <h1 class="title">Classifying images</h1>
+  <p class="subtitle">Lecture 6 — Convolutional neural networks</p>
+
+<div class="quarto-title-authors">
+<div class="quarto-title-author">
+<div class="quarto-title-author-name">
+Dr Thomas Robinson 
+</div>
+</div>
+</div>
+
+  <p class="date">August 10, 2026</p>
+</section>
+<section id="midterm-assessment" class="slide level2">
+<h2>Midterm assessment</h2>
+<p>I will release a midterm assignment <em>this</em> Thursday</p>
+<ul>
+<li>A small prediction challenge</li>
+<li>Constraints on the size of the network and its structure</li>
+<li>Small space to interpret the results etc.</li>
+</ul>
+<p>Should be submitted by <strong>Tuesday 18 August at 9am</strong></p>
+</section>
+<section id="warm-up-three-questions-from-last-time" class="slide level2">
+<h2>Warm-up · three questions from last time</h2>
+<p><span class="eyebrow"><span class="pause-cue">≈ 5 min</span> · shout it out</span></p>
+<div class="card">
+<ol type="1">
+<li>Your training loss keeps falling, but your validation loss has started rising. What is happening, and name one fix.</li>
+<li>A fully-connected layer maps 784 inputs to 128 outputs. How many parameters does it have, counting biases?</li>
+</ol>
+</div>
+</section>
+<section id="warm-up-answers" class="slide level2">
+<h2>Warm-up · answers</h2>
+<div class="card">
+<ol type="1">
+<li><strong>Overfitting</strong> — the model has started memorising the training set instead of learning the pattern. Any of: add dropout, get more data, stop training early.</li>
+<li>Each of the 128 outputs has 784 weights and 1 bias: <span class="math display">784 \times 128 + 128 = 100{,}352 + 128 = 100{,}480.</span></li>
+</ol>
+</div>
+</section>
+<section>
+<section id="part-1-images-as-data-then-convolutions" class="title-slide slide level1 center" data-background-color="#0E1A2B">
+<h1>Part 1 · Images as data, then convolutions</h1>
+
+</section>
+<section id="whats-different-about-images" class="slide level2">
+<h2>What’s different about images?</h2>
+<div class="columns">
+<div class="column" style="width:60%;">
+<p>Not everything is easily quantified.</p>
+<ul>
+<li>Our experience of the world is sensory.</li>
+<li>Images record aspects that “numbers” can’t capture.</li>
+<li>Two principal motivations to use images in research:
+<ol type="1">
+<li>They record <strong>unmeasured</strong> dimensions of the world.</li>
+<li>They are <strong>less reductive</strong> – they preserve more about the phenomenon under study.</li>
+</ol></li>
+</ul>
+</div><div class="column" style="width:40%;">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="../assets/images/miliband.jpg" class="quarto-figure quarto-figure-center" style="width:90.0%"></p>
+</figure>
+</div>
+</div></div>
+<div class="card">
+<p>For social scientists: protest crowds, ballot tallies, satellite views of land use, MRI scans, facial expressions are all relevant data, but hard to put in a spreadsheet.</p>
+</div>
+</section>
+<section id="even-digital-images-are-quantitative" class="slide level2">
+<h2>Even (digital) images are quantitative</h2>
+<p>Strip away the rendering: an image <strong>is</strong> a tensor of numbers.</p>
+<ul>
+<li>Each value is a <strong>pixel</strong> — a single point of light.</li>
+<li>A digital image is a grid of these pixels: an ordered arrangement of numbers.</li>
+</ul>
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="../assets/images/seurat.jpg" class="quarto-figure quarto-figure-center"></p>
+</figure>
+</div>
+<p><span class="muted">A surprising amount of computer vision is about reasoning with — and over — these grids of numbers.</span></p>
+</section>
+<section id="grayscale-and-colour" class="slide level2">
+<h2>Grayscale and colour</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><span class="pill-blue">Grayscale</span></p>
+<ul>
+<li>One value per pixel, 0–255 (black → white).</li>
+<li>A <span class="math inline">256 \times 256</span> grayscale image is a <span class="math inline">256 \times 256</span> <strong>matrix</strong>.</li>
+<li>So <span class="math inline">65{,}536</span> integers of light per image.</li>
+</ul>
+</div><div class="column" style="width:50%;">
+<p><span class="pill">Colour (RGB)</span></p>
+<ul>
+<li>Three values per pixel: red, green, blue</li>
+<li>A <span class="math inline">256 \times 256</span> colour image is a <span class="math inline">256 \times 256 \times 3</span> <strong>tensor</strong></li>
+<li>PyTorch likes to treat the images as shape <span class="math inline">(C,H,W)</span> rather than <span class="math inline">(H,W,C)</span></li>
+</ul>
+</div></div>
+<div class="callout callout-note callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Note</strong></p>
+</div>
+<div class="callout-content">
+<p>RGB is one of many ways to encode colour. It’s standard because it mimics human trichromatic vision. Other encodings (HSV, CMYK, Lab) exist.</p>
+<ul>
+<li>A deep-learning pipeline is agnostic to which, as they are all “tensorisable”</li>
+</ul>
+</div>
+</div>
+</div>
+</section>
+<section id="why-deep-learning-for-images-the-brute-force-approach" class="slide level2">
+<h2>Why deep learning for images? — the brute-force approach</h2>
+<p><span class="eyebrow">Suppose we treat the image as a <em>vector</em> of features</span></p>
+<p>Can you fit a random forest on a <span class="math inline">256 \times 256</span> RGB image?</p>
+<div class="card">
+<p>Yes!</p>
+<ul>
+<li><strong>Flatten</strong> it: <span class="math inline">256 \cdot 256 \cdot 3 = 196{,}608</span> features.</li>
+<li>Train a forest on those features.</li>
+<li>It will work — random forests get ~97% on handwritten digit tasks</li>
+</ul>
+<p>But for richer images:</p>
+<ul>
+<li>The feature space is <strong>enormous</strong> — most splits are useless.</li>
+<li>No mechanism for <strong>spatial structure</strong> — that pixel (50, 50) is next to (50, 51) is invisible.</li>
+<li>No mechanism for <strong>translation invariance</strong> — a digit is a digit whether it’s centred or off in a corner.</li>
+</ul>
+</div>
+</section>
+<section id="fully-connected-mlps-suffer-from-exploding-weight-matrices" class="slide level2">
+<h2>Fully-connected MLPs suffer from exploding weight matrices</h2>
+<p>Using week 1’s architecture on the same image:</p>
+<ul>
+<li>196,608 input nodes</li>
+<li>First hidden layer of <em>just</em> 128 nodes → <span class="math inline">196{,}608 \times 128 = 25{,}165{,}824 \approx 25.2</span> <strong>million</strong> weights</li>
+<li>Second hidden layer of 64 nodes → <span class="math inline">\approx 1.6</span> billion weights</li>
+</ul>
+<div class="card">
+<p><strong>Wildly wasteful</strong> -— and trains badly without enormous data</p>
+<ul>
+<li>We also want a model that respects the spatial structure of the input.</li>
+</ul>
+</div>
+</section>
+<section id="what-we-want-from-a-vision-friendly-architecture" class="slide level2">
+<h2>What we want from a vision-friendly architecture</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><span class="pill">1. Parameter sharing</span></p>
+<p>Learn and apply a <em>filter</em> that scans across the space of the image.</p>
+<ul>
+<li><strong>Dramatically fewer parameters</strong> as the filter can be much smaller than the image</li>
+<li>E.g. a 3×3 filter would have only 9 weights</li>
+</ul>
+</div><div class="column" style="width:50%;">
+<p><span class="pill-blue">2. Locality</span></p>
+<p>Only look at small patches at a time</p>
+<ul>
+<li>Encodes the idea that “nearby pixels matter together” as a structural component of the model</li>
+<li>Allows us to parallelise the inspection of the image</li>
+</ul>
+</div></div>
+<div class="card">
+<p><strong>Translation invariance</strong> is possible by virtue of these two properties: if a filter learns to detect an edge, it can do so <strong>anywhere</strong> in the image.</p>
+<p>(Though cf. <span class="citation" data-cites="biscione2021convolutional">Biscione &amp; Bowers (<a href="#/see-you-tomorrow" role="doc-biblioref" onclick="">2021</a>)</span> for subtleties — CNNs aren’t <em>perfectly</em> translation-invariant, but they learn to be close.)</p>
+</div>
+</section>
+<section id="the-convolution-operator-in-pictures" class="slide level2">
+<h2>The convolution operator — in pictures</h2>
+<p>Given an image <span class="math inline">\mathbf{A}</span> and a small <strong>kernel</strong> <span class="math inline">\mathbf{K}</span>:</p>
+<ol type="1">
+<li>Slide <span class="math inline">\mathbf{K}</span> over <span class="math inline">\mathbf{A}</span></li>
+<li>At each position, compute the <em>element-wise</em> product and sum</li>
+<li>Return the output value at that position</li>
+</ol>
+<div class="cell" data-fig-height="1.8" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class=""><p></p>
+<div>
+<svg width="960" height="173" viewbox="0.00 0.00 322.35 109.60" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" style="; max-width: none; max-height: none; display: block; margin: auto auto auto auto">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 105.6)">
+<title>G</title>
+<!-- A -->
+<g id="node1" class="node">
+<title>A</title>
+<polygon fill="#f4f1ea" stroke="black" points="64.11,-101.4 0.48,-101.4 0.48,-60.2 64.11,-60.2 64.11,-101.4"></polygon>
+<text text-anchor="middle" x="32.29" y="-85" font-family="Inter" font-size="14.00">image A</text>
+<text text-anchor="middle" x="32.29" y="-68.2" font-family="Inter" font-size="14.00">(H × W)</text>
+</g>
+<!-- out -->
+<g id="node3" class="node">
+<title>out</title>
+<polygon fill="#f4f1ea" stroke="black" points="314.39,-71.4 168.21,-71.4 168.21,-30.2 314.39,-30.2 314.39,-71.4"></polygon>
+<text text-anchor="middle" x="241.3" y="-55" font-family="Inter" font-size="14.00">feature map</text>
+<text text-anchor="middle" x="241.3" y="-38.2" font-family="Inter" font-size="14.00">((H−k+1) × (W−k+1))</text>
+</g>
+<!-- A&#45;&gt;out -->
+<g id="edge1" class="edge">
+<title>A-&gt;out</title>
+<path fill="none" stroke="black" d="M64.29,-76.31C89.02,-72.72 124.86,-67.53 157.76,-62.76"></path>
+<polygon fill="black" stroke="black" points="158.46,-66.2 167.85,-61.3 157.46,-59.27 158.46,-66.2"></polygon>
+</g>
+<!-- K -->
+<g id="node2" class="node">
+<title>K</title>
+<polygon fill="#c9322b" stroke="black" points="64.39,-41.4 0.2,-41.4 0.2,-0.2 64.39,-0.2 64.39,-41.4"></polygon>
+<text text-anchor="middle" x="32.29" y="-25" font-family="Inter" font-size="14.00" fill="white">kernel K</text>
+<text text-anchor="middle" x="32.29" y="-8.2" font-family="Inter" font-size="14.00" fill="white">(k × k)</text>
+</g>
+<!-- K&#45;&gt;out -->
+<g id="edge2" class="edge">
+<title>K-&gt;out</title>
+<path fill="none" stroke="black" d="M64.73,-25.36C89.54,-28.95 125.31,-34.13 158.1,-38.89"></path>
+<polygon fill="black" stroke="black" points="157.76,-42.37 168.16,-40.34 158.77,-35.45 157.76,-42.37"></polygon>
+<text text-anchor="middle" x="116.42" y="-42" font-family="Times,serif" font-size="14.00">slide &amp; sum</text>
+</g>
+</g>
+</svg>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+<div class="callout callout-note callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Note</strong></p>
+</div>
+<div class="callout-content">
+<p><strong>Convolution vs cross-correlation.</strong> Strictly, “convolution” flips the kernel first. In deep learning we always use cross-correlation but call it convolution.</p>
+<ul>
+<li>It doesn’t matter because the kernels are learned anyway</li>
+</ul>
+</div>
+</div>
+</div>
+</section>
+<section id="convolution-a-small-worked-example" class="slide level2">
+<h2>Convolution — a small worked example</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p>Image and kernel: <span class="math display">
+\mathbf{A} = \begin{bmatrix} 1 &amp; 2 &amp; 3 \\ 4 &amp; 5 &amp; 6 \\ 7 &amp; 8 &amp; 9 \end{bmatrix}, \quad
+\mathbf{K} = \begin{bmatrix} 1 &amp; 0 \\ 0 &amp; 1 \end{bmatrix}
+</span></p>
+<p>The kernel slides over the image (2×2 window). At each position, compute <span class="math inline">\sum K_{ij} A_{ij}</span>:</p>
+<ul>
+<li>Top-left: <span class="math inline">1\cdot1 + 0\cdot2 + 0\cdot4 + 1\cdot5 = 6</span>.</li>
+<li>Top-right: <span class="math inline">1\cdot2 + 0\cdot3 + 0\cdot5 + 1\cdot6 = 8</span>.</li>
+</ul>
+</div><div class="column" style="width:50%;">
+<p>Continuing:</p>
+<ul>
+<li>Bottom-left: <span class="math inline">1\cdot4 + 0\cdot5 + 0\cdot7 + 1\cdot8 = 12</span>.</li>
+<li>Bottom-right: <span class="math inline">1\cdot5 + 0\cdot6 + 0\cdot8 + 1\cdot9 = 14</span>.</li>
+</ul>
+<p>Result: <span class="math display">
+\mathbf{A} \circledast \mathbf{K} = \begin{bmatrix} 6 &amp; 8 \\ 12 &amp; 14 \end{bmatrix}
+</span></p>
+<p>where <span class="math inline">\circledast</span> denotes <strong>the convolution operator</strong>.</p>
+</div></div>
+<div class="card">
+<p><strong>Notice the shrinkage</strong>: the <span class="math inline">3 \times 3</span> input became a <span class="math inline">2 \times 2</span> output. A <span class="math inline">k \times k</span> kernel on an <span class="math inline">H \times W</span> image gives output size <span class="math inline">(H-k+1) \times (W-k+1)</span> — unless we <strong>pad</strong> the image with zeros.</p>
+</div>
+</section>
+<section id="parameters-of-a-convolution-layer" class="slide level2">
+<h2>Parameters of a convolution layer</h2>
+<div class="card">
+<ol type="1">
+<li><strong>Kernel size</strong> — typically 3×3, 5×5, 7×7.</li>
+<li><strong>Stride</strong> — how far we shift the kernel each step (typically 1).</li>
+<li><strong>Padding</strong> — whether to pad image edges with zeros to preserve output size.</li>
+<li><strong>Number of filters</strong> — how many <em>different</em> kernels we apply in parallel.</li>
+</ol>
+</div>
+<div class="callout callout-tip callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Tip</strong></p>
+</div>
+<div class="callout-content">
+<p>For a 3×3 kernel with stride 1 and padding 1, the output has the <strong>same</strong> height and width as the input. This “same” padding is what most modern CNNs use.</p>
+</div>
+</div>
+</div>
+<div class="card">
+<p><span class="eyebrow">The output-size formula</span></p>
+<p>For an input of height <span class="math inline">H</span>, kernel size <span class="math inline">k</span>, padding <span class="math inline">P</span> and stride <span class="math inline">s</span>:</p>
+<p><span class="math display">
+\text{out} = \left\lfloor \frac{H + 2P - k}{s} \right\rfloor + 1
+</span></p>
+<p>(the same formula gives the output width).</p>
+</div>
+</section>
+<section id="convolving-a-colour-image" class="slide level2">
+<h2>Convolving a colour image</h2>
+<p>Our worked examples so far were grayscale — one channel. Real photos have three.</p>
+<div class="card">
+<p>On an RGB input, a “3×3” kernel is a <span class="math inline">3 \times 3 \times 3</span> block of weights:</p>
+<ol type="1">
+<li>The kernel has one <span class="math inline">3 \times 3</span> <strong>slice</strong> per channel.</li>
+<li>Each slice multiplies its own channel’s patch, element-wise.</li>
+<li>The three per-channel sums are added together, plus the bias → <strong>one</strong> number.</li>
+</ol>
+</div>
+<p>Parameter count for one kernel: <span class="math inline">3 \times 3 \times 3 = 27</span> weights <span class="math inline">+\ 1</span> bias <span class="math inline">= 28</span>.</p>
+<div class="callout callout-note callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Note</strong></p>
+</div>
+<div class="callout-content">
+<p>The output is still a <strong>single</strong> feature map — the channels are summed away. The same rule holds deeper in the network: a 3×3 kernel over a 16-channel input has <span class="math inline">3 \cdot 3 \cdot 16 + 1 = 145</span> parameters.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="one-colour-output-pixel-by-hand" class="slide level2">
+<h2>One colour output pixel, by hand</h2>
+<p>Take one kernel position. Each channel has a <span class="math inline">3 \times 3</span> patch under the kernel’s matching slice — multiply element-wise (<span class="math inline">\odot</span>) and sum:</p>
+<div class="columns">
+<div class="column" style="width:33%;">
+<p><span class="pill">Red</span></p>
+<p><span class="math display">\small \begin{bmatrix} 2 &amp; 0 &amp; 1 \\ 0 &amp; 1 &amp; 0 \\ 1 &amp; 0 &amp; 2 \end{bmatrix} \odot \begin{bmatrix} 1 &amp; 0 &amp; 0 \\ 0 &amp; 1 &amp; 0 \\ 0 &amp; 0 &amp; 1 \end{bmatrix}</span></p>
+<p>Sum: <span class="math inline">2 + 1 + 2 = 5</span></p>
+</div><div class="column" style="width:33%;">
+<p><span class="pill-green">Green</span></p>
+<p><span class="math display">\small \begin{bmatrix} 0 &amp; 1 &amp; 0 \\ 1 &amp; 0 &amp; 1 \\ 0 &amp; 1 &amp; 0 \end{bmatrix} \odot \begin{bmatrix} 0 &amp; 1 &amp; 0 \\ 1 &amp; 0 &amp; 1 \\ 0 &amp; 1 &amp; 0 \end{bmatrix}</span></p>
+<p>Sum: <span class="math inline">1 + 1 + 1 + 1 = 4</span></p>
+</div><div class="column" style="width:33%;">
+<p><span class="pill-blue">Blue</span></p>
+<p><span class="math display">\small \begin{bmatrix} 1 &amp; 0 &amp; 1 \\ 0 &amp; 2 &amp; 0 \\ 1 &amp; 0 &amp; 1 \end{bmatrix} \odot \begin{bmatrix} 0 &amp; 0 &amp; 0 \\ 0 &amp; 1 &amp; 0 \\ 0 &amp; 0 &amp; 0 \end{bmatrix}</span></p>
+<p>Sum: <span class="math inline">2</span></p>
+</div></div>
+<div class="card">
+<p>Add the channel sums, then the bias (<span class="math inline">b = 1</span>): <span class="math display">
+5 + 4 + 2 + 1 = 12.
+</span> One output pixel. Slide the kernel one position and do it again.</p>
+</div>
+</section>
+<section id="deliberate-kernels" class="slide level2">
+<h2>Deliberate kernels</h2>
+<div class="columns">
+<div class="column" style="width:33%;">
+<p><strong>Sharpen</strong> <span class="math display">\small \begin{bmatrix} 0 &amp; -1 &amp; 0 \\ -1 &amp; 5 &amp; -1 \\ 0 &amp; -1 &amp; 0 \end{bmatrix}</span></p>
+</div><div class="column" style="width:33%;">
+<p><strong>Box blur</strong> <span class="math display">\small \begin{bmatrix} \tfrac{1}{9} &amp; \tfrac{1}{9} &amp; \tfrac{1}{9} \\ \tfrac{1}{9} &amp; \tfrac{1}{9} &amp; \tfrac{1}{9} \\ \tfrac{1}{9} &amp; \tfrac{1}{9} &amp; \tfrac{1}{9} \end{bmatrix}</span></p>
+</div><div class="column" style="width:33%;">
+<p><strong>Edge detect</strong> <span class="math display">\small \begin{bmatrix} -1 &amp; -1 &amp; -1 \\ -1 &amp; 8 &amp; -1 \\ -1 &amp; -1 &amp; -1 \end{bmatrix}</span></p>
+</div></div>
+<div class="card">
+<p><strong>These are hand-designed kernels</strong> from classical image processing. They produce visibly recognisable effects.</p>
+<p>In a CNN we don’t hand-design them. Instead, we <em>learn</em> them, just like any other weights, via backpropagation.</p>
+</div>
+</section>
+<section id="edge-detection-in-practice" class="slide level2">
+<h2>Edge-detection in practice</h2>
+<p><img data-src="../assets/images/puppy_reduced_large.jpg" style="width:35.0%"> <span class="math inline">\circledast</span> edge-detect kernel <span class="math inline">=</span> <img data-src="../assets/images/puppy_reduced_edge_large.jpg" style="width:35.0%"></p>
+<div class="callout callout-tip callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Tip</strong></p>
+</div>
+<div class="callout-content">
+<p><strong>What the network learns</strong> is rarely a “pure” edge detector. Instead it converges on dozens of specialised kernels that mix sharpening, blurring, contrasting, colour selection — whatever turns out to be useful for reducing the loss.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="why-kernels-generalise-translation-invariance" class="slide level2">
+<h2>Why kernels generalise — translation invariance</h2>
+<div class="card">
+<p>A 3×3 kernel “looks for” a specific local pattern. If the pattern appears <strong>anywhere</strong> in the image, the kernel’s output is high <em>at that location</em>.</p>
+<p>The same 9 weights detect that pattern in the corner, in the centre, at the edge — anywhere.</p>
+<p>This is the trick that takes us from 25 million weights to <strong>≈30 weights per filter</strong>.</p>
+</div>
+</section>
+<section id="stop-and-take-stock" class="slide level2">
+<h2>Stop and take stock</h2>
+<p><span class="eyebrow"><span class="pause-cue">Stop &amp; check</span></span></p>
+<div class="try-box">
+<p><span class="try-label">Try — 60 seconds in pairs</span></p>
+<p>A 28×28 grayscale image (MNIST). A single 3×3 convolution layer with 32 filters and “same” padding.</p>
+<p><strong>How many parameters does that layer have? How big is the output?</strong></p>
+</div>
+<div class="fragment">
+<div class="reveal-box">
+<p><span class="reveal-label">Answer</span> Each filter has <span class="math inline">3 \times 3 = 9</span> weights + 1 bias = 10 parameters. With 32 filters, that’s <strong>320 parameters</strong>.</p>
+<p>Output shape: <span class="math inline">28 \times 28 \times 32</span> — same spatial size, but now 32 channels (feature maps), one per filter.</p>
+<p>Compare to the fully-connected version, which would have <span class="math inline">784 \cdot 32 = 25{,}088</span> weights (78× more). And that’s just for the first layer.</p>
+</div>
+</div>
+</section></section>
+<section>
+<section id="plenary-design-a-kernel-by-hand" class="title-slide slide level1 center" data-background-color="#0E1A2B">
+<h1>Plenary · design a kernel by hand</h1>
+
+</section>
+<section id="plenary-design-a-kernel" class="slide level2">
+<h2>Plenary · design a kernel</h2>
+<p><span class="eyebrow"><span class="pause-cue">≈ 10 min</span> · in pairs</span></p>
+<div class="card">
+<p><span class="eyebrow">Design challenge</span></p>
+<p><strong>Your task</strong>: design a 3×3 kernel that detects <strong>vertical edges</strong> in a grayscale image.</p>
+<p>That is, the output should be large (positive) where there’s a strong vertical line of dark-to-light transition, and zero elsewhere.</p>
+<p><span class="eyebrow">Steps</span></p>
+<ol type="1">
+<li>Sketch the kernel.</li>
+<li>Apply it to this small 3×3 patch: <span class="math display">
+\begin{bmatrix} 0 &amp; 128 &amp; 255 \\ 0 &amp; 128 &amp; 255 \\ 0 &amp; 128 &amp; 255 \end{bmatrix}
+</span></li>
+<li>What if you had <strong>no</strong> edge in the patch?</li>
+</ol>
+</div>
+</section>
+<section id="plenary-one-defensible-answer" class="slide level2">
+<h2>Plenary · one defensible answer</h2>
+<div class="card">
+<p><span class="eyebrow">A vertical-edge kernel</span></p>
+<p><span class="math display">
+\mathbf{K} = \begin{bmatrix} -1 &amp; 0 &amp; 1 \\ -1 &amp; 0 &amp; 1 \\ -1 &amp; 0 &amp; 1 \end{bmatrix}
+</span></p>
+<ul>
+<li>Multiplies the <strong>left column</strong> of the patch by <span class="math inline">-1</span>, the <strong>right column</strong> by <span class="math inline">+1</span>.</li>
+<li>If left is dark (0) and right is bright (255), output is large positive.</li>
+<li>If left and right are the same (no edge), the outputs cancel — output is zero.</li>
+</ul>
+</div>
+<div class="card">
+<p><span class="eyebrow">On the test patch</span></p>
+<p>Each row contributes <span class="math inline">(0)(-1) + (128)(0) + (255)(1) = 255</span>. Sum the three rows:</p>
+<p><span class="math display">
+\text{output} = 255 + 255 + 255 = (255 - 0) \times 3 = 765.
+</span></p>
+<p><span class="eyebrow">On an all-128 patch</span> Each row gives <span class="math inline">(128)(-1) + (128)(0) + (128)(1) = 0</span> → output = 0. Correctly zero.</p>
+<div class="callout callout-tip callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Tip</strong></p>
+</div>
+<div class="callout-content">
+<p>This is the <strong>Prewitt operator</strong>, a classical edge detector.</p>
+</div>
+</div>
+</div>
+</div>
+</section></section>
+<section>
+<section id="part-2-from-convolutions-to-a-cnn" class="title-slide slide level1 center" data-background-color="#0E1A2B">
+<h1>Part 2 · From convolutions to a CNN</h1>
+
+</section>
+<section id="the-cnn-pipeline" class="slide level2">
+<h2>The CNN pipeline</h2>
+<div class="card">
+<ol type="1">
+<li>Apply <strong>many kernels</strong> in parallel → produce a stack of <strong>feature maps</strong>.</li>
+<li><strong>Pool</strong> — shrink each map to keep the strongest signal.</li>
+<li>Repeat (1) and (2). Each successive layer sees a coarser, deeper representation.</li>
+<li><strong>Flatten</strong> the final stack into a vector.</li>
+<li>Pass through one or more <strong>fully-connected layers</strong>.</li>
+<li>Output layer with <strong>softmax</strong> → class probabilities.</li>
+</ol>
+</div>
+<p>This is the basic recipe behind LeNet (1989), AlexNet (2012), and most CNNs since.</p>
+</section>
+<section id="feature-maps" class="slide level2">
+<h2>Feature maps</h2>
+<p>A single kernel can’t detect every useful feature. Stack many of them:</p>
+<ul>
+<li>Apply <span class="math inline">m</span> kernels to the input image, in parallel.</li>
+<li>Each yields one <strong>feature map</strong> of the original spatial size.</li>
+<li>A grayscale <span class="math inline">64 \times 64</span> image becomes a <span class="math inline">64 \times 64 \times m</span> tensor of feature maps.</li>
+<li>Each entry in a feature map is a <strong>unit</strong> — one number, produced at one spatial position by one filter. It’s the CNN’s analogue of a neuron.</li>
+</ul>
+<div class="card">
+<p><strong>Channels increase over successive convolutions.</strong> RGB images start at 3 channels. After conv layer 1 you might have 32. After layer 2: 64.</p>
+<ul>
+<li>Conversely, the <strong>height</strong> and <strong>width</strong> (spatial dimensions) shrink.</li>
+</ul>
+</div>
+</section>
+<section id="how-the-kernels-get-learned" class="slide level2">
+<h2>How the kernels get learned</h2>
+<div class="card">
+<ul>
+<li><p>Kernels start as random numbers</p></li>
+<li><p>Gradient descent updates each kernel weight to reduce the loss</p>
+<ul>
+<li>The same rule as any other parameter in the network</li>
+</ul></li>
+<li><p>Whatever local patterns help the network classify, the kernels converge towards</p></li>
+</ul>
+</div>
+<p>What do they converge to?</p>
+<ul>
+<li>In trained networks, first-layer kernels often come out as <strong>edge detectors</strong> and <strong>colour-blob detectors</strong></li>
+</ul>
+</section>
+<section id="what-deeper-layers-respond-to" class="slide level2">
+<h2>What deeper layers respond to</h2>
+<p><span class="citation" data-cites="zeiler2014visualizing">Zeiler &amp; Fergus (<a href="#/see-you-tomorrow" role="doc-biblioref" onclick="">2014</a>)</span> projected each layer’s activations back to pixel space to see what “excites” them:</p>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><span class="pill-blue">Early layers</span></p>
+<ul>
+<li><strong>Layer 1</strong> — edges and colour blobs.</li>
+<li><strong>Layer 2</strong> — textures: stripes, grids, corners.</li>
+</ul>
+</div><div class="column" style="width:50%;">
+<p><span class="pill-amber">Later layers</span></p>
+<ul>
+<li><strong>Layers 3–4</strong> — object parts: wheels, eyes, dog faces.</li>
+<li><strong>Layer 5</strong> — whole objects: keyboards, birds, people.</li>
+</ul>
+</div></div>
+<div class="card">
+<p>Each layer builds its features from the layer below: edges combine into textures, textures into parts, parts into objects. This sequence appears from training alone.</p>
+</div>
+</section>
+<section id="pooling" class="slide level2">
+<h2>Pooling</h2>
+<p>After convolution, we <strong>pool</strong> the results to shrink the spatial dimensions:</p>
+<ul>
+<li><strong>Max pooling</strong> — keep the maximum value in each <span class="math inline">2 \times 2</span> window. Most common.</li>
+<li><strong>Average pooling</strong> — keep the mean.</li>
+</ul>
+<div class="card">
+<p><strong>Why pool?</strong></p>
+<ul>
+<li>It compresses information</li>
+<li>Adds robustness to small spatial shifts (a digit that wobbles by a pixel is still a digit)</li>
+<li>Reduces compute downstream</li>
+</ul>
+</div>
+</section>
+<section id="max-pooling-by-example" class="slide level2">
+<h2>Max pooling — by example</h2>
+<p>Feature map (<span class="math inline">4 \times 4</span>), pool size <span class="math inline">2 \times 2</span>, stride 2:</p>
+<p><span class="math display">
+\begin{bmatrix}
+\color{#C9322B}{1} &amp; \color{#C9322B}{3} &amp; \color{#1A6FB4}{6} &amp; \color{#1A6FB4}{4} \\
+\color{#C9322B}{9} &amp; \color{#C9322B}{3} &amp; \color{#1A6FB4}{1} &amp; \color{#1A6FB4}{5} \\
+\color{#2F8F6C}{5} &amp; \color{#2F8F6C}{5} &amp; \color{#C58A12}{8} &amp; \color{#C58A12}{2} \\
+\color{#2F8F6C}{3} &amp; \color{#2F8F6C}{1} &amp; \color{#C58A12}{5} &amp; \color{#C58A12}{6}
+\end{bmatrix}
+\quad \rightarrow \quad
+\begin{bmatrix}
+\color{#C9322B}{9} &amp; \color{#1A6FB4}{6} \\
+\color{#2F8F6C}{5} &amp; \color{#C58A12}{8}
+\end{bmatrix}
+</span></p>
+<p>Each colour group is one pooling window. Keep only the <strong>max</strong> in each.</p>
+</section>
+<section id="a-fully-worked-cnn-sketch" class="slide level2">
+<h2>A fully worked CNN sketch</h2>
+<p>Input: <span class="math inline">32 \times 32 \times 3</span> image (CIFAR-style).</p>
+<table class="caption-top">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Layer</th>
+<th>Output shape</th>
+<th>Parameters (incl.&nbsp;biases)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Conv 1 (3×3, 16 filters, padding 1)</td>
+<td><span class="math inline">32 \times 32 \times 16</span></td>
+<td><span class="math inline">(3 \cdot 3 \cdot 3 + 1)\cdot 16 = 448</span></td>
+</tr>
+<tr class="even">
+<td>ReLU</td>
+<td><span class="math inline">32 \times 32 \times 16</span></td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td>MaxPool (2×2)</td>
+<td><span class="math inline">16 \times 16 \times 16</span></td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td>Conv 2 (3×3, 32 filters, padding 1)</td>
+<td><span class="math inline">16 \times 16 \times 32</span></td>
+<td><span class="math inline">(3 \cdot 3 \cdot 16 + 1)\cdot 32 = 4{,}640</span></td>
+</tr>
+<tr class="odd">
+<td>ReLU + MaxPool</td>
+<td><span class="math inline">8 \times 8 \times 32</span></td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td>Flatten</td>
+<td><span class="math inline">1 \times 2048</span></td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td>Linear (2048 → 64)</td>
+<td><span class="math inline">1 \times 64</span></td>
+<td><span class="math inline">2048 \cdot 64 + 64 = 131{,}136</span></td>
+</tr>
+<tr class="even">
+<td>ReLU + Linear (64 → 10)</td>
+<td><span class="math inline">1 \times 10</span></td>
+<td><span class="math inline">64 \cdot 10 + 10 = 650</span></td>
+</tr>
+<tr class="odd">
+<td>Softmax</td>
+<td><span class="math inline">1 \times 10</span></td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+<div class="callout callout-note callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Note</strong></p>
+</div>
+<div class="callout-content">
+<p><strong>Every row includes a bias term</strong> (the <span class="math inline">+1</span> per filter, the <span class="math inline">+64</span> and <span class="math inline">+10</span> per linear layer).</p>
+<p>Notice also that <strong>most parameters live in the first fully-connected layer</strong> (<span class="math inline">131{,}136</span>); the convolutions are compact as a result of parameter sharing.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="receptive-fields" class="slide level2">
+<h2>Receptive fields</h2>
+<p>How much of the image feeds into any given unit in a feature map?</p>
+<ul>
+<li>Notice deeper convolutions never “see” the image inputs themselves</li>
+</ul>
+<div class="card">
+<p>The <strong>receptive field</strong> of a unit is the patch of the input that can affect its value.</p>
+</div>
+<ul>
+<li><p>After one <span class="math inline">3 \times 3</span> convolution, each unit sees a <span class="math inline">3 \times 3</span> patch.</p></li>
+<li><p>Stack a second <span class="math inline">3 \times 3</span> convolution in the next layer, the unit sees <span class="math inline">5 \times 5</span></p>
+<ul>
+<li>With stride 1, neighbouring layer-1 windows overlap — so the view grows by 2 per layer, not 3</li>
+</ul></li>
+<li><p>The third layer then is <span class="math inline">7 \times 7</span> etc.</p></li>
+</ul>
+<p>For stride-1 convolutions with kernel size <span class="math inline">k</span>:</p>
+<p><span class="math display">
+\text{receptive field} = \text{layers} \times (k - 1) + 1
+</span></p>
+<p>Check: <span class="math inline">2 \times (3 - 1) + 1 = 5</span>; <span class="math inline">\ 3 \times (3 - 1) + 1 = 7</span>.</p>
+</section>
+<section id="why-stack-small-kernels" class="slide level2">
+<h2>Why stack small kernels?</h2>
+<div class="try-box">
+<p><span class="try-label">Try it yourself</span> <strong>How many stacked <span class="math inline">3 \times 3</span> layers does a unit need to see a <span class="math inline">15 \times 15</span> patch?</strong></p>
+</div>
+<div class="fragment">
+<div class="reveal-box">
+<p><span class="reveal-label">Answer</span> Solve <span class="math inline">\text{layers} \times (3 - 1) + 1 = 15</span>: <span class="math inline">\text{layers} = 14 / 2 = 7</span>.</p>
+</div>
+</div>
+<div class="card">
+<p><span class="eyebrow">VGG (2014) chose small kernels</span></p>
+<p>Two ways to see a <span class="math inline">7 \times 7</span> patch (single channel, biases included):</p>
+<ul>
+<li>One <span class="math inline">7 \times 7</span> kernel: <span class="math inline">49 + 1 = 50</span> parameters.</li>
+<li>Three stacked <span class="math inline">3 \times 3</span> kernels: <span class="math inline">3 \times (9 + 1) = 30</span> parameters — with two extra activation functions along the way.</li>
+</ul>
+<p>Fewer parameters <em>and</em> more non-linearity.</p>
+</div>
+</section>
+<section id="pooling-widens-the-view" class="slide level2">
+<h2>Pooling widens the view</h2>
+<p>Stacked convolutions grow the receptive field slowly — seven layers to reach <span class="math inline">15 \times 15</span>.</p>
+<p>Pooling speeds this up. After a <span class="math inline">2 \times 2</span> stride-2 pool, each pixel in the pooled map spans <strong>two</strong> pixels of the map below, so every later layer’s view doubles.</p>
+<div class="card">
+<p>Receptive field along a conv–pool–conv–pool–conv chain (all convs <span class="math inline">3 \times 3</span>):</p>
+<p><span class="math display">
+3 \;\xrightarrow{\text{pool}}\; 4 \;\xrightarrow{\text{conv}}\; 8 \;\xrightarrow{\text{pool}}\; 10 \;\xrightarrow{\text{conv}}\; 18
+</span></p>
+<p>Three <span class="math inline">3 \times 3</span> convolutions and two pools see an <span class="math inline">18 \times 18</span> patch — over half the width of a <span class="math inline">32 \times 32</span> CIFAR image. The same three convolutions without pooling: <span class="math inline">7 \times 7</span>.</p>
+</div>
+</section>
+<section id="the-11-convolution-what-could-it-possibly-do" class="slide level2">
+<h2>The 1×1 convolution — what could it possibly do?</h2>
+<div class="try-box">
+<p><span class="try-label">Try — 60 seconds in pairs</span></p>
+<p>Modern CNNs are full of <strong>1×1 convolutions</strong>. A 1×1 kernel sees a single pixel — no neighbourhood at all.</p>
+<p><strong>What could it possibly compute? And how many parameters does one 1×1 filter have on a 64-channel input?</strong></p>
+</div>
+<div class="fragment">
+<div class="reveal-box">
+<p><span class="reveal-label">Answer</span> On a 64-channel input, a “1×1” kernel is really a <span class="math inline">1 \times 1 \times 64</span> block: <span class="math inline">64</span> weights <span class="math inline">+\ 1</span> bias <span class="math inline">= 65</span> parameters — the same channel rule as every other kernel.</p>
+<p>It mixes <strong>channels</strong>, not space. At each position it takes the 64 channel values and returns one weighted sum: a fully-connected layer, applied pixel by pixel.</p>
+</div>
+</div>
+<div class="card">
+<p>The standard use is <strong>cheap channel reduction</strong>: squeezing 64 feature maps down to 16 costs <span class="math inline">(1 \cdot 1 \cdot 64 + 1) \cdot 16 = 1{,}040</span> parameters, and the spatial dimensions are untouched. ResNets and most modern CNNs use them for exactly this.</p>
+</div>
+</section>
+<section id="training-a-cnn-same-algorithm-different-graph" class="slide level2">
+<h2>Training a CNN — same algorithm, different graph</h2>
+<p>The convolution operation has a well-defined gradient. Everything from week 1 still applies:</p>
+<div class="card">
+<ul>
+<li><strong>Forward pass</strong> → compute loss.</li>
+<li><strong>Backward pass</strong> → propagate gradients through every conv, pool, and linear layer.</li>
+<li><strong>Update</strong> parameters (kernels and biases) with Adam / SGD.</li>
+</ul>
+<p>Pooling layers have <strong>no parameters</strong> but they do have gradients (the gradient passes through the position of the max, zero elsewhere). The learning happens in the <strong>convolutions</strong> and the <strong>fully-connected layers</strong>.</p>
+</div>
+</section>
+<section id="alexnet-the-model-that-started-deep-learning" class="slide level2">
+<h2>AlexNet — the model that started “deep learning”</h2>
+<div class="columns">
+<div class="column" style="width:60%;">
+<ul>
+<li><span class="citation" data-cites="Krizhevsky2012">Krizhevsky et al. (<a href="#/see-you-tomorrow" role="doc-biblioref" onclick="">2012</a>)</span> — ImageNet competition, 2012</li>
+<li>8 layers, ~60M parameters</li>
+<li>First widely-known model to train deep CNNs on a <strong>GPU</strong></li>
+<li>Beat the previous year’s ImageNet leader by <strong>10+ accuracy points</strong></li>
+<li>Used ReLU and dropout (unusual at the time)</li>
+</ul>
+<div class="card">
+<p>This is the result that kicked off the modern deep learning era. Everything after — ResNets, vision transformers, multimodal models, diffusion — descends from this work</p>
+</div>
+</div><div class="column" style="width:40%;">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="../assets/images/alexnet.png" class="quarto-figure quarto-figure-center"></p>
+</figure>
+</div>
+</div></div>
+</section></section>
+<section>
+<section id="activity-compute-output-shapes" class="title-slide slide level1 center" data-background-color="#0E1A2B">
+<h1>Activity · compute output shapes</h1>
+
+</section>
+<section id="activity-compute-output-shapes-1" class="slide level2">
+<h2>Activity · compute output shapes</h2>
+<p><span class="eyebrow"><span class="pause-cue">≈ 8 min</span> · in pairs</span></p>
+<p>For each scenario, give the <strong>output shape</strong> after the operation and the <strong>number of parameters</strong>:</p>
+<div class="card">
+<ol type="1">
+<li><p>Input: <span class="math inline">28 \times 28 \times 1</span> (grayscale MNIST). Conv: 5×5, 6 filters, stride 1, no padding.</p></li>
+<li><p>Input: <span class="math inline">14 \times 14 \times 6</span> (after pooling). Conv: 3×3, 16 filters, stride 1, “same” padding (= 1).</p></li>
+<li><p>Input: <span class="math inline">7 \times 7 \times 16</span>. MaxPool: 2×2 with stride 2.</p></li>
+<li><p>Input: <span class="math inline">4 \times 4 \times 16</span>. Flatten, then <code>Linear(?, 10)</code>.</p></li>
+</ol>
+</div>
+<p><span class="muted">Five minutes. Then we’ll discuss.</span></p>
+</section>
+<section id="activity-answers" class="slide level2">
+<h2>Activity · answers</h2>
+<div class="card">
+<ol type="1">
+<li><p>Conv output: <span class="math inline">(28 - 5 + 1) \times (28 - 5 + 1) \times 6 = 24 \times 24 \times 6</span>. Parameters: <span class="math inline">(5 \cdot 5 \cdot 1 + 1) \cdot 6 = 156</span>.</p></li>
+<li><p>Conv output: <span class="math inline">14 \times 14 \times 16</span> (same padding preserves spatial size). Parameters: <span class="math inline">(3 \cdot 3 \cdot 6 + 1) \cdot 16 = 880</span>.</p></li>
+<li><p>MaxPool: apply the output-size formula with <span class="math inline">k = s = 2,\ P = 0</span>: <span class="math inline">\lfloor (7 - 2)/2 \rfloor + 1 = \lfloor 2.5 \rfloor + 1 = 3</span>, so <span class="math inline">3 \times 3 \times 16</span>. Parameters: 0.</p></li>
+<li><p>Flatten: <span class="math inline">4 \cdot 4 \cdot 16 = 256</span>. So <code>Linear(256, 10)</code> has <span class="math inline">256 \cdot 10 + 10 = 2{,}570</span> parameters.</p></li>
+</ol>
+</div>
+<div class="callout callout-tip callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Tip</strong></p>
+</div>
+<div class="callout-content">
+<p><strong>Shape mismatches</strong> are the top source of CNN bugs. PyTorch’s error messages are usually good, but debugging at runtime is slow.</p>
+</div>
+</div>
+</div>
+</section></section>
+<section>
+<section id="part-3-cnns-in-social-science" class="title-slide slide level1 center" data-background-color="#0E1A2B">
+<h1>Part 3 · CNNs in social science</h1>
+
+</section>
+<section id="when-cnns-help-when-they-dont" class="slide level2">
+<h2>When CNNs help, when they don’t</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><span class="pill-green">Good fit</span></p>
+<ul>
+<li>Tasks where local visual features matter (handwriting, faces, satellite imagery, microscopy).</li>
+<li>Spatial structure dominates the signal.</li>
+<li>Reasonable amount of labelled data (<span class="math inline">10^3</span>–<span class="math inline">10^6</span> images).</li>
+</ul>
+</div><div class="column" style="width:50%;">
+<p><span class="pill-amber">Awkward fit</span></p>
+<ul>
+<li>Very small datasets (a few hundred images).</li>
+<li>Tasks where global structure matters more.</li>
+<li>Tasks dominated by <em>non-spatial</em> signal — text in the image, metadata.</li>
+</ul>
+<p>In 2026, <strong>vision transformers</strong> (ViTs) often outperform CNNs at the high end. For teaching and most research, CNNs remain the right starting point.</p>
+</div></div>
+</section>
+<section id="application-1-reading-vote-tallies" class="slide level2">
+<h2>Application 1 — Reading vote tallies</h2>
+<div class="columns">
+<div class="column" style="width:55%;">
+<p><span class="citation" data-cites="torres2022learning">Torres &amp; Cantú (<a href="#/see-you-tomorrow" role="doc-biblioref" onclick="">2022</a>)</span> — <em>Learning to See: CNNs for the Analysis of Social Science Data</em>.</p>
+<ul>
+<li>In many countries, vote counts are first written by hand on paper tally sheets.</li>
+<li>Errors during manual transcription are a real risk.</li>
+<li>The authors train a CNN to <strong>read</strong> handwritten tally numbers — significantly reducing transcription errors.</li>
+</ul>
+<div class="card">
+<p>The architecture is <strong>LeNet</strong> — the 1989 model — with modern training. The contribution isn’t novel deep-learning architecture; it’s the <em>social-science use case</em> and the careful validation.</p>
+</div>
+</div><div class="column" style="width:45%;">
+<div class="callout callout-tip callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Tip</strong></p>
+</div>
+<div class="callout-content">
+<p><strong>The takeaway</strong>: a 37-year-old architecture, when applied to a well-defined social-science problem, can have substantial real-world impact.</p>
+<p>You don’t need the bleeding edge to do meaningful work.</p>
+</div>
+</div>
+</div>
+</div></div>
+</section>
+<section id="application-2-visual-frames-in-protest-photography" class="slide level2">
+<h2>Application 2 — Visual frames in protest photography</h2>
+<div class="columns">
+<div class="column" style="width:55%;">
+<p><span class="citation" data-cites="torres2024framework">Torres (<a href="#/see-you-tomorrow" role="doc-biblioref" onclick="">2024</a>)</span> — <em>A framework for the unsupervised and semi-supervised analysis of visual frames</em>.</p>
+<ul>
+<li>What “frames” do protest photos use — heroic individuals? police violence? crowd shots?</li>
+<li>The author uses CNN feature embeddings + clustering to discover frames without labels.</li>
+<li>Connects to a long literature in political communication on framing.</li>
+</ul>
+</div><div class="column" style="width:45%;">
+<div class="card">
+<p>The deep network here serves as a <strong>feature extractor</strong> — its hidden representations become the inputs to a classical analysis.</p>
+<p>This is a very common pattern: pre-train (or download) a CNN, then use its embeddings for <em>your</em> task.</p>
+<p>We see this again with text embeddings on Day 8.</p>
+</div>
+</div></div>
+</section>
+<section id="application-3-satellite-imagery-for-development-economics" class="slide level2">
+<h2>Application 3 — Satellite imagery for development economics</h2>
+<div class="columns">
+<div class="column" style="width:55%;">
+<p>A rich modern research area:</p>
+<ul>
+<li><strong>Predicting GDP / poverty from night lights</strong> (Henderson, Storeygard, Weil 2012, originally with simple regression — extended by CNNs).</li>
+<li><strong>Tracking deforestation</strong> from time-series of satellite images.</li>
+<li><strong>Measuring urbanisation</strong> from change in building footprints.</li>
+<li><strong>Monitoring food security</strong> from crop reflectance.</li>
+</ul>
+</div><div class="column" style="width:45%;">
+<div class="callout callout-tip callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Tip</strong></p>
+</div>
+<div class="callout-content">
+<p>Most of these projects use <strong>transfer learning</strong> — start with a CNN pre-trained on ImageNet, fine-tune on the satellite data.</p>
+<p>This is feasible on a modest GPU. (The hard part is the data labelling, not the deep learning.)</p>
+</div>
+</div>
+</div>
+</div></div>
+</section>
+<section id="transfer-learning-you-dont-have-14-million-images" class="slide level2">
+<h2>Transfer learning — you don’t have 14 million images</h2>
+<p>The realistic research situation: you have <strong>2,000 labelled protest photos</strong>. ImageNet has <strong>14 million</strong> images. A CNN trained from scratch on 2,000 photos will overfit long before it learns what an edge is.</p>
+<div class="card">
+<p>An ImageNet-trained CNN has already learned edges, textures, and object parts — and none of that is specific to ImageNet’s classes.</p>
+<p><strong>Transfer learning</strong>: keep (<strong>freeze</strong>) the pre-trained convolutional layers, and retrain only a new <strong>output head</strong> on your own labels.</p>
+</div>
+<p>The frozen convolutional stack becomes a fixed feature extractor — the same pattern as Application 2, where CNN embeddings fed a clustering analysis.</p>
+</section>
+<section id="transfer-learning-the-arithmetic" class="slide level2">
+<h2>Transfer learning — the arithmetic</h2>
+<p>Take <strong>ResNet-18</strong>, a standard pre-trained CNN with about 11.7M parameters. Its convolutional stack maps any image to a 512-dimensional feature vector.</p>
+<div class="card">
+<p>A new head for three protest-frame classes is <code>Linear(512, 3)</code>:</p>
+<p><span class="math display">
+512 \times 3 + 3 = 1{,}536 + 3 = 1{,}539 \ \text{trainable parameters}
+</span></p>
+<p>That is <span class="math inline">1{,}539 / 11{,}700{,}000 \approx 0.01\%</span> of the network. Your 2,000 photos train 1,539 numbers, not 11.7 million.</p>
+</div>
+</section>
+<section id="fine-tuning-three-regimes" class="slide level2">
+<h2>Fine-tuning — three regimes</h2>
+<p>In increasing order of ambition:</p>
+<div class="card">
+<table class="caption-top">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Regime</th>
+<th>What trains</th>
+<th>Trainable parameters (ResNet-18, 3 classes)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Feature extraction</strong></td>
+<td>the new head only</td>
+<td><span class="math inline">1{,}539</span></td>
+</tr>
+<tr class="even">
+<td><strong>Partial fine-tuning</strong></td>
+<td>head + the last conv block</td>
+<td><span class="math inline">\approx 8.4</span>M</td>
+</tr>
+<tr class="odd">
+<td><strong>Warm starting</strong></td>
+<td>everything</td>
+<td><span class="math inline">\approx 11.7</span>M</td>
+</tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>In every case the network <strong>starts from the pre-trained weights</strong> — only the head is random.</li>
+<li>“Warm starting” is ordinary training with a better-than-random initialisation</li>
+</ul>
+</section>
+<section id="which-regime-ask-two-questions" class="slide level2">
+<h2>Which regime? Ask two questions</h2>
+<ol type="1">
+<li><strong>How much labelled data do you have?</strong></li>
+<li><strong>How similar are your images to the pre-training data?</strong></li>
+</ol>
+<div class="card">
+<table class="caption-top">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>Looks like ImageNet</th>
+<th>Looks nothing like it</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Little data</strong> (<span class="math inline">100-1000s</span>)</td>
+<td>freeze; train a new head</td>
+<td>freeze the early layers; fine-tune the later ones</td>
+</tr>
+<tr class="even">
+<td><strong>Lots of data</strong> (<span class="math inline">100,000s</span>+)</td>
+<td>warm-start the whole network</td>
+<td>warm-start — or train from scratch</td>
+</tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>Early layers detect edges and textures, useful for <em>any</em> image</li>
+<li>Later layers detect ImageNet-specific parts — dog faces, keyboards.</li>
+<li>The further your images sit from ImageNet, the deeper you have to retrain <span class="citation" data-cites="yosinski2014transferable">(<a href="#/see-you-tomorrow" role="doc-biblioref" onclick="">Yosinski et al., 2014</a>)</span>.</li>
+</ul>
+</section>
+<section id="fine-tuning-without-wrecking-the-weights" class="slide level2">
+<h2>Fine-tuning without wrecking the weights</h2>
+<p>A few over-sized gradient steps during fine-tuning will destroy existing weights</p>
+<div class="card">
+<ul>
+<li>Fine-tune with a <strong>much smaller learning rate</strong> than you would use from scratch — <span class="math inline">10^{-5}</span> to <span class="math inline">10^{-4}</span>.</li>
+<li><em>Or</em> (often better) use <strong>one learning rate per part</strong>: the head is random, so let it move; the backbone only needs a nudge.</li>
+</ul>
+</div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> torchvision.models.resnet18(weights<span class="op">=</span><span class="st">"IMAGENET1K_V1"</span>)</span>
+<span id="cb1-2"><a aria-hidden="true" tabindex="-1"></a>model.fc <span class="op">=</span> nn.Linear(<span class="dv">512</span>, <span class="dv">3</span>)                        <span class="co"># new, random head</span></span>
+<span id="cb1-3"><a aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a aria-hidden="true" tabindex="-1"></a>backbone <span class="op">=</span> [p <span class="cf">for</span> n, p <span class="kw">in</span> model.named_parameters() <span class="cf">if</span> <span class="kw">not</span> n.startswith(<span class="st">"fc."</span>)]</span>
+<span id="cb1-5"><a aria-hidden="true" tabindex="-1"></a>optimiser <span class="op">=</span> torch.optim.Adam([</span>
+<span id="cb1-6"><a aria-hidden="true" tabindex="-1"></a>    {<span class="st">"params"</span>: model.fc.parameters(), <span class="st">"lr"</span>: <span class="fl">1e-3</span>},  <span class="co"># random → move fast</span></span>
+<span id="cb1-7"><a aria-hidden="true" tabindex="-1"></a>    {<span class="st">"params"</span>: backbone,              <span class="st">"lr"</span>: <span class="fl">1e-5</span>},  <span class="co"># pre-trained → tread carefully</span></span>
+<span id="cb1-8"><a aria-hidden="true" tabindex="-1"></a>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="callout callout-warning callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Warning</strong></p>
+</div>
+<div class="callout-content">
+<p><strong>One trap.</strong> Setting <code>requires_grad = False</code> freezes a layer’s <em>weights</em>, but batch-norm layers still update their running mean and variance in training mode… You really need to run this part of the network under <code>.eval()</code>.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="a-research-framing-the-right-question-to-ask" class="slide level2">
+<h2>A research framing — the right question to ask</h2>
+<div class="card">
+<p>It won’t be surprising that we <em>can</em> classify images using CNNs.</p>
+<p>The real questions when developing these models are:</p>
+<ul>
+<li><strong>What does the CNN’s mistake pattern reveal about the underlying construct?</strong></li>
+<li><strong>How robust is the measurement to camera angle, lighting, demographics?</strong></li>
+<li><strong>What does the CNN encode about race / gender / class — that we did not ask it to?</strong></li>
+<li><strong>What does this measurement, scaled up, <em>do</em> to the population being measured?</strong></li>
+</ul>
+</div>
+<div class="callout callout-warning callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Warning</strong></p>
+</div>
+<div class="callout-content">
+<p>A model that classifies tally sheets with 99.5% accuracy is interesting. A model with 88% accuracy that systematically misreads tallies from one ethnic group is <em>important to investigate before deployment</em>.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="where-was-the-model-looking" class="slide level2">
+<h2>Where was the model looking?</h2>
+<div class="card">
+<p><span class="eyebrow">Occlusion sensitivity — <span class="citation" data-cites="zeiler2014visualizing">Zeiler &amp; Fergus (<a href="#/see-you-tomorrow" role="doc-biblioref" onclick="">2014</a>)</span> again</span></p>
+<ol type="1">
+<li>Classify the image once; note the probability of the true class.</li>
+<li>Slide a grey square across the image, one position at a time.</li>
+<li>Re-classify at every position and record how far the probability falls.</li>
+<li>Plot the falls as a heat map</li>
+</ol>
+<p>Where the probability collapses pinpoints what evidence it uses to classify well.</p>
+</div>
+<div class="card">
+<p><span class="eyebrow">The cautionary tale</span></p>
+<p><span class="citation" data-cites="ribeiro2016why">Ribeiro et al. (<a href="#/see-you-tomorrow" role="doc-biblioref" onclick="">2016</a>)</span> demonstrate a husky-vs-wolf classifier that scores well on held-out photos.</p>
+<p><em>But</em>:</p>
+<ul>
+<li><p>Checking <em>where it looked</em> revealed it was a <strong>snow detector</strong>:</p>
+<ul>
+<li>Training photos almost always showed wolves with snowy backgrounds.</li>
+</ul></li>
+</ul>
+<p>CNN classifiers can have excellent validation for the wrong reasons.</p>
+<ul>
+<li>Well worth checking where the model looks <em>before</em> you trust the accuracy</li>
+</ul>
+</div>
+<p><span class="muted">Cf. gradient-based refinements like saliency maps, Grad-CAM, which help make efficient this inspection.</span></p>
+</section>
+<section id="a-small-ethics-moment" class="slide level2">
+<h2>A small ethics moment</h2>
+<p><span class="eyebrow">Example of poor CNN usage</span></p>
+<div class="card">
+<p><strong>Facial recognition deployed by law enforcement</strong>, using the same CNN architectures we’ve been discussing.</p>
+<p>Buolamwini &amp; Gebru (2018) show commercial <strong>gender-classification</strong> systems had error rates of <strong>&lt;1% on white men</strong> and <strong>&gt;30% on dark-skinned women</strong>.</p>
+<ul>
+<li>The architectures were not different but the <strong>training data</strong> was</li>
+</ul>
+<p>By 2020 several US cities had banned police use of facial recognition</p>
+<p><strong>Be mindful of your applications</strong> – working with images (of humans) is much more ethically tricky, and we should be as responsible as we can be.</p>
+</div>
+</section>
+<section id="take-stock" class="slide level2">
+<h2>Take stock</h2>
+<p><span class="eyebrow"><span class="pause-cue">Where you are at the end of Day 6</span></span></p>
+<div class="card">
+<p>You can:</p>
+<ol type="1">
+<li>Describe what a digital image <em>is</em> to a computer.</li>
+<li>Explain why a fully-connected MLP is the wrong architecture for vision.</li>
+<li>Compute a small convolution by hand.</li>
+<li>Design a 3×3 kernel that detects a specific feature.</li>
+<li>Build a small CNN by stacking conv + ReLU + pool, plus an FC head.</li>
+<li>Cite at least two social-science applications of CNNs and the questions they raise.</li>
+<li>Choose between feature extraction, partial fine-tuning and warm starting — and pick learning rates that protect the pre-trained weights.</li>
+<li>Use occlusion sensitivity to check <em>where</em> a model is looking before trusting its accuracy.</li>
+</ol>
+</div>
+</section></section>
+<section>
+<section id="lab-brief-todays-afternoon" class="title-slide slide level1 center" data-background-color="#0E1A2B">
+<h1>Lab brief · today’s afternoon</h1>
+
+</section>
+<section id="todays-lab-90-minutes" class="slide level2">
+<h2>Today’s lab — 90 minutes</h2>
+<p><span class="eyebrow">Goals</span></p>
+<p>In Colab, train a small CNN on <strong>FashionMNIST</strong> — 28×28 grayscale images of clothing, ten classes.</p>
+<p>The core (Sections 1–3):</p>
+<ol type="1">
+<li>Use the output-size formula to design the network — the same arithmetic as today’s activity.</li>
+<li>Build a small CNN (2 conv layers + 2 FC layers), counting parameters with biases as you go.</li>
+<li>Train it with the Lab 5 loop, now on batches.</li>
+</ol>
+<div class="card">
+<p><span class="eyebrow">Stretch (Section 4) — look inside the network</span></p>
+<ul>
+<li>Inspect the predictions it gets wrong, and the confusion matrix.</li>
+<li><strong>Plot the learned first-layer filters.</strong> Do any look like edge detectors?</li>
+<li>Compare against an MLP baseline of similar size — does the convolution actually help?</li>
+</ul>
+</div>
+</section>
+<section id="see-you-tomorrow" class="slide level2 smaller scrollable" data-background-color="#0E1A2B">
+<h2>See you tomorrow</h2>
+<p><span class="eyebrow">Lecture 7 — <em>Generating images: autoencoders, VAEs, and diffusion</em></span></p>
+<p>Move from <em>classifying</em> images to <em>creating</em> them.</p>
+<ul>
+<li>Start with the <strong>autoencoder</strong></li>
+<li>Move to <strong>variational autoencoders</strong></li>
+<li>And then to <strong>diffusion</strong> models behind DALL·E etc.</li>
+</ul>
+<p>Convolutions remain critical throughout!</p>
+<div class="callout callout-tip callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Optional reading before tomorrow</strong></p>
+</div>
+<div class="callout-content">
+<ul>
+<li>Goodfellow, Bengio &amp; Courville — <em>Deep Learning</em> — Chapter 14 (autoencoders, skim).</li>
+<li>Recall <strong>MIDAS</strong> from Lecture 1 — denoising autoencoders for missing survey data — a generative method you’ll now understand from the inside.</li>
+</ul>
+</div>
+</div>
+</div>
+
+<div class="quarto-auto-generated-content">
+<div class="footer footer-default">
+<p>ME324 · AI and Deep Learning · LSE Summer School</p>
+</div>
+</div>
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list">
+<div id="ref-biscione2021convolutional" class="csl-entry" role="listitem">
+Biscione, V., &amp; Bowers, J. S. (2021). Convolutional neural networks are not invariant to translation, but they can learn to be. <em>Journal of Machine Learning Research</em>, <em>22</em>(229), 1–28.
+</div>
+<div id="ref-Krizhevsky2012" class="csl-entry" role="listitem">
+Krizhevsky, A., Sutskever, I., &amp; Hinton, G. E. (2012). ImageNet classification with deep convolutional neural networks. In F. Pereira, C. J. Burges, L. Bottou, &amp; K. Q. Weinberger (Eds.), <em>Advances in neural information processing systems</em> (Vol. 25). Curran Associates, Inc. <a href="https://proceedings.neurips.cc/paper_files/paper/2012/file/c399862d3b9d6b76c8436e924a68c45b-Paper.pdf">https://proceedings.neurips.cc/paper_files/paper/2012/file/c399862d3b9d6b76c8436e924a68c45b-Paper.pdf</a>
+</div>
+<div id="ref-ribeiro2016why" class="csl-entry" role="listitem">
+Ribeiro, M. T., Singh, S., &amp; Guestrin, C. (2016). <span>“Why should <span>I</span> trust you?”</span>: Explaining the predictions of any classifier. <em>Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining</em>, 1135–1144.
+</div>
+<div id="ref-torres2024framework" class="csl-entry" role="listitem">
+Torres, M. (2024). A framework for the unsupervised and semi-supervised analysis of visual frames. <em>Political Analysis</em>, <em>32</em>(2), 199–220.
+</div>
+<div id="ref-torres2022learning" class="csl-entry" role="listitem">
+Torres, M., &amp; Cantú, F. (2022). Learning to see: Convolutional neural networks for the analysis of social science data. <em>Political Analysis</em>, <em>30</em>(1), 113–131.
+</div>
+<div id="ref-yosinski2014transferable" class="csl-entry" role="listitem">
+Yosinski, J., Clune, J., Bengio, Y., &amp; Lipson, H. (2014). How transferable are features in deep neural networks? <em>Advances in Neural Information Processing Systems</em>, <em>27</em>.
+</div>
+<div id="ref-zeiler2014visualizing" class="csl-entry" role="listitem">
+Zeiler, M. D., &amp; Fergus, R. (2014). Visualizing and understanding convolutional networks. <em>Computer Vision – ECCV 2014</em>, 818–833.
+</div>
+</div>
+</section></section>
+    </div>
+  </div>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script>
+  <script src="../site_libs/revealjs/dist/reveal.js"></script>
+  <!-- reveal.js plugins -->
+  <script src="../site_libs/revealjs/plugin/quarto-line-highlight/line-highlight.js"></script>
+  <script src="../site_libs/revealjs/plugin/pdf-export/pdfexport.js"></script>
+  <script src="../site_libs/revealjs/plugin/reveal-menu/menu.js"></script>
+  <script src="../site_libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
+  <script src="../site_libs/revealjs/plugin/quarto-support/support.js"></script>
+  
+
+  <script src="../site_libs/revealjs/plugin/notes/notes.js"></script>
+  <script src="../site_libs/revealjs/plugin/search/search.js"></script>
+  <script src="../site_libs/revealjs/plugin/zoom/zoom.js"></script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script>
+
+  <script>
+
+      // Full list of configuration options available at:
+      // https://revealjs.com/config/
+      Reveal.initialize({
+'controlsAuto': true,
+'previewLinksAuto': false,
+'pdfSeparateFragments': false,
+'autoAnimateEasing': "ease",
+'autoAnimateDuration': 1,
+'autoAnimateUnmatched': true,
+'menu': {"side":"right","useTextContentForMissingTitles":true,"markers":false,"loadIcons":false,"custom":[{"title":"Tools","icon":"<i class=\"fas fa-gear\"></i>","content":"<ul class=\"slide-menu-items\">\n<li class=\"slide-tool-item active\" data-item=\"0\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.fullscreen(event)\"><kbd>f</kbd> Fullscreen</a></li>\n<li class=\"slide-tool-item\" data-item=\"1\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.speakerMode(event)\"><kbd>s</kbd> Speaker View</a></li>\n<li class=\"slide-tool-item\" data-item=\"2\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.overview(event)\"><kbd>o</kbd> Slide Overview</a></li>\n<li class=\"slide-tool-item\" data-item=\"3\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.togglePdfExport(event)\"><kbd>e</kbd> PDF Export Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"4\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.keyboardHelp(event)\"><kbd>?</kbd> Keyboard Help</a></li>\n</ul>"}],"openButton":true,"width":"third"},
+'smaller': true,
+ 
+        // Display controls in the bottom right corner
+        controls: false,
+
+        // Help the user learn the controls by providing hints, for example by
+        // bouncing the down arrow when they first encounter a vertical slide
+        controlsTutorial: false,
+
+        // Determines where controls appear, "edges" or "bottom-right"
+        controlsLayout: 'edges',
+
+        // Visibility rule for backwards navigation arrows; "faded", "hidden"
+        // or "visible"
+        controlsBackArrows: 'faded',
+
+        // Display a presentation progress bar
+        progress: true,
+
+        // Display the page number of the current slide
+        slideNumber: 'c/t',
+
+        // 'all', 'print', or 'speaker'
+        showSlideNumber: 'all',
+
+        // Add the current slide number to the URL hash so that reloading the
+        // page/copying the URL will return you to the same slide
+        hash: true,
+
+        // Start with 1 for the hash rather than 0
+        hashOneBasedIndex: false,
+
+        // Flags if we should monitor the hash and change slides accordingly
+        respondToHashChanges: true,
+
+        // Push each slide change to the browser history
+        history: false,
+
+        // Enable keyboard shortcuts for navigation
+        keyboard: true,
+
+        // Enable the slide overview mode
+        overview: true,
+
+        // Disables the default reveal.js slide layout (scaling and centering)
+        // so that you can use custom CSS layout
+        disableLayout: false,
+
+        // Vertical centering of slides
+        center: false,
+
+        // Enables touch navigation on devices with touch input
+        touch: true,
+
+        // Loop the presentation
+        loop: false,
+
+        // Change the presentation direction to be RTL
+        rtl: false,
+
+        // see https://revealjs.com/vertical-slides/#navigation-mode
+        navigationMode: 'linear',
+
+        // Randomizes the order of slides each time the presentation loads
+        shuffle: false,
+
+        // Turns fragments on and off globally
+        fragments: true,
+
+        // Flags whether to include the current fragment in the URL,
+        // so that reloading brings you to the same fragment position
+        fragmentInURL: false,
+
+        // Flags if the presentation is running in an embedded mode,
+        // i.e. contained within a limited portion of the screen
+        embedded: false,
+
+        // Flags if we should show a help overlay when the questionmark
+        // key is pressed
+        help: true,
+
+        // Flags if it should be possible to pause the presentation (blackout)
+        pause: true,
+
+        // Flags if speaker notes should be visible to all viewers
+        showNotes: false,
+
+        // Global override for autoplaying embedded media (null/true/false)
+        autoPlayMedia: null,
+
+        // Global override for preloading lazy-loaded iframes (null/true/false)
+        preloadIframes: null,
+
+        // Number of milliseconds between automatically proceeding to the
+        // next slide, disabled when set to 0, this value can be overwritten
+        // by using a data-autoslide attribute on your slides
+        autoSlide: 0,
+
+        // Stop auto-sliding after user input
+        autoSlideStoppable: true,
+
+        // Use this method for navigation when auto-sliding
+        autoSlideMethod: null,
+
+        // Specify the average time in seconds that you think you will spend
+        // presenting each slide. This is used to show a pacing timer in the
+        // speaker view
+        defaultTiming: null,
+
+        // Enable slide navigation via mouse wheel
+        mouseWheel: false,
+
+        // The display mode that will be used to show slides
+        display: 'block',
+
+        // Hide cursor if inactive
+        hideInactiveCursor: true,
+
+        // Time before the cursor is hidden (in ms)
+        hideCursorTime: 5000,
+
+        // Opens links in an iframe preview overlay
+        previewLinks: false,
+
+        // Transition style (none/fade/slide/convex/concave/zoom)
+        transition: 'none',
+
+        // Transition speed (default/fast/slow)
+        transitionSpeed: 'default',
+
+        // Transition style for full page slide backgrounds
+        // (none/fade/slide/convex/concave/zoom)
+        backgroundTransition: 'none',
+
+        // Number of slides away from the current that are visible
+        viewDistance: 3,
+
+        // Number of slides away from the current that are visible on mobile
+        // devices. It is advisable to set this to a lower number than
+        // viewDistance in order to save resources.
+        mobileViewDistance: 2,
+
+        // The "normal" size of the presentation, aspect ratio will be preserved
+        // when the presentation is scaled to fit different resolutions. Can be
+        // specified using percentage units.
+        width: 1280,
+
+        height: 760,
+
+        // Factor of the display size that should remain empty around the content
+        margin: 4.0e-2,
+
+        // Bounds for smallest/largest possible scale to apply to content
+        minScale: 0.4,
+
+        maxScale: 1.6,
+
+        // reveal.js plugins
+        plugins: [QuartoLineHighlight, PdfExport, RevealMenu, QuartoSupport,
+
+          RevealNotes,
+          RevealSearch,
+          RevealZoom
+        ]
+      });
+    </script>
+    <!--
+      ME324 — shrink-to-fit safety net for lecture decks.
+
+      reveal.js scales the whole 1280×760 canvas to the window, but it does nothing
+      about a slide whose content is taller than that canvas: the overflow is simply
+      clipped (or, on `.plenary` / `.transition` covers, hidden outright). This pass
+      measures every slide once after layout settles and, for any that overflow,
+      steps the slide down — font-size and figure heights together — until it fits
+      in the space above the running footer.
+
+      Slides that already fit are left completely alone, so a deck keeps a single
+      consistent type size except where a slide genuinely needs the help.
+
+      Anything still overflowing at MIN_SCALE is listed in the browser console —
+      those slides have too much content and want splitting in the .qmd.
+    -->
+    <style>
+      /* Lay out every slide (not just the current one) so it can be measured.
+         `display: block` matches what reveal.js gives a `.present` slide; the
+         theme's cover slides declare `display: flex !important` and so keep theirs.
+         Off-screen slides are already `opacity: 0`, so nothing becomes visible.
+         Note reveal.js *also* sets `display: none` inline on slides outside its
+         view distance — the script clears that separately, since no stylesheet
+         rule can win against an inline style. */
+      .reveal.me-fit-measuring .slides > section,
+      .reveal.me-fit-measuring .slides > section > section {
+        display: block;
+      }
+    </style>
+    <script>
+      (function () {
+        var MIN_SCALE = 0.55; // hard floor — below this, text stops being readable
+        var STEP = 0.98; // multiplicative creep per iteration
+        var MAX_ITER = 40;
+        var TOLERANCE = 2; // px of slack before we call a slide "overflowing"
+
+        function leafSections(slidesEl) {
+          return Array.prototype.filter.call(
+            slidesEl.querySelectorAll("section"),
+            function (s) {
+              return !s.querySelector("section"); // skip vertical-stack wrappers
+            }
+          );
+        }
+
+        function label(section) {
+          var h = section.querySelector("h1, h2, h3");
+          return (h ? h.textContent : section.id || "(untitled)").trim();
+        }
+
+        // How tall is this slide's content, really?
+        //
+        // `scrollHeight` is no use here: reveal.js gives every slide an explicit
+        // `height: 760px`, so a slide reports the full canvas whether it holds two
+        // bullets or twenty. Measure the bottom edge of the lowest child instead.
+        // Child rects come back in viewport pixels (the canvas is transform-scaled)
+        // whereas padding is in canvas pixels, hence the divide-then-add.
+        function contentHeight(section, canvasScale) {
+          var top = section.getBoundingClientRect().top;
+          var lowest = top;
+
+          Array.prototype.forEach.call(section.children, function (child) {
+            var r = child.getBoundingClientRect();
+            if (!r.height && !r.width) return; // skip anything not rendered
+            if (r.bottom > lowest) lowest = r.bottom;
+          });
+
+          var padBottom = parseFloat(getComputedStyle(section).paddingBottom) || 0;
+          return (lowest - top) / canvasScale + padBottom;
+        }
+
+        // Figures don't scale with font-size, so a slide dominated by a tall image
+        // can't be fixed by type alone. Cap them by the same factor as the text.
+        // `offsetHeight` is used rather than a client rect because it is already in
+        // canvas pixels, which is what the max-height we set needs to be in.
+        function figuresIn(section) {
+          return Array.prototype.map.call(
+            section.querySelectorAll("img, video, iframe"),
+            function (el) {
+              el.style.removeProperty("max-height");
+              return { el: el, height: el.offsetHeight };
+            }
+          );
+        }
+
+        function applyScale(section, figures, naturalFontPx, scale) {
+          section.style.setProperty(
+            "font-size",
+            (naturalFontPx * scale).toFixed(2) + "px",
+            "important"
+          );
+          figures.forEach(function (f) {
+            if (f.height > 0) {
+              f.el.style.setProperty(
+                "max-height",
+                (f.height * scale).toFixed(2) + "px",
+                "important"
+              );
+            }
+          });
+        }
+
+        // The running footer is painted over the slide, not inside it, so the last
+        // line of a full-height slide would collide with it. Work out how much of
+        // the canvas the footer covers, in canvas pixels.
+        function footerReserve(slidesEl, canvasScale) {
+          var footer = document.querySelector(".reveal .footer");
+          if (!footer || !footer.offsetHeight) return 0;
+
+          var overlap =
+            slidesEl.getBoundingClientRect().bottom -
+            footer.getBoundingClientRect().top;
+          return Math.max(0, overlap / canvasScale) + 6; // + breathing room
+        }
+
+        function fitAll() {
+          var revealEl = document.querySelector(".reveal");
+          var slidesEl = document.querySelector(".reveal .slides");
+          if (!revealEl || !slidesEl || !slidesEl.offsetHeight) return;
+
+          var canvasScale =
+            slidesEl.getBoundingClientRect().height / slidesEl.offsetHeight;
+          if (!canvasScale) return;
+
+          var available = slidesEl.offsetHeight - footerReserve(slidesEl, canvasScale);
+          if (!(available > 0)) return;
+
+          // --- force layout on every slide, including hidden ones ----------------
+          revealEl.classList.add("me-fit-measuring");
+          var allSections = Array.prototype.slice.call(
+            slidesEl.querySelectorAll("section")
+          );
+          var savedDisplay = allSections.map(function (s) {
+            var prev = s.style.display;
+            s.style.display = ""; // drop reveal's inline `display: none`
+            return prev;
+          });
+
+          var floored = [];
+
+          leafSections(slidesEl).forEach(function (section) {
+            // Always start from the slide's natural size so repeat passes are
+            // idempotent rather than compounding.
+            section.style.removeProperty("font-size");
+            var figures = figuresIn(section);
+            var naturalFontPx = parseFloat(getComputedStyle(section).fontSize);
+            if (!naturalFontPx) return;
+
+            if (contentHeight(section, canvasScale) <= available + TOLERANCE) {
+              delete section.dataset.meFitScale;
+              return;
+            }
+
+            var scale = 1;
+            for (var i = 0; i < MAX_ITER; i++) {
+              // Aim straight at the required ratio, then creep down — text reflow
+              // means height isn't perfectly linear in the scale factor.
+              var current = contentHeight(section, canvasScale);
+              scale = Math.max(
+                MIN_SCALE,
+                Math.min(scale * STEP, (available / current) * scale)
+              );
+              applyScale(section, figures, naturalFontPx, scale);
+              if (contentHeight(section, canvasScale) <= available + TOLERANCE) break;
+              if (scale <= MIN_SCALE) break;
+            }
+
+            section.dataset.meFitScale = scale.toFixed(3);
+            if (contentHeight(section, canvasScale) > available + TOLERANCE) {
+              floored.push(label(section));
+            }
+          });
+
+          // --- put reveal's own visibility bookkeeping back ----------------------
+          allSections.forEach(function (s, i) {
+            s.style.display = savedDisplay[i];
+          });
+          revealEl.classList.remove("me-fit-measuring");
+
+          if (floored.length && window.console) {
+            console.warn(
+              "[ME324] " +
+                floored.length +
+                " slide(s) still overflow at the minimum type size — consider " +
+                "splitting them:\n  • " +
+                floored.join("\n  • ")
+            );
+          }
+        }
+
+        // Wait for the things that change content height: web fonts, MathJax, and
+        // any images that haven't decoded yet.
+        function whenSettled(done) {
+          var waits = [];
+
+          if (document.fonts && document.fonts.ready) waits.push(document.fonts.ready);
+
+          if (window.MathJax && window.MathJax.startup && window.MathJax.startup.promise) {
+            waits.push(window.MathJax.startup.promise);
+          }
+
+          Array.prototype.forEach.call(document.images, function (img) {
+            if (img.complete) return;
+            waits.push(
+              new Promise(function (resolve) {
+                img.addEventListener("load", resolve, { once: true });
+                img.addEventListener("error", resolve, { once: true });
+              })
+            );
+          });
+
+          // Never block the deck on a hung asset.
+          var timeout = new Promise(function (resolve) {
+            setTimeout(resolve, 5000);
+          });
+
+          Promise.race([Promise.all(waits).catch(function () {}), timeout]).then(
+            function () {
+              requestAnimationFrame(function () {
+                requestAnimationFrame(done);
+              });
+            }
+          );
+        }
+
+        // The first pass is also a warm-up: it is what forces off-screen slides to
+        // lay out for the first time, which is what pulls in the web-font weights
+        // and finishes any deferred MathJax work they contain. Those land *after*
+        // we've measured, so a slide can grow by a line or two behind our back.
+        // fitAll() resets before it measures, so re-running it simply corrects.
+        function fitRepeatedly() {
+          fitAll();
+          whenSettled(function () {
+            fitAll();
+            setTimeout(fitAll, 1500);
+          });
+        }
+
+        function start() {
+          if (!window.Reveal) return;
+          if (Reveal.isReady && Reveal.isReady()) {
+            whenSettled(fitRepeatedly);
+          } else {
+            Reveal.on("ready", function () {
+              whenSettled(fitRepeatedly);
+            });
+          }
+        }
+
+        if (document.readyState === "complete") {
+          start();
+        } else {
+          window.addEventListener("load", start);
+        }
+      })();
+    </script>
+    <script id="quarto-html-after-body" type="application/javascript">
+    window.document.addEventListener("DOMContentLoaded", function (event) {
+      const toggleBodyColorMode = (bsSheetEl) => {
+        const mode = bsSheetEl.getAttribute("data-mode");
+        const bodyEl = window.document.querySelector("body");
+        if (mode === "dark") {
+          bodyEl.classList.add("quarto-dark");
+          bodyEl.classList.remove("quarto-light");
+        } else {
+          bodyEl.classList.add("quarto-light");
+          bodyEl.classList.remove("quarto-dark");
+        }
+      }
+      const toggleBodyColorPrimary = () => {
+        const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+        if (bsSheetEl) {
+          toggleBodyColorMode(bsSheetEl);
+        }
+      }
+      toggleBodyColorPrimary();  
+      const tabsets =  window.document.querySelectorAll(".panel-tabset-tabby")
+      tabsets.forEach(function(tabset) {
+        const tabby = new Tabby('#' + tabset.id);
+      });
+      const isCodeAnnotation = (el) => {
+        for (const clz of el.classList) {
+          if (clz.startsWith('code-annotation-')) {                     
+            return true;
+          }
+        }
+        return false;
+      }
+      const onCopySuccess = function(e) {
+        // button target
+        const button = e.trigger;
+        // don't keep focus
+        button.blur();
+        // flash "checked"
+        button.classList.add('code-copy-button-checked');
+        var currentTitle = button.getAttribute("title");
+        button.setAttribute("title", "Copied!");
+        let tooltip;
+        if (window.bootstrap) {
+          button.setAttribute("data-bs-toggle", "tooltip");
+          button.setAttribute("data-bs-placement", "left");
+          button.setAttribute("data-bs-title", "Copied!");
+          tooltip = new bootstrap.Tooltip(button, 
+            { trigger: "manual", 
+              customClass: "code-copy-button-tooltip",
+              offset: [0, -8]});
+          tooltip.show();    
+        }
+        setTimeout(function() {
+          if (tooltip) {
+            tooltip.hide();
+            button.removeAttribute("data-bs-title");
+            button.removeAttribute("data-bs-toggle");
+            button.removeAttribute("data-bs-placement");
+          }
+          button.setAttribute("title", currentTitle);
+          button.classList.remove('code-copy-button-checked');
+        }, 1000);
+        // clear code selection
+        e.clearSelection();
+      }
+      const getTextToCopy = function(trigger) {
+          const codeEl = trigger.previousElementSibling.cloneNode(true);
+          for (const childEl of codeEl.children) {
+            if (isCodeAnnotation(childEl)) {
+              childEl.remove();
+            }
+          }
+          return codeEl.innerText;
+      }
+      const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+        text: getTextToCopy
+      });
+      clipboard.on('success', onCopySuccess);
+      if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+        // For code content inside modals, clipBoardJS needs to be initialized with a container option
+        // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+        const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+          text: getTextToCopy,
+          container: window.document.getElementById('quarto-embedded-source-code-modal')
+        });
+        clipboardModal.on('success', onCopySuccess);
+      }
+        var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+        var mailtoRegex = new RegExp(/^mailto:/);
+          var filterRegex = new RegExp("https:\/\/ts-robinson\.com\/me324\/");
+        var isInternal = (href) => {
+            return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+        }
+        // Inspect non-navigation links and adorn them if external
+     	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+        for (var i=0; i<links.length; i++) {
+          const link = links[i];
+          if (!isInternal(link.href)) {
+            // undo the damage that might have been done by quarto-nav.js in the case of
+            // links that we want to consider external
+            if (link.dataset.originalHref !== undefined) {
+              link.href = link.dataset.originalHref;
+            }
+          }
+        }
+      function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+        const config = {
+          allowHTML: true,
+          maxWidth: 500,
+          delay: 100,
+          arrow: false,
+          appendTo: function(el) {
+              return el.closest('section.slide') || el.parentElement;
+          },
+          interactive: true,
+          interactiveBorder: 10,
+          theme: 'light-border',
+          placement: 'bottom-start',
+        };
+        if (contentFn) {
+          config.content = contentFn;
+        }
+        if (onTriggerFn) {
+          config.onTrigger = onTriggerFn;
+        }
+        if (onUntriggerFn) {
+          config.onUntrigger = onUntriggerFn;
+        }
+          config['offset'] = [0,0];
+          config['maxWidth'] = 700;
+        window.tippy(el, config); 
+      }
+      const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+      for (var i=0; i<noterefs.length; i++) {
+        const ref = noterefs[i];
+        tippyHover(ref, function() {
+          // use id or data attribute instead here
+          let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+          try { href = new URL(href).hash; } catch {}
+          const id = href.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note) {
+            return note.innerHTML;
+          } else {
+            return "";
+          }
+        });
+      }
+      const findCites = (el) => {
+        const parentEl = el.parentElement;
+        if (parentEl) {
+          const cites = parentEl.dataset.cites;
+          if (cites) {
+            return {
+              el,
+              cites: cites.split(' ')
+            };
+          } else {
+            return findCites(el.parentElement)
+          }
+        } else {
+          return undefined;
+        }
+      };
+      var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+      for (var i=0; i<bibliorefs.length; i++) {
+        const ref = bibliorefs[i];
+        const citeInfo = findCites(ref);
+        if (citeInfo) {
+          tippyHover(citeInfo.el, function() {
+            var popup = window.document.createElement('div');
+            citeInfo.cites.forEach(function(cite) {
+              var citeDiv = window.document.createElement('div');
+              citeDiv.classList.add('hanging-indent');
+              citeDiv.classList.add('csl-entry');
+              var biblioDiv = window.document.getElementById('ref-' + cite);
+              if (biblioDiv) {
+                citeDiv.innerHTML = biblioDiv.innerHTML;
+              }
+              popup.appendChild(citeDiv);
+            });
+            return popup.innerHTML;
+          });
+        }
+      }
+    });
+    </script>
+    
+
+</body></html>

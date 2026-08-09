@@ -24,6 +24,9 @@ project:
     - lectures/lecture-03-computational-graphs.qmd
     - lectures/lecture-04-backpropagation.qmd
     - lectures/lecture-05-feedforward.qmd
+    - lectures/lecture-06-cnns.qmd
+    - lectures/lecture-07-generative-images.qmd
+    - lectures/lecture-08-text-embeddings.qmd
     - labs/lab-01-setup-and-tensors.ipynb
     - labs/lab-02-perceptron-numpy.ipynb
     - labs/lab-03-value-forward.ipynb

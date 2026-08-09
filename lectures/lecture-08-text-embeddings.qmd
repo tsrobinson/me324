@@ -1,0 +1,1449 @@
+---
+title: "Building your own text-generating AI (1/4)"
+subtitle: "Lecture 8 — Treating text as data · embeddings · character models"
+author: "Dr Thomas Robinson"
+date: "2026-08-12"
+date-format: long
+bibliography: ../refs.bib
+format: 
+  revealjs:
+    smaller: true
+---
+
+## Warm-up · three questions from last time
+
+[<span class="pause-cue">≈ 5 min</span> · shout it out]{.eyebrow}
+
+::: {.card}
+1. What forces an autoencoder to learn a compressed representation rather than copying its input?
+2. What can you do with a trained VAE that you cannot do with a plain autoencoder — and which part of the loss makes it possible?
+3. In the reparameterisation trick we write $\mathbf{z} = \boldsymbol{\mu} + \boldsymbol{\sigma} \odot \boldsymbol{\epsilon}$. Why not just sample $\mathbf{z}$ directly?
+:::
+
+## Warm-up · answers
+
+::: {.card}
+1. **The bottleneck.** The latent dimension is smaller than the input, so the network cannot pass the input through unchanged -- it has to compress.
+
+2. **Sample new images from the latent space.** The KL term in the VAE loss keeps the latent space organised around the origin, so a point drawn from $\mathcal{N}(\mathbf{0}, \mathbf{I})$ decodes to something sensible. A plain autoencoder has no such guarantee -- most latent points decode to nonsense.
+
+3. **Gradients cannot flow through a random sampling step.** Writing $\mathbf{z} = \boldsymbol{\mu} + \boldsymbol{\sigma} \odot \boldsymbol{\epsilon}$ moves the randomness into $\boldsymbol{\epsilon}$, which has no parameters. The path from the loss back to $\boldsymbol{\mu}$ and $\boldsymbol{\sigma}$ is now deterministic, so backprop works.
+
+:::
+
+# Part 1 · Text as data {background-color="#0E1A2B"}
+
+## How do we feed text to a neural network?
+
+A neural network takes **numbers**. Text is a sequence of characters / words / morphemes / utf-8 codepoints.
+
+::: {.card}
+**Tokenisation** = the choice of *what counts as one unit*. The rest of the model — embeddings, attention, output layer — works on top of that decision.
+:::
+
+[Three granularities to choose from]{.eyebrow}
+
+::: {.columns}
+::: {.column width="33%"}
+[Character]{.pill-blue}
+
+* Tiny vocab ($\sim 100$)
+* Long sequences
+* Where we're going to start
+:::
+
+::: {.column width="33%"}
+[Word]{.pill}
+
+* Huge vocab ($10^5+$)
+* Out-of-vocabulary is a hard problem
+* What 1990s NLP used
+:::
+
+::: {.column width="33%"}
+[Subword (BPE)]{.pill-green}
+
+* In-between (~50-100k)
+* Composable
+* What GPT, Claude, BERT use
+* (We'll get to this on Day 11)
+:::
+
+:::
+
+## What does the text actually look like to the model?
+
+The string `"hello"` is, to your computer, a sequence of **bytes**: `[104, 101, 108, 108, 111]`.
+
+To a language model, after tokenisation, it's a sequence of **token ids** — typically much shorter:
+
+::: {.columns}
+::: {.column width="50%"}
+[As characters (tokens = chars)]{.pill-blue}
+
+`"hello world"` → `[7, 4, 11, 11, 14, 0, 22, 14, 17, 11, 3]` *(ids illustrative)*
+
+**11** tokens needed for the string
+
+* Each id picks one row from a small lookup table.
+
+:::
+::: {.column width="50%"}
+[As BPE (tokens = subwords)]{.pill-green}
+
+`"hello world"` → `[15339, 1917]`
+
+**Two** tokens. Each picks one row from a vocab of ~100,000.
+
+(These are the *actual* ids GPT-4's tokeniser, `cl100k`, assigns — and its vocab is ~100k.)
+:::
+:::
+
+::: {.callout-note}
+The choice of tokeniser determines **the cost** (sequence length) and **the unit** the model learns to work with. We'll see both on Day 11.
+:::
+
+## A baby character tokeniser
+
+Take all unique characters in some corpus. Number them 0, 1, 2, ….
+
+```python
+text = "to be or not to be"
+chars = sorted(set(text))      # [' ', 'b', 'e', 'n', 'o', 'r', 't']
+stoi  = {c: i for i, c in enumerate(chars)}
+itos  = {i: c for c, i in stoi.items()}
+
+encode = lambda s: [stoi[c] for c in s]
+decode = lambda ids: "".join(itos[i] for i in ids)
+```
+
+* `encode("to be")` → `[6, 4, 0, 1, 2]`.
+* Each integer is a **token id**.
+* The network will see and produce integers.
+
+::: {.callout-note}
+# And that's all we need!
+
+Once each character/token has a unique integer id, we just need to figure out how to process sequences of them.
+
+:::
+
+## Walking through a tokenisation
+
+Corpus: `"the cat sat on the mat"`
+
+::: {.card}
+[Step 1 — unique characters]{.eyebrow}
+
+`[' ', 'a', 'c', 'e', 'h', 'm', 'n', 'o', 's', 't']` — 10 distinct characters.
+
+[Step 2 — assign ids]{.eyebrow}
+
+| char | ` ` | `a` | `c` | `e` | `h` | `m` | `n` | `o` | `s` | `t` |
+|---|---|---|---|---|---|---|---|---|---|---|
+| id | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 |
+
+[Step 3 — encode]{.eyebrow}
+
+`"the cat"` → `[9, 4, 3, 0, 2, 1, 9]`
+
+7 ids. The model has *never seen* the letter `t` — it has only ever seen the integer `9`.
+:::
+
+## We don't want to one-hot encode
+
+You might think to feed token id $i$ as a one-hot vector $\mathbf{e}_i \in \mathbb{R}^V$:
+
+* For $V = 50{,}000$: every token becomes a 50,000-dim sparse vector (only one entry is a 1)
+* **Massive** but also **orthogonal** -- the representation encodes *no* similarity at all.
+
+::: {.card}
+**Words have structure.** "King" and "queen" should be close. "King" and "saucepan" should not. One-hot encodings know nothing about this.
+
+We want a **dense, learned, low-dimensional** representation. That representation is called an **embedding**.
+:::
+
+## An embedding is a lookup table
+
+::: {.card}
+A mapping from token id $i$ to a dense vector $\mathbf{e}_i \in \mathbb{R}^d$.
+
+Implemented as a learnable **embedding matrix** $\mathbf{E} \in \mathbb{R}^{V \times d}$.
+
+* Row $i$ of $\mathbf{E}$ is the embedding of token $i$.
+* Embedding lookup = "select row $i$".
+* The entries of $\mathbf{E}$ are **just parameters** — learned by backprop, like any other.
+:::
+
+In PyTorch: `nn.Embedding(num_embeddings=V, embedding_dim=d)`.
+
+## Example lookup
+
+`"the cat sat on the mat"`
+
+[Corpus ids from the tokenisation slide ]{.eyebrow}
+
+* Embedding dim $d = 3$
+* $\mathbf{E}$ is $10 \times 3$.
+
+::: {.r-stack}
+
+```{dot}
+//| fig-height: 4.6
+digraph EMB0 {
+  bgcolor="#FBFAF6"; nodesep=0.4; ranksep=0.3;
+  node [fontname="Inter" shape=plaintext fontcolor="#0E1A2B"];
+  tok [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="5"><TR><TD BORDER="0"><FONT COLOR="#5C6473">char</FONT></TD><TD BORDER="2" COLOR="#D7D2C5">c</TD><TD COLOR="#D7D2C5">a</TD><TD COLOR="#D7D2C5">t</TD></TR><TR><TD BORDER="0"><FONT COLOR="#5C6473">id</FONT></TD><TD PORT="p2" BORDER="2" COLOR="#D7D2C5">2</TD><TD COLOR="#D7D2C5">1</TD><TD COLOR="#D7D2C5">9</TD></TR></TABLE>>];
+  E [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4">
+    <TR><TD BGCOLOR="#F4F1EA" COLOR="#D7D2C5"><I>id</I></TD><TD BGCOLOR="#F4F1EA" COLOR="#D7D2C5"><I>char</I></TD><TD BGCOLOR="#F4F1EA" COLOR="#D7D2C5" COLSPAN="3"><B>E</B> &#8212; 10 &#215; 3</TD></TR>
+    <TR><TD COLOR="#D7D2C5"><FONT COLOR="#5C6473">0</FONT></TD><TD COLOR="#D7D2C5">' '</TD><TD COLOR="#D7D2C5" WIDTH="44">0.1</TD><TD COLOR="#D7D2C5" WIDTH="44">0.0</TD><TD COLOR="#D7D2C5" WIDTH="44">&#8722;0.2</TD></TR>
+    <TR><TD COLOR="#D7D2C5"><FONT COLOR="#5C6473">1</FONT></TD><TD COLOR="#D7D2C5">a</TD><TD COLOR="#D7D2C5" WIDTH="44">0.5</TD><TD COLOR="#D7D2C5" WIDTH="44">0.9</TD><TD COLOR="#D7D2C5" WIDTH="44">&#8722;0.1</TD></TR>
+    <TR><TD PORT="r2" BORDER="2" COLOR="#D7D2C5"><FONT COLOR="#5C6473">2</FONT></TD><TD BORDER="2" COLOR="#D7D2C5">c</TD><TD BORDER="2" COLOR="#D7D2C5" WIDTH="44">0.6</TD><TD BORDER="2" COLOR="#D7D2C5" WIDTH="44">&#8722;1.2</TD><TD PORT="r2e" BORDER="2" COLOR="#D7D2C5" WIDTH="44">0.3</TD></TR>
+    <TR><TD COLOR="#D7D2C5"><FONT COLOR="#5C6473">3</FONT></TD><TD COLOR="#D7D2C5">e</TD><TD COLOR="#D7D2C5" WIDTH="44">&#8722;0.7</TD><TD COLOR="#D7D2C5" WIDTH="44">0.4</TD><TD COLOR="#D7D2C5" WIDTH="44">0.8</TD></TR>
+    <TR><TD COLOR="#D7D2C5"><FONT COLOR="#5C6473">4</FONT></TD><TD COLOR="#D7D2C5">h</TD><TD COLOR="#D7D2C5" WIDTH="44">0.2</TD><TD COLOR="#D7D2C5" WIDTH="44">&#8722;0.3</TD><TD COLOR="#D7D2C5" WIDTH="44">1.1</TD></TR>
+    <TR><TD COLOR="#D7D2C5"><FONT COLOR="#5C6473">5</FONT></TD><TD COLOR="#D7D2C5">m</TD><TD COLOR="#D7D2C5" WIDTH="44">&#8722;1.0</TD><TD COLOR="#D7D2C5" WIDTH="44">0.6</TD><TD COLOR="#D7D2C5" WIDTH="44">0.2</TD></TR>
+    <TR><TD COLOR="#D7D2C5"><FONT COLOR="#5C6473">6</FONT></TD><TD COLOR="#D7D2C5">n</TD><TD COLOR="#D7D2C5" WIDTH="44">0.4</TD><TD COLOR="#D7D2C5" WIDTH="44">0.1</TD><TD COLOR="#D7D2C5" WIDTH="44">&#8722;0.9</TD></TR>
+    <TR><TD COLOR="#D7D2C5"><FONT COLOR="#5C6473">7</FONT></TD><TD COLOR="#D7D2C5">o</TD><TD COLOR="#D7D2C5" WIDTH="44">&#8722;0.2</TD><TD COLOR="#D7D2C5" WIDTH="44">1.3</TD><TD COLOR="#D7D2C5" WIDTH="44">0.5</TD></TR>
+    <TR><TD COLOR="#D7D2C5"><FONT COLOR="#5C6473">8</FONT></TD><TD COLOR="#D7D2C5">s</TD><TD COLOR="#D7D2C5" WIDTH="44">0.9</TD><TD COLOR="#D7D2C5" WIDTH="44">&#8722;0.5</TD><TD COLOR="#D7D2C5" WIDTH="44">&#8722;0.4</TD></TR>
+    <TR><TD COLOR="#D7D2C5"><FONT COLOR="#5C6473">9</FONT></TD><TD COLOR="#D7D2C5">t</TD><TD COLOR="#D7D2C5" WIDTH="44">&#8722;0.6</TD><TD COLOR="#D7D2C5" WIDTH="44">0.7</TD><TD COLOR="#D7D2C5" WIDTH="44">1.0</TD></TR>
+  </TABLE>>];
+  vec [label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4"><TR><TD COLSPAN="3" ALIGN="LEFT"><FONT COLOR="#FBFAF6">row 2 = <B>e</B><SUB>c</SUB></FONT></TD></TR><TR><TD BORDER="2" COLOR="#FBFAF6" WIDTH="44"><FONT COLOR="#FBFAF6">0.6</FONT></TD><TD BORDER="2" COLOR="#FBFAF6" WIDTH="44"><FONT COLOR="#FBFAF6">&#8722;1.2</FONT></TD><TD BORDER="2" COLOR="#FBFAF6" WIDTH="44"><FONT COLOR="#FBFAF6">0.3</FONT></TD></TR></TABLE>>];
+  cap [label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="3"><TR><TD ALIGN="LEFT"><FONT COLOR="#FBFAF6">Step 1 &#183; tokenise:&#160; 'c' &#8594; id 2 &#8212; an integer, nothing more</FONT></TD></TR><TR><TD ALIGN="LEFT"><FONT COLOR="#FBFAF6">Step 2 &#183; look up:&#160; take row 2 of E &#8212; no arithmetic, just indexing</FONT></TD></TR><TR><TD ALIGN="LEFT"><FONT COLOR="#FBFAF6">Step 3 &#183; hand over:&#160; e<SUB>c</SUB> = [0.6, &#8722;1.2, 0.3] is what the next layer receives</FONT></TD></TR></TABLE>>];
+  tok:p2:s -> E:r2:w [color="#FBFAF6" penwidth=1.6 arrowsize=0.8];
+  E:r2e:e -> vec:w [color="#FBFAF6" penwidth=1.6 arrowsize=0.8];
+  { rank=same; E; vec; }
+  E -> cap [style=invis];
+}
+```
+
+::: {.fragment}
+```{dot}
+//| fig-height: 4.6
+digraph EMB1 {
+  bgcolor="#FBFAF6"; nodesep=0.4; ranksep=0.3;
+  node [fontname="Inter" shape=plaintext fontcolor="#0E1A2B"];
+  tok [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="5"><TR><TD BORDER="0"><FONT COLOR="#5C6473">char</FONT></TD><TD BORDER="2" COLOR="#C9322B"><FONT COLOR="#C9322B">c</FONT></TD><TD COLOR="#D7D2C5">a</TD><TD COLOR="#D7D2C5">t</TD></TR><TR><TD BORDER="0"><FONT COLOR="#5C6473">id</FONT></TD><TD PORT="p2" BORDER="2" COLOR="#C9322B"><FONT COLOR="#C9322B">2</FONT></TD><TD COLOR="#D7D2C5">1</TD><TD COLOR="#D7D2C5">9</TD></TR></TABLE>>];
+  E [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4">
+    <TR><TD BGCOLOR="#F4F1EA" COLOR="#D7D2C5"><I>id</I></TD><TD BGCOLOR="#F4F1EA" COLOR="#D7D2C5"><I>char</I></TD><TD BGCOLOR="#F4F1EA" COLOR="#D7D2C5" COLSPAN="3"><B>E</B> &#8212; 10 &#215; 3</TD></TR>
+    <TR><TD COLOR="#D7D2C5"><FONT COLOR="#5C6473">0</FONT></TD><TD COLOR="#D7D2C5">' '</TD><TD COLOR="#D7D2C5" WIDTH="44">0.1</TD><TD COLOR="#D7D2C5" WIDTH="44">0.0</TD><TD COLOR="#D7D2C5" WIDTH="44">&#8722;0.2</TD></TR>
+    <TR><TD COLOR="#D7D2C5"><FONT COLOR="#5C6473">1</FONT></TD><TD COLOR="#D7D2C5">a</TD><TD COLOR="#D7D2C5" WIDTH="44">0.5</TD><TD COLOR="#D7D2C5" WIDTH="44">0.9</TD><TD COLOR="#D7D2C5" WIDTH="44">&#8722;0.1</TD></TR>
+    <TR><TD PORT="r2" BORDER="2" COLOR="#D7D2C5"><FONT COLOR="#5C6473">2</FONT></TD><TD BORDER="2" COLOR="#D7D2C5">c</TD><TD BORDER="2" COLOR="#D7D2C5" WIDTH="44">0.6</TD><TD BORDER="2" COLOR="#D7D2C5" WIDTH="44">&#8722;1.2</TD><TD PORT="r2e" BORDER="2" COLOR="#D7D2C5" WIDTH="44">0.3</TD></TR>
+    <TR><TD COLOR="#D7D2C5"><FONT COLOR="#5C6473">3</FONT></TD><TD COLOR="#D7D2C5">e</TD><TD COLOR="#D7D2C5" WIDTH="44">&#8722;0.7</TD><TD COLOR="#D7D2C5" WIDTH="44">0.4</TD><TD COLOR="#D7D2C5" WIDTH="44">0.8</TD></TR>
+    <TR><TD COLOR="#D7D2C5"><FONT COLOR="#5C6473">4</FONT></TD><TD COLOR="#D7D2C5">h</TD><TD COLOR="#D7D2C5" WIDTH="44">0.2</TD><TD COLOR="#D7D2C5" WIDTH="44">&#8722;0.3</TD><TD COLOR="#D7D2C5" WIDTH="44">1.1</TD></TR>
+    <TR><TD COLOR="#D7D2C5"><FONT COLOR="#5C6473">5</FONT></TD><TD COLOR="#D7D2C5">m</TD><TD COLOR="#D7D2C5" WIDTH="44">&#8722;1.0</TD><TD COLOR="#D7D2C5" WIDTH="44">0.6</TD><TD COLOR="#D7D2C5" WIDTH="44">0.2</TD></TR>
+    <TR><TD COLOR="#D7D2C5"><FONT COLOR="#5C6473">6</FONT></TD><TD COLOR="#D7D2C5">n</TD><TD COLOR="#D7D2C5" WIDTH="44">0.4</TD><TD COLOR="#D7D2C5" WIDTH="44">0.1</TD><TD COLOR="#D7D2C5" WIDTH="44">&#8722;0.9</TD></TR>
+    <TR><TD COLOR="#D7D2C5"><FONT COLOR="#5C6473">7</FONT></TD><TD COLOR="#D7D2C5">o</TD><TD COLOR="#D7D2C5" WIDTH="44">&#8722;0.2</TD><TD COLOR="#D7D2C5" WIDTH="44">1.3</TD><TD COLOR="#D7D2C5" WIDTH="44">0.5</TD></TR>
+    <TR><TD COLOR="#D7D2C5"><FONT COLOR="#5C6473">8</FONT></TD><TD COLOR="#D7D2C5">s</TD><TD COLOR="#D7D2C5" WIDTH="44">0.9</TD><TD COLOR="#D7D2C5" WIDTH="44">&#8722;0.5</TD><TD COLOR="#D7D2C5" WIDTH="44">&#8722;0.4</TD></TR>
+    <TR><TD COLOR="#D7D2C5"><FONT COLOR="#5C6473">9</FONT></TD><TD COLOR="#D7D2C5">t</TD><TD COLOR="#D7D2C5" WIDTH="44">&#8722;0.6</TD><TD COLOR="#D7D2C5" WIDTH="44">0.7</TD><TD COLOR="#D7D2C5" WIDTH="44">1.0</TD></TR>
+  </TABLE>>];
+  vec [label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4"><TR><TD COLSPAN="3" ALIGN="LEFT"><FONT COLOR="#FBFAF6">row 2 = <B>e</B><SUB>c</SUB></FONT></TD></TR><TR><TD BORDER="2" COLOR="#FBFAF6" WIDTH="44"><FONT COLOR="#FBFAF6">0.6</FONT></TD><TD BORDER="2" COLOR="#FBFAF6" WIDTH="44"><FONT COLOR="#FBFAF6">&#8722;1.2</FONT></TD><TD BORDER="2" COLOR="#FBFAF6" WIDTH="44"><FONT COLOR="#FBFAF6">0.3</FONT></TD></TR></TABLE>>];
+  cap [label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="3"><TR><TD ALIGN="LEFT"><FONT COLOR="#0E1A2B">Step 1 &#183; tokenise:&#160; 'c' &#8594; id 2 &#8212; an integer, nothing more</FONT></TD></TR><TR><TD ALIGN="LEFT"><FONT COLOR="#FBFAF6">Step 2 &#183; look up:&#160; take row 2 of E &#8212; no arithmetic, just indexing</FONT></TD></TR><TR><TD ALIGN="LEFT"><FONT COLOR="#FBFAF6">Step 3 &#183; hand over:&#160; e<SUB>c</SUB> = [0.6, &#8722;1.2, 0.3] is what the next layer receives</FONT></TD></TR></TABLE>>];
+  tok:p2:s -> E:r2:w [color="#FBFAF6" penwidth=1.6 arrowsize=0.8];
+  E:r2e:e -> vec:w [color="#FBFAF6" penwidth=1.6 arrowsize=0.8];
+  { rank=same; E; vec; }
+  E -> cap [style=invis];
+}
+```
+:::
+
+::: {.fragment}
+```{dot}
+//| fig-height: 4.6
+digraph EMB2 {
+  bgcolor="#FBFAF6"; nodesep=0.4; ranksep=0.3;
+  node [fontname="Inter" shape=plaintext fontcolor="#0E1A2B"];
+  tok [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="5"><TR><TD BORDER="0"><FONT COLOR="#5C6473">char</FONT></TD><TD BORDER="2" COLOR="#1A6FB4">c</TD><TD COLOR="#D7D2C5">a</TD><TD COLOR="#D7D2C5">t</TD></TR><TR><TD BORDER="0"><FONT COLOR="#5C6473">id</FONT></TD><TD PORT="p2" BORDER="2" COLOR="#1A6FB4">2</TD><TD COLOR="#D7D2C5">1</TD><TD COLOR="#D7D2C5">9</TD></TR></TABLE>>];
+  E [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4">
+    <TR><TD BGCOLOR="#F4F1EA" COLOR="#D7D2C5"><I>id</I></TD><TD BGCOLOR="#F4F1EA" COLOR="#D7D2C5"><I>char</I></TD><TD BGCOLOR="#F4F1EA" COLOR="#D7D2C5" COLSPAN="3"><B>E</B> &#8212; 10 &#215; 3</TD></TR>
+    <TR><TD COLOR="#D7D2C5"><FONT COLOR="#5C6473">0</FONT></TD><TD COLOR="#D7D2C5">' '</TD><TD COLOR="#D7D2C5" WIDTH="44">0.1</TD><TD COLOR="#D7D2C5" WIDTH="44">0.0</TD><TD COLOR="#D7D2C5" WIDTH="44">&#8722;0.2</TD></TR>
+    <TR><TD COLOR="#D7D2C5"><FONT COLOR="#5C6473">1</FONT></TD><TD COLOR="#D7D2C5">a</TD><TD COLOR="#D7D2C5" WIDTH="44">0.5</TD><TD COLOR="#D7D2C5" WIDTH="44">0.9</TD><TD COLOR="#D7D2C5" WIDTH="44">&#8722;0.1</TD></TR>
+    <TR><TD PORT="r2" BORDER="2" COLOR="#C9322B"><FONT COLOR="#C9322B">2</FONT></TD><TD BORDER="2" COLOR="#C9322B"><FONT COLOR="#C9322B">c</FONT></TD><TD BORDER="2" COLOR="#C9322B" WIDTH="44"><FONT COLOR="#C9322B">0.6</FONT></TD><TD BORDER="2" COLOR="#C9322B" WIDTH="44"><FONT COLOR="#C9322B">&#8722;1.2</FONT></TD><TD PORT="r2e" BORDER="2" COLOR="#C9322B" WIDTH="44"><FONT COLOR="#C9322B">0.3</FONT></TD></TR>
+    <TR><TD COLOR="#D7D2C5"><FONT COLOR="#5C6473">3</FONT></TD><TD COLOR="#D7D2C5">e</TD><TD COLOR="#D7D2C5" WIDTH="44">&#8722;0.7</TD><TD COLOR="#D7D2C5" WIDTH="44">0.4</TD><TD COLOR="#D7D2C5" WIDTH="44">0.8</TD></TR>
+    <TR><TD COLOR="#D7D2C5"><FONT COLOR="#5C6473">4</FONT></TD><TD COLOR="#D7D2C5">h</TD><TD COLOR="#D7D2C5" WIDTH="44">0.2</TD><TD COLOR="#D7D2C5" WIDTH="44">&#8722;0.3</TD><TD COLOR="#D7D2C5" WIDTH="44">1.1</TD></TR>
+    <TR><TD COLOR="#D7D2C5"><FONT COLOR="#5C6473">5</FONT></TD><TD COLOR="#D7D2C5">m</TD><TD COLOR="#D7D2C5" WIDTH="44">&#8722;1.0</TD><TD COLOR="#D7D2C5" WIDTH="44">0.6</TD><TD COLOR="#D7D2C5" WIDTH="44">0.2</TD></TR>
+    <TR><TD COLOR="#D7D2C5"><FONT COLOR="#5C6473">6</FONT></TD><TD COLOR="#D7D2C5">n</TD><TD COLOR="#D7D2C5" WIDTH="44">0.4</TD><TD COLOR="#D7D2C5" WIDTH="44">0.1</TD><TD COLOR="#D7D2C5" WIDTH="44">&#8722;0.9</TD></TR>
+    <TR><TD COLOR="#D7D2C5"><FONT COLOR="#5C6473">7</FONT></TD><TD COLOR="#D7D2C5">o</TD><TD COLOR="#D7D2C5" WIDTH="44">&#8722;0.2</TD><TD COLOR="#D7D2C5" WIDTH="44">1.3</TD><TD COLOR="#D7D2C5" WIDTH="44">0.5</TD></TR>
+    <TR><TD COLOR="#D7D2C5"><FONT COLOR="#5C6473">8</FONT></TD><TD COLOR="#D7D2C5">s</TD><TD COLOR="#D7D2C5" WIDTH="44">0.9</TD><TD COLOR="#D7D2C5" WIDTH="44">&#8722;0.5</TD><TD COLOR="#D7D2C5" WIDTH="44">&#8722;0.4</TD></TR>
+    <TR><TD COLOR="#D7D2C5"><FONT COLOR="#5C6473">9</FONT></TD><TD COLOR="#D7D2C5">t</TD><TD COLOR="#D7D2C5" WIDTH="44">&#8722;0.6</TD><TD COLOR="#D7D2C5" WIDTH="44">0.7</TD><TD COLOR="#D7D2C5" WIDTH="44">1.0</TD></TR>
+  </TABLE>>];
+  vec [label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4"><TR><TD COLSPAN="3" ALIGN="LEFT"><FONT COLOR="#FBFAF6">row 2 = <B>e</B><SUB>c</SUB></FONT></TD></TR><TR><TD BORDER="2" COLOR="#FBFAF6" WIDTH="44"><FONT COLOR="#FBFAF6">0.6</FONT></TD><TD BORDER="2" COLOR="#FBFAF6" WIDTH="44"><FONT COLOR="#FBFAF6">&#8722;1.2</FONT></TD><TD BORDER="2" COLOR="#FBFAF6" WIDTH="44"><FONT COLOR="#FBFAF6">0.3</FONT></TD></TR></TABLE>>];
+  cap [label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="3"><TR><TD ALIGN="LEFT"><FONT COLOR="#5C6473">Step 1 &#183; tokenise:&#160; 'c' &#8594; id 2 &#8212; an integer, nothing more</FONT></TD></TR><TR><TD ALIGN="LEFT"><FONT COLOR="#0E1A2B">Step 2 &#183; look up:&#160; take row 2 of E &#8212; no arithmetic, just indexing</FONT></TD></TR><TR><TD ALIGN="LEFT"><FONT COLOR="#FBFAF6">Step 3 &#183; hand over:&#160; e<SUB>c</SUB> = [0.6, &#8722;1.2, 0.3] is what the next layer receives</FONT></TD></TR></TABLE>>];
+  tok:p2:s -> E:r2:w [color="#C9322B" penwidth=1.6 arrowsize=0.8];
+  E:r2e:e -> vec:w [color="#FBFAF6" penwidth=1.6 arrowsize=0.8];
+  { rank=same; E; vec; }
+  E -> cap [style=invis];
+}
+```
+:::
+
+::: {.fragment}
+```{dot}
+//| fig-height: 4.6
+digraph EMB3 {
+  bgcolor="#FBFAF6"; nodesep=0.4; ranksep=0.3;
+  node [fontname="Inter" shape=plaintext fontcolor="#0E1A2B"];
+  tok [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="5"><TR><TD BORDER="0"><FONT COLOR="#5C6473">char</FONT></TD><TD BORDER="2" COLOR="#1A6FB4">c</TD><TD COLOR="#D7D2C5">a</TD><TD COLOR="#D7D2C5">t</TD></TR><TR><TD BORDER="0"><FONT COLOR="#5C6473">id</FONT></TD><TD PORT="p2" BORDER="2" COLOR="#1A6FB4">2</TD><TD COLOR="#D7D2C5">1</TD><TD COLOR="#D7D2C5">9</TD></TR></TABLE>>];
+  E [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4">
+    <TR><TD BGCOLOR="#F4F1EA" COLOR="#D7D2C5"><I>id</I></TD><TD BGCOLOR="#F4F1EA" COLOR="#D7D2C5"><I>char</I></TD><TD BGCOLOR="#F4F1EA" COLOR="#D7D2C5" COLSPAN="3"><B>E</B> &#8212; 10 &#215; 3</TD></TR>
+    <TR><TD COLOR="#D7D2C5"><FONT COLOR="#5C6473">0</FONT></TD><TD COLOR="#D7D2C5">' '</TD><TD COLOR="#D7D2C5" WIDTH="44">0.1</TD><TD COLOR="#D7D2C5" WIDTH="44">0.0</TD><TD COLOR="#D7D2C5" WIDTH="44">&#8722;0.2</TD></TR>
+    <TR><TD COLOR="#D7D2C5"><FONT COLOR="#5C6473">1</FONT></TD><TD COLOR="#D7D2C5">a</TD><TD COLOR="#D7D2C5" WIDTH="44">0.5</TD><TD COLOR="#D7D2C5" WIDTH="44">0.9</TD><TD COLOR="#D7D2C5" WIDTH="44">&#8722;0.1</TD></TR>
+    <TR><TD PORT="r2" BORDER="2" COLOR="#1A6FB4"><FONT COLOR="#5C6473">2</FONT></TD><TD BORDER="2" COLOR="#1A6FB4">c</TD><TD BORDER="2" COLOR="#1A6FB4" WIDTH="44">0.6</TD><TD BORDER="2" COLOR="#1A6FB4" WIDTH="44">&#8722;1.2</TD><TD PORT="r2e" BORDER="2" COLOR="#1A6FB4" WIDTH="44">0.3</TD></TR>
+    <TR><TD COLOR="#D7D2C5"><FONT COLOR="#5C6473">3</FONT></TD><TD COLOR="#D7D2C5">e</TD><TD COLOR="#D7D2C5" WIDTH="44">&#8722;0.7</TD><TD COLOR="#D7D2C5" WIDTH="44">0.4</TD><TD COLOR="#D7D2C5" WIDTH="44">0.8</TD></TR>
+    <TR><TD COLOR="#D7D2C5"><FONT COLOR="#5C6473">4</FONT></TD><TD COLOR="#D7D2C5">h</TD><TD COLOR="#D7D2C5" WIDTH="44">0.2</TD><TD COLOR="#D7D2C5" WIDTH="44">&#8722;0.3</TD><TD COLOR="#D7D2C5" WIDTH="44">1.1</TD></TR>
+    <TR><TD COLOR="#D7D2C5"><FONT COLOR="#5C6473">5</FONT></TD><TD COLOR="#D7D2C5">m</TD><TD COLOR="#D7D2C5" WIDTH="44">&#8722;1.0</TD><TD COLOR="#D7D2C5" WIDTH="44">0.6</TD><TD COLOR="#D7D2C5" WIDTH="44">0.2</TD></TR>
+    <TR><TD COLOR="#D7D2C5"><FONT COLOR="#5C6473">6</FONT></TD><TD COLOR="#D7D2C5">n</TD><TD COLOR="#D7D2C5" WIDTH="44">0.4</TD><TD COLOR="#D7D2C5" WIDTH="44">0.1</TD><TD COLOR="#D7D2C5" WIDTH="44">&#8722;0.9</TD></TR>
+    <TR><TD COLOR="#D7D2C5"><FONT COLOR="#5C6473">7</FONT></TD><TD COLOR="#D7D2C5">o</TD><TD COLOR="#D7D2C5" WIDTH="44">&#8722;0.2</TD><TD COLOR="#D7D2C5" WIDTH="44">1.3</TD><TD COLOR="#D7D2C5" WIDTH="44">0.5</TD></TR>
+    <TR><TD COLOR="#D7D2C5"><FONT COLOR="#5C6473">8</FONT></TD><TD COLOR="#D7D2C5">s</TD><TD COLOR="#D7D2C5" WIDTH="44">0.9</TD><TD COLOR="#D7D2C5" WIDTH="44">&#8722;0.5</TD><TD COLOR="#D7D2C5" WIDTH="44">&#8722;0.4</TD></TR>
+    <TR><TD COLOR="#D7D2C5"><FONT COLOR="#5C6473">9</FONT></TD><TD COLOR="#D7D2C5">t</TD><TD COLOR="#D7D2C5" WIDTH="44">&#8722;0.6</TD><TD COLOR="#D7D2C5" WIDTH="44">0.7</TD><TD COLOR="#D7D2C5" WIDTH="44">1.0</TD></TR>
+  </TABLE>>];
+  vec [label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4"><TR><TD COLSPAN="3" ALIGN="LEFT"><FONT COLOR="#0E1A2B">row 2 = <B>e</B><SUB>c</SUB></FONT></TD></TR><TR><TD BORDER="2" COLOR="#C9322B" WIDTH="44"><FONT COLOR="#C9322B">0.6</FONT></TD><TD BORDER="2" COLOR="#C9322B" WIDTH="44"><FONT COLOR="#C9322B">&#8722;1.2</FONT></TD><TD BORDER="2" COLOR="#C9322B" WIDTH="44"><FONT COLOR="#C9322B">0.3</FONT></TD></TR></TABLE>>];
+  cap [label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="3"><TR><TD ALIGN="LEFT"><FONT COLOR="#5C6473">Step 1 &#183; tokenise:&#160; 'c' &#8594; id 2 &#8212; an integer, nothing more</FONT></TD></TR><TR><TD ALIGN="LEFT"><FONT COLOR="#5C6473">Step 2 &#183; look up:&#160; take row 2 of E &#8212; no arithmetic, just indexing</FONT></TD></TR><TR><TD ALIGN="LEFT"><FONT COLOR="#0E1A2B">Step 3 &#183; hand over:&#160; e<SUB>c</SUB> = [0.6, &#8722;1.2, 0.3] is what the next layer receives</FONT></TD></TR></TABLE>>];
+  tok:p2:s -> E:r2:w [color="#1A6FB4" penwidth=1.6 arrowsize=0.8];
+  E:r2e:e -> vec:w [color="#C9322B" penwidth=1.6 arrowsize=0.8];
+  { rank=same; E; vec; }
+  E -> cap [style=invis];
+}
+```
+:::
+
+:::
+
+::: {.fragment}
+[`a` and `t` then get the same treatment.  The 30 numbers in $\mathbf{E}$ are learned parameters.]{.smaller}
+:::
+
+## Why embeddings end up meaningful
+
+The **distributional hypothesis** (Harris, 1954):
+
+> *Words that occur in similar contexts have similar meanings.*
+
+::: {.card}
+* Train a model to predict words from their context.
+* The hidden representation must capture context-relevant similarity.
+* Words appearing in interchangeable contexts get nudged to similar embeddings.
+
+Nobody defines "meaning" anywhere in this setup. Similar embeddings fall out of the prediction task on their own.
+:::
+
+## How embeddings actually get trained
+
+[Word2vec, in one slide]{.eyebrow}
+
+::: {.columns}
+::: {.column width="50%"}
+[Skip-gram]{.pill-blue}
+
+Given a centre word, predict its **neighbours** (within a window).
+
+* Input: one word.
+* Output: a *single* softmax over the whole vocabulary ($V$ slots), trained to put probability mass on each true neighbour.
+* Loss: cross-entropy.
+:::
+::: {.column width="50%"}
+[CBOW (continuous bag-of-words)]{.pill-blue}
+
+Given the neighbours, predict the **centre** word.
+
+* The inverse problem.
+* Slightly more efficient to train.
+* Same family of result.
+:::
+:::
+
+::: {.card}
+**Why this works.** To predict context, the model *has* to encode similarity-of-meaning into the embeddings — otherwise it can't generalise across the millions of contexts in the training corpus.
+
+GPT, Claude, and BERT all train embeddings the same way — as a side-effect of their primary task.
+:::
+
+## The difference, drawn
+
+::: {.columns}
+::: {.column width="50%"}
+[Skip-gram]{.pill-blue}
+
+```{dot}
+//| fig-height: 2.4
+digraph SG {
+  rankdir="LR"; bgcolor="transparent"; nodesep=0.15; ranksep=0.7;
+  node [fontname="Inter" shape=box];
+  sat [style=filled fillcolor="#1A6FB4" fontcolor="white"];
+  E [label="look up\nin E" style=filled fillcolor="#F4F1EA"];
+  the1 [label="the" style=filled fillcolor="#C9322B" fontcolor="white"];
+  cat [style=filled fillcolor="#C9322B" fontcolor="white"];
+  on [style=filled fillcolor="#C9322B" fontcolor="white"];
+  the2 [label="the" style=filled fillcolor="#C9322B" fontcolor="white"];
+  sat -> E; E -> the1; E -> cat; E -> on; E -> the2;
+}
+```
+
+[One input, four predictions — this window alone contributes four cross-entropy terms.]{.smaller}
+:::
+::: {.column width="50%"}
+[CBOW]{.pill-green}
+
+```{dot}
+//| fig-height: 2.4
+digraph CB {
+  rankdir="LR"; bgcolor="transparent"; nodesep=0.15; ranksep=0.7;
+  node [fontname="Inter" shape=box];
+  the1 [label="the" style=filled fillcolor="#1A6FB4" fontcolor="white"];
+  cat [style=filled fillcolor="#1A6FB4" fontcolor="white"];
+  on [style=filled fillcolor="#1A6FB4" fontcolor="white"];
+  the2 [label="the" style=filled fillcolor="#1A6FB4" fontcolor="white"];
+  E [label="average the\n4 rows of E" style=filled fillcolor="#F4F1EA"];
+  sat [style=filled fillcolor="#C9322B" fontcolor="white"];
+  the1 -> E; cat -> E; on -> E; the2 -> E; E -> sat;
+}
+```
+
+[Four inputs, averaged, one prediction — the averaging is the *bag*: order inside the window is gone.]{.smaller}
+:::
+:::
+
+::: {.callout-note}
+# Both arrows point at the same table
+
+Whichever direction you pick, the parameters being trained are the rows of $\mathbf{E}$. After millions of windows, `sat`'s row has been nudged towards the rows of the words it keeps company with.
+:::
+
+## What does the network actually look like?
+
+[The whole of word2vec (skip-gram), at the scale of our five-word vocabulary. Blue = input word; red = the neighbours to predict.]{.eyebrow}
+
+```{dot}
+//| fig-height: 3.2
+digraph W2V {
+  rankdir="LR"; ranksep=1.4; nodesep=0.22; bgcolor="transparent";
+  node [fontname="Inter" fontsize=12];
+  lin [shape=plaintext label="one-hot for 'sat'\n(V = 5)" fontcolor="#5C6473"];
+  i0 [shape=box label="the · 0"];
+  i1 [shape=box label="cat · 0"];
+  i2 [shape=box label="sat · 1" style=filled fillcolor="#1A6FB4" fontcolor="white"];
+  i3 [shape=box label="on · 0"];
+  i4 [shape=box label="mat · 0"];
+  lh [shape=plaintext label="hidden (d = 3)\nno activation" fontcolor="#5C6473"];
+  h1 [shape=circle label="h₁" style=filled fillcolor="#F4F1EA"];
+  h2 [shape=circle label="h₂" style=filled fillcolor="#F4F1EA"];
+  h3 [shape=circle label="h₃" style=filled fillcolor="#F4F1EA"];
+  lo [shape=plaintext label="softmax\nover V" fontcolor="#5C6473"];
+  o0 [shape=box label="P(the)" style=filled fillcolor="#C9322B" fontcolor="white"];
+  o1 [shape=box label="P(cat)" style=filled fillcolor="#C9322B" fontcolor="white"];
+  o2 [shape=box label="P(sat)"];
+  o3 [shape=box label="P(on)" style=filled fillcolor="#C9322B" fontcolor="white"];
+  o4 [shape=box label="P(mat)"];
+  { rank=same; lin; i0; i1; i2; i3; i4; }
+  { rank=same; lh; h1; h2; h3; }
+  { rank=same; lo; o0; o1; o2; o3; o4; }
+  lin -> i0 -> i1 -> i2 -> i3 -> i4 [style=invis];
+  lh -> h1 -> h2 -> h3 [style=invis];
+  lo -> o0 -> o1 -> o2 -> o3 -> o4 [style=invis];
+  edge [color="#5C6473" arrowsize=0.5 penwidth=0.7];
+  {i0 i1 i2 i3 i4} -> {h1 h2 h3};
+  {h1 h2 h3} -> {o0 o1 o2 o3 o4};
+}
+```
+
+[The left bundle of arrows is $\mathbf{W}_{\text{in}}$ ($5 \times 3$): multiplying the one-hot by it selects one row. So the hidden layer *is* `sat`'s embedding. The right bundle is $\mathbf{W}_{\text{out}}$ ($3 \times 5$), feeding the softmax.]{.smaller}
+
+::: {.columns}
+::: {.column width="50%"}
+::: {.card}
+[Number of parameters]{.eyebrow}
+
+$\mathbf{W}_{\text{in}}$: $5 \times 3 = 15$. $\mathbf{W}_{\text{out}}$: $3 \times 5 = 15$. Total: **30** (no bias terms!)
+
+At Google News scale ($V = 3$M, $d = 300$): $900$M *per matrix*. The shapes-table entry earlier was $\mathbf{W}_{\text{in}}$.
+:::
+:::
+::: {.column width="50%"}
+::: {.callout-tip}
+# At inference, we throw away the output
+
+After training, row $i$ of $\mathbf{W}_{\text{in}}$ is word $i$'s embedding. We discard $\mathbf{W}_{\text{out}}$ and the softmax.
+
+* The prediction task was used *only* to learn the embeddings
+
+:::
+:::
+:::
+
+## Can we afford that softmax?
+
+[The output layer, at real scale [@mikolov2013word2vec]]{.eyebrow}
+
+Our toy softmax had 5 slots. Google News word2vec has $V = 3$M.
+
+::: {.card}
+[The bill, per training pair]{.eyebrow}
+
+To normalise a softmax you must score **every** word: $\mathbf{h}\,\mathbf{W}_{\text{out}}$ is $300 \times 3\text{M} = 900$M multiplications — for *one* window, before *one* update. Multiply by billions of windows.
+:::
+
+::: {.card}
+[The fix — negative sampling]{.eyebrow}
+
+Swap "which of 3M words is the neighbour?" for a handful of **yes/no questions**:
+
+* The real pair from the corpus — (`sat`, `cat`) → target **yes**.
+* $k$ fake pairs with randomly drawn words — (`sat`, `quasar`), (`sat`, `invoice`), … → target **no**.
+
+Each question is a logistic regression on the two words' vectors. With $k = 5$: one update touches $6 \times 300 = 1{,}800$ output weights, not 900M — **half a million times less work**.
+:::
+
+[The embeddings come out about as good — and since we discard the output side anyway, nothing of value is lost.]{.smaller .muted}
+
+## The classic demonstration [@mikolov2013word2vec]
+
+Word2vec embeddings, trained on a big corpus:
+
+$$
+\mathbf{e}_{\text{king}} - \mathbf{e}_{\text{man}} + \mathbf{e}_{\text{woman}} \ \approx \ \mathbf{e}_{\text{queen}}
+$$
+
+::: {.card}
+**Analogies become vector arithmetic.** "King is to man as queen is to woman" — the relationship is encoded as a *direction* in the embedding space.
+
+The model wasn't trained to do analogies. It learned them as a by-product of predicting context words.
+:::
+
+::: {.callout-warning}
+Real-world embeddings encode *all* statistical regularities of their training corpus — including the unsavoury ones. We come back to this.
+:::
+
+## Measuring "closeness" with cosine similarity
+
+[What does that $\approx$ actually mean for two vectors?]{.eyebrow}
+
+We keep saying two embeddings are "close." The standard measure is **cosine similarity** —- the cosine of the angle $\theta$ between them:
+
+$$
+\cos\theta = \frac{\mathbf{a}\cdot\mathbf{b}}{\lVert\mathbf{a}\rVert\,\lVert\mathbf{b}\rVert}
+$$
+
+* $+1$ → same direction (very similar).
+* $0$ → orthogonal (unrelated — exactly the one-hot case).
+* $-1$ → opposite direction.
+
+## Calculating cosine similarity
+
+::: {.card}
+[A 2-D worked example]{.eyebrow}
+
+Let $\mathbf{a} = (3, 4)$ and $\mathbf{b} = (4, 3)$.
+
+* Dot product: $\mathbf{a}\cdot\mathbf{b} = 3\times 4 + 4\times 3 = 24$.
+* Lengths: $\lVert\mathbf{a}\rVert = \sqrt{3^2 + 4^2} = 5$ and $\lVert\mathbf{b}\rVert = \sqrt{4^2 + 3^2} = 5$.
+* So $\cos\theta = \dfrac{24}{5\times 5} = \dfrac{24}{25} = 0.96$ — nearly the same direction.
+
+Now take $\mathbf{c} = (4, -3)$: $\mathbf{a}\cdot\mathbf{c} = 12 - 12 = 0$, so $\cos\theta = 0$ — **orthogonal**, i.e. unrelated. (This is exactly what one-hot vectors are to each other.)
+:::
+
+::: {.try-box}
+[Try — 30 seconds in pairs]{.try-label}
+Compute $\cos\theta$ for $\mathbf{a} = (1, 0)$ and $\mathbf{b} = (1, 1)$.
+:::
+
+::: {.fragment}
+::: {.reveal-box}
+[Answer]{.reveal-label}
+$\mathbf{a}\cdot\mathbf{b} = 1\times 1 + 0\times 1 = 1$; $\lVert\mathbf{a}\rVert = 1$ and $\lVert\mathbf{b}\rVert = \sqrt{2} \approx 1.41$.
+
+$\cos\theta = \dfrac{1}{1\times 1.41} \approx 0.71$ — a 45° angle. Halfway between "identical" and "unrelated."
+:::
+:::
+
+## The analogy, with actual numbers
+
+[Let's earn that $\approx$ in a toy 2-D embedding space]{.eyebrow}
+
+Suppose, in our tiny space, the embeddings are:
+
+$$
+\mathbf{e}_{\text{king}} = (2, 1), \quad
+\mathbf{e}_{\text{man}} = (1, 1), \quad
+\mathbf{e}_{\text{woman}} = (1, 2)
+$$
+
+[Step 1 — do the arithmetic]{.eyebrow}
+
+$$
+\mathbf{e}_{\text{king}} - \mathbf{e}_{\text{man}} + \mathbf{e}_{\text{woman}}
+= (2 - 1 + 1,\; 1 - 1 + 2) = (2, 2)
+$$
+
+Call this result $\mathbf{r} = (2, 2)$, with length $\lVert\mathbf{r}\rVert = \sqrt{2^2 + 2^2} = \sqrt{8} \approx 2.83$.
+
+[Step 2 — find the nearest word by cosine similarity]{.eyebrow}
+
+We compare $\mathbf{r}$ to three candidate embeddings (each of length 5, so every denominator is $2.83\times 5 \approx 14.14$):
+
+| word | vector $\mathbf{v}$ | $\mathbf{r}\cdot\mathbf{v}$ | $\cos\theta$ |
+|---|---|---|---|
+| queen | $(4, 3)$ | $8 + 6 = 14$ | $14 / 14.14 \approx 0.99$ |
+| rock | $(0, 5)$ | $0 + 10 = 10$ | $10 / 14.14 \approx 0.71$ |
+| fish | $(3, -4)$ | $6 - 8 = -2$ | $-2 / 14.14 \approx -0.14$ |
+
+::: {.reveal-box}
+[Very high similarity]{.reveal-label}
+$\mathbf{e}_{\text{king}} - \mathbf{e}_{\text{man}} + \mathbf{e}_{\text{woman}}$ points almost exactly at **queen** ($\cos\theta \approx 0.99$) — far closer than to *rock* or *fish*.
+:::
+
+## We can do the same thing with characters
+
+Character-level embeddings work the same way:
+
+::: {.card}
+* Vocabulary $V$ = 65 characters (uppercase + lowercase + punctuation + whitespace).
+* Embedding dim $d$ = 32, for example
+* Embedding matrix: $65 \times 32 = 2{,}080$ parameters. Next to nothing.
+
+Each character gets a dense vector. Backprop tunes those vectors to be useful for the next-character prediction task.
+:::
+
+## Embedding shapes you'll see in practice
+
+::: {.card}
+| Model | Vocab $V$ | Dim $d$ | $V \cdot d$ |
+|---|---|---|---|
+| Character LM (today's lab) | 65 | 32 | ~2k |
+| word2vec (Google News) | 3M | 300 | ~900M |
+| BERT-base | 30,522 | 768 | ~23M |
+| GPT-3 | 50,257 | 12,288 | ~617M |
+| Llama-3-70B | 128,256 | 8,192 | ~1.05B |
+:::
+
+::: {.callout-tip}
+# What proportion of a model is the embedding matrix?
+It depends how big the rest of the model is. GPT-2's ($50{,}257 \times 768 \approx 38.6$M) is about a *third* of its 124M parameters whereas Llama-3-70B's is ~1.5%.
+:::
+
+## Stop and take stock
+
+[<span class="pause-cue">Stop & check</span>]{.eyebrow}
+
+::: {.try-box}
+[Try — 60 seconds in pairs]{.try-label}
+
+We want a model that predicts next character from current character. We have a vocab of 65 characters and use 32-dim embeddings.
+
+**What is the shape of the embedding matrix? And what does each row of it *do* in the model?**
+:::
+
+::: {.fragment}
+::: {.reveal-box}
+[Answer]{.reveal-label}
+Shape: $(65, 32)$.
+
+Each row is **the dense vector representation of one character**. When the model receives character id $i$, it looks up row $i$ — and uses that vector as the input to subsequent layers.
+
+Rows are learnable. Backprop will pull characters that appear in similar contexts towards similar embeddings.
+:::
+:::
+
+# Plenary · tokenise & count {background-color="#0E1A2B"}
+
+## Plenary · tokenise + bigram counts
+
+[<span class="pause-cue">≈ 10 min</span> · in pairs]{.eyebrow}
+
+::: {.card}
+[Corpus]{.eyebrow}
+
+`"the cat sat on the mat"`
+
+Treat each **character** as a token (including spaces). Treat the end of the string as a special end token.
+
+[Task 1: Tokenise]{.eyebrow}
+
+1. List all unique characters.
+2. Assign each an integer id.
+3. Encode the corpus as a list of ids.
+:::
+
+::: {.card}
+[Task 2: Bigram counts]{.eyebrow}
+
+A **bigram** is a pair of adjacent characters.
+
+* Go through your encoded corpus.
+* For each pair $(c_a, c_b)$, increment a counter.
+* What's the most common bigram? Second most common?
+:::
+
+[Six minutes.]{.muted}
+
+## Plenary · partial answer
+
+::: {.card}
+[Unique characters]{.eyebrow} 10 (including the space): `' ', 'a', 'c', 'e', 'h', 'm', 'n', 'o', 's', 't'`.
+
+[Most common bigram]{.eyebrow} — `('a', 't')`, which appears **three** times: c**at**, s**at**, m**at**. (The pair `('t', 'h')` appears only twice — **th**e, **th**e.)
+
+[Most frequent character]{.eyebrow} — `'t'`, counting *every* occurrence, appears **five** times: **t**he, ca**t**, sa**t**, **t**he, ma**t**.
+:::
+
+::: {.callout-tip}
+**This count table *is* a model.** If you have $P(c_b \mid c_a)$ for every pair, you can sample text:
+
+* Pick a starting character.
+* Sample next character given current.
+* Repeat.
+
+It generates gibberish — but **with structure**. Next we'll meet the smallest neural-network version of this.
+:::
+
+# Part 2 · What embeddings mean {background-color="#0E1A2B"}
+
+## Visualising embeddings
+
+[High-dim vectors compressed to 2D]{.eyebrow}
+
+::: {.columns}
+::: {.column width="42%"}
+Embeddings live in $\mathbb{R}^{50}$, $\mathbb{R}^{300}$, higher — invisible to the eye.
+
+But we can **project** them down to 2D using:
+
+* **PCA** — fast, linear, preserves global structure.
+* **t-SNE** — slow, non-linear, preserves *local* structure (clusters pop out).
+* **UMAP** — newer; balances local + global.
+
+On the right: 20 words from **GloVe** (50-d vectors, trained on 6 billion tokens of Wikipedia + newswire), PCA to 2D.
+
+The categories separate on their own — nobody told the model they exist.
+:::
+::: {.column width="58%"}
+```{python}
+#| echo: false
+#| fig-width: 5.4
+#| fig-height: 4.2
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib_inline.backend_inline as backend_inline
+
+# SVG keeps the figure vector-sharp when the deck is projected.
+backend_inline.set_matplotlib_formats("svg")
+
+# ME324 deck palette (see assets/theme/me324.scss); category colours from the
+# CVD-checked set used in lecture 7.
+INK, MUTED, RULE, PAPER = "#0E1A2B", "#5C6473", "#D7D2C5", "#FBFAF6"
+CAT_COLOURS = {"animal": "#016998", "city": "#DB6803", "food": "#0E9E42"}
+# Hand-placed offsets for labels that would otherwise collide.
+LABEL_OFF = {"dog": (-8, -3, "right"), "cat": (6, 4, "left"),
+             "horse": (8, -3, "left"), "bird": (0, -15, "center"),
+             "sheep": (-8, -3, "right"), "rice": (7, -2, "left"),
+             "bread": (-8, -2, "right"), "cheese": (9, -2, "left"),
+             "berlin": (-8, -3, "right"), "madrid": (8, -3, "left"),
+             "rome": (2, -15, "center")}
+
+plt.rcParams.update({
+    "font.family": "sans-serif",
+    "font.sans-serif": ["Inter", "Helvetica Neue", "Arial", "DejaVu Sans"],
+    "text.color": INK, "axes.labelcolor": INK,
+    "xtick.color": MUTED, "ytick.color": MUTED, "axes.edgecolor": RULE,
+})
+
+# Pretrained vectors from tools/make-glove-words.py (GloVe 6B, 50-d).
+D = np.load("../assets/data/glove-words.npz")
+words, cats, V = D["words"], D["category"], D["vectors"]
+
+# PCA: centre, SVD, keep the top two directions.
+X = V - V.mean(axis=0)
+_, S, Vt = np.linalg.svd(X, full_matrices=False)
+P = X @ Vt[:2].T
+
+fig, ax = plt.subplots(figsize=(5.4, 4.2))
+fig.patch.set_alpha(0)          # sit on the slide's own background
+ax.patch.set_alpha(0)
+for w, c, (x, y) in zip(words, cats, P):
+    w, col = str(w), CAT_COLOURS[str(c)]
+    dx, dy, ha = LABEL_OFF.get(w, (0, 7, "center"))
+    ax.scatter(x, y, s=14, c=col, lw=0)
+    ax.annotate(w, xy=(x, y), xytext=(dx, dy), textcoords="offset points",
+                color=col, fontsize=10.5, fontweight="bold", ha=ha)
+ax.margins(0.1)
+ax.set_xlabel("PCA dimension 1", fontsize=11)
+ax.set_ylabel("PCA dimension 2", fontsize=11)
+ax.grid(True, color=RULE, lw=0.8, alpha=0.5)
+ax.set_axisbelow(True)
+ax.set_aspect("equal")
+for side in ("top", "right"):
+    ax.spines[side].set_visible(False)
+plt.tight_layout()
+plt.show()
+```
+
+[The two PCA directions keep 55% of the 50 dimensions' variance. And look at `fish` — pulled off the animal cluster, towards the food one. The corpus knows fish is also dinner (to some).]{.smaller}
+:::
+:::
+
+## Static vs contextual embeddings
+
+[An important distinction]{.eyebrow}
+
+::: {.columns}
+::: {.column width="50%"}
+[Static]{.pill-blue}
+
+* **One vector per word, period.**
+* `"bank"` in *river bank* and *Bank of England* has the same embedding.
+* Word2vec, GloVe, fastText.
+* What we use today.
+:::
+::: {.column width="50%"}
+[Contextual]{.pill-green}
+
+* **The vector depends on the sentence.**
+* `"bank"` in two sentences gets *two different* vectors.
+* BERT, GPT, Claude all produce these.
+* Requires **attention** (Day 10).
+:::
+:::
+
+::: {.card}
+Static embeddings are most useful for retrieval, document similarity, social-science measurement. For *generation* you will want to use contextual embeddings.
+:::
+
+## Embeddings as geometry
+
+::: {.card}
+Once you have a trained embedding matrix, you can:
+
+* **Cluster** documents by averaging token embeddings within each
+
+* **Search** by embedding query + corpus, returning the nearest neighbour — *semantic retrieval*
+
+  * This is the retrieval step behind **RAG** (retrieval augmented generation)
+  
+* **Classify** — feed embeddings into a classifier for sentiment, stance, topic.
+
+* **Compare** documents using cosine similarity.
+
+:::
+
+Embeddings are the *glue* of much of NLP!
+
+## From word vectors to document vectors
+
+[The simplest recipe: average]{.eyebrow}
+
+To embed a sentence or a whole document: look up every word's vector, take the mean.
+
+::: {.card}
+[A worked 2-D example]{.eyebrow}
+
+Suppose $\mathbf{e}_{\text{great}} = (2, 1)$, $\mathbf{e}_{\text{terrible}} = (-2, 1)$, $\mathbf{e}_{\text{film}} = (0, 3)$.
+
+* *"great film"* → $\dfrac{(2,1) + (0,3)}{2} = (1, 2)$
+* *"terrible film"* → $\dfrac{(-2,1) + (0,3)}{2} = (-1, 2)$
+
+The **words** *great* and *terrible* point apart: $\cos\theta = \dfrac{-4 + 1}{\sqrt{5}\,\sqrt{5}} = -0.6$.
+
+The **documents** end up close: $\cos\theta = \dfrac{-1 + 4}{\sqrt{5}\,\sqrt{5}} = +0.6$ — the shared *film* dominates the average.
+:::
+
+* Averaging keeps the **topic** and dilutes the **sentiment** — fine for "what is this about?", risky for "what does it say?"
+* Word order is gone too: *"dog bites man"* and *"man bites dog"* average to the same vector.
+* The next slide's ideology measure is exactly this recipe. Modern retrieval (RAG) upgrades it with transformer sentence embeddings — Day 10.
+
+## Social-science example — measuring concepts
+
+::: {.columns}
+::: {.column width="55%"}
+**Word embeddings let us measure abstract concepts**.
+
+* Train embeddings on a large corpus of legislative speeches
+
+* Compute the average embedding of words like *redistribution, taxation, welfare*
+
+* Compute distance from each MP's speech embedding to that "left-economic" direction
+
+* You get a **scaled measure** of left-economic emphasis per MP
+
+This is how Rodriguez, Spirling & Stewart (2023) and others measure ideology *from text alone*.
+:::
+::: {.column width="45%"}
+::: {.card}
+A concept that's hard to define directly often has a **geometric expression** in embedding space:
+
+* Direction = the concept itself
+* Magnitude = how strongly an item carries the concept
+* Cluster = a discovered category
+
+:::
+:::
+:::
+
+## Social-science example — bias in embeddings
+
+::: {.columns}
+::: {.column width="55%"}
+Bolukbasi et al. (2016) — *Man is to computer programmer as woman is to homemaker?*
+
+* Word2vec embeddings trained on Google News.
+* The vector arithmetic $\mathbf{e}_{\text{man}} - \mathbf{e}_{\text{woman}}$ — call this the "gender direction".
+* For occupations: *doctor* lies closer to "man", *nurse* to "woman".
+* For adjectives: *brilliant* to "man", *lovely* to "woman".
+:::
+::: {.column width="45%"}
+::: {.card}
+The embeddings are "doing their job": they reflect how words actually co-occur in the corpus
+
+* Including the patterns we'd prefer they didn't!
+
+A model trained on these embeddings will inherit the bias. 
+
+* E.g. downstream classifiers for résumé screening
+
+:::
+:::
+:::
+
+## What to do about embedding bias
+
+[Three approaches, all imperfect]{.eyebrow}
+
+::: {.columns}
+::: {.column width="33%"}
+[Geometric debiasing]{.pill-amber}
+
+Find the "gender direction" in embedding space and *project it out* of occupation embeddings.
+
+* Fast.
+* Removes one axis of bias.
+* Bolukbasi et al. (2016).
+
+:::
+::: {.column width="33%"}
+[Data debiasing]{.pill-amber}
+
+Curate or rebalance the training corpus.
+
+* Slow.
+* Hard to do completely.
+* Hard to even *define* what "balanced" looks like for cultural concepts.
+:::
+::: {.column width="33%"}
+[Document and live with it]{.pill-amber}
+
+Be explicit about what the embeddings encode.
+
+* Often the most honest path for research.
+* The bias *is the data*; removing it may distort the construct you want to measure.
+:::
+:::
+
+::: {.callout-warning}
+# Bias in social science applications
+Using embeddings as **measurement instruments** can cut both ways: it can reveal real corpus patterns (even if biased) *but* it can also distort downstream measurement.
+:::
+
+## Debiasing is harder than it looks
+
+[The paper is titled "Lipstick on a pig" — that's the finding]{.eyebrow}
+
+::: {.card}
+Gonen & Goldberg tested the geometric fix from the last slide [@gonen2019lipstick]:
+
+* Take the words with the strongest gender associations in the original embeddings.
+* Apply the standard debiasing projection — find the gender direction, subtract it out.
+* Look at the "debiased" space: **those same words still cluster together**, and a classifier can still recover each word's former gender association from its new embedding.
+
+The bias was never stored in one direction you can subtract away. It is spread across many dimensions of the space.
+:::
+
+The practical upshot is that you should **measure and report** the bias in the embeddings you use.
+
+## What we'll *do* with embeddings today
+
+::: {.card}
+We're going to use the smallest possible embedding matrix — one row per character — as the input to a model that predicts the *next character*.
+
+This is called a **bigram language model**
+
+* It is *very bad* at modelling language!
+* It helps us motivate the additions we'll need to grow this into GPT
+
+
+:::
+
+# Activity · embedding behaviour {background-color="#0E1A2B"}
+
+## Activity · predict embedding behaviour
+
+[<span class="pause-cue">≈ 8 min</span> · in pairs]{.eyebrow}
+
+::: {.card}
+A word2vec model is trained on a 10-billion-token English corpus. We extract embeddings of these words:
+
+* `king, queen, prince, princess`
+* `cat, dog, horse, fish, table, chair`
+* `London, Paris, Berlin, Rome`
+* `walking, running, swimming, eating`
+
+[Without computing anything, predict the answers]{.eyebrow}
+
+1. Which pair is *closest* in embedding space — `(king, queen)` or `(king, fish)`?
+2. What vector arithmetic captures "king is to queen as ? is to princess"?
+3. What set of words would you expect to be tightly clustered, separate from the others?
+4. Where would `walking + cat - dog` land — closer to which other word?
+:::
+
+[Discuss in pairs. We'll compare guesses.]{.muted}
+
+## Activity · plausible answers
+
+::: {.card}
+1. **(king, queen)** — same domain, same level of formality. (king, fish) cross-domain.
+2. **king - queen = ? - princess** → `?` = prince.
+3. **Cities** typically cluster tightly. Animals also, separately. Verbs of locomotion (walking, running, swimming) form another cluster — and the model often learns this without being told.
+4. `walking + (cat - dog)` lands close to `walking` itself. *Cat* and *dog* are near neighbours, so their difference is a short vector — adding it barely moves you.
+:::
+
+::: {.callout-tip}
+Different models give slightly different geometry, so the details vary
+:::
+
+# Part 3 · The bigram language model {background-color="#0E1A2B"}
+
+## The task
+
+[Given the previous character, predict the next character.]{.eyebrow}
+
+::: {.card}
+Train on a chunk of text
+
+  * Shakespeare, news, code, etc. 
+
+And learn the distribution $P(c_{t+1} \mid c_t)$.
+
+**This is the same task GPT solves**, just on the smallest possible context (one character).
+
+We *don't need labels* as *the text* acts as its own signal
+
+* This is what makes language modelling so scalable
+
+:::
+
+## A pure-count bigram model
+
+Forget neural networks for a moment. The simplest model:
+
+::: {.card}
+1. Count, for each pair $(c_a, c_b)$, how often $c_b$ follows $c_a$.
+2. Normalise to get $P(c_b \mid c_a) = \text{count}(c_a, c_b) / \text{count}(c_a)$.
+3. To generate: pick a starting character. Sample next from $P(\cdot \mid c_a)$. Repeat.
+:::
+
+::: {.callout-note}
+This is a fine baseline but the output will be awful: e.g. `"hewenghadowt h"`.
+
+* Just notice it has the right *shape* and uses the right *signal*
+
+:::
+
+## The whole model, on one slide
+
+[The count table for the plenary corpus — every cell of it]{.eyebrow}
+
+::: {.columns}
+::: {.column width="52%"}
+```{python}
+#| echo: false
+#| fig-width: 4.6
+#| fig-height: 4.6
+# Reuses the imports and palette set up in the GloVe cell earlier in the deck.
+from matplotlib.colors import LinearSegmentedColormap
+
+corpus = "the cat sat on the mat"
+chars = sorted(set(corpus))
+stoi = {c: i for i, c in enumerate(chars)}
+n = len(chars)
+counts = np.zeros((n, n), dtype=int)
+for a, b in zip(corpus, corpus[1:]):
+    counts[stoi[a], stoi[b]] += 1
+
+fig, ax = plt.subplots(figsize=(4.6, 4.6))
+fig.patch.set_alpha(0)
+ax.patch.set_alpha(0)
+cmap = LinearSegmentedColormap.from_list("blues", [PAPER, "#1A6FB4"])
+ax.imshow(counts, cmap=cmap, vmin=0, vmax=counts.max())
+for i in range(n):
+    for j in range(n):
+        c = counts[i, j]
+        colour = RULE if c == 0 else (INK if c == 1 else PAPER)
+        ax.text(j, i, str(c), ha="center", va="center", fontsize=11,
+                color=colour, fontweight="normal" if c == 0 else "bold")
+labels = ["␣" if c == " " else c for c in chars]
+ax.set_xticks(range(n), labels, fontsize=11)
+ax.set_yticks(range(n), labels, fontsize=11)
+ax.xaxis.tick_top()
+ax.xaxis.set_label_position("top")
+ax.set_xlabel("next character", fontsize=11)
+ax.set_ylabel("current character", fontsize=11)
+ax.set_xticks(np.arange(n) - 0.5, minor=True)
+ax.set_yticks(np.arange(n) - 0.5, minor=True)
+ax.grid(which="minor", color=RULE, lw=0.6)
+ax.tick_params(which="both", length=0)
+for s in ax.spines.values():
+    s.set_visible(False)
+plt.tight_layout()
+plt.show()
+```
+:::
+::: {.column width="48%"}
+* Rows: current character. Columns: next. The corpus has **21 adjacent pairs**; every one is tallied in exactly one cell.
+
+* Read row `t`: after `t` we saw `h` twice and `' '` twice, so $P(\texttt{h} \mid \texttt{t}) = \frac{2}{4} = 0.5$.
+
+* Row `a` is fully committed: all three counts in one cell, so $P(\texttt{t} \mid \texttt{a}) = 1$.
+
+::: {.card}
+**85 of the 100 cells are zero.** Hold that thought for the next slide.
+:::
+:::
+:::
+
+## The zero-count problem
+
+Take our starting sentence `"the cat sat on the mat"`.
+
+::: {.card}
+In this corpus, `h` appears twice — and both times the next character is `e`.
+
+So the count table says:
+
+* $\text{count}(\texttt{h}, \texttt{e}) = 2$, and $P(\texttt{e} \mid \texttt{h}) = 2/2 = 1$.
+* $\text{count}(\texttt{h}, \texttt{a}) = 0$, and $P(\texttt{a} \mid \texttt{h}) = 0/2 = 0$.
+:::
+
+::: {.try-box}
+[Try it yourself]{.try-label}
+**What probability does the model give the string `"the cat sat on the hat"`?**
+:::
+
+::: {.fragment}
+::: {.reveal-box}
+[Answer]{.reveal-label}
+**Zero.** Since `h` → `a` never occurs in training, it has probability 0. 
+
+* The model multiplies the transition probabilities together, and one zero blanks the whole product
+
+The model confuses *"I never saw this"* with *"this is impossible"*.
+:::
+:::
+
+## Add-one (Laplace) smoothing
+
+We can pretend we see every pair **one extra time**.
+
+$$
+P(c_b \mid c_a) = \frac{\text{count}(c_a, c_b)}{\text{count}(c_a)}
+\quad \longrightarrow \quad
+P(c_b \mid c_a) = \frac{\text{count}(c_a, c_b) + 1}{\text{count}(c_a) + V}
+$$
+
+The $+V$ in the denominator (here $V = 10$ characters) keeps each row summing to 1.
+
+::: {.card}
+[Worked example — the `h` row]{.eyebrow}
+
+$\text{count}(\texttt{h}) = 2$, so every denominator is $2 + 10 = 12$:
+
+* $P(\texttt{e} \mid \texttt{h}) = \dfrac{2 + 1}{2 + 10} = \dfrac{3}{12} = 0.25$
+* $P(\texttt{a} \mid \texttt{h}) = \dfrac{0 + 1}{2 + 10} = \dfrac{1}{12} \approx 0.083$ — and likewise for the other 8 unseen characters.
+
+Row sum: $\dfrac{3}{12} + 9 \times \dfrac{1}{12} = \dfrac{12}{12} = 1$. Still a probability distribution!
+:::
+
+The zero became small-but-nonzero. `"the cat sat on the hat"` now gets a low probability instead of no probability.
+
+## Why not trigrams?
+
+If one character of context is good, surely two is better — and ten better still?
+
+::: {.card}
+[The table blows up]{.eyebrow}
+
+With $V = 27$ characters (26 letters + space), a count table over $n$-grams has $V^n$ cells:
+
+| context | table size |
+|---|---|
+| bigram | $27^2 = 729$ |
+| trigram | $27^3 = 19{,}683$ |
+| 10-gram | $27^{10} \approx 2 \times 10^{14}$ |
+
+The problem compounds if we use words: with $V = 50{,}000$ words, even the **bigram** table has $50{,}000^2 = 2.5 \times 10^9$ cells -- nearly all of them have count 0 (i.e. are sparse).
+:::
+
+Counting cannot scale to long contexts whereas sharing parameters through embeddings and a network can.
+
+## The same bigram as a neural network
+
+Exactly the same model:
+
+```python
+import torch.nn as nn
+
+class Bigram(nn.Module):
+    def __init__(self, vocab_size):
+        super().__init__()
+        # one row per character; one column per next-character logit
+        self.token_table = nn.Embedding(vocab_size, vocab_size)
+
+    def forward(self, idx):
+        # idx is a (B, T) tensor of token ids
+        logits = self.token_table(idx)       # (B, T, V)
+        return logits
+```
+
+::: {.card}
+* The embedding **is** the logit table. Row $i$ gives the score of each next character given character $i$.
+* Train with cross-entropy on the next character.
+* Total parameters: $V \cdot V$ — for $V = 65$, that's 4,225 numbers. Trivial.
+
+**This is the smallest substantive language model.** 
+:::
+
+## Training the bigram, concretely
+
+[A worked step]{.eyebrow}
+
+::: {.card}
+* Take one training pair: input `'t'` (id `9`), target `'h'` (id `4`).
+* Look up row 9 of the embedding/logits table → a vector of $V$ scores.
+* Apply softmax → a probability over `{', a, c, e, h, m, n, o, s, t}`.
+* Loss = $-\log P(\text{'h'}) = -\log(\text{slot 4})$.
+* Backprop adjusts row 9 to *raise* the score at slot 4.
+:::
+
+::: {.callout-tip}
+**That's it!** The model learns "when you see `t`, weight `h` a little higher." If we repeat this over the whole corpus, the bigram statistics emerge in the weights
+
+* These just are pure-count numbers (with a small amount of noise)
+
+:::
+
+## Generating from the model
+
+```python
+def generate(model, start, max_new=200):
+    idx = encode(start)
+    for _ in range(max_new):
+        logits = model(idx[-1:])              # only need the last char
+        probs  = softmax(logits, dim=-1)
+        next_id = sample(probs)
+        idx.append(next_id)
+    return decode(idx)
+```
+
+::: {.card}
+* Pass current context → logits → softmax → sample.
+* Append the sampled id to the running sequence.
+* Repeat.
+
+**Sampling** is what gives generation its variety. 
+
+* We can now vary the *temperature* to set how "adventurous" or "creative" the samples are
+:::
+
+## Temperature in sampling
+
+[A knob on how "creative" the model is]{.eyebrow}
+
+Standard softmax: $p_i = \dfrac{e^{z_i}}{\sum_j e^{z_j}}$.
+
+With temperature $\tau$: $p_i = \dfrac{e^{z_i / \tau}}{\sum_j e^{z_j / \tau}}$.
+
+::: {.columns}
+::: {.column width="50%"}
+[Low $\tau$ ($< 1$)]{.pill-blue}
+
+* Sharpens the distribution.
+* Best token gets even more probability mass.
+* Output: confident, repetitive.
+* At $\tau \to 0$: argmax (always pick best).
+:::
+::: {.column width="50%"}
+[High $\tau$ ($> 1$)]{.pill}
+
+* Flattens the distribution.
+* Rare tokens get more chance.
+* Output: creative, sometimes nonsense.
+:::
+:::
+
+::: {.card}
+Chat products often (used to) expose temperature as a hyperparameter: change the temperature and the output reads differently, without needing to change the weights.
+:::
+
+## How good is a language model?
+
+How do we *score* a model?
+
+::: {.card}
+Walk through a held-out string. At each position, ask the model: *what probability did you give the character that actually came next?*
+
+* Take $-\log p$ of each of those probabilities — the **negative log-likelihood** (NLL). High probability → small NLL.
+* Average the NLLs over the $N$ positions in the string.
+* **Perplexity** is $e$ to that average:
+
+$$
+\text{perplexity} = e^{\frac{1}{N}\sum_{t=1}^{N} -\log p_t}
+$$
+:::
+
+Perplexity reads as: *"the model is as unsure as if it were choosing uniformly among $k$ options."*
+
+A model that spreads probability uniformly over 27 characters gives every true character $p = \frac{1}{27}$, so the mean NLL is $-\log\frac{1}{27} = \log 27 \approx 3.30$, and perplexity is $e^{3.30} = 27$. As unsure as a 27-way guess.
+
+## Perplexity — a worked example
+
+A model reads a 4-token string. The probabilities it gave the four *true* next tokens:
+
+$$
+0.5, \quad 0.25, \quad 0.5, \quad 0.25
+$$
+
+::: {.card}
+[Step 1 — turn each probability into a number of options]{.eyebrow}
+
+A fair coin gets the answer right with $p = 0.5$ — so $p = 0.5$ means *as unsure as a 2-way guess*. In general: $1/p$ options.
+
+$$
+0.5 \to 2 \text{ ways}, \qquad 0.25 \to 4 \text{ ways}, \qquad 0.5 \to 2, \qquad 0.25 \to 4
+$$
+
+[Step 2 — average the guess sizes]{.eyebrow}
+
+Multiply them and take the 4th root — the *geometric* mean, the right average for numbers that multiply, as probabilities do:
+
+$$
+\text{perplexity} = (2 \times 4 \times 2 \times 4)^{1/4} = 64^{1/4} \approx 2.83
+$$
+:::
+
+**2.83 options.** The model made 2-way guesses on half the tokens and 4-way guesses on the other half, so its average uncertainty lands in between.
+
+[The formula on the last slide is this same computation, done with logs: mean NLL $= \tfrac{0.693 + 1.386 + 0.693 + 1.386}{4} \approx 1.04$, and $e^{1.04} \approx 2.83$. Logs just turn "multiply, then take the root" into "average, then exponentiate".]{.smaller .muted}
+
+## Perplexity — get a feel for the scale
+
+::: {.try-box}
+[Try it yourself]{.try-label}
+**What is the perplexity of a model that always puts probability 1 on the correct token? And of random guessing over 27 characters?**
+:::
+
+::: {.fragment}
+::: {.reveal-box}
+[Answer]{.reveal-label}
+
+* Always right: every NLL is $-\log 1 = 0$, so the mean is 0 and perplexity is $e^0 = \mathbf{1}$. I.e. no uncertainty at all.
+
+* Random guessing: every true token gets $p = \frac{1}{27}$, so perplexity is $\mathbf{27}$
+
+:::
+
+
+::: {.callout-tip}
+Compute your lab bigram's perplexity this afternoon and we can see whether tomorrow's RNN beats it.
+:::
+
+:::
+
+
+## What the bigram model is missing
+
+::: {.columns}
+::: {.column width="50%"}
+[What it has]{.pill-green}
+
+* A tokeniser.
+* An embedding.
+* A loss.
+* A training loop.
+* A sampler.
+
+**All the pieces of a real language model.**
+:::
+::: {.column width="50%"}
+[What it lacks]{.pill-amber}
+
+* **Context** — only sees the previous character.
+* No structure connecting positions.
+* No way to handle long-range dependencies (rhyme, names, narrative).
+
+This is why we need recurrence (tomorrow) and attention (Monday).
+:::
+:::
+
+## Stop and take stock
+
+[<span class="pause-cue">Where you are at the end of Day 8</span>]{.eyebrow}
+
+::: {.card}
+You can:
+
+1. Build a character-level tokeniser in 5 lines of Python.
+2. Explain why one-hot encoding doesn't scale.
+3. Describe an embedding as a learnable lookup table.
+4. State the distributional hypothesis and give one CS and one social-science example of its use.
+5. Train a bigram language model — and say what it is missing.
+6. Compute a perplexity and say what the number means.
+:::
+
+## A check-in on the headline promise
+
+[Two-thirds of the way through — where we are]{.eyebrow}
+
+::: {.card}
+* ✅ Forward pass + backprop
+* ✅ Feed-forward classifier
+* ✅ Vision (CNNs) + generative (VAE)
+* ✅ Text as data + a working bigram language model
+* ⏳ Tomorrow: memory (RNNs).
+* ⏳ Monday: **attention** — the last big architectural idea of the course
+* ⏳ Tuesday: BPE + sampling — your tiny GPT will write alright English
+
+**Eight days down, four to go!**
+:::
+
+# Lab brief · today's afternoon {background-color="#0E1A2B"}
+
+## Today's lab — 90 minutes
+
+[Goals]{.eyebrow}
+
+Train a character-level **bigram** language model on a small text corpus.
+
+Steps:
+
+1. Download a small text file (we'll provide tinyshakespeare or similar).
+2. Build a character-level tokeniser (encode + decode).
+3. Define a `Bigram` model in PyTorch (5–10 lines).
+4. Train for 1–2k steps with Adam + cross-entropy.
+5. Generate a 200-character sample. Read it. Laugh.
+
+::: {.card}
+[Stretch goals]{.eyebrow}
+
+* Sample at different **temperatures** — what changes?
+* Look at the trained embedding matrix. Does it have any visible structure (rows for vowels, etc.)?
+* Train on *your own* corpus — your essays, a journal — generate text in that voice.
+:::
+
+::: {.callout-tip}
+The output should be **terrible**. That's the point.
+:::
+
+## See you tomorrow {background-color="#0E1A2B"}
+
+[Lecture 9 — *Recurrent neural networks* · Thursday 13 Aug]{.eyebrow}
+
+### We give the model a memory
+
+Today's bigram sees only the **previous character** — it can't remember how a word/sentence began. Tomorrow we'll give the network a *memory* of everything it has read so far.
+
+[<span class="muted">Optional tonight:</span> Karpathy, [*The Unreasonable Effectiveness of Recurrent Neural Networks*](https://karpathy.github.io/2015/05/21/rnn-effectiveness/) (~20 min). Keep your bigram sample; we'll race it against an RNN tomorrow.]{.smaller}

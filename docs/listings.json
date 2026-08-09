@@ -6,7 +6,10 @@
       "/lectures/lecture-02-deep-models-primer.html",
       "/lectures/lecture-03-computational-graphs.html",
       "/lectures/lecture-04-backpropagation.html",
-      "/lectures/lecture-05-feedforward.html"
+      "/lectures/lecture-05-feedforward.html",
+      "/lectures/lecture-06-cnns.html",
+      "/lectures/lecture-07-generative-images.html",
+      "/lectures/lecture-08-text-embeddings.html"
     ]
   }
 ]

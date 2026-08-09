@@ -30,15 +30,19 @@ __pycache__/
 exams/
 quizzes/
 
+# Midterm (take-home, out Thu 13 Aug 2026). The Colab badge and the notebook's
+# wget URL point at assessment/... on main, so ON RELEASE DAY: delete the
+# `assessment/` line below (the xml-cache line stays), then commit the brief,
+# notebook and data. Checklist in assessment/README.md. Until then: never commit.
+assessment/
+assessment/xml-cache/
+
 # Internal working documents.
 *.docx
 
 # Weeks 2-3, released day by day. To publish one: delete its line here, add the
 # file to `render:` in _quarto.yml, add it to the listing in lectures.qmd or the
 # table in labs.qmd, then re-render and commit.
-lectures/lecture-06-*
-lectures/lecture-07-*
-lectures/lecture-08-*
 lectures/lecture-09-*
 lectures/lecture-10-*
 lectures/lecture-11-*
