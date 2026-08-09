@@ -32,6 +32,9 @@ project:
     - labs/lab-03-value-forward.ipynb
     - labs/lab-04-backprop-autograd.ipynb
     - labs/lab-05-pytorch-feedforward.ipynb
+    - labs/lab-06-cnn-images.ipynb
+    - labs/lab-07-autoencoders-vae.ipynb
+    - labs/lab-08-char-bigram.ipynb
   preview:
     port: 4200
     browser: true
