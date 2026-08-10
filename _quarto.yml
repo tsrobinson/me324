@@ -27,6 +27,7 @@ project:
     - lectures/lecture-06-cnns.qmd
     - lectures/lecture-07-generative-images.qmd
     - lectures/lecture-08-text-embeddings.qmd
+    - lectures/lecture-09-rnns.qmd
     - labs/lab-01-setup-and-tensors.ipynb
     - labs/lab-02-perceptron-numpy.ipynb
     - labs/lab-03-value-forward.ipynb

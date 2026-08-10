@@ -2449,7 +2449,7 @@ y = (3x + 2)(x - 1) \quad \text{with } x = 4.
 <section id="the-same-descent-as-a-picture" class="slide level2">
 <h2>The same descent, as a picture</h2>
 <p><span class="eyebrow"><span class="math inline">w</span> and <span class="math inline">b</span> start equal and get the same gradient, so they move together — one axis shows both</span></p>
-<div id="9f94c159" class="cell" data-fig-height="3.6" data-fig-width="9" data-execution_count="1">
+<div id="ef88e72c" class="cell" data-fig-height="3.6" data-fig-width="9" data-execution_count="1">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
@@ -2464,7 +2464,7 @@ y = (3x + 2)(x - 1) \quad \text{with } x = 4.
 </section>
 <section id="the-learning-rate-the-one-toggle-you-always-tune" class="slide level2">
 <h2>The learning rate — the one toggle you always tune</h2>
-<div id="d78792bb" class="cell" data-fig-height="3.5" data-fig-width="9" data-execution_count="2">
+<div id="937f9889" class="cell" data-fig-height="3.5" data-fig-width="9" data-execution_count="2">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
@@ -2523,7 +2523,7 @@ y = (3x + 2)(x - 1) \quad \text{with } x = 4.
 </ul>
 <p>In a big network, almost every critical point has at least one downhill direction — a saddle, not a minimum <span class="citation" data-cites="dauphin2014identifying">(<a href="#/see-you-tomorrow" role="doc-biblioref" onclick="">Dauphin et al., 2014</a>)</span>.</p>
 </div><div class="column" style="width:50%;">
-<div id="6bcf8620" class="cell" data-fig-height="4.4" data-fig-width="5.4" data-execution_count="3">
+<div id="d137653e" class="cell" data-fig-height="4.4" data-fig-width="5.4" data-execution_count="3">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
@@ -2771,7 +2771,7 @@ v \leftarrow \gamma v + g, \qquad w \leftarrow w - \lambda v
 </section>
 <section id="the-training-loop-preview-of-tomorrow" class="slide level2">
 <h2>The training loop — preview of tomorrow</h2>
-<div id="eab1a336" class="cell" data-execution_count="4">
+<div id="68a869fd" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> epoch <span class="kw">in</span> <span class="bu">range</span>(num_epochs):</span>
 <span id="cb1-2"><a aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> x_batch, y_batch <span class="kw">in</span> train_loader:</span>
 <span id="cb1-3"><a aria-hidden="true" tabindex="-1"></a>        optimizer.zero_grad()              <span class="co"># clear last step's gradients</span></span>

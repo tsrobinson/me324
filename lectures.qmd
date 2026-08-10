@@ -24,6 +24,8 @@ listing:
       pdf: "lectures/pdf/lecture-07-generative-images.pdf"
     - path: "lectures/lecture-08-text-embeddings.qmd"
       pdf: "lectures/pdf/lecture-08-text-embeddings.pdf"
+    - path: "lectures/lecture-09-rnns.qmd"
+      pdf: "lectures/pdf/lecture-09-rnns.pdf"
   template: assets/lecture-grid.ejs
   sort: "date"
 ---
@@ -36,7 +38,7 @@ and **?** for the full list of shortcuts.
 :::
 
 ::: {.callout-note appearance="simple"}
-**Later lectures are not posted yet.** Lecture 9 and week 3 will appear as we reach them. The full twelve-lecture outline is on the
+**Week 3 lectures are not posted yet.** They will appear as we reach them. The full twelve-lecture outline is on the
 [home page](index.qmd), and the [reading list](readings.qmd) covers all three weeks if you want to read ahead.
 :::
 

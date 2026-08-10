@@ -1,0 +1,1614 @@
+---
+title: "Building your own text-generating AI (2/4)"
+subtitle: "Lecture 9 — Recurrence and the problem of memory"
+author: "Dr Thomas Robinson"
+date: "2026-08-13"
+date-format: long
+bibliography: ../refs.bib
+format: 
+  revealjs:
+    smaller: true
+---
+
+## Warm-up · three questions from last time
+
+[<span class="pause-cue">≈ 5 min</span> · shout it out]{.eyebrow}
+
+::: {.card}
+1. A bigram language model predicts the next token from how much context?
+2. What is the cosine similarity of $[1, 0]$ and $[0, 1]$?
+3. An embedding table for 27 tokens, with 8 dimensions per token — how many parameters?
+:::
+
+## Warm-up · answers
+
+::: {.card}
+1. **Exactly one token** — the current one. However long the text, the bigram model conditions on the single most recent token and nothing further back.
+
+2. $\dfrac{(1 \times 0) + (0 \times 1)}{1 \times 1} = \dfrac{0}{1} = 0$. The vectors are **orthogonal** — no overlap in direction at all.
+
+3. $27 \times 8 = 216$. No bias term to add: an embedding table is a lookup table, not a layer computation.
+:::
+
+# Part 1 · Why feedforward fails on sequences {background-color="#0E1A2B"}
+
+## The fixed-input problem
+
+[Picking up from yesterday]{.eyebrow}
+
+Last time our bigram model remembered exactly one character
+
+* Today we want to give it a running memory
+
+::: {.columns}
+::: {.column width="50%"}
+A feed-forward network has a **fixed input size**:
+
+* MLP: $\mathbf{x} \in \mathbb{R}^d$, one $d$.
+* CNN: $H \times W \times C$ images.
+
+But text is **variable length**. "Yes." has four characters. The entirety of *Hamlet* has 175,000.
+:::
+::: {.column width="50%"}
+[Insufficient workarounds]{.pill-amber}
+
+* Pad / truncate to fixed length (*wastes capacity*)
+* Bag-of-words / TF-IDF (*throws away order entirely*)
+* Sliding window (*caps memory at the window size*)
+
+We want something that **scales with the sequence**.
+:::
+:::
+
+## Sequence ≠ independent observations
+
+::: {.card}
+The matters order words in of a sentence the. 
+
+This introduces dependencies:
+
+* *The keys, which had been sitting on the table next to the mail and the half-empty coffee mug, **were** still there.*
+
+  * Notice that "were" corresponds to a subject 16 words away
+
+* *He said he would come.* vs *He said he would **not** come.* 
+
+  * Single tokens can flip meaning.
+
+* *Hamilton, the founder of the Federalist Party, ...* 
+
+  * A co-reference to a named individual several sentences earlier
+  
+:::
+
+A good model has to **carry information forward** as it reads.
+
+## Sequences are everywhere
+
+[Not just text]{.eyebrow}
+
+::: {.columns}
+::: {.column width="50%"}
+[CS / industry]{.pill-blue}
+
+* **Speech recognition** — waveform → words.
+* **Music generation** — sequences of MIDI events.
+* **Time-series forecasting** — stock prices, server load.
+* **DNA / protein sequences** — amino-acid order matters.
+* **Streaming / online learning** — events as they arrive.
+:::
+::: {.column width="50%"}
+[Social science]{.pill-green}
+
+* **Conflict event sequences** — Hegre et al. forecasting.
+* **Legislative debate transcripts** — order of speakers, framing.
+* **Roll-call voting** — sequence of votes within a session.
+* **Survey responses over time** — panel data with attrition.
+* **Event-history models** — time-to-event with covariates.
+:::
+:::
+
+::: {.callout-tip}
+The architecture you'll meet today applies to all of these. If your data has a natural order and prior elements inform later ones, recurrence is a candidate.
+:::
+
+## The recurrent neural network — the idea
+
+Process the sequence **one token at a time**. At each step, combine:
+
+* The new input token.
+* A **hidden state** carrying everything seen so far.
+
+```{dot}
+//| fig-height: 1.8
+digraph G {
+  rankdir="LR"; bgcolor="transparent"; node [fontname="Inter"];
+  x1 [shape=record label="x₁"]; x2 [shape=record label="x₂"]; x3 [shape=record label="x₃"];
+  h0 [shape=box label="h₀" style=filled fillcolor="#1A6FB4" fontcolor="white"];
+  h1 [shape=box label="h₁" style=filled fillcolor="#1A6FB4" fontcolor="white"];
+  h2 [shape=box label="h₂" style=filled fillcolor="#1A6FB4" fontcolor="white"];
+  h3 [shape=box label="h₃" style=filled fillcolor="#1A6FB4" fontcolor="white"];
+  y1 [shape=record label="y₁"]; y2 [shape=record label="y₂"]; y3 [shape=record label="y₃"];
+
+  x1 -> h1; h0 -> h1; h1 -> y1; h1 -> h2;
+  x2 -> h2; h2 -> y2; h2 -> h3;
+  x3 -> h3; h3 -> y3;
+}
+```
+
+::: {.card}
+**Same weights** applied at every time step. The hidden state $\mathbf{h}_t$ is the network's *running summary*.
+:::
+
+## Unrolling the recursion
+
+[The cycle is shorthand — click to open it out]{.eyebrow}
+
+The RNN is recursive, causing a **cycle**: 
+
+* The hidden state feeds back into the cell that produced it. But Lecture 3 was clear — backprop needs an **acyclic** graph. The fix: the loop is only shorthand for a finite chain.
+
+::: {.r-stack}
+
+```{dot}
+//| fig-height: 2.4
+digraph UN0 {
+  rankdir="LR"; bgcolor="#FBFAF6"; nodesep=0.4; ranksep=0.4;
+  node [fontname="Inter" shape=box];
+  edge [arrowsize=0.8 penwidth=1.3];
+  xt [label=<x<SUB>t</SUB>> color="#0E1A2B" fontcolor="#0E1A2B"];
+  cell [label="cell" style=filled fillcolor="#F4F1EA" fontcolor="#0E1A2B" color="#0E1A2B"];
+  ht [label=<h<SUB>t</SUB>> style=filled fillcolor="#1A6FB4" fontcolor="white" color="#0E1A2B"];
+  xt -> cell [color="#0E1A2B"];
+  cell -> ht [color="#0E1A2B"];
+  ht -> cell [constraint=false color="#0E1A2B"];
+  lbl [shape=plaintext label="unroll ⟶" fontcolor="#FBFAF6"];
+  c1 [label="cell" style=filled fillcolor="#FBFAF6" fontcolor="#FBFAF6" color="#FBFAF6"];
+  x1 [label=<x<SUB>1</SUB>> color="#FBFAF6" fontcolor="#FBFAF6"];
+  h1 [label=<h<SUB>1</SUB>> style=filled fillcolor="#FBFAF6" fontcolor="#FBFAF6" color="#FBFAF6"];
+  c2 [label="cell" style=filled fillcolor="#FBFAF6" fontcolor="#FBFAF6" color="#FBFAF6"];
+  x2 [label=<x<SUB>2</SUB>> color="#FBFAF6" fontcolor="#FBFAF6"];
+  h2 [label=<h<SUB>2</SUB>> style=filled fillcolor="#FBFAF6" fontcolor="#FBFAF6" color="#FBFAF6"];
+  c3 [label="cell" style=filled fillcolor="#FBFAF6" fontcolor="#FBFAF6" color="#FBFAF6"];
+  x3 [label=<x<SUB>3</SUB>> color="#FBFAF6" fontcolor="#FBFAF6"];
+  h3 [label=<h<SUB>3</SUB>> style=filled fillcolor="#FBFAF6" fontcolor="#FBFAF6" color="#FBFAF6"];
+  { rank=same; c1; x1; }
+  { rank=same; c2; x2; }
+  { rank=same; c3; x3; }
+  x1 -> c1 [color="#FBFAF6"];
+  x2 -> c2 [color="#FBFAF6"];
+  x3 -> c3 [color="#FBFAF6"];
+  c1 -> h1 [color="#FBFAF6"];
+  h1 -> c2 [color="#FBFAF6"];
+  c2 -> h2 [color="#FBFAF6"];
+  h2 -> c3 [color="#FBFAF6"];
+  c3 -> h3 [color="#FBFAF6"];
+  ht -> lbl [style=invis];
+  lbl -> c1 [style=invis];
+}
+```
+
+::: {.fragment}
+```{dot}
+//| fig-height: 2.4
+digraph UN1 {
+  rankdir="LR"; bgcolor="#FBFAF6"; nodesep=0.4; ranksep=0.4;
+  node [fontname="Inter" shape=box];
+  edge [arrowsize=0.8 penwidth=1.3];
+  xt [label=<x<SUB>t</SUB>> color="#0E1A2B" fontcolor="#0E1A2B"];
+  cell [label="cell" style=filled fillcolor="#F4F1EA" fontcolor="#0E1A2B" color="#0E1A2B"];
+  ht [label=<h<SUB>t</SUB>> style=filled fillcolor="#1A6FB4" fontcolor="white" color="#0E1A2B"];
+  xt -> cell [color="#0E1A2B"];
+  cell -> ht [color="#0E1A2B"];
+  ht -> cell [constraint=false color="#0E1A2B"];
+  lbl [shape=plaintext label="unroll ⟶" fontcolor="#5C6473"];
+  c1 [label="cell" style=filled fillcolor="#F4F1EA" fontcolor="#C9322B" color="#C9322B"];
+  x1 [label=<x<SUB>1</SUB>> color="#C9322B" fontcolor="#C9322B"];
+  h1 [label=<h<SUB>1</SUB>> style=filled fillcolor="#C9322B" fontcolor="white" color="#0E1A2B"];
+  c2 [label="cell" style=filled fillcolor="#FBFAF6" fontcolor="#FBFAF6" color="#FBFAF6"];
+  x2 [label=<x<SUB>2</SUB>> color="#FBFAF6" fontcolor="#FBFAF6"];
+  h2 [label=<h<SUB>2</SUB>> style=filled fillcolor="#FBFAF6" fontcolor="#FBFAF6" color="#FBFAF6"];
+  c3 [label="cell" style=filled fillcolor="#FBFAF6" fontcolor="#FBFAF6" color="#FBFAF6"];
+  x3 [label=<x<SUB>3</SUB>> color="#FBFAF6" fontcolor="#FBFAF6"];
+  h3 [label=<h<SUB>3</SUB>> style=filled fillcolor="#FBFAF6" fontcolor="#FBFAF6" color="#FBFAF6"];
+  { rank=same; c1; x1; }
+  { rank=same; c2; x2; }
+  { rank=same; c3; x3; }
+  x1 -> c1 [color="#C9322B"];
+  x2 -> c2 [color="#FBFAF6"];
+  x3 -> c3 [color="#FBFAF6"];
+  c1 -> h1 [color="#C9322B"];
+  h1 -> c2 [color="#FBFAF6"];
+  c2 -> h2 [color="#FBFAF6"];
+  h2 -> c3 [color="#FBFAF6"];
+  c3 -> h3 [color="#FBFAF6"];
+  ht -> lbl [style=invis];
+  lbl -> c1 [style=invis];
+}
+```
+:::
+
+::: {.fragment}
+```{dot}
+//| fig-height: 2.4
+digraph UN2 {
+  rankdir="LR"; bgcolor="#FBFAF6"; nodesep=0.4; ranksep=0.4;
+  node [fontname="Inter" shape=box];
+  edge [arrowsize=0.8 penwidth=1.3];
+  xt [label=<x<SUB>t</SUB>> color="#0E1A2B" fontcolor="#0E1A2B"];
+  cell [label="cell" style=filled fillcolor="#F4F1EA" fontcolor="#0E1A2B" color="#0E1A2B"];
+  ht [label=<h<SUB>t</SUB>> style=filled fillcolor="#1A6FB4" fontcolor="white" color="#0E1A2B"];
+  xt -> cell [color="#0E1A2B"];
+  cell -> ht [color="#0E1A2B"];
+  ht -> cell [constraint=false color="#C9322B"];
+  lbl [shape=plaintext label="unroll ⟶" fontcolor="#5C6473"];
+  c1 [label="cell" style=filled fillcolor="#F4F1EA" fontcolor="#0E1A2B" color="#0E1A2B"];
+  x1 [label=<x<SUB>1</SUB>> color="#0E1A2B" fontcolor="#0E1A2B"];
+  h1 [label=<h<SUB>1</SUB>> style=filled fillcolor="#1A6FB4" fontcolor="white" color="#0E1A2B"];
+  c2 [label="cell" style=filled fillcolor="#F4F1EA" fontcolor="#C9322B" color="#C9322B"];
+  x2 [label=<x<SUB>2</SUB>> color="#C9322B" fontcolor="#C9322B"];
+  h2 [label=<h<SUB>2</SUB>> style=filled fillcolor="#C9322B" fontcolor="white" color="#0E1A2B"];
+  c3 [label="cell" style=filled fillcolor="#FBFAF6" fontcolor="#FBFAF6" color="#FBFAF6"];
+  x3 [label=<x<SUB>3</SUB>> color="#FBFAF6" fontcolor="#FBFAF6"];
+  h3 [label=<h<SUB>3</SUB>> style=filled fillcolor="#FBFAF6" fontcolor="#FBFAF6" color="#FBFAF6"];
+  { rank=same; c1; x1; }
+  { rank=same; c2; x2; }
+  { rank=same; c3; x3; }
+  x1 -> c1 [color="#0E1A2B"];
+  x2 -> c2 [color="#C9322B"];
+  x3 -> c3 [color="#FBFAF6"];
+  c1 -> h1 [color="#0E1A2B"];
+  h1 -> c2 [color="#C9322B"];
+  c2 -> h2 [color="#C9322B"];
+  h2 -> c3 [color="#FBFAF6"];
+  c3 -> h3 [color="#FBFAF6"];
+  ht -> lbl [style=invis];
+  lbl -> c1 [style=invis];
+}
+```
+:::
+
+::: {.fragment}
+```{dot}
+//| fig-height: 2.4
+digraph UN3 {
+  rankdir="LR"; bgcolor="#FBFAF6"; nodesep=0.4; ranksep=0.4;
+  node [fontname="Inter" shape=box];
+  edge [arrowsize=0.8 penwidth=1.3];
+  xt [label=<x<SUB>t</SUB>> color="#0E1A2B" fontcolor="#0E1A2B"];
+  cell [label="cell" style=filled fillcolor="#F4F1EA" fontcolor="#0E1A2B" color="#0E1A2B"];
+  ht [label=<h<SUB>t</SUB>> style=filled fillcolor="#1A6FB4" fontcolor="white" color="#0E1A2B"];
+  xt -> cell [color="#0E1A2B"];
+  cell -> ht [color="#0E1A2B"];
+  ht -> cell [constraint=false color="#1A6FB4"];
+  lbl [shape=plaintext label="unroll ⟶" fontcolor="#5C6473"];
+  c1 [label="cell" style=filled fillcolor="#F4F1EA" fontcolor="#0E1A2B" color="#0E1A2B"];
+  x1 [label=<x<SUB>1</SUB>> color="#0E1A2B" fontcolor="#0E1A2B"];
+  h1 [label=<h<SUB>1</SUB>> style=filled fillcolor="#1A6FB4" fontcolor="white" color="#0E1A2B"];
+  c2 [label="cell" style=filled fillcolor="#F4F1EA" fontcolor="#0E1A2B" color="#0E1A2B"];
+  x2 [label=<x<SUB>2</SUB>> color="#0E1A2B" fontcolor="#0E1A2B"];
+  h2 [label=<h<SUB>2</SUB>> style=filled fillcolor="#1A6FB4" fontcolor="white" color="#0E1A2B"];
+  c3 [label="cell" style=filled fillcolor="#F4F1EA" fontcolor="#C9322B" color="#C9322B"];
+  x3 [label=<x<SUB>3</SUB>> color="#C9322B" fontcolor="#C9322B"];
+  h3 [label=<h<SUB>3</SUB>> style=filled fillcolor="#C9322B" fontcolor="white" color="#0E1A2B"];
+  { rank=same; c1; x1; }
+  { rank=same; c2; x2; }
+  { rank=same; c3; x3; }
+  x1 -> c1 [color="#0E1A2B"];
+  x2 -> c2 [color="#0E1A2B"];
+  x3 -> c3 [color="#C9322B"];
+  c1 -> h1 [color="#0E1A2B"];
+  h1 -> c2 [color="#1A6FB4"];
+  c2 -> h2 [color="#0E1A2B"];
+  h2 -> c3 [color="#C9322B"];
+  c3 -> h3 [color="#C9322B"];
+  ht -> lbl [style=invis];
+  lbl -> c1 [style=invis];
+}
+```
+:::
+
+:::
+
+* Unrolling creates **one copy of the cell per token** — and the feedback becomes an input into the first, second, third copy etc.
+* The three "cells" are **the same unit**
+* The unrolled graph is cycle-free, so Lecture 3's topological order and Lecture 4's backprop apply unchanged. [Outputs $\hat{\mathbf{y}}_t$ omitted from the picture.]{.muted}
+
+## The recurrent unit, mathematically
+
+At each time step $t$:
+
+$$
+\mathbf{h}_t = \tanh\!\left( \mathbf{W}_{hh} \mathbf{h}_{t-1} + \mathbf{W}_{xh} \mathbf{x}_t + \mathbf{b}_h \right)
+$$
+
+$$
+\hat{\mathbf{y}}_t = \mathbf{W}_{hy} \mathbf{h}_t + \mathbf{b}_y
+$$
+
+::: {.card}
+* $\mathbf{W}_{hh}, \mathbf{W}_{xh}, \mathbf{W}_{hy}$ — shared across all time steps.
+* $\mathbf{h}_t$ has fixed dimensionality (say, 128 or 256)
+* The **only** way information from step 1 reaches step 50 is through this single hidden state (after going through 49 matmuls)
+:::
+
+::: {.callout-note}
+This is the **vanilla RNN** (Elman, 1990). The whole architecture is three weight matrices and a $\tanh$. As we'll see in Part 2, that simplicity is also its problem.
+:::
+
+## Example forward pass
+
+::: {.columns}
+::: {.column width="50%"}
+[Setup]{.eyebrow}
+
+* Hidden dim 1. $W_{hh} = 0.6$, $W_{xh} = 1.0$, $b_h = 0$.
+* $\sigma = \tanh$. Initial $h_0 = 0$.
+* Inputs: $x_1 = 0.8$, $x_2 = -0.4$.
+:::
+::: {.column width="50%"}
+[Time step 1]{.eyebrow}
+
+$h_1 = \tanh(0.6 \cdot 0 + 1.0 \cdot 0.8) = \tanh(0.8) \approx 0.664$
+
+[Time step 2]{.eyebrow}
+
+$h_2 = \tanh(0.6 \cdot 0.664 + 1.0 \cdot (-0.4)) = \tanh(-0.0016) \approx -0.0016$
+:::
+:::
+
+::: {.card}
+[Notice]{.eyebrow}
+
+A negative input all but cancelled the carried-forward signal from $x_1$. The hidden state is only a small bit of memory, and newer inputs will overwrite older ones.
+:::
+
+## Isn't one set of weights a limitation?
+
+::: {.columns}
+::: {.column width="55%"}
+The same $\mathbf{W}_{xh}$ processes every input token.
+
+* The model learns *one* way to look at a token.
+* The model learns *one* way to combine current input with prior history.
+* No "position-specific" weights.
+
+This is the same trick as **convolutions**
+
+* We share parameters across positions
+:::
+::: {.column width="45%"}
+::: {.card}
+Parameter sharing buys us:
+
+* **Generalisation** — what we learn "here" transfers to "there" too
+* **Variable length** — no architectural change needed for longer sequences
+* **Fewer parameters** — by orders of magnitude vs. an unrolled MLP
+:::
+:::
+:::
+
+## Generation with an RNN
+
+::: {.card}
+1. Start with $\mathbf{h}_0 = \mathbf{0}$.
+2. Feed in a starting token $\mathbf{x}_1$.
+3. Compute $\mathbf{h}_1$, then $\hat{\mathbf{y}}_1$ — predicted next-token logits.
+4. Sample next token from softmax of $\hat{\mathbf{y}}_1$.
+5. Use it as $\mathbf{x}_2$. Compute $\mathbf{h}_2$. Sample $\mathbf{x}_3$.
+6. Repeat as long as we want.
+:::
+
+Generation is just the forward pass, repeated — same machinery as the bigram model, but with the hidden state carrying memory.
+
+## How many inputs, how many outputs?
+
+[One recurrent cell, wired four ways — inputs on top, predictions below]{.eyebrow}
+
+::: {.columns}
+::: {.column width="50%"}
+```{dot}
+//| fig-height: 1.4
+//| fig-width: 2.2
+digraph M2O {
+  rankdir="LR"; bgcolor="transparent"; nodesep=0.3; ranksep=0.45;
+  node [fontname="Inter" shape=box];
+  edge [arrowsize=0.8 penwidth=1.2];
+  x1 [label=<x<SUB>1</SUB>> color="#0E1A2B" fontcolor="#0E1A2B"];
+  x2 [label=<x<SUB>2</SUB>> color="#0E1A2B" fontcolor="#0E1A2B"];
+  x3 [label=<x<SUB>3</SUB>> color="#0E1A2B" fontcolor="#0E1A2B"];
+  h1 [label=<h<SUB>1</SUB>> style=filled fillcolor="#1A6FB4" fontcolor="white"];
+  h2 [label=<h<SUB>2</SUB>> style=filled fillcolor="#1A6FB4" fontcolor="white"];
+  h3 [label=<h<SUB>3</SUB>> style=filled fillcolor="#1A6FB4" fontcolor="white"];
+  y  [label=<y&#770;> style=filled fillcolor="#C9322B" fontcolor="white"];
+  { rank=same; x1; h1; }
+  { rank=same; x2; h2; }
+  { rank=same; x3; h3; y; }
+  h1 -> h2 -> h3 [color="#0E1A2B"];
+  x1 -> h1 [color="#0E1A2B"];
+  x2 -> h2 [color="#0E1A2B"];
+  x3 -> h3 [color="#0E1A2B"];
+  h3 -> y [color="#0E1A2B"];
+}
+```
+[**Many-to-one** — read everything, then output one thing. Sentiment of a review; forecasting conflict from a sequence of events.]{.smaller}
+:::
+::: {.column width="50%"}
+```{dot}
+//| fig-height: 1.4
+//| fig-width: 2.2
+digraph O2M {
+  rankdir="LR"; bgcolor="transparent"; nodesep=0.3; ranksep=0.45;
+  node [fontname="Inter" shape=box];
+  edge [arrowsize=0.8 penwidth=1.2];
+  x1 [label=<x<SUB>1</SUB>> color="#0E1A2B" fontcolor="#0E1A2B"];
+  h1 [label=<h<SUB>1</SUB>> style=filled fillcolor="#1A6FB4" fontcolor="white"];
+  h2 [label=<h<SUB>2</SUB>> style=filled fillcolor="#1A6FB4" fontcolor="white"];
+  h3 [label=<h<SUB>3</SUB>> style=filled fillcolor="#1A6FB4" fontcolor="white"];
+  y1 [label=<y&#770;<SUB>1</SUB>> style=filled fillcolor="#C9322B" fontcolor="white"];
+  y2 [label=<y&#770;<SUB>2</SUB>> style=filled fillcolor="#C9322B" fontcolor="white"];
+  y3 [label=<y&#770;<SUB>3</SUB>> style=filled fillcolor="#C9322B" fontcolor="white"];
+  { rank=same; x1; h1; y1; }
+  { rank=same; h2; y2; }
+  { rank=same; h3; y3; }
+  h1 -> h2 -> h3 [color="#0E1A2B"];
+  x1 -> h1 [color="#0E1A2B"];
+  h1 -> y1 [color="#0E1A2B"];
+  h2 -> y2 [color="#0E1A2B"];
+  h3 -> y3 [color="#0E1A2B"];
+}
+```
+[**One-to-many** — one input starts a sequence. Image captioning: one image in, a sentence out.]{.smaller}
+:::
+:::
+
+::: {.columns}
+::: {.column width="42%"}
+```{dot}
+//| fig-height: 1.4
+//| fig-width: 2.2
+digraph M2M {
+  rankdir="LR"; bgcolor="transparent"; nodesep=0.3; ranksep=0.45;
+  node [fontname="Inter" shape=box];
+  edge [arrowsize=0.8 penwidth=1.2];
+  x1 [label=<x<SUB>1</SUB>> color="#0E1A2B" fontcolor="#0E1A2B"];
+  x2 [label=<x<SUB>2</SUB>> color="#0E1A2B" fontcolor="#0E1A2B"];
+  x3 [label=<x<SUB>3</SUB>> color="#0E1A2B" fontcolor="#0E1A2B"];
+  h1 [label=<h<SUB>1</SUB>> style=filled fillcolor="#1A6FB4" fontcolor="white"];
+  h2 [label=<h<SUB>2</SUB>> style=filled fillcolor="#1A6FB4" fontcolor="white"];
+  h3 [label=<h<SUB>3</SUB>> style=filled fillcolor="#1A6FB4" fontcolor="white"];
+  y1 [label=<y&#770;<SUB>1</SUB>> style=filled fillcolor="#C9322B" fontcolor="white"];
+  y2 [label=<y&#770;<SUB>2</SUB>> style=filled fillcolor="#C9322B" fontcolor="white"];
+  y3 [label=<y&#770;<SUB>3</SUB>> style=filled fillcolor="#C9322B" fontcolor="white"];
+  { rank=same; x1; h1; y1; }
+  { rank=same; x2; h2; y2; }
+  { rank=same; x3; h3; y3; }
+  h1 -> h2 -> h3 [color="#0E1A2B"];
+  x1 -> h1 [color="#0E1A2B"];
+  x2 -> h2 [color="#0E1A2B"];
+  x3 -> h3 [color="#0E1A2B"];
+  h1 -> y1 [color="#0E1A2B"];
+  h2 -> y2 [color="#0E1A2B"];
+  h3 -> y3 [color="#0E1A2B"];
+}
+```
+[**Many-to-many, aligned** — one output per input. Tagging each word with its part of speech; predicting the next character at every position.]{.smaller}
+:::
+::: {.column width="58%"}
+```{dot}
+//| fig-height: 1.4
+//| fig-width: 3.6
+digraph ED {
+  rankdir="LR"; bgcolor="transparent"; nodesep=0.3; ranksep=0.45;
+  node [fontname="Inter" shape=box];
+  edge [arrowsize=0.8 penwidth=1.2];
+  x1 [label=<x<SUB>1</SUB>> color="#0E1A2B" fontcolor="#0E1A2B"];
+  x2 [label=<x<SUB>2</SUB>> color="#0E1A2B" fontcolor="#0E1A2B"];
+  x3 [label=<x<SUB>3</SUB>> color="#0E1A2B" fontcolor="#0E1A2B"];
+  h1 [label=<h<SUB>1</SUB>> style=filled fillcolor="#1A6FB4" fontcolor="white"];
+  h2 [label=<h<SUB>2</SUB>> style=filled fillcolor="#1A6FB4" fontcolor="white"];
+  h3 [label=<h<SUB>3</SUB>> style=filled fillcolor="#1A6FB4" fontcolor="white"];
+  h4 [label=<h<SUB>4</SUB>> style=filled fillcolor="#1A6FB4" fontcolor="white"];
+  h5 [label=<h<SUB>5</SUB>> style=filled fillcolor="#1A6FB4" fontcolor="white"];
+  y1 [label=<y&#770;<SUB>1</SUB>> style=filled fillcolor="#C9322B" fontcolor="white"];
+  y2 [label=<y&#770;<SUB>2</SUB>> style=filled fillcolor="#C9322B" fontcolor="white"];
+  { rank=same; x1; h1; }
+  { rank=same; x2; h2; }
+  { rank=same; x3; h3; }
+  { rank=same; h4; y1; }
+  { rank=same; h5; y2; }
+  h1 -> h2 -> h3 -> h4 -> h5 [color="#0E1A2B"];
+  x1 -> h1 [color="#0E1A2B"];
+  x2 -> h2 [color="#0E1A2B"];
+  x3 -> h3 [color="#0E1A2B"];
+  h4 -> y1 [color="#0E1A2B"];
+  h5 -> y2 [color="#0E1A2B"];
+}
+```
+[**Many-to-many, encoder–decoder** — read it all, then write an output of a different length. Machine translation; more at the end of today.]{.smaller}
+:::
+:::
+
+[The cell is identical in all four panels — the same $\mathbf{W}_{hh}, \mathbf{W}_{xh}, \mathbf{W}_{hy}$. You choose where to plug in inputs and where to read off predictions.]{.muted}
+
+## Bidirectional RNNs
+
+[For non-generative tasks, you can read both directions]{.eyebrow}
+
+::: {.columns}
+::: {.column width="55%"}
+For classifying a sentence or tagging each word, the model can read **both forward and backward**:
+
+$$\mathbf{h}_t = [\overrightarrow{\mathbf{h}}_t; \overleftarrow{\mathbf{h}}_t]$$
+
+* Forward RNN reads left → right.
+* Backward RNN reads right → left.
+* Concatenate the two hidden states at each position.
+:::
+::: {.column width="45%"}
+::: {.card}
+**Why this isn't always usable.**
+
+* For *generation*, you can't read the future as it hasn't been produced yet.
+
+* Bidirectional RNNs are for **labelling**, not **generating**.
+
+* Same constraint applies to attention on Day 10: we have to apply a *causal mask* for generation, but not for classification.
+
+:::
+:::
+:::
+
+## Stacked RNNs
+
+[Depth in space]{.eyebrow}
+
+Layer 1's hidden states form a sequence. So we can feed them to a second RNN:
+
+$$
+\mathbf{h}^{(2)}_t = \tanh\!\left( \mathbf{W}^{(2)}_{hh} \mathbf{h}^{(2)}_{t-1} + \mathbf{W}^{(2)}_{xh} \mathbf{h}^{(1)}_t + \mathbf{b}^{(2)}_h \right)
+$$
+
+The superscript is the layer. Layer 2's "input token" at step $t$ is layer 1's hidden state $\mathbf{h}^{(1)}_t$.
+
+::: {.columns}
+::: {.column width="50%"}
+::: {.card}
+Two separable kinds of depth:
+
+* **Depth in time** — how many steps the recurrence runs (stems from the data)
+* **Depth in space** — how many layers are stacked (adds more parameters)
+:::
+:::
+::: {.column width="50%"}
+::: {.card}
+[Parameter cost per extra layer]{.eyebrow}
+
+Each layer has its own $\mathbf{W}_{hh}, \mathbf{W}_{xh}, \mathbf{b}_h$. With hidden size 128 at both layers, layer 2 adds:
+
+$$
+\begin{aligned}
+128^2 + 128^2 + 128 &= 16{,}384 + 16{,}384 + 128 \\
+&= 32{,}896
+\end{aligned}
+$$
+:::
+:::
+:::
+
+[Two or three layers was the working norm]{.muted}
+
+# Plenary · unroll an RNN by hand {background-color="#0E1A2B"}
+
+## Plenary · unroll a tiny RNN
+
+[<span class="pause-cue">≈ 12 min</span> · in pairs]{.eyebrow}
+
+::: {.card}
+[A tiny RNN]{.eyebrow}
+
+Hidden dim = 1 (so $\mathbf{h}_t$ is a single number).
+
+Weights: $W_{hh} = 0.5,\ W_{xh} = 1.0,\ b_h = 0$. Initial $h_0 = 0$. Use $\tanh$ as the activation.
+
+(Treat the network as outputting $h_t$ directly — skip $\mathbf{W}_{hy}$ for this exercise.)
+
+[Inputs at three time steps]{.eyebrow}
+$x_1 = 1.0, \ x_2 = -0.5, \ x_3 = 2.0$
+
+[Compute]{.eyebrow}
+
+$h_1$, $h_2$, $h_3$ by hand.
+
+[Reflect]{.eyebrow}
+
+How much of the original $x_1$ signal is still detectable in $h_3$?
+:::
+
+[Six minutes.]{.muted}
+
+## Plenary · answers
+
+::: {.card}
+[Step 1]{.eyebrow}
+$h_1 = \tanh(0.5 \cdot 0 + 1.0 \cdot 1.0) = \tanh(1.0) \approx 0.762$.
+
+[Step 2]{.eyebrow}
+$h_2 = \tanh(0.5 \cdot 0.762 + 1.0 \cdot (-0.5)) = \tanh(-0.119) \approx -0.119$.
+
+[Step 3]{.eyebrow}
+$h_3 = \tanh(0.5 \cdot (-0.119) + 1.0 \cdot 2.0) = \tanh(1.94) \approx 0.959$.
+:::
+
+::: {.reveal-box}
+[The reflection]{.reveal-label}
+By step 3, the input $x_3 = 2.0$ has dominated. The signal from $x_1$ has been (a) multiplied by $0.5$ at step 2, (b) squashed through $\tanh$ at step 2, (c) multiplied by $0.5$ at step 3, (d) squashed through $\tanh$ at step 3.
+
+That sequence of multiplications and saturations is the **vanishing gradient problem**, in miniature.
+:::
+
+# Part 2 · Training & failure modes {background-color="#0E1A2B"}
+
+## Training: backpropagation through time
+
+When we "unroll" the RNN over the sequence, it becomes a (very deep) **feed-forward** network where the *same* weights appear at every layer.
+
+```{dot}
+//| fig-height: 1.6
+digraph G {
+  rankdir="LR"; bgcolor="transparent"; node [fontname="Inter"];
+  h0 [shape=box label="h₀" style=filled fillcolor="#1A6FB4" fontcolor="white"];
+  h1 [shape=box label="h₁" style=filled fillcolor="#1A6FB4" fontcolor="white"];
+  h2 [shape=box label="h₂" style=filled fillcolor="#1A6FB4" fontcolor="white"];
+  hT [shape=box label="h_T" style=filled fillcolor="#1A6FB4" fontcolor="white"];
+  loss [shape=box label="L" style=filled fillcolor="#C9322B" fontcolor="white"];
+  h0 -> h1 -> h2;
+  h2 -> hT [label="..." style=dashed];
+  hT -> loss;
+  loss -> hT [label="∂L/∂h_T" color="#C9322B" constraint=false];
+  hT -> h2 [label="..." style=dashed color="#C9322B" constraint=false];
+  h2 -> h1 [color="#C9322B" constraint=false];
+  h1 -> h0 [color="#C9322B" constraint=false];
+}
+```
+
+::: {.card}
+* **Forward pass** through the unrolled chain.
+* **Backward pass** through the same chain → **backpropagation through time (BPTT)**.
+* Gradients of $\mathbf{W}_{hh}$ are **summed** contributions from *every* time step.
+:::
+
+## Why do we sum the gradients?
+
+[One matrix, used at every step — Lecture 4's fan-out rule, at RNN scale]{.eyebrow}
+
+```{dot}
+//| fig-height: 2.6
+digraph WS {
+  rankdir="LR"; nodesep=0.5; ranksep=0.6; bgcolor="transparent";
+  node [fontname="Inter" shape=box];
+  edge [arrowsize=0.8 penwidth=1.2];
+  h0 [label=<h<SUB>0</SUB>> style=filled fillcolor="#1A6FB4" fontcolor="white"];
+  h1 [label=<h<SUB>1</SUB>> style=filled fillcolor="#1A6FB4" fontcolor="white"];
+  h2 [label=<h<SUB>2</SUB>> style=filled fillcolor="#1A6FB4" fontcolor="white"];
+  h3 [label=<h<SUB>3</SUB>> style=filled fillcolor="#1A6FB4" fontcolor="white"];
+  L  [label="L" style=filled fillcolor="#C9322B" fontcolor="white"];
+  x1 [label=<x<SUB>1</SUB>>]; x2 [label=<x<SUB>2</SUB>>]; x3 [label=<x<SUB>3</SUB>>];
+  W  [label=<W<SUB>hh</SUB>> style=filled fillcolor="#C58A12" fontcolor="white"];
+  { rank=same; W; h0; }
+  W -> h0 [style=invis];
+  { rank=same; h1; x1; }
+  { rank=same; h2; x2; }
+  { rank=same; h3; x3; }
+  h0 -> h1 -> h2 -> h3 -> L [color="#0E1A2B"];
+  x1 -> h1 [color="#0E1A2B"]; x2 -> h2 [color="#0E1A2B"]; x3 -> h3 [color="#0E1A2B"];
+  W -> h1 [constraint=false color="#C58A12" penwidth=1.5];
+  W -> h2 [constraint=false color="#C58A12" penwidth=1.5];
+  W -> h3 [constraint=false color="#C58A12" penwidth=1.5];
+}
+```
+
+In computational graph terms, our RNN weights are **one node with a branch to every time step**..
+
+::: {.card}
+Lecture 4's rule for a value used in several places: the gradients from each use **add**. So
+
+$$
+\frac{\partial L}{\partial \mathbf{W}_{hh}} = \underbrace{g_1}_{\text{via } \mathbf{h}_1} + \underbrace{g_2}_{\text{via } \mathbf{h}_2} + \underbrace{g_3}_{\text{via } \mathbf{h}_3}
+$$
+
+— one term per time step. That is the "summed contributions" on the last slide.
+:::
+
+[Each term travels back from $L$ along the chain to its step — the further left the step, the more upstream nodes that influence the derivative.]{.smaller .muted}
+
+## BPTT
+
+[The graph from the last slide, run backwards — one click per time step]{.eyebrow}
+
+::: {.r-stack}
+
+```{dot}
+//| fig-height: 2.6
+digraph BW0 {
+  rankdir="LR"; nodesep=0.5; ranksep=0.6; bgcolor="#FBFAF6";
+  node [fontname="Inter" shape=box];
+  edge [arrowsize=0.8 penwidth=1.2];
+  W [shape=plaintext label=<<TABLE BORDER="1" COLOR="#0E1A2B" BGCOLOR="#C58A12" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4"><TR><TD><FONT COLOR="white"><B>W</B><SUB>hh</SUB></FONT></TD></TR><TR><TD><FONT POINT-SIZE="11" COLOR="#C58A12">&#8706;L/&#8706;W = g<SUB>3</SUB></FONT><FONT POINT-SIZE="11" COLOR="#C58A12"> + g<SUB>2</SUB></FONT><FONT POINT-SIZE="11" COLOR="#C58A12"> + g<SUB>1</SUB></FONT></TD></TR></TABLE>>];
+  h0 [label=<h<SUB>0</SUB>> style=filled fillcolor="#1A6FB4" fontcolor="white" color="#0E1A2B"];
+  h1 [label=<h<SUB>1</SUB>> style=filled fillcolor="#1A6FB4" fontcolor="white" color="#0E1A2B"];
+  h2 [label=<h<SUB>2</SUB>> style=filled fillcolor="#1A6FB4" fontcolor="white" color="#0E1A2B"];
+  h3 [label=<h<SUB>3</SUB>> style=filled fillcolor="#1A6FB4" fontcolor="white" color="#0E1A2B"];
+  L  [label="L" style=filled fillcolor="#C9322B" fontcolor="white" color="#0E1A2B"];
+  x1 [label=<x<SUB>1</SUB>> color="#0E1A2B" fontcolor="#0E1A2B"];
+  x2 [label=<x<SUB>2</SUB>> color="#0E1A2B" fontcolor="#0E1A2B"];
+  x3 [label=<x<SUB>3</SUB>> color="#0E1A2B" fontcolor="#0E1A2B"];
+  { rank=same; W; h0; }
+  W -> h0 [style=invis];
+  { rank=same; h1; x1; }
+  { rank=same; h2; x2; }
+  { rank=same; h3; x3; }
+  h0 -> h1 -> h2 -> h3 -> L [color="#0E1A2B"];
+  x1 -> h1 [color="#0E1A2B"]; x2 -> h2 [color="#0E1A2B"]; x3 -> h3 [color="#0E1A2B"];
+  W -> h1 [constraint=false color="#C58A12" penwidth=1.5];
+  W -> h2 [constraint=false color="#C58A12" penwidth=1.5];
+  W -> h3 [constraint=false color="#C58A12" penwidth=1.5];
+}
+```
+
+::: {.fragment}
+```{dot}
+//| fig-height: 2.6
+digraph BW1 {
+  rankdir="LR"; nodesep=0.5; ranksep=0.6; bgcolor="#FBFAF6";
+  node [fontname="Inter" shape=box];
+  edge [arrowsize=0.8 penwidth=1.2];
+  W [shape=plaintext label=<<TABLE BORDER="1" COLOR="#0E1A2B" BGCOLOR="#C58A12" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4"><TR><TD><FONT COLOR="white"><B>W</B><SUB>hh</SUB></FONT></TD></TR><TR><TD><FONT POINT-SIZE="11" COLOR="white">&#8706;L/&#8706;W = g<SUB>3</SUB></FONT><FONT POINT-SIZE="11" COLOR="#C58A12"> + g<SUB>2</SUB></FONT><FONT POINT-SIZE="11" COLOR="#C58A12"> + g<SUB>1</SUB></FONT></TD></TR></TABLE>>];
+  h0 [label=<h<SUB>0</SUB>> style=filled fillcolor="#1A6FB4" fontcolor="white" color="#0E1A2B"];
+  h1 [label=<h<SUB>1</SUB>> style=filled fillcolor="#1A6FB4" fontcolor="white" color="#0E1A2B"];
+  h2 [label=<h<SUB>2</SUB>> style=filled fillcolor="#1A6FB4" fontcolor="white" color="#0E1A2B"];
+  h3 [label=<h<SUB>3</SUB>> style=filled fillcolor="#C9322B" fontcolor="white" color="#0E1A2B"];
+  L  [label="L" style=filled fillcolor="#C9322B" fontcolor="white" color="#0E1A2B"];
+  x1 [label=<x<SUB>1</SUB>> color="#0E1A2B" fontcolor="#0E1A2B"];
+  x2 [label=<x<SUB>2</SUB>> color="#0E1A2B" fontcolor="#0E1A2B"];
+  x3 [label=<x<SUB>3</SUB>> color="#0E1A2B" fontcolor="#0E1A2B"];
+  { rank=same; W; h0; }
+  W -> h0 [style=invis];
+  { rank=same; h1; x1; }
+  { rank=same; h2; x2; }
+  { rank=same; h3; x3; }
+  h0 -> h1 -> h2 -> h3 -> L [color="#0E1A2B"];
+  x1 -> h1 [color="#0E1A2B"]; x2 -> h2 [color="#0E1A2B"]; x3 -> h3 [color="#0E1A2B"];
+  W -> h1 [constraint=false color="#C58A12" penwidth=1.5];
+  W -> h2 [constraint=false color="#C58A12" penwidth=1.5];
+  W -> h3 [constraint=false color="#C9322B" penwidth=1.5 style=dashed dir=back];
+}
+```
+:::
+
+::: {.fragment}
+```{dot}
+//| fig-height: 2.6
+digraph BW2 {
+  rankdir="LR"; nodesep=0.5; ranksep=0.6; bgcolor="#FBFAF6";
+  node [fontname="Inter" shape=box];
+  edge [arrowsize=0.8 penwidth=1.2];
+  W [shape=plaintext label=<<TABLE BORDER="1" COLOR="#0E1A2B" BGCOLOR="#C58A12" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4"><TR><TD><FONT COLOR="white"><B>W</B><SUB>hh</SUB></FONT></TD></TR><TR><TD><FONT POINT-SIZE="11" COLOR="white">&#8706;L/&#8706;W = g<SUB>3</SUB></FONT><FONT POINT-SIZE="11" COLOR="white"> + g<SUB>2</SUB></FONT><FONT POINT-SIZE="11" COLOR="#C58A12"> + g<SUB>1</SUB></FONT></TD></TR></TABLE>>];
+  h0 [label=<h<SUB>0</SUB>> style=filled fillcolor="#1A6FB4" fontcolor="white" color="#0E1A2B"];
+  h1 [label=<h<SUB>1</SUB>> style=filled fillcolor="#1A6FB4" fontcolor="white" color="#0E1A2B"];
+  h2 [label=<h<SUB>2</SUB>> style=filled fillcolor="#C9322B" fontcolor="white" color="#0E1A2B"];
+  h3 [label=<h<SUB>3</SUB>> style=filled fillcolor="#1A6FB4" fontcolor="white" color="#0E1A2B"];
+  L  [label="L" style=filled fillcolor="#C9322B" fontcolor="white" color="#0E1A2B"];
+  x1 [label=<x<SUB>1</SUB>> color="#0E1A2B" fontcolor="#0E1A2B"];
+  x2 [label=<x<SUB>2</SUB>> color="#0E1A2B" fontcolor="#0E1A2B"];
+  x3 [label=<x<SUB>3</SUB>> color="#0E1A2B" fontcolor="#0E1A2B"];
+  { rank=same; W; h0; }
+  W -> h0 [style=invis];
+  { rank=same; h1; x1; }
+  { rank=same; h2; x2; }
+  { rank=same; h3; x3; }
+  h0 -> h1 -> h2 -> h3 -> L [color="#0E1A2B"];
+  x1 -> h1 [color="#0E1A2B"]; x2 -> h2 [color="#0E1A2B"]; x3 -> h3 [color="#0E1A2B"];
+  W -> h1 [constraint=false color="#C58A12" penwidth=1.5];
+  W -> h2 [constraint=false color="#C9322B" penwidth=1.5 style=dashed dir=back];
+  W -> h3 [constraint=false color="#C9322B" penwidth=1.5 style=dashed dir=back];
+}
+```
+:::
+
+::: {.fragment}
+```{dot}
+//| fig-height: 2.6
+digraph BW3 {
+  rankdir="LR"; nodesep=0.5; ranksep=0.6; bgcolor="#FBFAF6";
+  node [fontname="Inter" shape=box];
+  edge [arrowsize=0.8 penwidth=1.2];
+  W [shape=plaintext label=<<TABLE BORDER="1" COLOR="#0E1A2B" BGCOLOR="#C58A12" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4"><TR><TD><FONT COLOR="white"><B>W</B><SUB>hh</SUB></FONT></TD></TR><TR><TD><FONT POINT-SIZE="11" COLOR="white">&#8706;L/&#8706;W = g<SUB>3</SUB></FONT><FONT POINT-SIZE="11" COLOR="white"> + g<SUB>2</SUB></FONT><FONT POINT-SIZE="11" COLOR="white"> + g<SUB>1</SUB></FONT></TD></TR></TABLE>>];
+  h0 [label=<h<SUB>0</SUB>> style=filled fillcolor="#1A6FB4" fontcolor="white" color="#0E1A2B"];
+  h1 [label=<h<SUB>1</SUB>> style=filled fillcolor="#C9322B" fontcolor="white" color="#0E1A2B"];
+  h2 [label=<h<SUB>2</SUB>> style=filled fillcolor="#1A6FB4" fontcolor="white" color="#0E1A2B"];
+  h3 [label=<h<SUB>3</SUB>> style=filled fillcolor="#1A6FB4" fontcolor="white" color="#0E1A2B"];
+  L  [label="L" style=filled fillcolor="#C9322B" fontcolor="white" color="#0E1A2B"];
+  x1 [label=<x<SUB>1</SUB>> color="#0E1A2B" fontcolor="#0E1A2B"];
+  x2 [label=<x<SUB>2</SUB>> color="#0E1A2B" fontcolor="#0E1A2B"];
+  x3 [label=<x<SUB>3</SUB>> color="#0E1A2B" fontcolor="#0E1A2B"];
+  { rank=same; W; h0; }
+  W -> h0 [style=invis];
+  { rank=same; h1; x1; }
+  { rank=same; h2; x2; }
+  { rank=same; h3; x3; }
+  h0 -> h1 -> h2 -> h3 -> L [color="#0E1A2B"];
+  x1 -> h1 [color="#0E1A2B"]; x2 -> h2 [color="#0E1A2B"]; x3 -> h3 [color="#0E1A2B"];
+  W -> h1 [constraint=false color="#C9322B" penwidth=1.5 style=dashed dir=back];
+  W -> h2 [constraint=false color="#C9322B" penwidth=1.5 style=dashed dir=back];
+  W -> h3 [constraint=false color="#C9322B" penwidth=1.5 style=dashed dir=back];
+}
+```
+:::
+
+:::
+
+* The gradients reach $\mathbf{W}_{hh}$ **right to left**
+
+* After all time steps are dealt with, we perform *one* update
+
+## Teacher forcing
+
+[What do we feed in when the model guesses wrong?]{.eyebrow}
+
+Training on the word *hello*. At each step the model predicts the next character:
+
+::: {.card}
+| Step | Input | Target | Model's top guess |
+|---|---|---|---|
+| 1 | h | e | e |
+| 2 | e | l | **x** (wrong) |
+| 3 | l | l | l |
+| 4 | l | o | o |
+:::
+
+At *step 3* we feed in the **true** previous character (*"l"* from the corpus), not the "x" the model produced. This is called **teacher forcing**.
+
+::: {.card}
+* Every position has a known target from the corpus
+* The loss decomposes per step: $L = \sum_t L_t$ — one cross-entropy per position
+* A wrong guess costs loss at its own step but doesn't derail the next one
+:::
+
+## Generation cannot use a teacher
+
+::: {.columns}
+::: {.column width="50%"}
+[Training]{.pill-green}
+
+Inputs always come from the corpus. The model reads true history at every step, mistakes or not.
+:::
+::: {.column width="50%"}
+[Generation]{.pill-amber}
+
+The sampled token becomes the next input. The model ingests its own output, so one wrong early token feeds every later prediction
+:::
+:::
+
+::: {.card}
+We call this mismatch **exposure bias**. 
+
+  * The model never sees its own mistakes during training, but has to accept them at generation
+
+The alternative -- training on the model's own samples -- means sampling a sequence at every training step. Slow, and in practice unstable.
+
+:::
+
+[Transformers train with teacher forcing too, token for token]{.muted}
+
+## Truncated BPTT
+
+[Training on texts too long to unroll]{.eyebrow}
+
+You cannot backpropagate through a million-token book: 
+
+* The graph holds every hidden state in memory, and the gradient product runs over every step.
+
+::: {.card}
+**Truncated BPTT**:
+
+1. Chop the text into windows of, e.g., 128 steps.
+2. Run forward and backward within each window; update the weights.
+3. Carry the **final hidden state** into the next window as its $\mathbf{h}_0$.
+4. We detach this hidden state first, to prevent carrying gradients over
+:::
+
+::: {.columns}
+::: {.column width="50%"}
+[Truncation preserves memory]{.pill-green}
+
+The hidden state flows across the window boundary, so the model can carry context from window to window.
+:::
+::: {.column width="50%"}
+[Truncation cuts off gradient]{.pill-amber}
+
+No gradient crosses the boundary, so nothing more than 128 steps back affects the current update.
+:::
+:::
+
+## Vanishing & exploding gradients
+
+The gradient of the loss w.r.t. $\mathbf{h}_1$:
+
+$$
+\frac{\partial L}{\partial \mathbf{h}_1} = \frac{\partial L}{\partial \mathbf{h}_T} \cdot \frac{\partial \mathbf{h}_T}{\partial \mathbf{h}_{T-1}} \cdots \frac{\partial \mathbf{h}_2}{\partial \mathbf{h}_1}
+$$
+
+Each factor $\frac{\partial \mathbf{h}_t}{\partial \mathbf{h}_{t-1}}$ is the matrix of partial derivatives of $\mathbf{h}_t$ with respect to $\mathbf{h}_{t-1}$.
+
+With **$T$ multiplications** of similar matrices, and magnitudes generally $< 1$, the product shrinks.
+
+* And if $> 1$, it explodes.
+
+::: {.columns}
+::: {.column width="50%"}
+[Vanishing]{.pill-amber}
+
+Early steps stop learning. The model effectively has **no long-range memory**.
+
+This is the harder problem.
+:::
+::: {.column width="50%"}
+[Exploding]{.pill-amber}
+
+Training diverges, but can be fixed in practice with **gradient clipping**.
+:::
+:::
+
+## Vanilla RNNs struggle past ~50 tokens
+
+Recall $\tanh'$ peaks at 1 and falls off fast. For $|z| > 5$, $\tanh'(z) < 0.001$.
+
+::: {.card}
+After 50 multiplications by a matrix whose largest singular value is, e.g., 0.5:
+
+$$
+0.5^{50} \approx 8.9 \times 10^{-16}
+$$
+
+About $10^{-15}$ of the signal arrives. 
+
+* So whatever happened 50 steps ago has no measurable influence on the update.
+:::
+
+::: {.callout-warning}
+# Often, real RNNs degrade well before 50 tokens
+RNNs handle sequences of 5–20 tokens reasonably well, but any larger and you need some variant.
+:::
+
+# Activity · find the vanishing gradient {background-color="#0E1A2B"}
+
+## Activity · find the vanishing gradient
+
+[<span class="pause-cue">≈ 8 min</span> · in pairs]{.eyebrow}
+
+::: {.card}
+A vanilla RNN with hidden dim 1, $W_{hh} = 0.3, W_{xh} = 1.0, b_h = 0$, $\tanh$ activation.
+
+Inputs: $x_1, x_2, \ldots, x_{10}$ — all equal to $1.0$.
+
+[Compute (approximately)]{.eyebrow}
+
+1. $h_1, h_2, h_5, h_{10}$.
+
+2. Estimate $\dfrac{\partial h_{10}}{\partial h_5}$ — what's the magnitude?
+
+3. **Interpretation:** if I change $x_5$ by a small amount, how much does $h_{10}$ change?
+:::
+
+[Six minutes.]{.muted}
+
+## Activity · answer
+
+::: {.card}
+[Trajectory of $h_t$]{.eyebrow}
+
+$h_1 = \tanh(1.0) \approx 0.762$. Then each step: $h_{t+1} = \tanh(0.3 h_t + 1.0)$.
+
+Numerically: $h_2 = \tanh(1.2285) \approx 0.842$, $h_3 = \tanh(1.2527) \approx 0.849$, …, converges to a fixed point ≈ 0.850.
+:::
+
+::: {.card}
+[Gradient]{.eyebrow}
+
+$\dfrac{\partial h_{t+1}}{\partial h_t} = (1 - h_{t+1}^2) \cdot 0.3$.
+
+At convergence ($h \approx 0.850$): $(1 - 0.850^2)(0.3) = (0.2775)(0.3) \approx 0.083$.
+
+So $\dfrac{\partial h_{10}}{\partial h_5} \approx 0.083^5 \approx 3.9 \times 10^{-6}$.
+:::
+
+::: {.reveal-box}
+[Interpretation]{.reveal-label}
+Changing $x_5$ moves $h_{10}$ by **about a millionth** of the change you made. The signal vanished in 5 steps.
+
+Backprop can't tell the network that $x_5$ matters for predicting $\hat{y}_{10}$. Training stalls on long-range dependencies.
+:::
+
+## Exploding gradients
+
+[This is the same mechanism but run the other way]{.eyebrow}
+
+If we drop the $\tanh$ (a simplification), the **linear** RNN:
+
+$$h_t = 1.5\, h_{t-1} + x_t$$
+
+has a backward step that now multiplies the gradient by 1.5:
+
+::: {.card}
+$$\frac{\partial h_{10}}{\partial h_5} = 1.5^5 \approx 7.6 \qquad\qquad 1.5^{50} \approx 6.4 \times 10^8$$
+
+:::
+
+Fifty steps turn 1.5 into 640 million!
+
+[With the $\tanh$ back in, each factor is $W_{hh} \tanh'(\cdot)$ — messier, but these failure modes remain.]{.muted}
+
+## Gradient clipping
+
+[For exploding gradients we can be pragmatic]{.eyebrow}
+
+::: {.columns}
+::: {.column width="55%"}
+**Algorithm**: after backprop, compute the norm of all gradients. If it exceeds a threshold (e.g. 1.0 or 5.0), **rescale** all gradients to that threshold.
+
+```python
+torch.nn.utils.clip_grad_norm_(
+    model.parameters(), max_norm=1.0
+)
+```
+
+* Can be added to **every** RNN training loop in practice.
+* Stops the loss from going NaN as $L \to \infty$
+:::
+::: {.column width="45%"}
+::: {.callout-tip}
+# Doesn't solve vanishing gradients
+To "clip" a number close to 0 would only worsen the problem!
+
+:::
+:::
+:::
+
+For exploding, clipping is enough. 
+
+* An example of "if the maths is unstable, just truncate" that recurs across deep learning
+
+## Gated multiplication
+
+[Clipping handled exploding. For vanishing, the fix is a multiply the network controls]{.eyebrow}
+
+A **gate** is a vector with entries between 0 and 1, produced by a small sigmoid layer with its own learned weights:
+
+$$
+\mathbf{g} = \sigma\!\left(\mathbf{W}_g [\mathbf{h}_{t-1}, \mathbf{x}_t] + \mathbf{b}_g\right)
+$$
+
+[$[\mathbf{h}_{t-1}, \mathbf{x}_t]$ stacks the two vectors into one long input — notation we'll reuse for the LSTM.]{.muted}
+
+Applying a gate is **element-wise multiplication** (the *Hadamard product*), written $\odot$: 
+
+* Multiply matching entries of *two equal-shaped* vectors
+
+::: {.columns}
+::: {.column width="50%"}
+::: {.card}
+[Worked example]{.eyebrow}
+
+$$
+\begin{bmatrix} 1.0 \\ 0.5 \\ 0.0 \end{bmatrix} \odot \begin{bmatrix} 4.0 \\ -2.0 \\ 5.0 \end{bmatrix} = \begin{bmatrix} 4.0 \\ -1.0 \\ 0.0 \end{bmatrix}
+$$
+
+Maintains the same shape.
+:::
+:::
+::: {.column width="50%"}
+[Why a gate helps]{.eyebrow}
+
+$\mathbf{W}_g$ is learned and $\mathbf{g}$ is recomputed at every step, so the network reads $\mathbf{h}_{t-1}$ and $\mathbf{x}_t$ and decides what passes.
+
+::: {.card}
+The $\tanh$ chain multiplied by $\approx 0.083$ per step whether the signal mattered or not. A gate can learn to open fully and multiply by $\sim$1.0.
+:::
+:::
+:::
+
+[$\sigma$ never reaches 0 or 1 exactly and instead sits at values like 0.002 or 0.998]{.muted}
+
+## Gated RNNs
+
+::: {.columns}
+::: {.column width="50%"}
+[LSTM]{.pill-blue} [@hochreiter1997lstm]
+
+A **cell state** $\mathbf{c}_t$ that can carry information across many steps with only **gated multiplications** 
+
+* Enabling gradients to survive much longer
+
+Three gates:
+
+* **Forget**: drop bits of $\mathbf{c}_{t-1}$.
+* **Input**: add bits to $\mathbf{c}_t$.
+* **Output**: expose part of $\mathbf{c}_t$ as $\mathbf{h}_t$.
+:::
+::: {.column width="50%"}
+[GRU]{.pill}
+
+A simpler version (Cho et al. 2014)
+
+* Fewer gates than LSTM
+* Comparable performance on most tasks
+* Cheaper
+
+This is the default RNN variant in many libraries
+
+:::
+:::
+
+::: {.card}
+LSTMs and GRUs were the state of the art for sequence tasks from ~2014 to 2017. Then came **transformers** — the story at the end of today, and all of Monday.
+:::
+
+## Inside an LSTM cell
+
+[The diagram first — the equations come next slide]{.eyebrow}
+
+::: {.columns}
+::: {.column width="52%"}
+```{dot}
+//| fig-height: 3.0
+digraph G {
+  rankdir="LR"; bgcolor="transparent"; node [fontname="Inter"];
+  in    [shape=record label="hₜ₋₁, xₜ" style=filled fillcolor="#F4F1EA"];
+  cprev [shape=box label="cₜ₋₁" style=filled fillcolor="#1A6FB4" fontcolor="white"];
+  f    [shape=circle label="fₜ" style=filled fillcolor="#F6E7C1"];
+  i    [shape=circle label="iₜ" style=filled fillcolor="#F6E7C1"];
+  cand [shape=circle label="c̃ₜ" style=filled fillcolor="#F6E7C1"];
+  o    [shape=circle label="oₜ" style=filled fillcolor="#F6E7C1"];
+  m1 [shape=circle label="×" style=filled fillcolor="#F4F1EA"];
+  m2 [shape=circle label="×" style=filled fillcolor="#F4F1EA"];
+  add [shape=circle label="+" style=filled fillcolor="#F4F1EA"];
+  m3 [shape=circle label="×" style=filled fillcolor="#F4F1EA"];
+  ct [shape=box label="cₜ" style=filled fillcolor="#1A6FB4" fontcolor="white"];
+  ht [shape=box label="hₜ" style=filled fillcolor="#C9322B" fontcolor="white"];
+  in -> f; in -> i; in -> cand; in -> o;
+  cprev -> m1; f -> m1;
+  i -> m2; cand -> m2;
+  m1 -> add; m2 -> add; add -> ct;
+  ct -> m3; o -> m3; m3 -> ht;
+}
+```
+:::
+::: {.column width="48%"}
+[Three gates + a cell state]{.eyebrow}
+
+* **Forget gate** $\mathbf{f}_t$ — how much of the previous cell state $\mathbf{c}_{t-1}$ to keep.
+* **Input gate** $\mathbf{i}_t$ — how much of the new candidate $\tilde{\mathbf{c}}_t$ to write.
+* **Output gate** $\mathbf{o}_t$ — how much of the updated $\mathbf{c}_t$ to expose as the hidden state.
+
+The straight path along the top — $\mathbf{c}_{t-1} \to \mathbf{c}_t$ — is the **memory highway**: information rides it with only a multiply and an add.
+:::
+:::
+
+## The LSTM, in equations
+
+[Same picture, written out. Each gate is its own sigmoid layer; $\odot$ is the element-wise multiply from the gating slide.]{.eyebrow}
+
+::: {.columns}
+::: {.column width="55%"}
+$$\mathbf{f}_t = \sigma\!\left(\mathbf{W}_f [\mathbf{h}_{t-1}, \mathbf{x}_t] + \mathbf{b}_f\right)$$
+$$\mathbf{i}_t = \sigma\!\left(\mathbf{W}_i [\mathbf{h}_{t-1}, \mathbf{x}_t] + \mathbf{b}_i\right)$$
+$$\mathbf{o}_t = \sigma\!\left(\mathbf{W}_o [\mathbf{h}_{t-1}, \mathbf{x}_t] + \mathbf{b}_o\right)$$
+$$\tilde{\mathbf{c}}_t = \tanh\!\left(\mathbf{W}_c [\mathbf{h}_{t-1}, \mathbf{x}_t] + \mathbf{b}_c\right)$$
+$$\mathbf{c}_t = \mathbf{f}_t \odot \mathbf{c}_{t-1} + \mathbf{i}_t \odot \tilde{\mathbf{c}}_t$$
+$$\mathbf{h}_t = \mathbf{o}_t \odot \tanh(\mathbf{c}_t)$$
+:::
+::: {.column width="45%"}
+The three gates are **sigmoids**, so each entry sits in $[0, 1]$ — a soft "how much to let through".
+
+::: {.card}
+[Worked forget-gate number]{.eyebrow}
+
+A forget gate of $f_t = 0.9$ keeps 90% of the old cell value: if $c_{t-1} = 2.0$, the forget step alone passes $0.9 \times 2.0 = 1.8$ forward. A gate of $0.1$ would pass only $0.1 \times 2.0 = 0.2$.
+:::
+
+The cell update is **additive** — gradients flow along $\mathbf{c}$ without shrinking.
+:::
+:::
+
+## One LSTM step by hand
+
+[One dimension of everything, so each quantity is a single number]{.eyebrow}
+
+::: {.columns}
+::: {.column width="45%"}
+[Setup]{.eyebrow}
+
+* $h_0 = 0$, $c_0 = 0$, input $x_1 = 1$.
+* Each weight matrix is a pair $[\,\text{weight on } h_{t-1},\ \text{weight on } x_t\,]$:
+
+::: {.card}
+$W_f = [0,\ 0.5]$
+
+$W_i = W_o = W_c = [0,\ 1]$
+
+$b_f = b_i = b_o = b_c = 0$
+:::
+:::
+::: {.column width="55%"}
+[The three gates]{.eyebrow}
+
+$$f_1 = \sigma(0 \times 0 + 0.5 \times 1 + 0) = \sigma(0.5) \approx 0.62$$
+
+$$i_1 = \sigma(0 \times 0 + 1 \times 1 + 0) = \sigma(1) \approx 0.73$$
+
+$$o_1 = \sigma(0 \times 0 + 1 \times 1 + 0) = \sigma(1) \approx 0.73$$
+
+All three numbers are between 0 and 1.
+:::
+:::
+
+## One LSTM step by hand — memory and output
+
+[In one dimension, $\odot$ is just multiplication]{.eyebrow}
+
+::: {.card}
+[Candidate]{.eyebrow}
+
+$$\tilde{c}_1 = \tanh(0 \times 0 + 1 \times 1 + 0) = \tanh(1) \approx 0.76$$
+
+[Memory update]{.eyebrow}
+
+$$c_1 = f_1 c_0 + i_1 \tilde{c}_1 \approx (0.62 \times 0) + (0.73 \times 0.76) \approx 0.56$$
+
+[Output]{.eyebrow}
+
+$$h_1 = o_1 \tanh(c_1) \approx 0.73 \times \tanh(0.56) \approx 0.73 \times 0.51 \approx 0.37$$
+:::
+
+
+## One LSTM step by hand — reading the numbers
+
+::: {.card}
+* $f_1 \approx 0.62$ — *keep 62% of the old memory.* ($c_0 = 0$ here, so there was nothing to keep yet.)
+* $i_1 \approx 0.73$ — *write 73% of the new candidate into memory.*
+* $o_1 \approx 0.73$ — *expose 73% of the (squashed) memory as the hidden state.*
+:::
+
+Each gate is a ***learned* dial between 0 and 1**. 
+
+* In a trained model the forget gate might sit near 1 while a name is being spelled out...
+* ... then drop towards 0 at a full stop
+
+## Inside a GRU cell — the simpler cousin
+
+[Cho et al. (2014) — two gates, no separate cell state]{.eyebrow}
+
+::: {.columns}
+::: {.column width="50%"}
+[Two gates]{.eyebrow}
+
+* **Update gate** $\mathbf{z}_t$ — how much of the new candidate $\tilde{\mathbf{h}}_t$ to write in; $(1 - \mathbf{z}_t)$ keeps the old state.
+* **Reset gate** $\mathbf{r}_t$ — how much of the previous hidden state to use when computing the candidate.
+
+$$\mathbf{z}_t = \sigma\!\left(\mathbf{W}_z [\mathbf{h}_{t-1}, \mathbf{x}_t]\right)$$
+$$\mathbf{r}_t = \sigma\!\left(\mathbf{W}_r [\mathbf{h}_{t-1}, \mathbf{x}_t]\right)$$
+$$\tilde{\mathbf{h}}_t = \tanh\!\left(\mathbf{W}_h [\mathbf{r}_t \odot \mathbf{h}_{t-1}, \mathbf{x}_t]\right)$$
+$$\mathbf{h}_t = (1 - \mathbf{z}_t) \odot \mathbf{h}_{t-1} + \mathbf{z}_t \odot \tilde{\mathbf{h}}_t$$
+:::
+::: {.column width="50%"}
+::: {.card}
+**Pros**: roughly 25% fewer parameters than an LSTM. Faster to train. Comparable performance on most tasks.
+
+**Cons**: slightly less expressive for very long sequences. Hard to tell apart from LSTMs in benchmarks.
+:::
+
+:::
+:::
+
+::: {.callout-note}
+# Precise gating doesn't matter
+LSTM and GRU achieve similar performance with different gate structures. 
+What really matters is having *some* additive path for gradients to flow through long sequences.
+:::
+
+## What the cells learn
+
+[Karpathy, [*The Unreasonable Effectiveness of Recurrent Neural Networks*](https://karpathy.github.io/2015/05/21/rnn-effectiveness/) (2015)]{.eyebrow}
+
+Karpathy:
+
+1. Trained character-level LSTMs on prose and on source code
+2. Plotted the value of **individual cells** as the model read.
+
+::: {.card}
+* One cell tracked whether the text was **inside a quotation** -- one value between quote marks, another outside.
+* One cell tracked **line length** -- resetting at each newline.
+* One cell tracked **bracket depth** in code.
+:::
+
+*Nobody specified these!* Next-character prediction alone caused these features to emerge because they help.
+
+## The hidden state is a learned summary
+
+::: {.card}
+**The general point**
+
+$\mathbf{h}_t$ is a **distributed summary of what matters so far** -- learned from the prediction objective.
+
+* Nobody wrote a quote detector. The model built one because quotes change what comes next.
+* A few cells are readable. Most are not — the summary is spread across all of them at once.
+
+At only 128 hidden units, you can plot every cell and hunt for the readable ones (as Karpathy did).
+:::
+
+At millions of units, however, single-cell inspection stops working
+
+* Understanding what a model represents becomes a research field of its own
+* Called **interpretability** or "explainable AI" (xAI)
+* This problem returns with transformers
+
+## Why RNNs lost
+
+::: {.columns}
+::: {.column width="50%"}
+[The constraint]{.pill-amber}
+
+To compute $\mathbf{h}_t$, you need $\mathbf{h}_{t-1}$.
+
+* **No parallelism over time.**
+* Training a length-$T$ sequence takes time proportional to $T$.
+* GPUs love parallelism
+:::
+::: {.column width="50%"}
+[Transformers]{.pill-green}
+
+Process every token **in parallel** during training.
+
+* Massive throughput
+* Scale to ~~billions~~ trillions of tokens
+* Same architecture at every size
+
+@vaswani2017attention — *"Attention is all you need"*. 
+:::
+:::
+
+::: {.card}
+**The transformer paper is short and readable**, so I'd recommend reading it
+
+* We'll go through Figure 1 line-by-line on Monday morning
+
+:::
+
+# Part 3 · Where RNNs sit today {background-color="#0E1A2B"}
+
+## Encoder–decoder seq2seq — the pre-transformer winner
+
+[**seq2seq** = *sequence-to-sequence*: the architecture that powered machine translation 2014–2017]{.eyebrow}
+
+::: {.columns}
+::: {.column width="50%"}
+[Encoder]{.pill-blue}
+
+Reads the input sentence with an RNN. The **final hidden state** $\mathbf{h}_T$ becomes a single fixed-size summary.
+:::
+::: {.column width="50%"}
+[Decoder]{.pill}
+
+A second RNN, initialised from $\mathbf{h}_T$. Generates the output one token at a time.
+:::
+:::
+
+::: {.card}
+**The bottleneck.** All information about the input has to squeeze through one vector $\mathbf{h}_T$. For long sentences this breaks down — as the next slide makes concrete.
+:::
+
+## A foreshadow of attention
+
+[The seq2seq bottleneck, in one example]{.eyebrow}
+
+Translating a 30-word sentence with vanilla seq2seq:
+
+::: {.card}
+1. Encoder reads all 30 words → final hidden state $\mathbf{h}_{30}$.
+2. Decoder starts from $\mathbf{h}_{30}$.
+3. By the time the decoder is on word 5, it has *forgotten* the start of the input.
+
+The information from "the cat" at the beginning has to travel through 30 RNN updates *and then* 5 decoder updates
+
+* The same problem: 35 multiplications by partial derivative matrices with magnitude < 1
+
+:::
+
+::: {.callout-tip}
+Bahdanau et al. (2014) fixed this by letting the decoder *look back* at *all* the encoder's hidden states — a weighted average, with weights the model learns to set. They called it **attention**.
+
+It worked so well that, by 2017, someone asked: do we even need the recurrent layers? 
+:::
+
+## Still in use
+
+Despite losing the headline race, RNNs (especially LSTMs / GRUs) are still chosen for:
+
+::: {.columns}
+::: {.column width="50%"}
+* **Streaming applications** — real-time speech recognition, online time-series control.
+* **Small-data settings** — LSTMs need less training data than transformers.
+* **Time-series forecasting** — where the autoregressive structure is a *feature*.
+* **Embedded systems** — RNNs run on tiny chips.
+:::
+::: {.column width="50%"}
+[Social-science examples]{.pill-blue}
+
+* Forecasting **conflict events** as a sequence over time [@hegre2022forecasting].
+* **Roll-call vote prediction** — modelling votes within a legislative session.
+* **Event-history models** as DL — survival analysis with sequential covariates.
+* **Sentiment over conversations** — speaker-to-speaker.
+:::
+:::
+
+## RNNs for survival analysis
+
+[A social-science application of seq2one RNNs]{.eyebrow}
+
+::: {.columns}
+::: {.column width="55%"}
+Standard survival analysis (Cox PH, Kaplan-Meier) assumes:
+
+* Proportional hazards.
+* Fixed covariates (or simple time-varying ones).
+* Linear-in-covariates risk.
+
+**Recurrent survival models** relax all three:
+
+* The hidden state $\mathbf{h}_t$ summarises the full event history up to time $t$.
+* Output is the hazard rate at each time step.
+* Non-linear interactions emerge from the network.
+:::
+::: {.column width="45%"}
+::: {.card}
+Applications:
+
+* **Patient trajectories** (re-admission, mortality).
+* **Customer churn** with rich behavioural sequences.
+* **Time-to-conflict-onset** in international relations.
+* **Firm bankruptcy** with quarterly financials.
+
+A drop-in upgrade when you have rich sequences and enough data to make the network worth its complexity.
+:::
+:::
+:::
+
+## A worked social-science example
+
+[Predicting protest events from a stream of news headlines]{.eyebrow}
+
+::: {.columns}
+::: {.column width="55%"}
+* **Input**: a sequence of daily news headlines for a country.
+* **Output**: probability of a protest in each subsequent day.
+* The model needs **memory** of recent escalating language.
+* An LSTM (or GRU) is a sensible architecture.
+
+::: {.card}
+Even with transformers available, an LSTM-based forecaster is often:
+
+* Easier to train on small national news corpora.
+* Easier to deploy in real time on rolling data.
+* Easier to interpret per-timestep contribution.
+:::
+:::
+::: {.column width="45%"}
+::: {.callout-tip}
+# Choosing between architectures
+
+Ask not "what is the biggest model?" but "what is the right model for the data I have?"
+
+* Transformers work best when you have lots of data and lots of compute. 
+
+* RNNs often work better when you have less data and/or compute
+
+:::
+:::
+:::
+
+## Applications beyond text
+
+[Where RNNs/LSTMs are still load-bearing]{.eyebrow}
+
+::: {.columns}
+::: {.column width="50%"}
+[Speech]{.pill-blue}
+
+* End-to-end speech recognition (CTC-based RNNs from ~2014).
+* Live captioning systems.
+* Many production ASR pipelines retain RNNs.
+
+[Music]{.pill-blue}
+
+* MIDI generation, ad-hoc accompaniment.
+* OpenAI's MuseNet had transformer + RNN components.
+:::
+::: {.column width="50%"}
+[Time series]{.pill-blue}
+
+* Forecasting (sales, demand, finance).
+* Anomaly detection (server logs, IoT sensors).
+* Often beats classical models like ARIMA on long series.
+
+[Bioinformatics]{.pill-blue}
+
+* DNA / protein sequence modelling (pre-AlphaFold).
+* Variant-effect prediction.
+:::
+:::
+
+::: {.callout-tip}
+The common thread: moderate sequence lengths, streaming data, modest compute requirements. These are conditions where transformers' parallel training will buy little.
+:::
+
+## Lessons RNNs taught us
+
+[Carry into the rest of the course]{.eyebrow}
+
+::: {.card}
+1. **Parameter sharing** across position (also true of CNNs, attention).
+2. **Hidden state** as compressed running summary (returns in transformers' KV cache).
+3. **The vanishing-gradient problem** (returns in deep transformers — fixed with residuals + LayerNorm).
+4. **Gating** as a way to control information flow (returns in transformer MoE, mixture-of-experts routing).
+5. **Encoder-decoder** as a template (still the shape of translation, summarisation).
+
+Even though recurrence is now "out of date", its constituent parts remain very useful!
+
+:::
+
+## What we covered today
+
+[<span class="pause-cue">Take stock</span>]{.eyebrow}
+
+::: {.card}
+You can:
+
+1. Explain why feed-forward networks don't naturally handle variable-length sequences.
+2. Describe the vanilla RNN — recurrence relation, hidden state, parameter sharing.
+3. Run one by hand for a small number of steps.
+4. State the vanishing/exploding gradient problem and why it's worse for RNNs.
+5. Name LSTM and GRU as the gated fixes, and explain why transformers ultimately replaced them.
+6. Cite at least one social-science setting where an RNN is still the right tool.
+:::
+
+# Lab brief · tomorrow {background-color="#0E1A2B"}
+
+## Tomorrow's lab — 90 minutes
+
+[Goals]{.eyebrow}
+
+Take yesterday's character-level bigram model and:
+
+1. Replace the embedding-as-logits with a proper **RNN cell** (`nn.RNN` or `nn.GRU`).
+2. Carry the hidden state across each character of a sequence.
+3. Predict the next character at every position.
+4. Train for ~5k steps on the same corpus.
+5. Generate a 500-character sample.
+
+::: {.card}
+[What you should see]{.eyebrow}
+
+The samples will be noticeably *less* terrible. You'll see real(ish) words start to appear and sensible whitespace.
+
+:::
+
+[Stretch goal: train with sequence length 64, 128, 256 and plot the loss for each. Does more context keep paying?]{.muted}
+
+## See you on Monday {background-color="#0E1A2B"}
+
+[Lecture 10 — *Attention & transformers*]{.eyebrow}
+
+::: {.callout-tip}
+**Over the weekend, if you want a preview:** read the *abstract* of @vaswani2017attention. Stop there. We'll do the rest together on Monday.
+:::
