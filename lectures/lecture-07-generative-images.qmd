@@ -30,6 +30,23 @@ format:
 3. **Weight sharing.** A kernel looks at one small window at a time, and the *same* weights slide across the whole image. A fully-connected layer gives every pixel its own weight; the kernel reuses its 10 numbers everywhere.
 :::
 
+## Breaking news!
+
+*'My AI agent booked a gym class — by booting out someone else'* 
+
+* Australian man asks Claude agent to book him a gym class
+* Classes fully booked but notices flaw allowing it to book unreleased slots
+* Then prompted to bump man up existing waiting list
+
+*Copy-paste no more: Anthropic puts invisible watermarks on Claude text under EU rules*
+
+* Subtly alter the distribution of tokens/pixels in an invisible way
+* Likely a defence against distillation
+* I suspect this will be jail-broken fairly quickly
+
+(**I think you folks could code the latter up after today's session!**)
+
+
 # Part 1 · Generative vs predictive {background-color="#0E1A2B"}
 
 ## Two flavours of modelling — quick reminder

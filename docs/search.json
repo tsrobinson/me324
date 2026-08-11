@@ -3624,5 +3624,12 @@
     "title": "Generating images",
     "section": "Be careful!",
     "text": "Be careful!\nSynthetic media is no longer a research curiosity\n\nThe architecture you’ll train in the lab is a (much smaller) version of what produces:\n\nNon-consensual deepfake imagery — Disproportionately affects women, including teenagers\nAI-generated political ads\nFabricated evidence\nIdentity-laundering\n\nThere are also enormous legitimate uses:\n\nPrivacy-preserving health data\nCreative tools\nScientific imaging"
+  },
+  {
+    "objectID": "lectures/lecture-07-generative-images.html#breaking-news",
+    "href": "lectures/lecture-07-generative-images.html#breaking-news",
+    "title": "Generating images",
+    "section": "Breaking news!",
+    "text": "Breaking news!\n‘My AI agent booked a gym class — by booting out someone else’\n\nAustralian man asks Claude agent to book him a gym class\nClasses fully booked but notices flaw allowing it to book unreleased slots\nThen prompted to bump man up existing waiting list\n\nCopy-paste no more: Anthropic puts invisible watermarks on Claude text under EU rules\n\nSubtly alter the distribution of tokens/pixels in an invisible way\nLikely a defence against distillation\nI suspect this will be jail-broken fairly quickly\n\n(I think you folks could code the latter up after today’s session!)"
   }
 ]

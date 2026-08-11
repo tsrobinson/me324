@@ -401,6 +401,22 @@ Dr Thomas Robinson
 </ol>
 </div>
 </section>
+<section id="breaking-news" class="slide level2">
+<h2>Breaking news!</h2>
+<p><em>‘My AI agent booked a gym class — by booting out someone else’</em></p>
+<ul>
+<li>Australian man asks Claude agent to book him a gym class</li>
+<li>Classes fully booked but notices flaw allowing it to book unreleased slots</li>
+<li>Then prompted to bump man up existing waiting list</li>
+</ul>
+<p><em>Copy-paste no more: Anthropic puts invisible watermarks on Claude text under EU rules</em></p>
+<ul>
+<li>Subtly alter the distribution of tokens/pixels in an invisible way</li>
+<li>Likely a defence against distillation</li>
+<li>I suspect this will be jail-broken fairly quickly</li>
+</ul>
+<p>(<strong>I think you folks could code the latter up after today’s session!</strong>)</p>
+</section>
 <section>
 <section id="part-1-generative-vs-predictive" class="title-slide slide level1 center" data-background-color="#0E1A2B">
 <h1>Part 1 · Generative vs predictive</h1>
@@ -645,7 +661,7 @@ Dr Thomas Robinson
 <p><span class="eyebrow">A real AE: 784 → 128 → 32 → <strong>2</strong> → 32 → 128 → 784, trained on MNIST</span></p>
 <div class="columns">
 <div class="column" style="width:48%;">
-<div id="3a195ced" class="cell" data-fig-height="4.5" data-fig-width="4.8" data-execution_count="1">
+<div id="4f8794d9" class="cell" data-fig-height="4.5" data-fig-width="4.8" data-execution_count="1">
 <div class="cell-output cell-output-display">
 <div>
 <figure>
@@ -670,7 +686,7 @@ Dr Thomas Robinson
 <section id="decoding-the-gaps" class="slide level2">
 <h2>Decoding the gaps</h2>
 <p><span class="eyebrow">Let’s try sample from the gaps</span></p>
-<div id="1c193a77" class="cell" data-fig-height="3.6" data-fig-width="9.6" data-execution_count="2">
+<div id="70e2e318" class="cell" data-fig-height="3.6" data-fig-width="9.6" data-execution_count="2">
 <div class="cell-output cell-output-display">
 <div>
 <figure>
@@ -1147,7 +1163,7 @@ Dr Thomas Robinson
 <h2>Walking the latent space</h2>
 <p><span class="eyebrow">Interpolation with a real VAE — 2-D latent, trained on MNIST</span></p>
 <p>Encode two real test images with a small trained VAE: a 3 becomes <span class="math inline">\mathbf{z}_A = (1.1, -0.9)</span>, an 8 becomes <span class="math inline">\mathbf{z}_B = (-1.0, -0.2)</span>. Decode nine points along the line <span class="math inline">\mathbf{z}(t) = (1-t)\,\mathbf{z}_A + t\,\mathbf{z}_B</span>:</p>
-<div id="f923f914" class="cell" data-fig-height="1.55" data-fig-width="9.6" data-execution_count="3">
+<div id="0b00c350" class="cell" data-fig-height="1.55" data-fig-width="9.6" data-execution_count="3">
 <div class="cell-output cell-output-display">
 <div>
 <figure>
