@@ -170,7 +170,7 @@ Still, we train end-to-end with backprop, just like any other network.
 
 ## Autoencoders are brittle
 
-[An uncomfortable observation]{.eyebrow}
+[Deep networks are lazy!]{.eyebrow}
 
 ::: {.try-box}
 [Try]{.try-label}
@@ -192,7 +192,7 @@ The latent space has **no structure we can sample from** so the anything not in 
 
 ## Seeing the latent space
 
-[A real one: 784 → 128 → 32 → **2** → 32 → 128 → 784, trained on MNIST]{.eyebrow}
+[A real AE: 784 → 128 → 32 → **2** → 32 → 128 → 784, trained on MNIST]{.eyebrow}
 
 ::: {.columns}
 ::: {.column width="48%"}
@@ -331,7 +331,7 @@ The VAE will *engineer* the latent space into something we can sample from.
 
 ## Denoising autoencoders
 
-[A first fix — gives a stepping stone to two huge ideas]{.eyebrow}
+[A first fix]{.eyebrow}
 
 ```{dot}
 //| fig-height: 1.6
@@ -435,7 +435,7 @@ A latent space such that:
 
 ## From AE to VAE — three changes
 
-[We are about to change three things and nothing else.]{.eyebrow}
+[We only need to change three things]{.eyebrow}
 
 ::: {.card}
 [Change 1 — encoder output]{.eyebrow}
@@ -457,7 +457,7 @@ Instead of sending $\boldsymbol{\mu}$ to the decoder, sample a $\mathbf{z}$ from
 ::: {.card}
 [Change 3 — regularise the latent]{.eyebrow}
 
-Add a second loss term that pulls the encoder's $(\boldsymbol{\mu}, \boldsymbol{\sigma})$ output towards $\mathcal{N}(\mathbf{0}, \mathbf{I})$ -— so that *any* draw from a standard Gaussian is a plausible latent code.
+Add a second loss term that pulls the encoder's $(\boldsymbol{\mu}, \boldsymbol{\sigma})$ output towards $\mathcal{N}(\mathbf{0}, \mathbf{I})$ -- so that *any* draw from a standard Gaussian is a plausible latent code.
 
 :::
 
@@ -543,7 +543,7 @@ $$
 Different in each direction. That asymmetry is why we say **divergence**, not distance. [A "nat" is one natural-log unit of information — base $e$'s answer to the bit.]{.muted}
 
 ::: {.try-box}
-[Try it yourself]{.try-label}
+[Double check it still holds]{.try-label}
 **What is $\text{KL}(P \,\|\, P)$?**
 :::
 
@@ -624,12 +624,20 @@ The $\beta$ weight (*hyperparameter*) trades off reconstruction quality vs laten
 ::: {.column width="50%"}
 [$\beta \to 0$]{.pill-amber}
 
-KL term vanishes. The model is essentially a plain autoencoder. Reconstructions are sharp; the latent space is unstructured and not sampleable.
+KL term vanishes
+
+* The model is essentially a plain autoencoder
+* Reconstructions are sharp
+* The latent space is unstructured and not sampleable
 :::
 ::: {.column width="50%"}
 [$\beta$ large]{.pill-amber}
 
-Reconstruction term is dwarfed. The encoder is forced to output something close to $\mathcal{N}(\mathbf{0}, \mathbf{I})$ regardless of the input. The latent space is very normal but reconstruction become **blurry**.
+Reconstruction term is dwarfed 
+
+* The encoder is forced to output something close to $\mathcal{N}(\mathbf{0}, \mathbf{I})$ regardless of the input
+* The latent space is very normal but reconstruction become **blurry**
+
 :::
 :::
 
@@ -643,7 +651,7 @@ The "$\beta$-VAE" literature (Higgins et al., 2017) shows that pushing $\beta$ u
 
 ## The reparameterisation trick
 
-[A problem in the backpropagation]{.eyebrow}
+[A pain in the backpropagation]{.eyebrow}
 
 ::: {.columns}
 ::: {.column width="50%"}
@@ -760,10 +768,13 @@ plt.show()
 Two things to notice:
 
 * **Every stop is a plausible digit.** No garbage anywhere on the path — compare the plain autoencoder's gap point earlier. This is the KL term at work: the whole region around the origin decodes to digits.
-* The halfway point is not "half a 3, half an 8". It is a clean **2**, and around $t = 0.75$ you pass a **6**: the straight line from the 3s to the 8s crosses their patches of the plane. In a latent space this small, a long walk greets the neighbours.
+* Notice halfway is a clean **2**, and around $t = 0.75$ we pass a **6**
+
+  * The straight line from the 3s to the 8s crosses their patches of the plane
+  
 :::
 
-[Both codes sit within about one unit of the origin — the plain AE's scatter spanned roughly $-15$ to $+30$. The KL term has pulled everything in around $\mathcal{N}(\mathbf{0}, \mathbf{I})$.]{.muted}
+[Both codes sit within about one unit of the origin — compared to AE's $-15$ to $+30$ span.]{.muted}
 
 ## Latent arithmetic on complex features
 
@@ -985,7 +996,7 @@ This is the Lecture 5 loop with a different target: no adversary to balance, no 
 :::
 
 ::: {.callout-note}
-**The bill arrives at sampling time.** Generating one image runs the network $T \approx 1{,}000$ times *in sequence*. Hence fast samplers — and Stable Diffusion's trick of running the whole chain inside an autoencoder's *latent space*, where every pass is much smaller.
+**The cost is realised at sampling time.** Generating one image runs the network $T \approx 1{,}000$ times *in sequence*. Hence we need fast samplers and/or diffusion chains run within autoencoder *latent spaces* (see Stable Diffusion).
 :::
 
 ## Conditional generation — text-to-image
@@ -1024,7 +1035,10 @@ Stable Diffusion and Midjourney both have a *guidance scale* setting.
 ::: {.card}
 [Training]{.eyebrow}
 
-Train **one** denoiser both with and without the caption: at random (say 10% of training steps), replace the caption with a blank. The model learns a conditional prediction *and* an unconditional one.
+Train **one** denoiser both with and without the caption: at random (say 10% of training steps), replace the caption with a blank. The model learns a conditional prediction *and* an unconditional one
+
+  * Notice the similarity to dropout
+  
 :::
 
 ::: {.card}
@@ -1052,10 +1066,10 @@ Suppose at one denoising step the two predictions are $\epsilon_{\text{uncond}} 
 $s = 3$:
 
 $$
-\hat{\epsilon} = 0.2 + 3 \times (0.8 - 0.2) = 0.2 + 3 \times 0.6 = 0.2 + 1.8 = 2.0
+\hat{\epsilon} = 0.2 + 3 \times (0.8 - 0.2) = 2.0
 $$
 
-The caption moved the prediction by $0.6$; guidance moves it by $1.8$ — the caption's influence is amplified three-fold.
+The caption moved the prediction by $0.6$; guidance moves it by $1.8$ by amplifying its influence three-fold.
 :::
 
 ::: {.card}
@@ -1189,7 +1203,7 @@ Before asking "is the model *good enough*?", ask **where the information would c
   * So the real question is: is that import *right for the population you're targeting*?
 :::
 
-## The ecological fallacy, at scale
+## The ecological fallacy in deep models
 
 ::: {.try-box}
 [Try — 60 seconds]{.try-label}
@@ -1201,7 +1215,6 @@ Across countries, richer countries trust their police more. **Does it follow tha
 [Answer]{.reveal-label}
 No — that is the **ecological fallacy**: a between-group pattern need not hold within groups. In ~700,000 harmonised ESS/WVS responses, the within-country correlation of household income with trust in police is **0.03**. Across country *averages* it is **0.48**.
 :::
-:::
 
 ::: {.card}
 Ask an LLM for survey respondents country by country, and its respondents show a within-country correlation of **0.49** -- the between-country value, stamped onto individuals. 
@@ -1211,6 +1224,10 @@ The model builds each fake person *from the country profile*, so group-level pat
 * Every one of the four LLMs we tested (four different developers) inflate the same way: 0.03 becomes 0.49–0.75.
 
 :::
+
+:::
+
+
 
 ## When does synthetic data actually help?
 
@@ -1239,12 +1256,12 @@ The output *looks* equally plausible in all three cases.
 
 :::
 
-## Remember!
+## Be careful!
 
 [Synthetic media is no longer a research curiosity]{.eyebrow}
 
 ::: {.card}
-The architecture you'll train in today's lab is a (much smaller) version of what produces:
+The architecture you'll train in the lab is a (much smaller) version of what produces:
 
 * **Non-consensual deepfake imagery** — Disproportionately affects women, including teenagers
 
@@ -1281,7 +1298,7 @@ You can:
 
 
 
-# Lab brief · today's afternoon {background-color="#0E1A2B"}
+# Lab brief · tomorrow morning {background-color="#0E1A2B"}
 
 ## Today's lab — 90 minutes
 

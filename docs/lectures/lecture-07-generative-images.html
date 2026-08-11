@@ -625,7 +625,7 @@ Dr Thomas Robinson
 </section>
 <section id="autoencoders-are-brittle" class="slide level2">
 <h2>Autoencoders are brittle</h2>
-<p><span class="eyebrow">An uncomfortable observation</span></p>
+<p><span class="eyebrow">Deep networks are lazy!</span></p>
 <div class="try-box">
 <p><span class="try-label">Try</span> <strong>What’s the <em>easiest</em> function for an autoencoder to learn?</strong></p>
 </div>
@@ -642,10 +642,10 @@ Dr Thomas Robinson
 </section>
 <section id="seeing-the-latent-space" class="slide level2">
 <h2>Seeing the latent space</h2>
-<p><span class="eyebrow">A real one: 784 → 128 → 32 → <strong>2</strong> → 32 → 128 → 784, trained on MNIST</span></p>
+<p><span class="eyebrow">A real AE: 784 → 128 → 32 → <strong>2</strong> → 32 → 128 → 784, trained on MNIST</span></p>
 <div class="columns">
 <div class="column" style="width:48%;">
-<div id="f1668fd1" class="cell" data-fig-height="4.5" data-fig-width="4.8" data-execution_count="1">
+<div id="3a195ced" class="cell" data-fig-height="4.5" data-fig-width="4.8" data-execution_count="1">
 <div class="cell-output cell-output-display">
 <div>
 <figure>
@@ -670,7 +670,7 @@ Dr Thomas Robinson
 <section id="decoding-the-gaps" class="slide level2">
 <h2>Decoding the gaps</h2>
 <p><span class="eyebrow">Let’s try sample from the gaps</span></p>
-<div id="9779641d" class="cell" data-fig-height="3.6" data-fig-width="9.6" data-execution_count="2">
+<div id="1c193a77" class="cell" data-fig-height="3.6" data-fig-width="9.6" data-execution_count="2">
 <div class="cell-output cell-output-display">
 <div>
 <figure>
@@ -700,7 +700,7 @@ Dr Thomas Robinson
 </section>
 <section id="denoising-autoencoders" class="slide level2">
 <h2>Denoising autoencoders</h2>
-<p><span class="eyebrow">A first fix — gives a stepping stone to two huge ideas</span></p>
+<p><span class="eyebrow">A first fix</span></p>
 <div class="cell" data-fig-height="1.6" data-layout-align="default">
 <div class="cell-output-display">
 <div>
@@ -859,7 +859,7 @@ Dr Thomas Robinson
 </section>
 <section id="from-ae-to-vae-three-changes" class="slide level2">
 <h2>From AE to VAE — three changes</h2>
-<p><span class="eyebrow">We are about to change three things and nothing else.</span></p>
+<p><span class="eyebrow">We only need to change three things</span></p>
 <div class="card">
 <p><span class="eyebrow">Change 1 — encoder output</span></p>
 <p>Instead of a single point <span class="math inline">\mathbf{z}</span>, the encoder outputs <strong>two vectors</strong>: a mean <span class="math inline">\boldsymbol{\mu}</span> and a standard deviation <span class="math inline">\boldsymbol{\sigma}</span>.</p>
@@ -874,7 +874,7 @@ Dr Thomas Robinson
 </div>
 <div class="card">
 <p><span class="eyebrow">Change 3 — regularise the latent</span></p>
-<p>Add a second loss term that pulls the encoder’s <span class="math inline">(\boldsymbol{\mu}, \boldsymbol{\sigma})</span> output towards <span class="math inline">\mathcal{N}(\mathbf{0}, \mathbf{I})</span> -— so that <em>any</em> draw from a standard Gaussian is a plausible latent code.</p>
+<p>Add a second loss term that pulls the encoder’s <span class="math inline">(\boldsymbol{\mu}, \boldsymbol{\sigma})</span> output towards <span class="math inline">\mathcal{N}(\mathbf{0}, \mathbf{I})</span> – so that <em>any</em> draw from a standard Gaussian is a plausible latent code.</p>
 </div>
 </section>
 <section id="the-vae-idea-kingma2013auto" class="slide level2">
@@ -961,7 +961,7 @@ Dr Thomas Robinson
 </span></p>
 <p>Different in each direction. That asymmetry is why we say <strong>divergence</strong>, not distance. <span class="muted">A “nat” is one natural-log unit of information — base <span class="math inline">e</span>’s answer to the bit.</span></p>
 <div class="try-box">
-<p><span class="try-label">Try it yourself</span> <strong>What is <span class="math inline">\text{KL}(P \,\|\, P)</span>?</strong></p>
+<p><span class="try-label">Double check it still holds</span> <strong>What is <span class="math inline">\text{KL}(P \,\|\, P)</span>?</strong></p>
 </div>
 <div class="fragment">
 <div class="reveal-box">
@@ -1030,10 +1030,19 @@ Dr Thomas Robinson
 <div class="columns">
 <div class="column" style="width:50%;">
 <p><span class="pill-amber"><span class="math inline">\beta \to 0</span></span></p>
-<p>KL term vanishes. The model is essentially a plain autoencoder. Reconstructions are sharp; the latent space is unstructured and not sampleable.</p>
+<p>KL term vanishes</p>
+<ul>
+<li>The model is essentially a plain autoencoder</li>
+<li>Reconstructions are sharp</li>
+<li>The latent space is unstructured and not sampleable</li>
+</ul>
 </div><div class="column" style="width:50%;">
 <p><span class="pill-amber"><span class="math inline">\beta</span> large</span></p>
-<p>Reconstruction term is dwarfed. The encoder is forced to output something close to <span class="math inline">\mathcal{N}(\mathbf{0}, \mathbf{I})</span> regardless of the input. The latent space is very normal but reconstruction become <strong>blurry</strong>.</p>
+<p>Reconstruction term is dwarfed</p>
+<ul>
+<li>The encoder is forced to output something close to <span class="math inline">\mathcal{N}(\mathbf{0}, \mathbf{I})</span> regardless of the input</li>
+<li>The latent space is very normal but reconstruction become <strong>blurry</strong></li>
+</ul>
 </div></div>
 <div class="card">
 <p><span class="eyebrow">The trade-off</span></p>
@@ -1043,7 +1052,7 @@ Dr Thomas Robinson
 </section>
 <section id="the-reparameterisation-trick" class="slide level2">
 <h2>The reparameterisation trick</h2>
-<p><span class="eyebrow">A problem in the backpropagation</span></p>
+<p><span class="eyebrow">A pain in the backpropagation</span></p>
 <div class="columns">
 <div class="column" style="width:50%;">
 <p><span class="pill-amber">Problem</span></p>
@@ -1138,7 +1147,7 @@ Dr Thomas Robinson
 <h2>Walking the latent space</h2>
 <p><span class="eyebrow">Interpolation with a real VAE — 2-D latent, trained on MNIST</span></p>
 <p>Encode two real test images with a small trained VAE: a 3 becomes <span class="math inline">\mathbf{z}_A = (1.1, -0.9)</span>, an 8 becomes <span class="math inline">\mathbf{z}_B = (-1.0, -0.2)</span>. Decode nine points along the line <span class="math inline">\mathbf{z}(t) = (1-t)\,\mathbf{z}_A + t\,\mathbf{z}_B</span>:</p>
-<div id="cd125f64" class="cell" data-fig-height="1.55" data-fig-width="9.6" data-execution_count="3">
+<div id="f923f914" class="cell" data-fig-height="1.55" data-fig-width="9.6" data-execution_count="3">
 <div class="cell-output cell-output-display">
 <div>
 <figure>
@@ -1150,11 +1159,14 @@ Dr Thomas Robinson
 <div class="card">
 <p>Two things to notice:</p>
 <ul>
-<li><strong>Every stop is a plausible digit.</strong> No garbage anywhere on the path — compare the plain autoencoder’s gap point earlier. This is the KL term at work: the whole region around the origin decodes to digits.</li>
-<li>The halfway point is not “half a 3, half an 8”. It is a clean <strong>2</strong>, and around <span class="math inline">t = 0.75</span> you pass a <strong>6</strong>: the straight line from the 3s to the 8s crosses their patches of the plane. In a latent space this small, a long walk greets the neighbours.</li>
+<li><p><strong>Every stop is a plausible digit.</strong> No garbage anywhere on the path — compare the plain autoencoder’s gap point earlier. This is the KL term at work: the whole region around the origin decodes to digits.</p></li>
+<li><p>Notice halfway is a clean <strong>2</strong>, and around <span class="math inline">t = 0.75</span> we pass a <strong>6</strong></p>
+<ul>
+<li>The straight line from the 3s to the 8s crosses their patches of the plane</li>
+</ul></li>
 </ul>
 </div>
-<p><span class="muted">Both codes sit within about one unit of the origin — the plain AE’s scatter spanned roughly <span class="math inline">-15</span> to <span class="math inline">+30</span>. The KL term has pulled everything in around <span class="math inline">\mathcal{N}(\mathbf{0}, \mathbf{I})</span>.</span></p>
+<p><span class="muted">Both codes sit within about one unit of the origin — compared to AE’s <span class="math inline">-15</span> to <span class="math inline">+30</span> span.</span></p>
 </section>
 <section id="latent-arithmetic-on-complex-features" class="slide level2">
 <h2>Latent arithmetic on complex features</h2>
@@ -1588,7 +1600,7 @@ Dr Thomas Robinson
 <p><strong>Note</strong></p>
 </div>
 <div class="callout-content">
-<p><strong>The bill arrives at sampling time.</strong> Generating one image runs the network <span class="math inline">T \approx 1{,}000</span> times <em>in sequence</em>. Hence fast samplers — and Stable Diffusion’s trick of running the whole chain inside an autoencoder’s <em>latent space</em>, where every pass is much smaller.</p>
+<p><strong>The cost is realised at sampling time.</strong> Generating one image runs the network <span class="math inline">T \approx 1{,}000</span> times <em>in sequence</em>. Hence we need fast samplers and/or diffusion chains run within autoencoder <em>latent spaces</em> (see Stable Diffusion).</p>
 </div>
 </div>
 </div>
@@ -1624,7 +1636,10 @@ Dr Thomas Robinson
 <p>Stable Diffusion and Midjourney both have a <em>guidance scale</em> setting.</p>
 <div class="card">
 <p><span class="eyebrow">Training</span></p>
-<p>Train <strong>one</strong> denoiser both with and without the caption: at random (say 10% of training steps), replace the caption with a blank. The model learns a conditional prediction <em>and</em> an unconditional one.</p>
+<p>Train <strong>one</strong> denoiser both with and without the caption: at random (say 10% of training steps), replace the caption with a blank. The model learns a conditional prediction <em>and</em> an unconditional one</p>
+<ul>
+<li>Notice the similarity to dropout</li>
+</ul>
 </div>
 <div class="card">
 <p><span class="eyebrow">Sampling</span></p>
@@ -1647,9 +1662,9 @@ Dr Thomas Robinson
 <div class="card">
 <p><span class="math inline">s = 3</span>:</p>
 <p><span class="math display">
-\hat{\epsilon} = 0.2 + 3 \times (0.8 - 0.2) = 0.2 + 3 \times 0.6 = 0.2 + 1.8 = 2.0
+\hat{\epsilon} = 0.2 + 3 \times (0.8 - 0.2) = 2.0
 </span></p>
-<p>The caption moved the prediction by <span class="math inline">0.6</span>; guidance moves it by <span class="math inline">1.8</span> — the caption’s influence is amplified three-fold.</p>
+<p>The caption moved the prediction by <span class="math inline">0.6</span>; guidance moves it by <span class="math inline">1.8</span> by amplifying its influence three-fold.</p>
 </div>
 <div class="card">
 <p><span class="math inline">s = 1</span></p>
@@ -1866,8 +1881,8 @@ Dr Thomas Robinson
 </ul>
 </div>
 </section>
-<section id="the-ecological-fallacy-at-scale" class="slide level2">
-<h2>The ecological fallacy, at scale</h2>
+<section id="the-ecological-fallacy-in-deep-models" class="slide level2">
+<h2>The ecological fallacy in deep models</h2>
 <div class="try-box">
 <p><span class="try-label">Try — 60 seconds</span> Across countries, richer countries trust their police more. <strong>Does it follow that, within a country, richer people trust the police more?</strong></p>
 </div>
@@ -1875,13 +1890,13 @@ Dr Thomas Robinson
 <div class="reveal-box">
 <p><span class="reveal-label">Answer</span> No — that is the <strong>ecological fallacy</strong>: a between-group pattern need not hold within groups. In ~700,000 harmonised ESS/WVS responses, the within-country correlation of household income with trust in police is <strong>0.03</strong>. Across country <em>averages</em> it is <strong>0.48</strong>.</p>
 </div>
-</div>
 <div class="card">
 <p>Ask an LLM for survey respondents country by country, and its respondents show a within-country correlation of <strong>0.49</strong> – the between-country value, stamped onto individuals.</p>
 <p>The model builds each fake person <em>from the country profile</em>, so group-level patterns bleed into individual-level observations.</p>
 <ul>
 <li>Every one of the four LLMs we tested (four different developers) inflate the same way: 0.03 becomes 0.49–0.75.</li>
 </ul>
+</div>
 </div>
 </section>
 <section id="when-does-synthetic-data-actually-help" class="slide level2">
@@ -1908,11 +1923,11 @@ Dr Thomas Robinson
 </ol>
 </div>
 </section>
-<section id="remember" class="slide level2">
-<h2>Remember!</h2>
+<section id="be-careful" class="slide level2">
+<h2>Be careful!</h2>
 <p><span class="eyebrow">Synthetic media is no longer a research curiosity</span></p>
 <div class="card">
-<p>The architecture you’ll train in today’s lab is a (much smaller) version of what produces:</p>
+<p>The architecture you’ll train in the lab is a (much smaller) version of what produces:</p>
 <ul>
 <li><p><strong>Non-consensual deepfake imagery</strong> — Disproportionately affects women, including teenagers</p></li>
 <li><p><strong>AI-generated political ads</strong></p></li>
@@ -1944,8 +1959,8 @@ Dr Thomas Robinson
 </div>
 </section></section>
 <section>
-<section id="lab-brief-todays-afternoon" class="title-slide slide level1 center" data-background-color="#0E1A2B">
-<h1>Lab brief · today’s afternoon</h1>
+<section id="lab-brief-tomorrow-morning" class="title-slide slide level1 center" data-background-color="#0E1A2B">
+<h1>Lab brief · tomorrow morning</h1>
 
 </section>
 <section id="todays-lab-90-minutes" class="slide level2">
