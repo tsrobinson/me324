@@ -1993,7 +1993,7 @@ Dr Thomas Robinson
 <section id="measuring-closeness-with-cosine-similarity" class="slide level2">
 <h2>Measuring “closeness” with cosine similarity</h2>
 <p><span class="eyebrow">What does that <span class="math inline">\approx</span> actually mean for two vectors?</span></p>
-<p>We keep saying two embeddings are “close.” The standard measure is <strong>cosine similarity</strong> —- the cosine of the angle <span class="math inline">\theta</span> between them:</p>
+<p>We keep saying two embeddings are “close.” The standard measure is <strong>cosine similarity</strong> – the cosine of the angle <span class="math inline">\theta</span> between them:</p>
 <p><span class="math display">
 \cos\theta = \frac{\mathbf{a}\cdot\mathbf{b}}{\lVert\mathbf{a}\rVert\,\lVert\mathbf{b}\rVert}
 </span></p>
@@ -2025,9 +2025,9 @@ Dr Thomas Robinson
 </div>
 </div>
 </section>
-<section id="the-analogy-with-actual-numbers" class="slide level2">
-<h2>The analogy, with actual numbers</h2>
-<p><span class="eyebrow">Let’s earn that <span class="math inline">\approx</span> in a toy 2-D embedding space</span></p>
+<section id="the-analogy" class="slide level2">
+<h2>The analogy</h2>
+<p><span class="eyebrow">A toy 2-D embedding space</span></p>
 <p>Suppose, in our tiny space, the embeddings are:</p>
 <p><span class="math display">
 \mathbf{e}_{\text{king}} = (2, 1), \quad
@@ -2213,10 +2213,10 @@ Dr Thomas Robinson
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
-<p><strong>Tip</strong></p>
+<p><strong>This count table is a model.</strong></p>
 </div>
 <div class="callout-content">
-<p><strong>This count table <em>is</em> a model.</strong> If you have <span class="math inline">P(c_b \mid c_a)</span> for every pair, you can sample text:</p>
+<p>If you have <span class="math inline">P(c_b \mid c_a)</span> for every pair, you can sample text:</p>
 <ul>
 <li>Pick a starting character.</li>
 <li>Sample next character given current.</li>
@@ -2247,7 +2247,7 @@ Dr Thomas Robinson
 <p>On the right: 20 words from <strong>GloVe</strong> (50-d vectors, trained on 6 billion tokens of Wikipedia + newswire), PCA to 2D.</p>
 <p>The categories separate on their own — nobody told the model they exist.</p>
 </div><div class="column" style="width:58%;">
-<div id="b5ef62f9" class="cell" data-fig-height="4.2" data-fig-width="5.4" data-execution_count="1">
+<div id="17953229" class="cell" data-fig-height="4.2" data-fig-width="5.4" data-execution_count="1">
 <div class="cell-output cell-output-display">
 <div>
 <figure>
@@ -2537,7 +2537,7 @@ Dr Thomas Robinson
 <p><span class="eyebrow">The count table for the plenary corpus — every cell of it</span></p>
 <div class="columns">
 <div class="column" style="width:52%;">
-<div id="474deb47" class="cell" data-fig-height="4.6" data-fig-width="4.6" data-execution_count="2">
+<div id="ec5b0f4a" class="cell" data-fig-height="4.6" data-fig-width="4.6" data-execution_count="2">
 <div class="cell-output cell-output-display">
 <div>
 <figure>
@@ -2657,8 +2657,8 @@ P(c_b \mid c_a) = \frac{\text{count}(c_a, c_b) + 1}{\text{count}(c_a) + V}
 <p><strong>This is the smallest substantive language model.</strong></p>
 </div>
 </section>
-<section id="training-the-bigram-concretely" class="slide level2">
-<h2>Training the bigram, concretely</h2>
+<section id="training-the-bigram" class="slide level2">
+<h2>Training the bigram</h2>
 <p><span class="eyebrow">A worked step</span></p>
 <div class="card">
 <ul>
@@ -2855,8 +2855,8 @@ P(c_b \mid c_a) = \frac{\text{count}(c_a, c_b) + 1}{\text{count}(c_a) + V}
 </div>
 </section></section>
 <section>
-<section id="lab-brief-todays-afternoon" class="title-slide slide level1 center" data-background-color="#0E1A2B">
-<h1>Lab brief · today’s afternoon</h1>
+<section id="lab-brief" class="title-slide slide level1 center" data-background-color="#0E1A2B">
+<h1>Lab brief</h1>
 
 </section>
 <section id="todays-lab-90-minutes" class="slide level2">

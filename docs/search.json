@@ -830,7 +830,7 @@
     "href": "lectures/lecture-08-text-embeddings.html#measuring-closeness-with-cosine-similarity",
     "title": "Building your own text-generating AI (1/4)",
     "section": "Measuring “closeness” with cosine similarity",
-    "text": "Measuring “closeness” with cosine similarity\nWhat does that \\approx actually mean for two vectors?\nWe keep saying two embeddings are “close.” The standard measure is cosine similarity —- the cosine of the angle \\theta between them:\n\n\\cos\\theta = \\frac{\\mathbf{a}\\cdot\\mathbf{b}}{\\lVert\\mathbf{a}\\rVert\\,\\lVert\\mathbf{b}\\rVert}\n\n\n+1 → same direction (very similar).\n0 → orthogonal (unrelated — exactly the one-hot case).\n-1 → opposite direction."
+    "text": "Measuring “closeness” with cosine similarity\nWhat does that \\approx actually mean for two vectors?\nWe keep saying two embeddings are “close.” The standard measure is cosine similarity – the cosine of the angle \\theta between them:\n\n\\cos\\theta = \\frac{\\mathbf{a}\\cdot\\mathbf{b}}{\\lVert\\mathbf{a}\\rVert\\,\\lVert\\mathbf{b}\\rVert}\n\n\n+1 → same direction (very similar).\n0 → orthogonal (unrelated — exactly the one-hot case).\n-1 → opposite direction."
   },
   {
     "objectID": "lectures/lecture-08-text-embeddings.html#calculating-cosine-similarity",
@@ -879,7 +879,7 @@
     "href": "lectures/lecture-08-text-embeddings.html#plenary-partial-answer",
     "title": "Building your own text-generating AI (1/4)",
     "section": "Plenary · partial answer",
-    "text": "Plenary · partial answer\n\nUnique characters 10 (including the space): ' ', 'a', 'c', 'e', 'h', 'm', 'n', 'o', 's', 't'.\nMost common bigram — ('a', 't'), which appears three times: cat, sat, mat. (The pair ('t', 'h') appears only twice — the, the.)\nMost frequent character — 't', counting every occurrence, appears five times: the, cat, sat, the, mat.\n\n\n\n\n\n\n\nTip\n\n\nThis count table is a model. If you have P(c_b \\mid c_a) for every pair, you can sample text:\n\nPick a starting character.\nSample next character given current.\nRepeat.\n\nIt generates gibberish — but with structure. Next we’ll meet the smallest neural-network version of this."
+    "text": "Plenary · partial answer\n\nUnique characters 10 (including the space): ' ', 'a', 'c', 'e', 'h', 'm', 'n', 'o', 's', 't'.\nMost common bigram — ('a', 't'), which appears three times: cat, sat, mat. (The pair ('t', 'h') appears only twice — the, the.)\nMost frequent character — 't', counting every occurrence, appears five times: the, cat, sat, the, mat.\n\n\n\n\n\n\n\nThis count table is a model.\n\n\nIf you have P(c_b \\mid c_a) for every pair, you can sample text:\n\nPick a starting character.\nSample next character given current.\nRepeat.\n\nIt generates gibberish — but with structure. Next we’ll meet the smallest neural-network version of this."
   },
   {
     "objectID": "lectures/lecture-08-text-embeddings.html#visualising-embeddings",
@@ -3631,5 +3631,19 @@
     "title": "Generating images",
     "section": "Breaking news!",
     "text": "Breaking news!\n‘My AI agent booked a gym class — by booting out someone else’\n\nAustralian man asks Claude agent to book him a gym class\nClasses fully booked but notices flaw allowing it to book unreleased slots\nThen prompted to bump man up existing waiting list\n\nCopy-paste no more: Anthropic puts invisible watermarks on Claude text under EU rules\n\nSubtly alter the distribution of tokens/pixels in an invisible way\nLikely a defence against distillation\nI suspect this will be jail-broken fairly quickly\n\n(I think you folks could code the latter up after today’s session!)"
+  },
+  {
+    "objectID": "lectures/lecture-08-text-embeddings.html#the-analogy",
+    "href": "lectures/lecture-08-text-embeddings.html#the-analogy",
+    "title": "Building your own text-generating AI (1/4)",
+    "section": "The analogy",
+    "text": "The analogy\nA toy 2-D embedding space\nSuppose, in our tiny space, the embeddings are:\n\n\\mathbf{e}_{\\text{king}} = (2, 1), \\quad\n\\mathbf{e}_{\\text{man}} = (1, 1), \\quad\n\\mathbf{e}_{\\text{woman}} = (1, 2)\n\nStep 1 — do the arithmetic\n\n\\mathbf{e}_{\\text{king}} - \\mathbf{e}_{\\text{man}} + \\mathbf{e}_{\\text{woman}}\n= (2 - 1 + 1,\\; 1 - 1 + 2) = (2, 2)\n\nCall this result \\mathbf{r} = (2, 2), with length \\lVert\\mathbf{r}\\rVert = \\sqrt{2^2 + 2^2} = \\sqrt{8} \\approx 2.83.\nStep 2 — find the nearest word by cosine similarity\nWe compare \\mathbf{r} to three candidate embeddings (each of length 5, so every denominator is 2.83\\times 5 \\approx 14.14):\n\n\n\n\n\n\n\n\n\nword\nvector \\mathbf{v}\n\\mathbf{r}\\cdot\\mathbf{v}\n\\cos\\theta\n\n\n\n\nqueen\n(4, 3)\n8 + 6 = 14\n14 / 14.14 \\approx 0.99\n\n\nrock\n(0, 5)\n0 + 10 = 10\n10 / 14.14 \\approx 0.71\n\n\nfish\n(3, -4)\n6 - 8 = -2\n-2 / 14.14 \\approx -0.14\n\n\n\n\nVery high similarity \\mathbf{e}_{\\text{king}} - \\mathbf{e}_{\\text{man}} + \\mathbf{e}_{\\text{woman}} points almost exactly at queen (\\cos\\theta \\approx 0.99) — far closer than to rock or fish."
+  },
+  {
+    "objectID": "lectures/lecture-08-text-embeddings.html#training-the-bigram",
+    "href": "lectures/lecture-08-text-embeddings.html#training-the-bigram",
+    "title": "Building your own text-generating AI (1/4)",
+    "section": "Training the bigram",
+    "text": "Training the bigram\nA worked step\n\n\nTake one training pair: input 't' (id 9), target 'h' (id 4).\nLook up row 9 of the embedding/logits table → a vector of V scores.\nApply softmax → a probability over {', a, c, e, h, m, n, o, s, t}.\nLoss = -\\log P(\\text{'h'}) = -\\log(\\text{slot 4}).\nBackprop adjusts row 9 to raise the score at slot 4.\n\n\n\n\n\n\n\n\nTip\n\n\nThat’s it! The model learns “when you see t, weight h a little higher.” If we repeat this over the whole corpus, the bigram statistics emerge in the weights\n\nThese just are pure-count numbers (with a small amount of noise)"
   }
 ]

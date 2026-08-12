@@ -516,7 +516,7 @@ Real-world embeddings encode *all* statistical regularities of their training co
 
 [What does that $\approx$ actually mean for two vectors?]{.eyebrow}
 
-We keep saying two embeddings are "close." The standard measure is **cosine similarity** —- the cosine of the angle $\theta$ between them:
+We keep saying two embeddings are "close." The standard measure is **cosine similarity** -- the cosine of the angle $\theta$ between them:
 
 $$
 \cos\theta = \frac{\mathbf{a}\cdot\mathbf{b}}{\lVert\mathbf{a}\rVert\,\lVert\mathbf{b}\rVert}
@@ -554,9 +554,9 @@ $\cos\theta = \dfrac{1}{1\times 1.41} \approx 0.71$ — a 45° angle. Halfway be
 :::
 :::
 
-## The analogy, with actual numbers
+## The analogy
 
-[Let's earn that $\approx$ in a toy 2-D embedding space]{.eyebrow}
+[A toy 2-D embedding space]{.eyebrow}
 
 Suppose, in our tiny space, the embeddings are:
 
@@ -685,7 +685,9 @@ A **bigram** is a pair of adjacent characters.
 :::
 
 ::: {.callout-tip}
-**This count table *is* a model.** If you have $P(c_b \mid c_a)$ for every pair, you can sample text:
+# This count table is a model.
+
+If you have $P(c_b \mid c_a)$ for every pair, you can sample text:
 
 * Pick a starting character.
 * Sample next character given current.
@@ -1207,7 +1209,7 @@ class Bigram(nn.Module):
 **This is the smallest substantive language model.** 
 :::
 
-## Training the bigram, concretely
+## Training the bigram
 
 [A worked step]{.eyebrow}
 
@@ -1410,7 +1412,7 @@ You can:
 **Eight days down, four to go!**
 :::
 
-# Lab brief · today's afternoon {background-color="#0E1A2B"}
+# Lab brief {background-color="#0E1A2B"}
 
 ## Today's lab — 90 minutes
 
