@@ -6,8 +6,9 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="description" content="Take-home midterm — build a character-level language model for Parliament.">
 
-<title>Lectures – ME324 · AI &amp; Deep Learning</title>
+<title>Midterm assessment · ME324 – ME324 · AI &amp; Deep Learning</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -29,8 +30,6 @@ ul.task-list li input[type="checkbox"] {
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
-<script src="site_libs/quarto-listing/list.min.js"></script>
-<script src="site_libs/quarto-listing/quarto-listing.js"></script>
 <script src="site_libs/quarto-html/quarto.js"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
@@ -67,69 +66,11 @@ ul.task-list li input[type="checkbox"] {
     "search-label": "Search"
   }
 }</script>
-<script>
-
-  window.document.addEventListener("DOMContentLoaded", function (_event) {
-    const listingTargetEl = window.document.querySelector('#listing-lecture-listing .list');
-    if (!listingTargetEl) {
-      // No listing discovered, do not attach.
-      return; 
-    }
-
-    const options = {
-      valueNames: ['listing-project','listing-website','listing-format','listing-bibliography','listing-csl','listing-editor','listing-_quarto-vars','listing-language','listing-title','listing-subtitle','listing-author','listing-date','listing-date-format','listing-path','listing-outputHref','listing-date-modified','listing-description','listing-filename','listing-file-modified','listing-reading-time','listing-word-count','listing-pdf',{ data: ['index'] },{ data: ['categories'] },{ data: ['listing-date-sort'] },{ data: ['listing-date-modified-sort'] },{ data: ['listing-file-modified-sort'] },{ data: ['listing-reading-time-sort'] },{ data: ['listing-word-count-sort'] }],
-      
-      searchColumns: ["listing-project","listing-website","listing-format","listing-bibliography","listing-csl","listing-editor","listing-_quarto-vars","listing-language","listing-title","listing-subtitle","listing-author","listing-date","listing-date-format","listing-path","listing-outputHref","listing-date-modified","listing-description","listing-filename","listing-file-modified","listing-reading-time","listing-word-count","listing-pdf"],
-    };
-
-    window['quarto-listings'] = window['quarto-listings'] || {};
-    window['quarto-listings']['listing-lecture-listing'] = new List('listing-lecture-listing', options);
-
-    if (window['quarto-listing-loaded']) {
-      window['quarto-listing-loaded']();
-    }
-  });
-
-  window.addEventListener('hashchange',() => {
-    if (window['quarto-listing-loaded']) {
-      window['quarto-listing-loaded']();
-    }
-  })
-  </script>
 <style>html{ scroll-behavior: smooth; }</style>
 
-  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
-<script type="text/javascript">
-const typesetMath = (el) => {
-  if (window.MathJax) {
-    // MathJax Typeset
-    window.MathJax.typeset([el]);
-  } else if (window.katex) {
-    // KaTeX Render
-    var mathElements = el.getElementsByClassName("math");
-    var macros = [];
-    for (var i = 0; i < mathElements.length; i++) {
-      var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
-        window.katex.render(texText.data, mathElements[i], {
-          displayMode: mathElements[i].classList.contains('display'),
-          throwOnError: false,
-          macros: macros,
-          fleqn: false
-        });
-      }
-    }
-  }
-}
-window.Quarto = {
-  typesetMath
-};
-</script>
-
-<meta property="og:title" content="Lectures – ME324 · AI &amp; Deep Learning">
-<meta property="og:description" content="Twelve 3-hour sessions">
+<meta property="og:title" content="Midterm assessment · ME324">
+<meta property="og:description" content="Take-home midterm — build a character-level language model for Parliament.">
 <meta property="og:site_name" content="ME324 · AI &amp; Deep Learning">
 </head>
 
@@ -155,7 +96,7 @@ window.Quarto = {
 <span class="menu-text">Home</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link active" href="./lectures.html" aria-current="page"> 
+    <a class="nav-link" href="./lectures.html"> 
 <span class="menu-text">Lectures</span></a>
   </li>  
   <li class="nav-item">
@@ -163,7 +104,7 @@ window.Quarto = {
 <span class="menu-text">Labs</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./midterm.html"> 
+    <a class="nav-link active" href="./midterm.html" aria-current="page"> 
 <span class="menu-text">Midterm</span></a>
   </li>  
   <li class="nav-item">
@@ -185,249 +126,160 @@ window.Quarto = {
     </nav>
 </header>
 <!-- content -->
-<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul class="collapse">
+  <li><a href="#me324-midterm-assessment-a-language-model-for-parliament" id="toc-me324-midterm-assessment-a-language-model-for-parliament" class="nav-link active" data-scroll-target="#me324-midterm-assessment-a-language-model-for-parliament">ME324 · Midterm assessment — A language model for Parliament</a>
+  <ul class="collapse">
+  <li><a href="#the-task" id="toc-the-task" class="nav-link" data-scroll-target="#the-task">The task</a></li>
+  <li><a href="#what-youre-given" id="toc-what-youre-given" class="nav-link" data-scroll-target="#what-youre-given">What you’re given</a></li>
+  <li><a href="#the-rules" id="toc-the-rules" class="nav-link" data-scroll-target="#the-rules">The rules</a></li>
+  <li><a href="#part-a-building-a-model-35-marks" id="toc-part-a-building-a-model-35-marks" class="nav-link" data-scroll-target="#part-a-building-a-model-35-marks">Part A — Building a model (35 marks)</a></li>
+  <li><a href="#part-b-experimenting-on-your-model-35-marks" id="toc-part-b-experimenting-on-your-model-35-marks" class="nav-link" data-scroll-target="#part-b-experimenting-on-your-model-35-marks">Part B — Experimenting on your model (35 marks)</a></li>
+  <li><a href="#part-c-discussing-your-model-25-marks" id="toc-part-c-discussing-your-model-25-marks" class="nav-link" data-scroll-target="#part-c-discussing-your-model-25-marks">Part C — Discussing your model (25 marks)</a></li>
+  <li><a href="#appendix-ai-use-reporting-and-reproducibility-5-marks" id="toc-appendix-ai-use-reporting-and-reproducibility-5-marks" class="nav-link" data-scroll-target="#appendix-ai-use-reporting-and-reproducibility-5-marks">Appendix — AI use, reporting and reproducibility (5 marks)</a></li>
+  <li><a href="#marking" id="toc-marking" class="nav-link" data-scroll-target="#marking">Marking</a></li>
+  <li><a href="#submission" id="toc-submission" class="nav-link" data-scroll-target="#submission">Submission</a></li>
+  <li><a href="#the-data" id="toc-the-data" class="nav-link" data-scroll-target="#the-data">The data</a></li>
+  </ul></li>
+  </ul>
+<div class="toc-actions"><ul class="collapse"><li><a href="https://github.com/tsrobinson/me324/blob/main/midterm.qmd" class="toc-action"><i class="bi bi-github"></i>View source</a></li></ul></div></nav>
     </div>
 <!-- main -->
-<main class="content column-page" id="quarto-document-content">
-
-<header id="title-block-header" class="quarto-title-block default">
-<div class="quarto-title">
-<h1 class="title">Lectures</h1>
-<p class="subtitle lead">Twelve 3-hour sessions</p>
-</div>
+<main class="content" id="quarto-document-content">
 
 
 
-<div class="quarto-title-meta column-page">
 
-    
-  
-    
-  </div>
-  
-
-
-</header>
-
-
-<p>Each card opens the slide deck in your browser. Inside a deck: <strong>→ / ←</strong> to move, <strong>F</strong> for full-screen, <strong>M</strong> for the slide menu, <strong>O</strong> for an overview of all slides, and <strong>?</strong> for the full list of shortcuts.</p>
-<div id="listing-lecture-listing" class="quarto-listing quarto-listing-container-custom">
-<div class="list grid quarto-listing-cols-3">
-<div class="g-col-1">
-<div class="quarto-grid-item card h-100 card-left">
-<a href="./lectures/lecture-01-what-is-ai.html" class="quarto-grid-link">
-<div class="card-body post-contents">
-<h5 class="no-anchor card-title listing-title">
-What do we mean by AI?
-</h5>
-<div class="card-subtitle listing-subtitle">
-Lecture 1 — Course overview &amp; framing
-</div>
-</div>
-</a>
-<div class="card-footer card-text-small d-flex justify-content-between align-items-center">
-<div class="listing-date">
-Mon, 3 Aug 2026
-</div>
-<p><a href="lectures/pdf/lecture-01-what-is-ai.pdf">⬇ PDF version</a></p>
-</div>
-</div>
-</div>
-<div class="g-col-1">
-<div class="quarto-grid-item card h-100 card-left">
-<a href="./lectures/lecture-02-deep-models-primer.html" class="quarto-grid-link">
-<div class="card-body post-contents">
-<h5 class="no-anchor card-title listing-title">
-Deep models — a primer
-</h5>
-<div class="card-subtitle listing-subtitle">
-Lecture 2 — From a single neuron to a network
-</div>
-</div>
-</a>
-<div class="card-footer card-text-small d-flex justify-content-between align-items-center">
-<div class="listing-date">
-Tue, 4 Aug 2026
-</div>
-<p><a href="lectures/pdf/lecture-02-deep-models-primer.pdf">⬇ PDF version</a></p>
-</div>
-</div>
-</div>
-<div class="g-col-1">
-<div class="quarto-grid-item card h-100 card-left">
-<a href="./lectures/lecture-03-computational-graphs.html" class="quarto-grid-link">
-<div class="card-body post-contents">
-<h5 class="no-anchor card-title listing-title">
-Computational graphs &amp; the maths of AI
-</h5>
-<div class="card-subtitle listing-subtitle">
-Lecture 3 — Three tools: linear algebra, calculus, and computation graphs
-</div>
-</div>
-</a>
-<div class="card-footer card-text-small d-flex justify-content-between align-items-center">
-<div class="listing-date">
-Wed, 5 Aug 2026
-</div>
-<p><a href="lectures/pdf/lecture-03-computational-graphs.pdf">⬇ PDF version</a></p>
-</div>
-</div>
-</div>
-<div class="g-col-1">
-<div class="quarto-grid-item card h-100 card-left">
-<a href="./lectures/lecture-04-backpropagation.html" class="quarto-grid-link">
-<div class="card-body post-contents">
-<h5 class="no-anchor card-title listing-title">
-Backpropagation
-</h5>
-<div class="card-subtitle listing-subtitle">
-Lecture 4 — Turning a wrong network into a right one
-</div>
-</div>
-</a>
-<div class="card-footer card-text-small d-flex justify-content-between align-items-center">
-<div class="listing-date">
-Thu, 6 Aug 2026
-</div>
-<p><a href="lectures/pdf/lecture-04-backpropagation.pdf">⬇ PDF version</a></p>
-</div>
-</div>
-</div>
-<div class="g-col-1">
-<div class="quarto-grid-item card h-100 card-left">
-<a href="./lectures/lecture-05-feedforward.html" class="quarto-grid-link">
-<div class="card-body post-contents">
-<h5 class="no-anchor card-title listing-title">
-Feed-forward networks in PyTorch
-</h5>
-<div class="card-subtitle listing-subtitle">
-Lecture 5 — Real models, real data, real choices
-</div>
-</div>
-</a>
-<div class="card-footer card-text-small d-flex justify-content-between align-items-center">
-<div class="listing-date">
-Fri, 7 Aug 2026
-</div>
-<p><a href="lectures/pdf/lecture-05-feedforward.pdf">⬇ PDF version</a></p>
-</div>
-</div>
-</div>
-<div class="g-col-1">
-<div class="quarto-grid-item card h-100 card-left">
-<a href="./lectures/lecture-06-cnns.html" class="quarto-grid-link">
-<div class="card-body post-contents">
-<h5 class="no-anchor card-title listing-title">
-Classifying images
-</h5>
-<div class="card-subtitle listing-subtitle">
-Lecture 6 — Convolutional neural networks
-</div>
-</div>
-</a>
-<div class="card-footer card-text-small d-flex justify-content-between align-items-center">
-<div class="listing-date">
-Mon, 10 Aug 2026
-</div>
-<p><a href="lectures/pdf/lecture-06-cnns.pdf">⬇ PDF version</a></p>
-</div>
-</div>
-</div>
-<div class="g-col-1">
-<div class="quarto-grid-item card h-100 card-left">
-<a href="./lectures/lecture-07-generative-images.html" class="quarto-grid-link">
-<div class="card-body post-contents">
-<h5 class="no-anchor card-title listing-title">
-Generating images
-</h5>
-<div class="card-subtitle listing-subtitle">
-Lecture 7 — Autoencoders, VAEs, and a glance at diffusion
-</div>
-</div>
-</a>
-<div class="card-footer card-text-small d-flex justify-content-between align-items-center">
-<div class="listing-date">
-Tue, 11 Aug 2026
-</div>
-<p><a href="lectures/pdf/lecture-07-generative-images.pdf">⬇ PDF version</a></p>
-</div>
-</div>
-</div>
-<div class="g-col-1">
-<div class="quarto-grid-item card h-100 card-left">
-<a href="./lectures/lecture-08-text-embeddings.html" class="quarto-grid-link">
-<div class="card-body post-contents">
-<h5 class="no-anchor card-title listing-title">
-Building your own text-generating AI (1/4)
-</h5>
-<div class="card-subtitle listing-subtitle">
-Lecture 8 — Treating text as data · embeddings · character models
-</div>
-</div>
-</a>
-<div class="card-footer card-text-small d-flex justify-content-between align-items-center">
-<div class="listing-date">
-Wed, 12 Aug 2026
-</div>
-<p><a href="lectures/pdf/lecture-08-text-embeddings.pdf">⬇ PDF version</a></p>
-</div>
-</div>
-</div>
-<div class="g-col-1">
-<div class="quarto-grid-item card h-100 card-left">
-<a href="./lectures/lecture-09-rnns.html" class="quarto-grid-link">
-<div class="card-body post-contents">
-<h5 class="no-anchor card-title listing-title">
-Building your own text-generating AI (2/4)
-</h5>
-<div class="card-subtitle listing-subtitle">
-Lecture 9 — Recurrence and the problem of memory
-</div>
-</div>
-</a>
-<div class="card-footer card-text-small d-flex justify-content-between align-items-center">
-<div class="listing-date">
-Thu, 13 Aug 2026
-</div>
-<p><a href="lectures/pdf/lecture-09-rnns.pdf">⬇ PDF version</a></p>
-</div>
-</div>
-</div>
-</div>
-<div class="listing-no-matching d-none">
-No matching items
-</div>
-</div>
-<div class="callout callout-style-simple callout-note">
-<div class="callout-body d-flex">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-body-container">
-<p><strong>Week 3 lectures are not posted yet.</strong> They will appear as we reach them. The full twelve-lecture outline is on the <a href="./index.html">home page</a>, and the <a href="./readings.html">reading list</a> covers all three weeks if you want to read ahead.</p>
-</div>
-</div>
-</div>
-<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout callout-style-simple callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-Tip
+Get the starter notebook
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>The decks are the primary study resource for the <strong>final exam</strong>.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="https://colab.research.google.com/github/tsrobinson/me324/blob/main/assessment/midterm-starter.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg" class="img-fluid figure-img" alt="Open in Colab"></a></p>
+<figcaption>Open in Colab</figcaption>
+</figure>
+</div>
+<p><a href="assessment/midterm-starter.html">view the notebook</a> · <a href="https://github.com/tsrobinson/me324/raw/main/assessment/midterm-starter.ipynb">download .ipynb</a></p>
+<p><strong>Submit two files on Moodle by 09:00, Tuesday 18 August</strong> — your notebook (outputs saved) and the <code>.pt</code> checkpoint it writes.</p>
 </div>
 </div>
+<section id="me324-midterm-assessment-a-language-model-for-parliament" class="level1">
+<h1>ME324 · Midterm assessment — A language model for Parliament</h1>
+<p><strong>Due Tuesday 18 August 2026, 09:00 (Moodle). 25% of your final mark. Individual work.</strong></p>
+<section id="the-task" class="level2">
+<h2 class="anchored" data-anchor-id="the-task">The task</h2>
+<p>In Lab 8 you built a character-level language-model pipeline and ran a bigram through it, on Shakespeare; in Lab 5 you built and trained feedforward networks in PyTorch. This weekend I would like you to put the two together on a different corpus – about 2.1 million characters of debate from the House of Commons in July 2026.</p>
+<p>Build the best character-level language model you can, using only the tools from weeks 1 and 2, following the constraints detailed below. Then run two controlled assessments on it, and write a short discussion of what your model has and hasn’t learned.</p>
+<p>You should expect the whole exercise to take around six hours.</p>
+</section>
+<section id="what-youre-given" class="level2">
+<h2 class="anchored" data-anchor-id="what-youre-given">What you’re given</h2>
+<p>The starter notebook (<code>midterm-starter.ipynb</code>) contains, already working:</p>
+<ul>
+<li>The corpus download and a look at the data</li>
+<li>The Lab 8 pipeline (<code>build_char_pipeline</code>)</li>
+<li>A training loop (<code>train_model_tracked</code>) —- identical to the labs’ <code>train_model</code> except it also records the loss history</li>
+<li>A <code>plot_histories</code> helper to plot those losses</li>
+<li>The Lab 8 bigram model to use as your baseline</li>
+<li><code>count_params</code>, which counts every trainable parameter, biases included</li>
+<li>A <strong>checkpoint save cell</strong> and a <strong>verify cell</strong>. The verify cell runs the same automated checks we will run on every submission, so if it passes for you, it will run on our testing setup too.</li>
+</ul>
+</section>
+<section id="the-rules" class="level2">
+<h2 class="anchored" data-anchor-id="the-rules">The rules</h2>
+<ol type="1">
+<li><strong>Architectures from weeks 1 and 2 only.</strong> Character embeddings and feedforward layers are all you need – an embedding table feeding a small network over a window of characters You may use recurrent networks (<code>nn.RNN</code>/<code>nn.GRU</code>/<code>nn.LSTM</code>) following from Thursday’s lecture, but they are not required. You should not use attention, transformer blocks, pretrained weights, or any form of external data</li>
+<li>Token prediction must be at the <strong>character-level, using the given pipeline.</strong> Do not modify <code>build_char_pipeline</code>. You may change the <em>arguments</em> you call it with (<code>block_size</code>, <code>batch_size</code>, seed) but you may not change the tokeniser or the train/validation split</li>
+<li><strong>Your model may contain up to 500,000 parameters but no more.</strong> You should validate by using the <code>count_params(model)</code> template we provide, and note that biases are included in this count.</li>
+<li><strong>Your code must run.</strong> Before submitting, do Runtime → Restart and run all, and check it completes on a free Colab GPU runtime in under 20 minutes. Do not clear the outputs — your saved outputs are what we mark!</li>
+<li>AI assistants are allowed and expected (see below), and you may talk generally with your classmates, but please do not share code, notebooks, or your experimentation.</li>
+<li><strong>Be ready to talk it through.</strong> During week 3 labs the teaching team may ask you to explain any cell of your submission – why it is there, what it does, what happens if it changes. This is routine, not an accusation. If you can’t explain your own notebook, that will be reflected in the mark.</li>
+</ol>
+</section>
+<section id="part-a-building-a-model-35-marks" class="level2">
+<h2 class="anchored" data-anchor-id="part-a-building-a-model-35-marks">Part A — Building a model (35 marks)</h2>
+<p>Design and train your model.</p>
+<ul>
+<li>Write a model class that follows the labs’ pipeline and setup: <code>forward(idx, targets)</code> returns <code>(logits, loss)</code>, and <code>generate(idx, max_new_tokens)</code> extends a context. You may reuse anything you yourself built in Labs 5 and 8. One practical requirement: your final hyperparameters must be set as constructor defaults, so <code>MyLanguageModel(vocab_size)</code> rebuilds your trained model.</li>
+<li>Train it with <code>train_model_tracked</code> but choose your own hyperparameters.</li>
+<li><strong>Threshold:</strong> your model’s validation loss must beat the bigram baseline you trained in Section 2 by at least 0.1. Once you past that threshold, your mark will not continue to increase.</li>
+<li>Report: final train and validation loss, per-character perplexity (e^loss, as in Lecture 8), the parameter count, and a 400-character sample.</li>
+<li>Save your checkpoint with the provided notebook cell and confirm the verify cell passes. You need to submit your <code>.pt</code> file.</li>
+<li>In ~150 words: justify your design. Why this architecture, why these sizes, and what you spent your 500k parameters on.</li>
+</ul>
+<p>Full marks look like: a working model within the rules, a clear margin over the baseline, and a justification that argues from things we’ve covered — not “an LLM suggested these settings”.</p>
+</section>
+<section id="part-b-experimenting-on-your-model-35-marks" class="level2">
+<h2 class="anchored" data-anchor-id="part-b-experimenting-on-your-model-35-marks">Part B — Experimenting on your model (35 marks)</h2>
+<p>Pick <strong>two</strong> of the following hyperparameters:</p>
+<ol type="1">
+<li><strong>Context length</strong> — <code>block_size</code> (Lecture 8): a wider window gives the model more to condition on, but in a fixed-window model it also grows the input layer, so it costs parameters. Does the trade buy you anything?</li>
+<li><strong>Capacity</strong> — hidden size, embedding size, or number of layers (depth vs width)</li>
+<li><strong>Learning rate</strong> — value or schedule (Lecture 4)</li>
+<li><strong>Regularisation</strong> — dropout or weight decay (Lecture 5)</li>
+<li><strong>Batch size</strong> (Lectures 4–5)</li>
+<li><strong>Training length</strong> — train much longer, and decide from the curves when you <em>should</em> have stopped (Lecture 5)</li>
+</ol>
+<p>For each chosen option:</p>
+<ul>
+<li><strong>State your hypothesis.</strong> One or two sentences noting what you expect to happen to the validation loss and why. Write this before you run the experiments: a specific but <em>wrong</em> hypothesis can score full marks still.</li>
+<li><strong>Run a comparison.</strong> Change the value of your lever but keep everything else fixed.</li>
+<li><strong>Plot the resulting curves.</strong> Use <code>plot_histories</code> to plot the runs against each other.</li>
+<li><strong>Interpret.</strong> 150–250 words. What happened, was your hypothesis right, and what in the curves tells you. Refer to your actual numbers.</li>
+</ul>
+</section>
+<section id="part-c-discussing-your-model-25-marks" class="level2">
+<h2 class="anchored" data-anchor-id="part-c-discussing-your-model-25-marks">Part C — Discussing your model (25 marks)</h2>
+<p>Complete t three hree short answers, ~200 words each, in the marked cells. All three must be grounded in <em>your</em> results — quote your own numbers and samples.</p>
+<ol type="1">
+<li><strong>Diagnose your final model</strong> using the Lecture 5 taxonomy: underfitting, overfitting, or about right — argue from your train/validation curves. Then say what you would try first with ten times the compute, and why that and not something else.</li>
+<li><strong>Read your model’s output.</strong> Take two or three generated samples. What has the model genuinely learned about parliamentary English — structure, register, names, procedure? What does it consistently get wrong, and which limitation from the lectures explains that failure?</li>
+<li><strong>The data.</strong> Your training data is real MPs’ words, scraped from the public record (it is published under the Open Parliament Licence, which permits this). Give one reason this use is clearly legitimate, and one genuine concern that would apply to training on scraped text in general. We return to this properly in Lecture 12.</li>
+</ol>
+</section>
+<section id="appendix-ai-use-reporting-and-reproducibility-5-marks" class="level2">
+<h2 class="anchored" data-anchor-id="appendix-ai-use-reporting-and-reproducibility-5-marks">Appendix — AI use, reporting and reproducibility (5 marks)</h2>
+<p>Fill in the appendix at the bottom of the notebook:</p>
+<ul>
+<li><strong>Tools.</strong> Which AI assistants you used and for what (writing code, debugging, explaining, drafting prose). “None” is an acceptable answer, but won’t score you more points!</li>
+<li><strong>One correction.</strong> Paste one exchange where an assistant’s suggestion was wrong, or didn’t fit the rules or the budget, and explain how you caught and fixed it. If you never had to correct anything, pick one substantial piece of assistant-written code and explain how you satisfied yourself it was right.</li>
+<li><strong>Declaration.</strong> You can explain every line you submitted.</li>
+</ul>
+<p>The remaining reporting marks are for the basics: the notebook runs top-to-bottom, outputs are saved, seeds are set where the starter sets them, and your prose lives in the marked cells.</p>
+</section>
+<section id="marking" class="level2">
+<h2 class="anchored" data-anchor-id="marking">Marking</h2>
+<p>Remember: assistants are good at writing training loops and bad at knowing which experiment is worth running on <em>your</em> loss curves. So our marks will emphasise the judgements you make. Generic prose that could have been written without running your notebook will score worse, whereas short, specific claims tied to your own numbers will score well.</p>
+<p><strong>What we check automatically.</strong> We will reload your checkpoint and re-evaluate your notebook on our own testing platform, i.e.&nbsp;we will recount the parameters, screen for banned <code>nn.</code> modules, rebuild your model from your class, and recompute your validation loss on the same split. This is exactly what the verify cell does, so there should be no surprises, but it means the numbers in your notebook must be the numbers your checkpoint produces. A reported loss that doesn’t match the reloaded model will result in a mark deduction.</p>
+</section>
+<section id="submission" class="level2">
+<h2 class="anchored" data-anchor-id="submission">Submission</h2>
+<p>Two files, uploaded to Moodle by <strong>09:00, Tuesday 18 August</strong>:</p>
+<ul>
+<li><code>ME324-midterm-&lt;candidate-number&gt;.ipynb</code> — outputs saved, from a fresh top-to-bottom run;</li>
+<li><code>ME324-midterm-&lt;candidate-number&gt;.pt</code> — the checkpoint the notebook saves (download it from Colab’s file browser).</li>
+</ul>
+</section>
+<section id="the-data" class="level2">
+<h2 class="anchored" data-anchor-id="the-data">The data</h2>
+<p><code>hansard-2026.txt</code>: every attributed speech from five sitting days of the House of Commons (9–16 July 2026), formatted exactly like the labs’ Shakespeare file — speaker name, colon, speech. Contains Parliamentary information licensed under the Open Parliament Licence v3.0, via TheyWorkForYou.</p>
 
 
-
+</section>
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
@@ -863,7 +715,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 </div>   
     <div class="nav-footer-center">
 <p>Dr Thomas Robinson · Lab instructor: Kaifang Zhou</p>
-<div class="toc-actions"><ul><li><a href="https://github.com/tsrobinson/me324/blob/main/lectures.qmd" class="toc-action"><i class="bi bi-github"></i>View source</a></li></ul></div></div>
+<div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/tsrobinson/me324/blob/main/midterm.qmd" class="toc-action"><i class="bi bi-github"></i>View source</a></li></ul></div></div>
     <div class="nav-footer-right">
 <p>Built with <a href="https://quarto.org">Quarto</a></p>
 </div>

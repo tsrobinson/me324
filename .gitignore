@@ -30,12 +30,17 @@ __pycache__/
 exams/
 quizzes/
 
-# Midterm (take-home, out Thu 13 Aug 2026). The Colab badge and the notebook's
-# wget URL point at assessment/... on main, so ON RELEASE DAY: delete the
-# `assessment/` line below (the xml-cache line stays), then commit the brief,
-# notebook and data. Checklist in assessment/README.md. Until then: never commit.
-assessment/
-assessment/xml-cache/
+# Midterm (take-home) — RELEASED 2026-08-12. Publish ONLY the student-facing
+# files (brief, starter notebook, corpus + the render config); keep marker-side
+# material private: autograde.py, README.md (reference numbers), the reference
+# checkpoint, build scripts, the stray local hansard.txt, and the raw XML cache.
+assessment/*
+!assessment/midterm-brief.md
+!assessment/midterm-starter.ipynb
+!assessment/_metadata.yml
+!assessment/data
+assessment/data/*
+!assessment/data/hansard-2026.txt
 
 # Internal working documents.
 *.docx

@@ -76,7 +76,7 @@ Each day pairs a **3-hour lecture** with a **90-minute lab**. The lectures build
 :::
 ::: {.g-col-12 .g-col-md-4}
 ::: {.callout-tip appearance="minimal"}
-**Take-home midterm** at the end of week 2 — train a model, document your choices, and discuss the results.
+**[Take-home midterm](midterm.qmd)** at the end of week 2 — train a model, document your choices, and discuss the results.
 :::
 :::
 ::: {.g-col-12 .g-col-md-4}

@@ -19,6 +19,7 @@ project:
     - lectures.qmd
     - labs.qmd
     - readings.qmd
+    - midterm.qmd
     - lectures/lecture-01-what-is-ai.qmd
     - lectures/lecture-02-deep-models-primer.qmd
     - lectures/lecture-03-computational-graphs.qmd
@@ -36,6 +37,7 @@ project:
     - labs/lab-06-cnn-images.ipynb
     - labs/lab-07-autoencoders-vae.ipynb
     - labs/lab-08-char-bigram.ipynb
+    - assessment/midterm-starter.ipynb
   preview:
     port: 4200
     browser: true
@@ -68,6 +70,8 @@ website:
         text: Lectures
       - href: labs.qmd
         text: Labs
+      - href: midterm.qmd
+        text: Midterm
       - href: readings.qmd
         text: Readings
     right:

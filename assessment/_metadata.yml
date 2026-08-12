@@ -1,0 +1,7 @@
+# Applies to notebooks in assessment/ when rendered into the website. As with
+# labs/, we render the starter notebook to a readable HTML page WITHOUT executing
+# it (it downloads data and contains TODO cells). Students run it in Colab.
+execute:
+  enabled: false
+toc: true
+toc-depth: 2

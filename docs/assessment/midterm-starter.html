@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.5.57">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>ME324 · Midterm assessment — A language model for Parliament – ME324 · AI &amp; Deep Learning</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+
+
+<meta property="og:title" content="ME324 · Midterm assessment — A language model for Parliament – ME324 · AI &amp; Deep Learning">
+<meta property="og:description" content="LSE Summer School — a three-week intensive introduction to deep learning and modern AI.">
+<meta property="og:site_name" content="ME324 · AI &amp; Deep Learning">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">ME324 · AI &amp; Deep Learning</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../lectures.html"> 
+<span class="menu-text">Lectures</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../labs.html"> 
+<span class="menu-text">Labs</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../midterm.html"> 
+<span class="menu-text">Midterm</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../readings.html"> 
+<span class="menu-text">Readings</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/tsrobinson/me324"> <i class="bi bi-github" role="img" aria-label="GitHub repository">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul class="collapse">
+  <li><a href="#there-are-four-parts-to-this-notebook-for-which-you-should-budget-around-6-hours-of-time" id="toc-there-are-four-parts-to-this-notebook-for-which-you-should-budget-around-6-hours-of-time" class="nav-link active" data-scroll-target="#there-are-four-parts-to-this-notebook-for-which-you-should-budget-around-6-hours-of-time">⏱️ There are four parts to this notebook for which you should budget around 6 hours of time</a></li>
+  <li><a href="#run-me-first" id="toc-run-me-first" class="nav-link" data-scroll-target="#run-me-first">Run me first</a></li>
+  <li><a href="#section-1-the-data" id="toc-section-1-the-data" class="nav-link" data-scroll-target="#section-1-the-data">Section 1 · The data</a></li>
+  <li><a href="#section-2-pipeline-and-baseline-given" id="toc-section-2-pipeline-and-baseline-given" class="nav-link" data-scroll-target="#section-2-pipeline-and-baseline-given">Section 2 · Pipeline and baseline (given)</a></li>
+  <li><a href="#section-3-part-a-building-a-model-35-marks" id="toc-section-3-part-a-building-a-model-35-marks" class="nav-link" data-scroll-target="#section-3-part-a-building-a-model-35-marks">Section 3 · Part A — Building a model (35 marks)</a></li>
+  <li><a href="#section-4-part-b-experimenting-on-your-model-35-marks" id="toc-section-4-part-b-experimenting-on-your-model-35-marks" class="nav-link" data-scroll-target="#section-4-part-b-experimenting-on-your-model-35-marks">Section 4 · Part B — Experimenting on your model (35 marks)</a></li>
+  <li><a href="#section-5-part-c-discussing-your-model-25-marks" id="toc-section-5-part-c-discussing-your-model-25-marks" class="nav-link" data-scroll-target="#section-5-part-c-discussing-your-model-25-marks">Section 5 · Part C — Discussing your model (25 marks)</a></li>
+  <li><a href="#appendix-ai-use-5-marks-with-reporting" id="toc-appendix-ai-use-5-marks-with-reporting" class="nav-link" data-scroll-target="#appendix-ai-use-5-marks-with-reporting">Appendix — AI use (5 marks, with reporting)</a></li>
+  <li><a href="#before-you-submit" id="toc-before-you-submit" class="nav-link" data-scroll-target="#before-you-submit">Before you submit</a></li>
+  </ul>
+<div class="toc-actions"><ul class="collapse"><li><a href="https://github.com/tsrobinson/me324/blob/main/assessment/midterm-starter.ipynb" class="toc-action"><i class="bi bi-github"></i>View source</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">ME324 · Midterm assessment — A language model for Parliament</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p><strong>Due Tuesday 18 August 2026 at 09:00 (Moodle) · 25% of the final mark · Individual work</strong></p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="https://colab.research.google.com/github/tsrobinson/me324/blob/main/assessment/midterm-starter.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg" class="img-fluid figure-img" alt="Open In Colab"></a></p>
+<figcaption>Open In Colab</figcaption>
+</figure>
+</div>
+<p><strong>How this notebook works.</strong> This is an assessment, so unlike the labs there is no Solutions section. Cells marked <code># TODO</code> are yours to write; markdown cells marked <strong>✍️</strong> are where your prose goes. Everything else is given and already works and is provided to help you. You should complete this notebook in tandem with reading the brief I have supplied you.</p>
+<p><strong>LLM usage is permitted.</strong> We are assessing you in this new working environment. Just note you do need to fill in the <strong>AI use appendix</strong> at the bottom, and you must be able to explain every line you submit – the teaching team may ask you to, in the week 3 labs.</p>
+<section id="there-are-four-parts-to-this-notebook-for-which-you-should-budget-around-6-hours-of-time" class="level2">
+<h2 class="anchored" data-anchor-id="there-are-four-parts-to-this-notebook-for-which-you-should-budget-around-6-hours-of-time">⏱️ There are four parts to this notebook for which you should budget around 6 hours of time</h2>
+<ul>
+<li><strong>Part A — Building a model (35 marks).</strong> ~2–3 hours, much of it will be waiting for training runs.</li>
+<li><strong>Part B — Experimenting on your model (35 marks).</strong> ~2–3 hours.</li>
+<li><strong>Part C — Discussing your model (25 marks).</strong> ~1 hour.</li>
+<li><strong>Appendix — AI use (5 marks, with reporting).</strong> ~15 minutes.</li>
+</ul>
+<p>Do them in order!</p>
+</section>
+<section id="run-me-first" class="level2">
+<h2 class="anchored" data-anchor-id="run-me-first">Run me first</h2>
+<div id="85de2976" class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> math, os, time</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn <span class="im">as</span> nn</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torch.nn <span class="im">import</span> functional <span class="im">as</span> F</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>torch.manual_seed(<span class="dv">1337</span>)          <span class="co"># reproducibility (same seed as every ME324 lab)</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>device <span class="op">=</span> <span class="st">'cuda'</span> <span class="cf">if</span> torch.cuda.is_available() <span class="cf">else</span> <span class="st">'cpu'</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'PyTorch'</span>, torch.__version__, <span class="st">'| device:'</span>, device)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> torch.cuda.is_available():</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">'GPU:'</span>, torch.cuda.get_device_name(<span class="dv">0</span>))</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">'No GPU — Runtime &gt; Change runtime type &gt; GPU (everything still runs on CPU, just slower).'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="section-1-the-data" class="level2">
+<h2 class="anchored" data-anchor-id="section-1-the-data">Section 1 · The data</h2>
+<p>Your corpus is <strong>every attributed speech from five sitting days of the House of Commons</strong> (9–16 July 2026), which equates to about 2.1 million characters. The format is always speaker name, colon, speech.</p>
+<p>(The data was sourced via TheyWorkForYou.)</p>
+<div id="1c91048b" class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="op">!</span>wget <span class="op">-</span>nc https:<span class="op">//</span>raw.githubusercontent.com<span class="op">/</span>tsrobinson<span class="op">/</span>me324<span class="op">/</span>main<span class="op">/</span>assessment<span class="op">/</span>data<span class="op">/</span>hansard<span class="op">-</span><span class="fl">2026.</span><span class="er">txt</span> <span class="op">-</span>O hansard.txt</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(<span class="st">'hansard.txt'</span>, <span class="st">'r'</span>, encoding<span class="op">=</span><span class="st">'utf-8'</span>) <span class="im">as</span> f:</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    text <span class="op">=</span> f.read()</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'total characters:'</span>, <span class="bu">len</span>(text))</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'---- first 500 characters ----'</span>)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(text[:<span class="dv">500</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Have a scroll through the data before you model it. Note the register: procedural formulas (“I beg to move”, “my hon. Friend”), long sentences, plenty of numbers and £ signs.</p>
+<div id="a91ff5e4" class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>chars <span class="op">=</span> <span class="bu">sorted</span>(<span class="bu">set</span>(text))</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'vocab size:'</span>, <span class="bu">len</span>(chars))         <span class="co"># slightly different from our Shakespeare corpus</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="bu">repr</span>(<span class="st">''</span>.join(chars)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="section-2-pipeline-and-baseline-given" class="level2">
+<h2 class="anchored" data-anchor-id="section-2-pipeline-and-baseline-given">Section 2 · Pipeline and baseline (given)</h2>
+<p>The pipeline comes from Lab 8. We have added one tracker that <strong>records the loss history</strong> and returns it, so you can plot your runs against each other. <code>count_params</code> is the parameter counter we will use to ensure you meet the constraints in the brief.</p>
+<div id="f161473c" class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> build_char_pipeline(text, block_size<span class="op">=</span><span class="dv">8</span>, batch_size<span class="op">=</span><span class="dv">32</span>, device<span class="op">=</span><span class="st">"cpu"</span>, seed<span class="op">=</span><span class="dv">1337</span>):</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Char-level tokenizer + batcher + loss estimator. (Lab 8, unchanged.)"""</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    torch.manual_seed(seed)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    chars <span class="op">=</span> <span class="bu">sorted</span>(<span class="bu">set</span>(text))</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    vocab_size <span class="op">=</span> <span class="bu">len</span>(chars)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    stoi <span class="op">=</span> {ch: i <span class="cf">for</span> i, ch <span class="kw">in</span> <span class="bu">enumerate</span>(chars)}        <span class="co"># char  -&gt; integer id</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    itos <span class="op">=</span> {i: ch <span class="cf">for</span> i, ch <span class="kw">in</span> <span class="bu">enumerate</span>(chars)}        <span class="co"># id    -&gt; char</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    encode <span class="op">=</span> <span class="kw">lambda</span> s: [stoi[c] <span class="cf">for</span> c <span class="kw">in</span> s]             <span class="co"># string -&gt; list[int]</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    decode <span class="op">=</span> <span class="kw">lambda</span> l: <span class="st">''</span>.join(itos[i] <span class="cf">for</span> i <span class="kw">in</span> l)      <span class="co"># list[int] -&gt; string</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    data <span class="op">=</span> torch.tensor(encode(text), dtype<span class="op">=</span>torch.<span class="bu">long</span>)</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    n <span class="op">=</span> <span class="bu">int</span>(<span class="fl">0.9</span> <span class="op">*</span> <span class="bu">len</span>(data))</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    train_data, val_data <span class="op">=</span> data[:n], data[n:]           <span class="co"># 90% train / 10% val</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> get_batch(split):</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>        d <span class="op">=</span> train_data <span class="cf">if</span> split <span class="op">==</span> <span class="st">'train'</span> <span class="cf">else</span> val_data</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>        ix <span class="op">=</span> torch.randint(<span class="bu">len</span>(d) <span class="op">-</span> block_size, (batch_size,))      <span class="co"># random starts</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> torch.stack([d[i:i <span class="op">+</span> block_size] <span class="cf">for</span> i <span class="kw">in</span> ix])          <span class="co"># (B, block_size)</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>        y <span class="op">=</span> torch.stack([d[i <span class="op">+</span> <span class="dv">1</span>:i <span class="op">+</span> block_size <span class="op">+</span> <span class="dv">1</span>] <span class="cf">for</span> i <span class="kw">in</span> ix])  <span class="co"># shifted by one</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> x.to(device), y.to(device)</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">@torch.no_grad</span>()</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> estimate_loss(model, eval_iters<span class="op">=</span><span class="dv">200</span>):</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>        out <span class="op">=</span> {}</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>        model.<span class="bu">eval</span>()</span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> split <span class="kw">in</span> [<span class="st">'train'</span>, <span class="st">'val'</span>]:</span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>            losses <span class="op">=</span> torch.zeros(eval_iters)</span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> k <span class="kw">in</span> <span class="bu">range</span>(eval_iters):</span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>                xb, yb <span class="op">=</span> get_batch(split)</span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>                _, loss <span class="op">=</span> model(xb, yb)               </span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>                losses[k] <span class="op">=</span> loss.item()</span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>            out[split] <span class="op">=</span> losses.mean().item()</span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>        model.train()</span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> out</span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">dict</span>(vocab_size<span class="op">=</span>vocab_size, stoi<span class="op">=</span>stoi, itos<span class="op">=</span>itos, encode<span class="op">=</span>encode,</span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>                decode<span class="op">=</span>decode, get_batch<span class="op">=</span>get_batch, estimate_loss<span class="op">=</span>estimate_loss,</span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a>                block_size<span class="op">=</span>block_size, device<span class="op">=</span>device)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="a757b5e1" class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> train_model_tracked(model, get_batch, estimate_loss, max_iters<span class="op">=</span><span class="dv">3000</span>, eval_interval<span class="op">=</span><span class="dv">500</span>,</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>                        lr<span class="op">=</span><span class="fl">1e-3</span>, device<span class="op">=</span><span class="st">"cpu"</span>):</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""The labs' train_model, plus a record: returns (model, history), where history</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co">    is a list of (iteration, train_loss, val_loss) tuples."""</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    history <span class="op">=</span> []</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    optimizer <span class="op">=</span> torch.optim.AdamW(model.parameters(), lr<span class="op">=</span>lr)</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> it <span class="kw">in</span> <span class="bu">range</span>(max_iters):</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> it <span class="op">%</span> eval_interval <span class="op">==</span> <span class="dv">0</span> <span class="kw">or</span> it <span class="op">==</span> max_iters <span class="op">-</span> <span class="dv">1</span>:</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>            losses <span class="op">=</span> estimate_loss(model)</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>            history.append((it, losses[<span class="st">'train'</span>], losses[<span class="st">'val'</span>]))</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(<span class="ss">f"step </span><span class="sc">{</span>it<span class="sc">:5d}</span><span class="ss"> | train </span><span class="sc">{</span>losses[<span class="st">'train'</span>]<span class="sc">:.4f}</span><span class="ss"> | val </span><span class="sc">{</span>losses[<span class="st">'val'</span>]<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>        xb, yb <span class="op">=</span> get_batch(<span class="st">'train'</span>)</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>        _, loss <span class="op">=</span> model(xb, yb)                 <span class="co"># forward: model -&gt; (logits, loss)</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>        optimizer.zero_grad(set_to_none<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>        loss.backward()                         <span class="co"># backward: autograd</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>        optimizer.step()                        <span class="co"># update weights</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> model, history</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cb81a04f" class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> plot_histories(runs, title<span class="op">=</span><span class="st">""</span>):</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""runs: dict of label -&gt; history, e.g. {'block=8': h8, 'block=64': h64}."""</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    plt.figure(figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="dv">4</span>))</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> label, hist <span class="kw">in</span> runs.items():</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>        its <span class="op">=</span> [h[<span class="dv">0</span>] <span class="cf">for</span> h <span class="kw">in</span> hist]</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>        plt.plot(its, [h[<span class="dv">1</span>] <span class="cf">for</span> h <span class="kw">in</span> hist], <span class="st">'--'</span>, alpha<span class="op">=</span><span class="fl">0.5</span>, label<span class="op">=</span><span class="ss">f'</span><span class="sc">{</span>label<span class="sc">}</span><span class="ss"> · train'</span>)</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>        plt.plot(its, [h[<span class="dv">2</span>] <span class="cf">for</span> h <span class="kw">in</span> hist], <span class="st">'-'</span>, label<span class="op">=</span><span class="ss">f'</span><span class="sc">{</span>label<span class="sc">}</span><span class="ss"> · val'</span>)</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    plt.xlabel(<span class="st">'iteration'</span>)<span class="op">;</span> plt.ylabel(<span class="st">'loss'</span>)<span class="op">;</span> plt.title(title)</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    plt.legend()<span class="op">;</span> plt.grid(alpha<span class="op">=</span><span class="fl">0.3</span>)<span class="op">;</span> plt.show()</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> count_params(model):</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Every trainable parameter, biases included (house rule)."""</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">sum</span>(p.numel() <span class="cf">for</span> p <span class="kw">in</span> model.parameters() <span class="cf">if</span> p.requires_grad)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<section id="the-bigram-baseline" class="level3">
+<h3 class="anchored" data-anchor-id="the-bigram-baseline">The bigram baseline</h3>
+<p>Here’s Lab 8’s bigram. Train it and uise the validation loss as the threshold for your Part A model to beat.</p>
+<div id="5999a418" class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> BigramLanguageModel(nn.Module):</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, vocab_size):</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>        <span class="co"># one row of next-char scores per character: no context, no memory.</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.token_embedding_table <span class="op">=</span> nn.Embedding(vocab_size, vocab_size)</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, idx, targets<span class="op">=</span><span class="va">None</span>):</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>        logits <span class="op">=</span> <span class="va">self</span>.token_embedding_table(idx)            <span class="co"># (B, T, vocab)</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>        loss <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> targets <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>            B, T, C <span class="op">=</span> logits.shape</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>            loss <span class="op">=</span> F.cross_entropy(logits.view(B <span class="op">*</span> T, C), targets.view(B <span class="op">*</span> T))</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> logits, loss</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">@torch.no_grad</span>()</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> generate(<span class="va">self</span>, idx, max_new_tokens):</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(max_new_tokens):</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>            logits, _ <span class="op">=</span> <span class="va">self</span>(idx)</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>            logits <span class="op">=</span> logits[:, <span class="op">-</span><span class="dv">1</span>, :]                       <span class="co"># last position only</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>            probs <span class="op">=</span> F.softmax(logits, dim<span class="op">=-</span><span class="dv">1</span>)</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>            idx_next <span class="op">=</span> torch.multinomial(probs, num_samples<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>            idx <span class="op">=</span> torch.cat((idx, idx_next), dim<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> idx</span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'Bigram defined — same model as Lab 8.'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="3efc56cb" class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>P <span class="op">=</span> build_char_pipeline(text, block_size<span class="op">=</span><span class="dv">8</span>, batch_size<span class="op">=</span><span class="dv">32</span>, device<span class="op">=</span>device)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>torch.manual_seed(<span class="dv">1337</span>)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>bigram <span class="op">=</span> BigramLanguageModel(P[<span class="st">'vocab_size'</span>]).to(device)</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'parameters:'</span>, count_params(bigram))</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>bigram, bigram_history <span class="op">=</span> train_model_tracked(bigram, P[<span class="st">'get_batch'</span>], P[<span class="st">'estimate_loss'</span>],</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>                                             max_iters<span class="op">=</span><span class="dv">3000</span>, eval_interval<span class="op">=</span><span class="dv">500</span>, lr<span class="op">=</span><span class="fl">1e-2</span>,</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>                                             device<span class="op">=</span>device)</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>baseline <span class="op">=</span> P[<span class="st">'estimate_loss'</span>](bigram)</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">BASELINE | val loss </span><span class="sc">{</span>baseline[<span class="st">'val'</span>]<span class="sc">:.4f}</span><span class="ss"> | per-char perplexity </span><span class="sc">{</span>math<span class="sc">.</span>exp(baseline[<span class="st">'val'</span>])<span class="sc">:.1f}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="bf57e395" class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>context <span class="op">=</span> torch.zeros((<span class="dv">1</span>, <span class="dv">1</span>), dtype<span class="op">=</span>torch.<span class="bu">long</span>, device<span class="op">=</span>device)   <span class="co"># start token = id 0</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(P[<span class="st">'decode'</span>](bigram.generate(context, max_new_tokens<span class="op">=</span><span class="dv">400</span>)[<span class="dv">0</span>].tolist()))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Notice that, untrained, the loss starts near ln(83) ≈ 4.42. Once trained, the baseline should land around <strong>2.44</strong> (perplexity ≈ 11.5 — the model is choosing among ~11 plausible next characters). If you are far from that, something upstream is wrong. The sample will be gibberish.</p>
+</section>
+</section>
+<section id="section-3-part-a-building-a-model-35-marks" class="level2">
+<h2 class="anchored" data-anchor-id="section-3-part-a-building-a-model-35-marks">Section 3 · Part A — Building a model (35 marks)</h2>
+<p>Design and train the best model you can within the rules. Make sure to follow the docstring below, so the pipeline and training loop work unchanged and justify your design in ~150 words in the ✍️ cell.</p>
+<p>You may reuse anything <strong>you</strong> built in Labs 5 and 8. Remember that once you pass the baseline as stipulated in the brief, a lower loss will not earn you extra marks.</p>
+<div id="8cfccd35" class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> MyLanguageModel(nn.Module):</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Your model. The contract, same as every ME324 language model:</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="co">      forward(idx, targets=None) -&gt; (logits, loss)</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="co">          idx: (B, T) integer ids; logits: (B, T, vocab_size);</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="co">          loss: cross-entropy over all positions if targets is given, else None.</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="co">      generate(idx, max_new_tokens) -&gt; (B, T + max_new_tokens) integer ids</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="co">    Allowed ingredients: nn.Embedding, nn.Linear, activations, dropout, norm layers,</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a><span class="co">    nn.RNN / nn.GRU / nn.LSTM (or a recurrent cell of your own).</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a><span class="co">    Two practical constraints, because we rebuild your model from your checkpoint:</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a><span class="co">    keep this cell self-contained (everything the class needs is defined in it), and</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a><span class="co">    make your FINAL hyperparameters the constructor defaults, so that</span></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a><span class="co">    MyLanguageModel(vocab_size), with no other arguments, recreates the exact</span></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a><span class="co">    shapes you trained.</span></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, vocab_size):</span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>        <span class="co"># </span><span class="al">TODO</span><span class="co">: your architecture</span></span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, idx, targets<span class="op">=</span><span class="va">None</span>):</span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>        <span class="co"># </span><span class="al">TODO</span></span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>        <span class="cf">pass</span></span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">@torch.no_grad</span>()</span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> generate(<span class="va">self</span>, idx, max_new_tokens):</span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>        <span class="co"># </span><span class="al">TODO</span></span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a>        <span class="cf">pass</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="9b6bc0f4" class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Pipeline settings for your final model — change the arguments if you wish.</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>P <span class="op">=</span> build_char_pipeline(text, block_size<span class="op">=</span><span class="dv">8</span>, batch_size<span class="op">=</span><span class="dv">32</span>, device<span class="op">=</span>device)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>torch.manual_seed(<span class="dv">1337</span>)</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> MyLanguageModel(P[<span class="st">'vocab_size'</span>]).to(device)</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>n_params <span class="op">=</span> count_params(model)</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'parameters: </span><span class="sc">{</span>n_params<span class="sc">:,}</span><span class="ss"> / 500,000'</span>)</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> n_params <span class="op">&lt;=</span> <span class="dv">500_000</span>, <span class="st">'over budget - slim it down'</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="94846257" class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># </span><span class="al">TODO</span><span class="co">: choose your training hyperparameters.</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>model, model_history <span class="op">=</span> train_model_tracked(model, P[<span class="st">'get_batch'</span>], P[<span class="st">'estimate_loss'</span>],</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>                                           max_iters<span class="op">=</span><span class="dv">3000</span>, eval_interval<span class="op">=</span><span class="dv">500</span>, lr<span class="op">=</span><span class="fl">1e-3</span>,</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>                                           device<span class="op">=</span>device)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="5c009cc6" class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>final <span class="op">=</span> P[<span class="st">'estimate_loss'</span>](model)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"yours    | train </span><span class="sc">{</span>final[<span class="st">'train'</span>]<span class="sc">:.4f}</span><span class="ss"> | val </span><span class="sc">{</span>final[<span class="st">'val'</span>]<span class="sc">:.4f}</span><span class="ss"> | perplexity </span><span class="sc">{</span>math<span class="sc">.</span>exp(final[<span class="st">'val'</span>])<span class="sc">:.1f}</span><span class="ss">"</span>)</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"baseline | val </span><span class="sc">{</span>baseline[<span class="st">'val'</span>]<span class="sc">:.4f}</span><span class="ss"> | perplexity </span><span class="sc">{</span>math<span class="sc">.</span>exp(baseline[<span class="st">'val'</span>])<span class="sc">:.1f}</span><span class="ss">"</span>)</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>plot_histories({<span class="st">'bigram'</span>: bigram_history, <span class="st">'yours'</span>: model_history},</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>               title<span class="op">=</span><span class="st">'Part A — your model vs the baseline'</span>)</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>context <span class="op">=</span> torch.zeros((<span class="dv">1</span>, <span class="dv">1</span>), dtype<span class="op">=</span>torch.<span class="bu">long</span>, device<span class="op">=</span>device)</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(P[<span class="st">'decode'</span>](model.generate(context, max_new_tokens<span class="op">=</span><span class="dv">400</span>)[<span class="dv">0</span>].tolist()))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<section id="save-and-verify-your-checkpoint" class="level3">
+<h3 class="anchored" data-anchor-id="save-and-verify-your-checkpoint">Save and verify your checkpoint</h3>
+<p>Your submission is the notebook <strong>plus</strong> the <code>.pt</code> file the next cell saves. The verify cell after it runs the same checks we run on every submission. <strong>If the verify cell passes for you, it will pass for us.</strong> Download the .pt file from Colab’s file browser (folder icon, left sidebar) when you are done.</p>
+<div id="023b6b5e" class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Save your checkpoint. Re-run this (and the verify cell) if you retrain your model.</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>bundle <span class="op">=</span> <span class="bu">dict</span>(state_dict<span class="op">=</span>model.state_dict(),</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>              block_size<span class="op">=</span>P[<span class="st">'block_size'</span>],</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>              n_params<span class="op">=</span>n_params,</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>              val_loss<span class="op">=</span>final[<span class="st">'val'</span>])</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>torch.save(bundle, <span class="st">'me324-midterm-checkpoint.pt'</span>)</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"saved me324-midterm-checkpoint.pt (</span><span class="sc">{</span>os<span class="sc">.</span>path<span class="sc">.</span>getsize(<span class="st">'me324-midterm-checkpoint.pt'</span>)<span class="op">/</span><span class="fl">1e6</span><span class="sc">:.1f}</span><span class="ss"> MB)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="a2aeab7d" class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify your submission — the same checks we run on receipt. Leave this cell in.</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>b <span class="op">=</span> torch.load(<span class="st">'me324-midterm-checkpoint.pt'</span>, map_location<span class="op">=</span><span class="st">'cpu'</span>, weights_only<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>n <span class="op">=</span> <span class="bu">sum</span>(t.numel() <span class="cf">for</span> t <span class="kw">in</span> b[<span class="st">'state_dict'</span>].values())</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> n <span class="op">&lt;=</span> <span class="dv">500_000</span>, <span class="ss">f'over budget: </span><span class="sc">{</span>n<span class="sc">:,}</span><span class="ss">'</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>banned <span class="op">=</span> [k <span class="cf">for</span> k <span class="kw">in</span> b[<span class="st">'state_dict'</span>]</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>          <span class="cf">if</span> <span class="bu">any</span>(s <span class="kw">in</span> k.lower() <span class="cf">for</span> s <span class="kw">in</span> (<span class="st">'attn'</span>, <span class="st">'attention'</span>, <span class="st">'in_proj'</span>, <span class="st">'q_proj'</span>, <span class="st">'k_proj'</span>, <span class="st">'v_proj'</span>))]</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="kw">not</span> banned, <span class="ss">f'attention-like modules found: </span><span class="sc">{</span>banned<span class="sc">}</span><span class="ss">'</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>check <span class="op">=</span> MyLanguageModel(P[<span class="st">'vocab_size'</span>])         <span class="co"># constructor defaults must rebuild your shapes</span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>check.load_state_dict(b[<span class="st">'state_dict'</span>])</span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>check.to(device)</span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>P_check <span class="op">=</span> build_char_pipeline(text, block_size<span class="op">=</span>b[<span class="st">'block_size'</span>], batch_size<span class="op">=</span><span class="dv">32</span>, device<span class="op">=</span>device)</span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>torch.manual_seed(<span class="dv">1337</span>)</span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>recomputed <span class="op">=</span> P_check[<span class="st">'estimate_loss'</span>](check)[<span class="st">'val'</span>]</span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"recomputed val </span><span class="sc">{</span>recomputed<span class="sc">:.4f}</span><span class="ss"> | reported </span><span class="sc">{</span>b[<span class="st">'val_loss'</span>]<span class="sc">:.4f}</span><span class="ss"> | baseline </span><span class="sc">{</span>baseline[<span class="st">'val'</span>]<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">abs</span>(recomputed <span class="op">-</span> b[<span class="st">'val_loss'</span>]) <span class="op">&lt;</span> <span class="fl">0.05</span>, <span class="st">'reported loss does not match the checkpoint'</span></span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> recomputed <span class="op">&lt;=</span> baseline[<span class="st">'val'</span>] <span class="op">-</span> <span class="fl">0.1</span>, <span class="st">'does not beat the baseline by 0.1'</span></span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'all submission checks passed'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>✍️ <strong>Design justification (~150 words).</strong> <em>Why this architecture, why these sizes, and what you spent your 500k parameters on. Your argument should be theoretical and specific. Replace this text with your answer.</em></p>
+</section>
+</section>
+<section id="section-4-part-b-experimenting-on-your-model-35-marks" class="level2">
+<h2 class="anchored" data-anchor-id="section-4-part-b-experimenting-on-your-model-35-marks">Section 4 · Part B — Experimenting on your model (35 marks)</h2>
+<p>Pick <strong>two</strong> of the following hyperparameters and test them on your model, one at a time:</p>
+<ol type="1">
+<li><strong>Context length</strong> — <code>block_size</code> (Lecture 8): a wider window conditions on more, but in a fixed-window model it costs parameters. Does the trade buy anything?</li>
+<li><strong>Capacity</strong> — hidden size, embedding size, or number of layers (depth vs width)</li>
+<li><strong>Learning rate</strong> — value or schedule (Lecture 4)</li>
+<li><strong>Regularisation</strong> — dropout or weight decay (Lecture 5)</li>
+<li><strong>Batch size</strong> (Lectures 4–5)</li>
+<li><strong>Training length</strong> — train much longer, and decide from the curves when you <em>should</em> have stopped (Lecture 5)</li>
+</ol>
+<p>For each experiment, in this order:</p>
+<ul>
+<li><strong>State your hypothesis first</strong>, in the ✍️ cell, <em>before</em> you run anything.</li>
+<li><strong>Run a fair comparison.</strong></li>
+<li><strong>Show the curves</strong> with <code>plot_histories</code>.</li>
+<li><strong>Interpret</strong> in the ✍️ cell: 150–250 words, referring to your actual numbers.</li>
+</ul>
+<p>We will mark the reasoning and the fairness of the comparison, not whether the change helped.</p>
+<section id="experiment-1" class="level3">
+<h3 class="anchored" data-anchor-id="experiment-1">Experiment 1</h3>
+<p>✍️ <strong>Hyperparameter:</strong> <em>(name it)</em></p>
+<p>✍️ <strong>Hypothesis (written before running):</strong> <em>Replace this text with one or two sentences — what will happen to the validation loss, and why.</em></p>
+<div id="62346eed" class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Experiment 1: change ONE thing between runs; keep everything else fixed.</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="co"># The pattern:</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="co">#   P_a = build_char_pipeline(text, block_size=..., batch_size=..., device=device)</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="co">#   torch.manual_seed(1337)</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="co">#   model_a = MyLanguageModel(P_a['vocab_size']).to(device)   # or a variant class</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="co">#   model_a, hist_a = train_model_tracked(model_a, P_a['get_batch'], P_a['estimate_loss'],</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="co">#                                         max_iters=..., lr=..., device=device)</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a><span class="co">#   ...then the same again with the one change...</span></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a><span class="co"># </span><span class="al">TODO</span><span class="co">: your runs</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="6f28b5b1" class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># </span><span class="al">TODO</span><span class="co">: label your runs and plot them against each other.</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="co"># plot_histories({'setting A': hist_a, 'setting B': hist_b}, title='Experiment 1')</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>✍️ <strong>Interpretation (150–250 words).</strong> <em>What happened, was your hypothesis right, and what in the curves tells you? Replace this text with your answer.</em></p>
+</section>
+<section id="experiment-2" class="level3">
+<h3 class="anchored" data-anchor-id="experiment-2">Experiment 2</h3>
+<p>✍️ <strong>Hyperparameter:</strong> <em>(name it)</em></p>
+<p>✍️ <strong>Hypothesis (written before running):</strong> <em>Replace this text with one or two sentences — what will happen to the validation loss, and why.</em></p>
+<div id="0592d5c1" class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Experiment 2: change ONE thing between runs; keep everything else fixed.</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="co"># The pattern:</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="co">#   P_a = build_char_pipeline(text, block_size=..., batch_size=..., device=device)</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="co">#   torch.manual_seed(1337)</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a><span class="co">#   model_a = MyLanguageModel(P_a['vocab_size']).to(device)   # or a variant class</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a><span class="co">#   model_a, hist_a = train_model_tracked(model_a, P_a['get_batch'], P_a['estimate_loss'],</span></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a><span class="co">#                                         max_iters=..., lr=..., device=device)</span></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a><span class="co">#   ...then the same again with the one change...</span></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a><span class="co"># </span><span class="al">TODO</span><span class="co">: your runs</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="3f867c15" class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># </span><span class="al">TODO</span><span class="co">: label your runs and plot them against each other.</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="co"># plot_histories({'setting A': hist_a, 'setting B': hist_b}, title='Experiment 2')</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>✍️ <strong>Interpretation (150–250 words).</strong> <em>What happened, was your hypothesis right, and what in the curves tells you? Replace this text with your answer.</em></p>
+</section>
+</section>
+<section id="section-5-part-c-discussing-your-model-25-marks" class="level2">
+<h2 class="anchored" data-anchor-id="section-5-part-c-discussing-your-model-25-marks">Section 5 · Part C — Discussing your model (25 marks)</h2>
+<p>Provide three short answers, ~200 words each, referencing your results — make sure to quote your own numbers and samples, not general facts about language models.</p>
+<p><strong>C1 · Diagnose your final model</strong> using the Lecture 5 taxonomy: underfitting, overfitting, or about right? Argue from your train/validation curves. Then: what would you try first with ten times the compute, and why that rather than something else?</p>
+<p>✍️ <em>Replace this text with your answer (~200 words).</em></p>
+<p><strong>C2 · Take two or three generated samples.</strong> What has the model genuinely learned about parliamentary English — structure, register, names, procedure? What does it consistently get wrong, and which limitation from the lectures explains that failure?</p>
+<p>✍️ <em>Replace this text with your answer (~200 words).</em></p>
+<p><strong>C3 · The data.</strong> Your training data is real MPs’ words, scraped from the public record (published under the Open Parliament Licence, which permits this). Give one reason this use is clearly legitimate, and one genuine concern that would apply to training on scraped text in general.</p>
+<p>✍️ <em>Replace this text with your answer (~200 words).</em></p>
+</section>
+<section id="appendix-ai-use-5-marks-with-reporting" class="level2">
+<h2 class="anchored" data-anchor-id="appendix-ai-use-5-marks-with-reporting">Appendix — AI use (5 marks, with reporting)</h2>
+<p>✍️ <strong>Tools.</strong> <em>Which AI assistants you used, and for what (writing code, debugging, explaining, drafting prose). “None” is acceptable, but we don’t expect it.</em></p>
+<p>✍️ <strong>One correction.</strong> <em>Paste one exchange where an assistant’s suggestion was wrong, or didn’t fit the rules or the budget, and explain how you caught and fixed it. If you never had to correct anything, pick one substantial piece of assistant-written code and explain how you satisfied yourself it was right.</em></p>
+<p>✍️ <strong>Declaration.</strong> <em>“I can explain every line of this notebook.” Leave this line in — submitting the notebook asserts it.</em></p>
+</section>
+<section id="before-you-submit" class="level2">
+<h2 class="anchored" data-anchor-id="before-you-submit">Before you submit</h2>
+<ul class="task-list">
+<li><label><input type="checkbox">Runtime → <strong>Restart and run all</strong> completes without errors, in under ~20 minutes on a Colab GPU runtime</label></li>
+<li><label><input type="checkbox">All cell outputs visible and saved — do <strong>not</strong> clear outputs</label></li>
+<li><label><input type="checkbox">The parameter assert and the <strong>verify cell</strong> both pass on the fresh run</label></li>
+<li><label><input type="checkbox">Checkpoint downloaded from the Colab file browser</label></li>
+<li><label><input type="checkbox">Every ✍️ cell filled in (and both hypotheses genuinely written before the runs)</label></li>
+<li><label><input type="checkbox">Appendix complete</label></li>
+<li><label><input type="checkbox"><strong>Two files</strong>, renamed <code>ME324-midterm-&lt;candidate-number&gt;.ipynb</code> and <code>ME324-midterm-&lt;candidate-number&gt;.pt</code>, uploaded to Moodle by <strong>09:00, Tuesday 18 August</strong></label></li>
+</ul>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp("https:\/\/ts-robinson\.com\/me324\/");
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+          // target, if specified
+          link.setAttribute("target", "_blank");
+          if (link.getAttribute("rel") === null) {
+            link.setAttribute("rel", "noopener");
+          }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>ME324 · AI and Deep Learning · LSE Summer School</p>
+</div>   
+    <div class="nav-footer-center">
+<p>Dr Thomas Robinson · Lab instructor: Kaifang Zhou</p>
+<div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/tsrobinson/me324/blob/main/assessment/midterm-starter.ipynb" class="toc-action"><i class="bi bi-github"></i>View source</a></li></ul></div></div>
+    <div class="nav-footer-right">
+<p>Built with <a href="https://quarto.org">Quarto</a></p>
+</div>
+  </div>
+</footer>
+
+
+
+
+<script src="../site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

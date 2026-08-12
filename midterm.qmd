@@ -1,0 +1,18 @@
+---
+pagetitle: "Midterm assessment · ME324"
+description: "Take-home midterm — build a character-level language model for Parliament."
+toc: true
+toc-depth: 2
+---
+
+::: {.callout-note appearance="simple"}
+## Get the starter notebook
+
+[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/{{< var github.owner >}}/{{< var github.repo >}}/blob/{{< var github.branch >}}/assessment/midterm-starter.ipynb)
+
+[view the notebook](assessment/midterm-starter.html) · [download .ipynb](https://github.com/{{< var github.owner >}}/{{< var github.repo >}}/raw/{{< var github.branch >}}/assessment/midterm-starter.ipynb)
+
+**Submit two files on Moodle by 09:00, Tuesday 18 August** — your notebook (outputs saved) and the `.pt` checkpoint it writes.
+:::
+
+{{< include assessment/midterm-brief.md >}}
