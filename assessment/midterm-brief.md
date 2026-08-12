@@ -24,7 +24,7 @@ The starter notebook (`midterm-starter.ipynb`) contains, already working:
 
 ## The rules
 
-1. **Architectures from weeks 1 and 2 only.** Character embeddings and feedforward layers are all you need -- an embedding table feeding a small network over a window of characters You may use recurrent networks (`nn.RNN`/`nn.GRU`/`nn.LSTM`) following from Thursday's lecture, but they are not required. You should not use attention, transformer blocks, pretrained weights, or any form of external data
+1. **Architectures from weeks 1 and 2 only.** Character embeddings and feedforward layers are all you need -- an embedding table feeding a small network over a window of characters. You may use recurrent networks (`nn.RNN`/`nn.GRU`/`nn.LSTM`) following from Thursday's lecture, but they are not required. You should not use attention, transformer blocks, pretrained weights, or any form of external data
 2. Token prediction must be at the **character-level, using the given pipeline.** Do not modify `build_char_pipeline`. You may change the *arguments* you call it with (`block_size`, `batch_size`, seed) but you may not change the tokeniser or the train/validation split
 3. **Your model may contain up to 500,000 parameters but no more.** You should validate by using the `count_params(model)` template we provide, and note that biases are included in this count.
 4. **Your code must run.** Before submitting, do Runtime → Restart and run all, and check it completes on a free Colab GPU runtime in under 20 minutes. Do not clear the outputs — your saved outputs are what we mark!
@@ -37,7 +37,7 @@ Design and train your model.
 
 - Write a model class that follows the labs' pipeline and setup: `forward(idx, targets)` returns `(logits, loss)`, and `generate(idx, max_new_tokens)` extends a context. You may reuse anything you yourself built in Labs 5 and 8. One practical requirement: your final hyperparameters must be set as constructor defaults, so `MyLanguageModel(vocab_size)` rebuilds your trained model.
 - Train it with `train_model_tracked` but choose your own hyperparameters.
-- **Threshold:** your model's validation loss must beat the bigram baseline you trained in Section 2 by at least 0.1. Once you past that threshold, your mark will not continue to increase.
+- **Threshold:** your model's validation loss must beat the bigram baseline you trained in Section 2 by at least 0.1. Once you pass that threshold, your mark will not continue to increase.
 - Report: final train and validation loss, per-character perplexity (e^loss, as in Lecture 8), the parameter count, and a 400-character sample.
 - Save your checkpoint with the provided notebook cell and confirm the verify cell passes. You need to submit your `.pt` file.
 - In ~150 words: justify your design. Why this architecture, why these sizes, and what you spent your 500k parameters on.
@@ -64,7 +64,7 @@ For each chosen option:
 
 ## Part C — Discussing your model (25 marks)
 
-Complete t three hree short answers, ~200 words each, in the marked cells. All three must be grounded in *your* results — quote your own numbers and samples.
+Complete three short answers, ~200 words each, in the marked cells. All three must be grounded in *your* results — quote your own numbers and samples.
 
 1. **Diagnose your final model** using the Lecture 5 taxonomy: underfitting, overfitting, or about right — argue from your train/validation curves. Then say what you would try first with ten times the compute, and why that and not something else.
 2. **Read your model's output.** Take two or three generated samples. What has the model genuinely learned about parliamentary English — structure, register, names, procedure? What does it consistently get wrong, and which limitation from the lectures explains that failure?

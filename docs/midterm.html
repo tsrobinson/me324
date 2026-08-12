@@ -201,7 +201,7 @@ Get the starter notebook
 <section id="the-rules" class="level2">
 <h2 class="anchored" data-anchor-id="the-rules">The rules</h2>
 <ol type="1">
-<li><strong>Architectures from weeks 1 and 2 only.</strong> Character embeddings and feedforward layers are all you need – an embedding table feeding a small network over a window of characters You may use recurrent networks (<code>nn.RNN</code>/<code>nn.GRU</code>/<code>nn.LSTM</code>) following from Thursday’s lecture, but they are not required. You should not use attention, transformer blocks, pretrained weights, or any form of external data</li>
+<li><strong>Architectures from weeks 1 and 2 only.</strong> Character embeddings and feedforward layers are all you need – an embedding table feeding a small network over a window of characters. You may use recurrent networks (<code>nn.RNN</code>/<code>nn.GRU</code>/<code>nn.LSTM</code>) following from Thursday’s lecture, but they are not required. You should not use attention, transformer blocks, pretrained weights, or any form of external data</li>
 <li>Token prediction must be at the <strong>character-level, using the given pipeline.</strong> Do not modify <code>build_char_pipeline</code>. You may change the <em>arguments</em> you call it with (<code>block_size</code>, <code>batch_size</code>, seed) but you may not change the tokeniser or the train/validation split</li>
 <li><strong>Your model may contain up to 500,000 parameters but no more.</strong> You should validate by using the <code>count_params(model)</code> template we provide, and note that biases are included in this count.</li>
 <li><strong>Your code must run.</strong> Before submitting, do Runtime → Restart and run all, and check it completes on a free Colab GPU runtime in under 20 minutes. Do not clear the outputs — your saved outputs are what we mark!</li>
@@ -215,7 +215,7 @@ Get the starter notebook
 <ul>
 <li>Write a model class that follows the labs’ pipeline and setup: <code>forward(idx, targets)</code> returns <code>(logits, loss)</code>, and <code>generate(idx, max_new_tokens)</code> extends a context. You may reuse anything you yourself built in Labs 5 and 8. One practical requirement: your final hyperparameters must be set as constructor defaults, so <code>MyLanguageModel(vocab_size)</code> rebuilds your trained model.</li>
 <li>Train it with <code>train_model_tracked</code> but choose your own hyperparameters.</li>
-<li><strong>Threshold:</strong> your model’s validation loss must beat the bigram baseline you trained in Section 2 by at least 0.1. Once you past that threshold, your mark will not continue to increase.</li>
+<li><strong>Threshold:</strong> your model’s validation loss must beat the bigram baseline you trained in Section 2 by at least 0.1. Once you pass that threshold, your mark will not continue to increase.</li>
 <li>Report: final train and validation loss, per-character perplexity (e^loss, as in Lecture 8), the parameter count, and a 400-character sample.</li>
 <li>Save your checkpoint with the provided notebook cell and confirm the verify cell passes. You need to submit your <code>.pt</code> file.</li>
 <li>In ~150 words: justify your design. Why this architecture, why these sizes, and what you spent your 500k parameters on.</li>
@@ -243,7 +243,7 @@ Get the starter notebook
 </section>
 <section id="part-c-discussing-your-model-25-marks" class="level2">
 <h2 class="anchored" data-anchor-id="part-c-discussing-your-model-25-marks">Part C — Discussing your model (25 marks)</h2>
-<p>Complete t three hree short answers, ~200 words each, in the marked cells. All three must be grounded in <em>your</em> results — quote your own numbers and samples.</p>
+<p>Complete three short answers, ~200 words each, in the marked cells. All three must be grounded in <em>your</em> results — quote your own numbers and samples.</p>
 <ol type="1">
 <li><strong>Diagnose your final model</strong> using the Lecture 5 taxonomy: underfitting, overfitting, or about right — argue from your train/validation curves. Then say what you would try first with ten times the compute, and why that and not something else.</li>
 <li><strong>Read your model’s output.</strong> Take two or three generated samples. What has the model genuinely learned about parliamentary English — structure, register, names, procedure? What does it consistently get wrong, and which limitation from the lectures explains that failure?</li>
