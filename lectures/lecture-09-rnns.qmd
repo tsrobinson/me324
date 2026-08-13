@@ -1582,9 +1582,9 @@ You can:
 6. Cite at least one social-science setting where an RNN is still the right tool.
 :::
 
-# Lab brief · tomorrow {background-color="#0E1A2B"}
+# Lab brief · Monday {background-color="#0E1A2B"}
 
-## Tomorrow's lab — 90 minutes
+## Monday's lab — 90 minutes
 
 [Goals]{.eyebrow}
 

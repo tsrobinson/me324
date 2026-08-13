@@ -3764,5 +3764,12 @@
     "title": "Backpropagation",
     "section": "See you tomorrow",
     "text": "See you tomorrow\nLecture 5 — Feed-forward networks in PyTorch\n\n\n\n\n\n\nTonight:\n\n\n\nWell done — today and yesterday were the two steepest lectures of the whole course.\nIf you’re curious, watch Karpathy’s Building micrograd – it walks through the exact lab you just did.\nOptional: install PyTorch locally if you want to run things outside Colab. Setup notes are on Moodle.\n\n\n\n\n\n\n\nME324 · AI and Deep Learning · LSE Summer School\n\n\n\n\nDauphin, Y. N., Pascanu, R., Gulcehre, C., Cho, K., Ganguli, S., & Bengio, Y. (2014). Identifying and attacking the saddle point problem in high-dimensional non-convex optimization. Advances in Neural Information Processing Systems, 27.\n\n\nKingma, D. P. (2014). Adam: A method for stochastic optimization. arXiv Preprint arXiv:1412.6980.\n\n\nLall, R., & Robinson, T. (2022). The MIDAS touch: Accurate and scalable missing-data imputation with deep learning. Political Analysis, 30(2), 179–196.\n\n\nRumelhart, D. E., Hinton, G. E., & Williams, R. J. (1986). Learning representations by back-propagating errors. Nature, 323(6088), 533–536."
+  },
+  {
+    "objectID": "lectures/lecture-09-rnns.html#mondays-lab-90-minutes",
+    "href": "lectures/lecture-09-rnns.html#mondays-lab-90-minutes",
+    "title": "Building your own text-generating AI (2/4)",
+    "section": "Monday’s lab — 90 minutes",
+    "text": "Monday’s lab — 90 minutes\nGoals\nTake yesterday’s character-level bigram model and:\n\nReplace the embedding-as-logits with a proper RNN cell (nn.RNN or nn.GRU).\nCarry the hidden state across each character of a sequence.\nPredict the next character at every position.\nTrain for ~5k steps on the same corpus.\nGenerate a 500-character sample.\n\n\nWhat you should see\nThe samples will be noticeably less terrible. You’ll see real(ish) words start to appear and sensible whitespace.\n\nStretch goal: train with sequence length 64, 128, 256 and plot the loss for each. Does more context keep paying?"
   }
 ]
