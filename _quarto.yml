@@ -37,6 +37,10 @@ project:
     - labs/lab-06-cnn-images.ipynb
     - labs/lab-07-autoencoders-vae.ipynb
     - labs/lab-08-char-bigram.ipynb
+    - labs/lab-09-rnn.ipynb
+    - labs/lab-10-transformer-gpt.ipynb
+    - labs/lab-11-bpe-sampling-capstone.ipynb
+    - labs/lab-12-ethics-redteam.ipynb
     - assessment/midterm-starter.ipynb
   preview:
     port: 4200
