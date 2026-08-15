@@ -767,7 +767,7 @@ That's the course: a dot product, a count, a shape, three vectors, and a knob.
 
 ## What the questions look like
 
-[Two hours, forty questions — about three minutes each]{.eyebrow}
+[Two hours, forty questions — about two minutes each in Parts A–B, three thereafter]{.eyebrow}
 
 ::: {.columns}
 ::: {.column width="50%"}
@@ -787,11 +787,11 @@ Or: here is a training curve / a validation result / a research design — what 
 :::
 
 ::: {.callout-warning appearance="simple"}
-**Arithmetic alone will not be enough.** On several questions two options carry the **same number** and differ only in the claim attached to it. Getting the number right is the first half of the work; deciding what it means is the second. **Read all six options before you choose.**
+**Arithmetic alone will not be enough.** On several questions two options carry the **same number** and differ only in the claim attached to it. Getting the number right is the first half of the work; deciding what it means is the second. Note that **neither** of a matching pair is necessarily right — on some questions both are wrong and the answer is a third option, so judge each claim on its own rather than assuming the pair contains the answer. **Read all six options before you choose.**
 :::
 
 ::: {.card}
-The paper runs roughly in course order and **gets harder as it goes**. The last few questions are meant to stretch the strongest of you — if you get stuck, move on and come back.
+The paper runs roughly in course order and **gets harder as it goes**. The last few questions are meant to stretch the strongest of you. A handful in the middle — the longer hand-traces — take noticeably more than three minutes: if one is not coming out, **move on and come back**. Banking the quick questions is worth more than finishing any single slow one.
 :::
 
 ## How to study tonight
