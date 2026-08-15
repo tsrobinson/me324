@@ -1,0 +1,2200 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-html/tabby.min.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/light-border.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-html.min.css" rel="stylesheet" data-mode="light">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
+  <meta name="generator" content="quarto-1.5.57">
+
+  <meta name="author" content="Dr Thomas Robinson">
+  <meta name="dcterms.date" content="2026-08-18">
+  <title>ME324 · AI &amp; Deep Learning – Building your own text-generating AI (4/4)</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+  <link rel="stylesheet" href="../site_libs/revealjs/dist/reset.css">
+  <link rel="stylesheet" href="../site_libs/revealjs/dist/reveal.css">
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+      vertical-align: middle;
+    }
+    /* CSS for citations */
+    div.csl-bib-body { }
+    div.csl-entry {
+      clear: both;
+      margin-bottom: 0em;
+    }
+    .hanging-indent div.csl-entry {
+      margin-left:2em;
+      text-indent:-2em;
+    }
+    div.csl-left-margin {
+      min-width:2em;
+      float:left;
+    }
+    div.csl-right-inline {
+      margin-left:2em;
+      padding-left:1em;
+    }
+    div.csl-indent {
+      margin-left: 2em;
+    }  </style>
+  <link rel="stylesheet" href="../site_libs/revealjs/dist/theme/quarto.css">
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
+  <link href="../site_libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
+  <link href="../site_libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
+  <link href="../site_libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
+  <link href="../site_libs/revealjs/plugin/quarto-support/footer.css" rel="stylesheet">
+  <style type="text/css">
+
+  .callout {
+    margin-top: 1em;
+    margin-bottom: 1em;  
+    border-radius: .25rem;
+  }
+
+  .callout.callout-style-simple { 
+    padding: 0em 0.5em;
+    border-left: solid #acacac .3rem;
+    border-right: solid 1px silver;
+    border-top: solid 1px silver;
+    border-bottom: solid 1px silver;
+    display: flex;
+  }
+
+  .callout.callout-style-default {
+    border-left: solid #acacac .3rem;
+    border-right: solid 1px silver;
+    border-top: solid 1px silver;
+    border-bottom: solid 1px silver;
+  }
+
+  .callout .callout-body-container {
+    flex-grow: 1;
+  }
+
+  .callout.callout-style-simple .callout-body {
+    font-size: 1rem;
+    font-weight: 400;
+  }
+
+  .callout.callout-style-default .callout-body {
+    font-size: 0.9rem;
+    font-weight: 400;
+  }
+
+  .callout.callout-titled.callout-style-simple .callout-body {
+    margin-top: 0.2em;
+  }
+
+  .callout:not(.callout-titled) .callout-body {
+      display: flex;
+  }
+
+  .callout:not(.no-icon).callout-titled.callout-style-simple .callout-content {
+    padding-left: 1.6em;
+  }
+
+  .callout.callout-titled .callout-header {
+    padding-top: 0.2em;
+    margin-bottom: -0.2em;
+  }
+
+  .callout.callout-titled .callout-title  p {
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+  }
+    
+  .callout.callout-titled.callout-style-simple .callout-content  p {
+    margin-top: 0;
+  }
+
+  .callout.callout-titled.callout-style-default .callout-content  p {
+    margin-top: 0.7em;
+  }
+
+  .callout.callout-style-simple div.callout-title {
+    border-bottom: none;
+    font-size: .9rem;
+    font-weight: 600;
+    opacity: 75%;
+  }
+
+  .callout.callout-style-default  div.callout-title {
+    border-bottom: none;
+    font-weight: 600;
+    opacity: 85%;
+    font-size: 0.9rem;
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+  }
+
+  .callout.callout-style-default div.callout-content {
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+  }
+
+  .callout.callout-style-simple .callout-icon::before {
+    height: 1rem;
+    width: 1rem;
+    display: inline-block;
+    content: "";
+    background-repeat: no-repeat;
+    background-size: 1rem 1rem;
+  }
+
+  .callout.callout-style-default .callout-icon::before {
+    height: 0.9rem;
+    width: 0.9rem;
+    display: inline-block;
+    content: "";
+    background-repeat: no-repeat;
+    background-size: 0.9rem 0.9rem;
+  }
+
+  .callout-title {
+    display: flex
+  }
+    
+  .callout-icon::before {
+    margin-top: 1rem;
+    padding-right: .5rem;
+  }
+
+  .callout.no-icon::before {
+    display: none !important;
+  }
+
+  .callout.callout-titled .callout-body > .callout-content > :last-child {
+    padding-bottom: 0.5rem;
+    margin-bottom: 0;
+  }
+
+  .callout.callout-titled .callout-icon::before {
+    margin-top: .5rem;
+    padding-right: .5rem;
+  }
+
+  .callout:not(.callout-titled) .callout-icon::before {
+    margin-top: 1rem;
+    padding-right: .5rem;
+  }
+
+  /* Callout Types */
+
+  div.callout-note {
+    border-left-color: #4582ec !important;
+  }
+
+  div.callout-note .callout-icon::before {
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAIKADAAQAAAABAAAAIAAAAACshmLzAAAEU0lEQVRYCcVXTWhcVRQ+586kSUMMxkyaElstCto2SIhitS5Ek8xUKV2poatCcVHtUlFQk8mbaaziwpWgglJwVaquitBOfhQXFlqlzSJpFSpIYyXNjBNiTCck7x2/8/LeNDOZxDuEkgOXe++553zfefee+/OYLOXFk3+1LLrRdiO81yNqZ6K9cG0P3MeFaMIQjXssE8Z1JzLO9ls20MBZX7oG8w9GxB0goaPrW5aNMp1yOZIa7Wv6o2ykpLtmAPs/vrG14Z+6d4jpbSKuhdcSyq9wGMPXjonwmESXrriLzFGOdDBLB8Y6MNYBu0dRokSygMA/mrun8MGFN3behm6VVAwg4WR3i6FvYK1T7MHo9BK7ydH+1uurECoouk5MPRyVSBrBHMYwVobG2aOXM07sWrn5qgB60rc6mcwIDJtQrnrEr44kmy+UO9r0u9O5/YbkS9juQckLed3DyW2XV/qWBBB3ptvI8EUY3I9p/67OW+g967TNr3Sotn3IuVlfMLVnsBwH4fsnebJvyGm5GeIUA3jljERmrv49SizPYuq+z7c2H/jlGC+Ghhupn/hcapqmcudB9jwJ/3jvnvu6vu5lVzF1fXyZuZZ7U8nRmVzytvT+H3kilYvH09mLWrQdwFSsFEsxFVs5fK7A0g8gMZjbif4ACpKbjv7gNGaD8bUrlk8x+KRflttr22JEMRUbTUwwDQScyzPgedQHZT0xnx7ujw2jfVfExwYHwOsDTjLdJ2ebmeQIlJ7neo41s/DrsL3kl+W2lWvAga0tR3zueGr6GL78M3ifH0rGXrBC2aAR8uYcIA5gwV8zIE8onoh8u0Fca/ciF7j1uOzEnqcIm59sEXoGc0+z6+H45V1CvAvHcD7THztu669cnp+L0okAeIc6zjbM/24LgGM1gZk7jnRu1aQWoU9sfUOuhrmtaPIO3YY1KLLWZaEO5TKUbMY5zx8W9UJ6elpLwKXbsaZ4EFl7B4bMtDv0iRipKoDQT2sNQI9b1utXFdYisi+wzZ/ri/1m7QfDgEuvgUUEIJPq3DhX/5DWNqIXDOweC2wvIR90Oq3lDpdMIgD2r0dXvGdsEW5H6x6HLRJYU7C69VefO1x8Gde1ZFSJLfWS1jbCnhtOPxmpfv2LXOA2Xk2tvnwKKPFuZ/oRmwBwqRQDcKNeVQkYcOjtWVBuM/JuYw5b6isojIkYxyYAFn5K7ZBF10fea52y8QltAg6jnMqNHFBmGkQ1j+U43HMi2xMar1Nv0zGsf1s8nUsmUtPOOrbFIR8bHFDMB5zL13Gmr/kGlCkUzedTzzmzsaJXhYawnA3UmARpiYj5ooJZiUoxFRtK3X6pgNPv+IZVPcnwbOl6f+aBaO1CNvPW9n9LmCp01nuSaTRF2YxHqZ8DYQT6WsXT+RD6eUztwYLZ8rM+rcPxamv1VQzFUkzFXvkiVrySGQgJNvXHJAxiU3/NwiC03rSf05VBaPtu/Z7/B8Yn/w7eguloAAAAAElFTkSuQmCC');
+  }
+
+  div.callout-note.callout-style-default .callout-title {
+    background-color: #dae6fb
+  }
+
+  div.callout-important {
+    border-left-color: #d9534f !important;
+  }
+
+  div.callout-important .callout-icon::before {
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAIKADAAQAAAABAAAAIAAAAACshmLzAAAEKklEQVRYCcVXTWhcVRS+575MJym48A+hSRFr00ySRQhURRfd2HYjk2SSTokuBCkU2o0LoSKKraKIBTcuFCoidGFD08nkBzdREbpQ1EDNIv8qSGMFUboImMSZd4/f9zJv8ibJMC8xJQfO3HPPPef7zrvvvnvviIkpC9nsw0UttFunbUhpFzFtarSd6WJkStVMw5xyVqYTvkwfzuf/5FgtkVoB0729j1rjXwThS7Vio+Mo6DNnvLfahoZ+i/o32lULuJ3NNiz7q6+pyAUkJaFF6JwaM2lUJlV0MlnQn5aTRbEu0SEqHUa0A4AdiGuB1kFXRfVyg5d87+Dg4DL6m2TLAub60ilj7A1Ec4odSAc8X95sHh7+ZRPCFo6Fnp7HfU/fBng/hi10CjCnWnJjsxvDNxWw0NfV6Rv5GgP3I3jGWXumdTD/3cbEOP2ZbOZp69yniG3FQ9z1jD7bnBu9Fc2tKGC2q+uAJOQHBDRiZX1x36o7fWBs7J9ownbtO+n0/qWkvW7UPIfc37WgT6ZGR++EOJyeQDSb9UB+DZ1G6DdLDzyS+b/kBCYGsYgJbSQHuThGKRcw5xdeQf8YdNHsc6ePXrlSYMBuSIAFTGAtQo+VuALo4BX83N190NWZWbynBjhOHsmNfFWLeL6v+ynsA58zDvvAC8j5PkbOcXCMg2PZFk3q8MjI7WAG/Dp9AwP7jdGBOOQkAvlFUB+irtm16I1Zw9YBcpGTGXYmk3kQIC/Cds55l+iMI3jqhjAuaoe+am2Jw5GT3Nbz3CkE12NavmzN5+erJW7046n/CH1RO/RVa8lBLozXk9uqykkGAyRXLWlLv5jyp4RFsG5vGVzpDLnIjTWgnRy2Rr+tDKvRc7Y8AyZq10jj8DqXdnIRNtFZb+t/ZRtXcDiVnzpqx8mPcDWxgARUqx0W1QB9MeUZiNrV4qP+Ehc+BpNgATsTX8ozYKL2NtFYAHc84fG7ndxUPr+AR/iQSns7uSUufAymwDOb2+NjK27lEFocm/EE2WpyIy/Hi66MWuMKJn8RvxIcj87IM5Vh9663ziW36kR0HNenXuxmfaD8JC7tfKbrhFr7LiZCrMjrzTeGx+PmkosrkNzW94ObzwocJ7A1HokLolY+AvkTiD/q1H0cN48c5EL8Crkttsa/AXQVDmutfyku0E7jShx49XqV3MFK8IryDhYVbj7Sj2P2eBxwcXoe8T8idsKKPRcnZw1b+slFTubwUwhktrfnAt7J++jwQtLZcm3sr9LQrjRzz6cfMv9aLvgmnAGvpoaGLxM4mAEaLV7iAzQ3oU0IvD5x9ix3yF2RAAuYAOO2f7PEFWCXZ4C9Pb2UsgDeVnFSpbFK7/IWu7TPTvBqzbGdCHOJQSxiEjt6IyZmxQyEJHv6xyQsYk//moVFsN2zP6fRImjfq7/n/wFDguUQFNEwugAAAABJRU5ErkJggg==');
+  }
+
+  div.callout-important.callout-style-default .callout-title {
+    background-color: #f7dddc
+  }
+
+  div.callout-warning {
+    border-left-color: #f0ad4e !important;
+  }
+
+  div.callout-warning .callout-icon::before {
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAIKADAAQAAAABAAAAIAAAAACshmLzAAAETklEQVRYCeVWW2gcVRg+58yaTUnizqbipZeX4uWhBEniBaoUX1Ioze52t7sRq6APio9V9MEaoWlVsFasRq0gltaAPuxms8lu0gcviE/FFOstVbSIxgcv6SU7EZqmdc7v9+9mJtNks51NTUH84ed889/PP+cmxP+d5FIbMJmNbpREu4WUkiTtCicKny0l1pIKmBzovF2S+hIJHX8iEu3hZJ5lNZGqyRrGSIQpq15AzF28jgpeY6yk6GVdrfFqdrD6Iw+QlB8g0YS2g7dyQmXM/IDhBhT0UCiRf59lfqmmDvzRt6kByV/m4JjtzuaujMUM2c5Z2d6JdKrRb3K2q6mA+oYVz8JnDdKPmmNthzkAk/lN63sYPgevrguc72aZX/L9C6x09GYyxBgCX4NlvyGUHOKELlm5rXeR1kchuChJt4SSwyddZRXgvwMGvYo4QSlk3/zkHD8UHxwVJA6zjZZqP8v8kK8OWLnIZtLyCAJagYC4rTGW/9Pqj92N/c+LUaAj27movwbi19tk/whRCIE7Q9vyI6yvRpftAKVTdUjOW40X3h5OXsKCdmFcx0xlLJoSuQngnrJe7Kcjm4OMq9FlC7CMmScQANuNvjfP3PjGXDBaUQmbp296S5L4DrpbrHN1T87ZVEZVCzg1FF0Ft+dKrlLukI+/c9ENo+TvlTDbYFvuKPtQ9+l052rXrgKoWkDAFnvh0wTOmYn8R5f4k/jN/fZiCM1tQx9jQQ4ANhqG4hiL0qIFTGViG9DKB7GYzgubnpofgYRwO+DFjh0Zin2m4b/97EDkXkc+f6xYAPX0KK2I/7fUQuwzuwo/L3AkcjugPNixC8cHf0FyPjWlItmLxWw4Ou9YsQCr5fijMGoD/zpdRy95HRysyXA74MWOnscpO4j2y3HAVisw85hX5+AFBRSHt4ShfLFkIMXTqyKFc46xdzQM6XbAi702a7sy04J0+feReMFKp5q9esYLCqAZYw/k14E/xcLLsFElaornTuJB0svMuJINy8xkIYuL+xPAlWRceH6+HX7THJ0djLUom46zREu7tTkxwmf/FdOZ/sh6Q8qvEAiHpm4PJ4a/doJe0gH1t+aHRgCzOvBvJedEK5OFE5jpm4AGP2a8Dxe3gGJ/pAutug9Gp6he92CsSsWBaEcxGx0FHytmIpuqGkOpldqNYQK8cSoXvd+xLxXADw0kf6UkJNFtdo5MOgaLjiQOQHcn+A6h5NuL2s0qsC2LOM75PcF3yr5STuBSAcGG+meA14K/CI21HcS4LBT6tv0QAh8Dr5l93AhZzG5ZJ4VxAqdZUEl9z7WJ4aN+svMvwHHL21UKTd1mqvChH7/Za5xzXBBKrUcB0TQ+Ulgkfbi/H/YT5EptrGzsEK7tR1B7ln9BBwckYfMiuSqklSznIuoIIOM42MQO+QnduCoFCI0bpkzjCjddHPN/F+2Yu+sd9bKNpVwHhbS3LluK/0zgfwD0xYI5dXuzlQAAAABJRU5ErkJggg==');
+  }
+
+  div.callout-warning.callout-style-default .callout-title {
+    background-color: #fcefdc
+  }
+
+  div.callout-tip {
+    border-left-color: #02b875 !important;
+  }
+
+  div.callout-tip .callout-icon::before {
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAIKADAAQAAAABAAAAIAAAAACshmLzAAADr0lEQVRYCe1XTWgTQRj9ZjZV8a9SPIkKgj8I1bMHsUWrqYLVg4Ue6v9BwZOxSYsIerFao7UiUryIqJcqgtpimhbBXoSCVxUFe9CTiogUrUp2Pt+3aUI2u5vdNh4dmMzOzHvvezuz8xNFM0mjnbXaNu1MvFWRXkXEyE6aYOYJpdW4IXuA4r0fo8qqSMDBU0v1HJUgVieAXxzCsdE/YJTdFcVIZQNMyhruOMJKXYFoLfIfIvVIMWdsrd+Rpd86ZmyzzjJmLStqRn0v8lzkb4rVIXvnpScOJuAn2ACC65FkPzEdEy4TPWRLJ2h7z4cArXzzaOdKlbOvKKX25Wl00jSnrwVxAg3o4dRxhO13RBSdNvH0xSARv3adTXbBdTf64IWO2vH0LT+cv4GR1DJt+DUItaQogeBX/chhbTBxEiZ6gftlDNXTrvT7co4ub5A6gp9HIcHvzTa46OS5fBeP87Qm0fQkr4FsYgVQ7Qg+ZayaDg9jhg1GkWj8RG6lkeSacrrHgDaxdoBiZPg+NXV/KifMuB6//JmYH4CntVEHy/keA6x4h4CU5oFy8GzrBS18cLJMXcljAKB6INjWsRcuZBWVaS3GDrqB7rdapVIeA+isQ57Eev9eCqzqOa81CY05VLd6SamW2wA2H3SiTbnbSxmzfp7WtKZkqy4mdyAlGx7ennghYf8voqp9cLSgKdqNfa6RdRsAAkPwRuJZNbpByn+RrJi1RXTwdi8RQF6ymDwGMAtZ6TVE+4uoKh+MYkcLsT0Hk8eAienbiGdjJHZTpmNjlbFJNKDVAp2fJlYju6IreQxQ08UJDNYdoLSl6AadO+fFuCQqVMB1NJwPm69T04Wv5WhfcWyfXQB+wXRs1pt+nCknRa0LVzSA/2B+a9+zQJadb7IyyV24YAxKp2Jqs3emZTuNnKxsah+uabKbMk7CbTgJx/zIgQYErIeTKRQ9yD9wxVof5YolPHqaWo7TD6tJlh7jQnK5z2n3+fGdggIOx2kaa2YI9QWarc5Ce1ipNWMKeSG4DysFF52KBmTNMmn5HqCFkwy34rDg05gDwgH3bBi+sgFhN/e8QvRn8kbamCOhgrZ9GJhFDgfcMHzFb6BAtjKpFhzTjwv1KCVuxHvCbsSiEz4CANnj84cwHdFXAbAOJ4LTSAawGWFn5tDhLMYz6nWeU2wJfIhmIJBefcd/A5FWQWGgrWzyORZ3Q6HuV+Jf0Bj+BTX69fm1zWgK7By1YTXchFDORywnfQ7GpzOo6S+qECrsx2ifVQAAAABJRU5ErkJggg==');
+  }
+
+  div.callout-tip.callout-style-default .callout-title {
+    background-color: #ccf1e3
+  }
+
+  div.callout-caution {
+    border-left-color: #fd7e14 !important;
+  }
+
+  div.callout-caution .callout-icon::before {
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAIKADAAQAAAABAAAAIAAAAACshmLzAAACV0lEQVRYCdVWzWoUQRCuqp2ICBLJXgITZL1EfQDBW/bkzUMUD7klD+ATSHBEfAIfQO+iXsWDxJsHL96EHAwhgzlkg8nBg25XWb0zIb0zs9muYYWkoKeru+vn664fBqElyZNuyh167NXJ8Ut8McjbmEraKHkd7uAnAFku+VWdb3reSmRV8PKSLfZ0Gjn3a6Xlcq9YGb6tADjn+lUfTXtVmaZ1KwBIvFI11rRXlWlatwIAAv2asaa9mlB9wwygiDX26qaw1yYPzFXg2N1GgG0FMF8Oj+VIx7E/03lHx8UhvYyNZLN7BwSPgekXXLribw7w5/c8EF+DBK5idvDVYtEEwMeYefjjLAdEyQ3M9nfOkgnPTEkYU+sxMq0BxNR6jExrAI31H1rzvLEfRIdgcv1XEdj6QTQAS2wtstEALLG1yEZ3QhH6oDX7ExBSFEkFINXH98NTrme5IOaaA7kIfiu2L8A3qhH9zRbukdCqdsA98TdElyeMe5BI8Rs2xHRIsoTSSVFfCFCWGPn9XHb4cdobRIWABNf0add9jakDjQJpJ1bTXOJXnnRXHRf+dNL1ZV1MBRCXhMbaHqGI1JkKIL7+i8uffuP6wVQAzO7+qVEbF6NbS0LJureYcWXUUhH66nLR5rYmva+2tjRFtojkM2aD76HEGAD3tPtKM309FJg5j/K682ywcWJ3PASCcycH/22u+Bh7Aa0ehM2Fu4z0SAE81HF9RkB21c5bEn4Dzw+/qNOyXr3DCTQDMBOdhi4nAgiFDGCinIa2owCEChUwD8qzd03PG+qdW/4fDzjUMcE1ZpIAAAAASUVORK5CYII=');
+  }
+
+  div.callout-caution.callout-style-default .callout-title {
+    background-color: #ffe5d0
+  }
+
+  </style>
+  <style type="text/css">
+    .reveal div.sourceCode {
+      margin: 0;
+      overflow: auto;
+    }
+    .reveal div.hanging-indent {
+      margin-left: 1em;
+      text-indent: -1em;
+    }
+    .reveal .slide:not(.center) {
+      height: 100%;
+    }
+    .reveal .slide.scrollable {
+      overflow-y: auto;
+    }
+    .reveal .footnotes {
+      height: 100%;
+      overflow-y: auto;
+    }
+    .reveal .slide .absolute {
+      position: absolute;
+      display: block;
+    }
+    .reveal .footnotes ol {
+      counter-reset: ol;
+      list-style-type: none; 
+      margin-left: 0;
+    }
+    .reveal .footnotes ol li:before {
+      counter-increment: ol;
+      content: counter(ol) ". "; 
+    }
+    .reveal .footnotes ol li > p:first-child {
+      display: inline-block;
+    }
+    .reveal .slide ul,
+    .reveal .slide ol {
+      margin-bottom: 0.5em;
+    }
+    .reveal .slide ul li,
+    .reveal .slide ol li {
+      margin-top: 0.4em;
+      margin-bottom: 0.2em;
+    }
+    .reveal .slide ul[role="tablist"] li {
+      margin-bottom: 0;
+    }
+    .reveal .slide ul li > *:first-child,
+    .reveal .slide ol li > *:first-child {
+      margin-block-start: 0;
+    }
+    .reveal .slide ul li > *:last-child,
+    .reveal .slide ol li > *:last-child {
+      margin-block-end: 0;
+    }
+    .reveal .slide .columns:nth-child(3) {
+      margin-block-start: 0.8em;
+    }
+    .reveal blockquote {
+      box-shadow: none;
+    }
+    .reveal .tippy-content>* {
+      margin-top: 0.2em;
+      margin-bottom: 0.7em;
+    }
+    .reveal .tippy-content>*:last-child {
+      margin-bottom: 0.2em;
+    }
+    .reveal .slide > img.stretch.quarto-figure-center,
+    .reveal .slide > img.r-stretch.quarto-figure-center {
+      display: block;
+      margin-left: auto;
+      margin-right: auto; 
+    }
+    .reveal .slide > img.stretch.quarto-figure-left,
+    .reveal .slide > img.r-stretch.quarto-figure-left  {
+      display: block;
+      margin-left: 0;
+      margin-right: auto; 
+    }
+    .reveal .slide > img.stretch.quarto-figure-right,
+    .reveal .slide > img.r-stretch.quarto-figure-right  {
+      display: block;
+      margin-left: auto;
+      margin-right: 0; 
+    }
+  </style>
+<meta property="og:title" content="Building your own text-generating AI (4/4) – ME324 · AI &amp; Deep Learning">
+<meta property="og:description" content="Lecture 11 — Tokenisation, sampling, and what you’ve built">
+<meta property="og:site_name" content="ME324 · AI &amp; Deep Learning">
+</head>
+<body class="quarto-light">
+  <div class="reveal">
+    <div class="slides">
+
+<section id="title-slide" class="quarto-title-block center">
+  <h1 class="title">Building your own text-generating AI (4/4)</h1>
+  <p class="subtitle">Lecture 11 — Tokenisation, sampling, and what you’ve built</p>
+
+<div class="quarto-title-authors">
+<div class="quarto-title-author">
+<div class="quarto-title-author-name">
+Dr Thomas Robinson 
+</div>
+</div>
+</div>
+
+  <p class="date">August 18, 2026</p>
+</section>
+<section>
+<section id="show-tell-your-gpts" class="title-slide slide level1 center" data-background-color="#0E1A2B">
+<h1>Show &amp; tell · your GPTs</h1>
+
+</section>
+<section id="plenary-read-your-gpt-aloud" class="slide level2">
+<h2>Plenary · read your GPT aloud</h2>
+<p><span class="eyebrow"><span class="pause-cue">≈ 10 min</span> · whole room</span></p>
+<p>Yesterday you each built a tiny GPT and brought away <strong>one generated sample</strong> — the funniest line, or the one that shouldn’t have made sense but did.</p>
+<div class="try-box">
+<p><span class="try-label">Share with the room</span></p>
+<p>Read <strong>one line</strong> your model produced. In a sentence or two, tell us:</p>
+<ol type="1">
+<li>Why you picked it — coherent? funny? eerily plausible?</li>
+<li><strong>One failure mode</strong> you noticed — repetition, invented non-words, losing the thread mid-sentence, confident nonsense.</li>
+</ol>
+</div>
+<div class="callout callout-tip callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Tip</strong></p>
+</div>
+<div class="callout-content">
+<p>Three weeks ago this was a black box. Yesterday <em>you trained a transformer that produces English.</em> It is small and it is flawed — and that is exactly what today is about: better <strong>tokens</strong> (Part 1), better <strong>sampling</strong> (Part 2), and a <strong>map of everything that sits between your tiny GPT and ChatGPT</strong> (Part 3).</p>
+</div>
+</div>
+</div>
+</section>
+<section id="warm-up-three-questions-from-last-time" class="slide level2">
+<h2>Warm-up · three questions from last time</h2>
+<p><span class="eyebrow"><span class="pause-cue">≈ 5 min</span> · shout it out</span></p>
+<div class="card">
+<ol type="1">
+<li>In attention, what are the roles of the <strong>query</strong>, the <strong>key</strong>, and the <strong>value</strong> — one phrase each?</li>
+<li>Why do we divide the attention scores by <span class="math inline">\sqrt{d}</span>?</li>
+<li>What does the <strong>causal mask</strong> block, and why do we need it?</li>
+</ol>
+</div>
+</section>
+<section id="warm-up-answers" class="slide level2">
+<h2>Warm-up · answers</h2>
+<div class="card">
+<ol type="1">
+<li><strong>Query</strong>: what I am looking for. <strong>Key</strong>: what I contain. <strong>Value</strong>: what I hand over if matched.</li>
+<li>Dot products grow with dimension. Unscaled, the scores saturate the softmax and one token takes nearly all the weight. Dividing by <span class="math inline">\sqrt{d}</span> keeps the scores in a range where the softmax still spreads attention.</li>
+<li>It blocks attention to <strong>future tokens</strong>. Without it, next-token prediction could read the answer it is supposed to predict.</li>
+</ol>
+</div>
+</section></section>
+<section>
+<section id="part-1-tokenisation" class="title-slide slide level1 center" data-background-color="#0E1A2B">
+<h1>Part 1 · Tokenisation</h1>
+
+</section>
+<section id="three-levels-of-tokenisation" class="slide level2">
+<h2>Three levels of tokenisation</h2>
+<div class="columns">
+<div class="column" style="width:33%;">
+<p><span class="pill-blue">Character</span></p>
+<ul>
+<li>Tiny vocab (~100).</li>
+<li>Sequences are <strong>long</strong> — typically 4× longer than word-level.</li>
+<li>Model spends compute learning spelling.</li>
+<li>What our labs have used since Lab 8.</li>
+</ul>
+</div><div class="column" style="width:33%;">
+<p><span class="pill-amber">Word</span></p>
+<ul>
+<li>Huge vocab (10⁵+).</li>
+<li>OOV (out-of-vocabulary) is a real failure mode.</li>
+<li>Embedding matrix is gigantic.</li>
+<li>What 1990s/2000s NLP used.</li>
+</ul>
+</div><div class="column" style="width:33%;">
+<p><span class="pill-green">Subword</span></p>
+<ul>
+<li>Vocab ~32k–128k.</li>
+<li>No OOV — rare words just split into smaller pieces.</li>
+<li>What every modern LLM uses.</li>
+<li>The topic of this lecture.</li>
+</ul>
+</div></div>
+</section>
+<section id="where-compute-goes-and-why-tokenisation-matters" class="slide level2">
+<h2>Where compute goes — and why tokenisation matters</h2>
+<p>For a transformer with width <span class="math inline">d</span> trained on <span class="math inline">T</span> tokens at sequence length <span class="math inline">L</span>:</p>
+<div class="card">
+<ul>
+<li>Self-attention cost per layer: <span class="math inline">\mathcal{O}(L^2 d)</span>.</li>
+<li>Feed-forward cost: <span class="math inline">\mathcal{O}(L d^2)</span>.</li>
+<li>Memory for the attention matrix: <span class="math inline">\mathcal{O}(L^2)</span>.</li>
+</ul>
+</div>
+<div class="callout callout-tip callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Tip</strong></p>
+</div>
+<div class="callout-content">
+<p><strong>Longer sequences are quadratically more expensive.</strong></p>
+<p>Halving the average tokens-per-word — by better tokenisation — halves the sequence length. And <strong>quarters the attention compute</strong>.</p>
+<p>Tokenisation choices have downstream cost implications.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="token-cost-varies-by-language" class="slide level2">
+<h2>Token cost varies by language</h2>
+<p><span class="eyebrow">The hidden cost of being non-English</span></p>
+<div class="columns">
+<div class="column" style="width:55%;">
+<p>“Hello, how are you today?” in GPT-4’s tokeniser:</p>
+<ul>
+<li><strong>English</strong>: 7 tokens.</li>
+<li><strong>Spanish</strong>: 8 tokens.</li>
+<li><strong>Chinese</strong>: 10 tokens.</li>
+<li><strong>Burmese</strong>: 71 tokens.</li>
+<li><strong>Tamil</strong>: 49 tokens.</li>
+</ul>
+<p>Same content. <strong>Ten times the cost</strong> for some languages.</p>
+</div><div class="column" style="width:45%;">
+<div class="card">
+<p>This is a structural inequity. API pricing is per token. Context windows are per token. A Burmese-speaking user pays ten times more <em>and</em> fits one-tenth the conversation.</p>
+<p>Petrov et al.&nbsp;(2023) — <em>Language Model Tokenizers Introduce Unfairness Between Languages</em>.</p>
+</div>
+</div></div>
+</section>
+<section id="tokenisations-strangest-bugs" class="slide level2">
+<h2>Tokenisation’s strangest bugs</h2>
+<p><span class="eyebrow">Surprises you’ll meet in the wild</span></p>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><span class="pill-amber">Numbers</span></p>
+<p>GPT-4 tokenises numbers <strong>inconsistently</strong>:</p>
+<ul>
+<li>Some years are a <strong>single token</strong>.</li>
+<li>An <em>adjacent</em> year can split into <strong>several</strong> tokens.</li>
+<li>There’s no clean rule — it depends on what was frequent in the training data.</li>
+</ul>
+<p>A model that sees <code>2024</code> as one atom but <code>2025</code> as three pieces has no stable notion of “a year,” let alone how to add one. This inconsistency is part of why LLMs are <strong>bad at arithmetic</strong>.</p>
+</div><div class="column" style="width:50%;">
+<p><span class="pill-amber">Glitch tokens</span></p>
+<p>Some tokens appear in the vocabulary but rarely in training data. The model has no idea what they mean.</p>
+<ul>
+<li><code>" SolidGoldMagikarp"</code> produced bizarre, evasive output in GPT-2/GPT-3-era models.</li>
+<li>Reddit-derived artefacts; the vocabulary outlived the user.</li>
+</ul>
+</div></div>
+<div class="callout callout-tip callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Tip</strong></p>
+</div>
+<div class="callout-content">
+<p><strong>The lesson</strong>: vocabulary is a one-shot decision made before training. Mistakes cascade for the model’s whole life. Modern tokenisers (cl100k, o200k) try harder to avoid these.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="byte-pair-encoding-the-standard" class="slide level2">
+<h2>Byte-pair encoding — the standard</h2>
+<p><span class="eyebrow">The BPE algorithm — start with bytes</span></p>
+<p>Initialise: every byte is a token. Vocab size 256.</p>
+<p>Repeat until target vocab size (e.g.&nbsp;50,000):</p>
+<div class="card">
+<ol type="1">
+<li>Count all adjacent token <strong>pairs</strong> in the corpus.</li>
+<li>Find the most frequent pair.</li>
+<li>Merge it into a new token.</li>
+<li>Add the new token to the vocabulary.</li>
+</ol>
+</div>
+<div class="callout callout-note callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Note</strong></p>
+</div>
+<div class="callout-content">
+<p><strong>That’s the whole algorithm.</strong> It was invented for data compression in the 1990s. Sennrich, Haddow &amp; Birch (2016) applied it to neural machine translation. It is now the default tokeniser in every major LLM.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="a-worked-bpe-example" class="slide level2">
+<h2>A worked BPE example</h2>
+<p><span class="eyebrow">Tiny corpus</span></p>
+<p><code>low low low low low lowest newer newer newer newer newer wider</code></p>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><span class="pill-blue">Initial state</span></p>
+<p>Single characters. Words become sequences (using <code>_</code> for word-end):</p>
+<ul>
+<li><code>l o w _</code> × 5</li>
+<li><code>l o w e s t _</code> × 1</li>
+<li><code>n e w e r _</code> × 5</li>
+<li><code>w i d e r _</code> × 1</li>
+</ul>
+</div><div class="column" style="width:50%;">
+<p><span class="pill-blue">Most-frequent pair counts</span></p>
+<ul>
+<li><code>(e, r)</code> appears 6 times</li>
+<li><code>(l, o)</code> appears 6 times</li>
+<li><code>(o, w)</code> appears 6 times</li>
+<li><code>(n, e)</code> appears 5 times</li>
+</ul>
+<p>(Tie-break by alphabetical order, say.)</p>
+</div></div>
+<div class="card">
+<p><strong>Merge <code>(e, r)</code> → new token <code>er</code>.</strong> Repeat.</p>
+</div>
+</section>
+<section id="bpe-merges-step-by-step" class="slide level2">
+<h2>BPE merges — step by step</h2>
+<p>Each row applies <strong>exactly one</strong> merge. The cell shows the <em>full</em> token sequence of every word afterwards, so you can see what changed:</p>
+<table class="caption-top">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Step</th>
+<th>Merge</th>
+<th>Corpus after this merge</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0</td>
+<td><em>(start)</em></td>
+<td><code>l o w _</code>×5 · <code>l o w e s t _</code> · <code>n e w e r _</code>×5 · <code>w i d e r _</code></td>
+</tr>
+<tr class="even">
+<td>1</td>
+<td><code>(e,r)→er</code></td>
+<td><code>l o w _</code>×5 · <code>l o w e s t _</code> · <code>n e w er _</code>×5 · <code>w i d er _</code></td>
+</tr>
+<tr class="odd">
+<td>2</td>
+<td><code>(er,_)→er_</code></td>
+<td><code>l o w _</code>×5 · <code>l o w e s t _</code> · <code>n e w er_</code>×5 · <code>w i d er_</code></td>
+</tr>
+<tr class="even">
+<td>3</td>
+<td><code>(l,o)→lo</code></td>
+<td><code>lo w _</code>×5 · <code>lo w e s t _</code> · <code>n e w er_</code>×5 · <code>w i d er_</code></td>
+</tr>
+<tr class="odd">
+<td>4</td>
+<td><code>(lo,w)→low</code></td>
+<td><code>low _</code>×5 · <code>low e s t _</code> · <code>n e w er_</code>×5 · <code>w i d er_</code></td>
+</tr>
+<tr class="even">
+<td>5</td>
+<td><code>(low,_)→low_</code></td>
+<td><code>low_</code>×5 · <code>low e s t _</code> · <code>n e w er_</code>×5 · <code>w i d er_</code></td>
+</tr>
+</tbody>
+</table>
+<div class="card">
+<p>After these five merges the frequent word <code>low_</code> is already a <strong>single token</strong>. Keep going and <code>newer_</code>, <code>wider_</code> collapse too.</p>
+<p>The rare word <code>lowest_</code> stays split — <code>low e s t _</code> — but it <strong>reuses the <code>low</code> piece</strong> it shares with the common word. That sharing is the whole point: the model can spell a word it has barely seen out of pieces it knows well. <strong>No word is ever out-of-vocabulary.</strong></p>
+</div>
+</section>
+<section id="how-modern-tokenisers-look" class="slide level2">
+<h2>How modern tokenisers look</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><span class="pill">GPT-2</span></p>
+<p>Byte-level BPE — operates on raw utf-8 bytes. Any text works.</p>
+<p>Vocab: 50,257.</p>
+</div><div class="column" style="width:50%;">
+<p><span class="pill">GPT-4 / Claude</span></p>
+<p><code>cl100k_base</code> and variants — larger vocabularies, refined merge ordering for code + multilingual text.</p>
+<p>Vocab: ~100,000+.</p>
+</div></div>
+<div class="callout callout-note callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Note</strong></p>
+</div>
+<div class="callout-content">
+<p><strong>Try <a href="https://platform.openai.com/tokenizer">OpenAI’s tokeniser visualiser</a>.</strong> Type a sentence in English, then in another language. Watch the token count change.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="byte-level-bpe-the-missing-detail" class="slide level2">
+<h2>Byte-level BPE — the missing detail</h2>
+<p>Our worked examples merged <strong>characters</strong>. Run BPE that way at scale and there is a hole:</p>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><span class="pill-amber">Character-level BPE</span></p>
+<ul>
+<li>Base vocabulary = the characters seen in training.</li>
+<li>Unicode has ~150,000 characters. No corpus contains them all.</li>
+<li>Meet a new one at test time — a rare script, a fresh emoji — and the tokeniser has no token for it. The model gets <code>&lt;unk&gt;</code>.</li>
+</ul>
+</div><div class="column" style="width:50%;">
+<p><span class="pill-green">Byte-level BPE — GPT-2’s fix</span></p>
+<ul>
+<li>Run BPE on <strong>bytes</strong>, not characters.</li>
+<li>Base vocabulary = <strong>all 256 byte values</strong>.</li>
+<li>Every string a computer stores is a byte sequence, so every possible string is representable.</li>
+<li>There is no unknown token, ever.</li>
+</ul>
+</div></div>
+</section>
+<section id="bytes-in-practice-one-character-is-not-one-byte" class="slide level2">
+<h2>Bytes in practice — one character is not one byte</h2>
+<p>In UTF-8, common Latin characters take one byte each; everything else takes more:</p>
+<div class="card">
+<ul>
+<li><code>café</code> → <code>c</code>, <code>a</code>, <code>f</code> at one byte each, <code>é</code> at <strong>two</strong> (<code>0xC3 0xA9</code>): <span class="math inline">3 \times 1 + 2 = 5</span> bytes.</li>
+<li>🤖 → <strong>four</strong> bytes (<code>0xF0 0x9F 0xA4 0x96</code>).</li>
+</ul>
+</div>
+<p>If 🤖 is rare in the training corpus, no merge ever forms it. The tokeniser hands the model <strong>four single-byte tokens</strong>, and the model has to piece the robot together itself.</p>
+<div class="try-box">
+<p><span class="try-label">Try it yourself</span> <strong>Why can byte-level BPE never meet an out-of-vocabulary string?</strong></p>
+</div>
+<div class="fragment">
+<div class="reveal-box">
+<p><span class="reveal-label">Answer</span> Every string is stored as a sequence of bytes, and all 256 possible byte values are in the vocabulary. Worst case, a string tokenises byte by byte — but it always tokenises.</p>
+</div>
+</div>
+</section></section>
+<section>
+<section id="plenary-bpe-by-hand" class="title-slide slide level1 center" data-background-color="#0E1A2B">
+<h1>Plenary · BPE by hand</h1>
+
+</section>
+<section id="plenary-bpe-by-hand-1" class="slide level2">
+<h2>Plenary · BPE by hand</h2>
+<p><span class="eyebrow"><span class="pause-cue">≈ 10 min</span> · in pairs</span></p>
+<div class="card">
+<p><span class="eyebrow">Tiny corpus</span></p>
+<p><code>"banana banana banana ana ana"</code></p>
+<p>Use a <code>_</code> to mark word ends. Each character + <code>_</code> starts as a token.</p>
+<p><span class="eyebrow">Task</span></p>
+<p>Do <strong>three</strong> BPE merges by hand. After each, write down:</p>
+<ol type="1">
+<li>Which pair you merged.</li>
+<li>The current state of the corpus.</li>
+<li>The current vocabulary.</li>
+</ol>
+</div>
+<div class="try-box">
+<p><span class="try-label">Reflection</span> After your three merges, would <code>"banana"</code> be a single token or several? What about <code>"bandana"</code> (a word the corpus has never seen)?</p>
+</div>
+<p><span class="muted">Six minutes.</span></p>
+</section>
+<section id="plenary-answers" class="slide level2">
+<h2>Plenary · answers</h2>
+<div class="card">
+<p><span class="eyebrow">Start</span> <code>banana_</code> = <code>b a n a n a _</code> (×3) · <code>ana_</code> = <code>a n a _</code> (×2)</p>
+<p><span class="eyebrow">Initial pair counts</span> <code>(a,n)</code> 8 · <code>(n,a)</code> 8 · <code>(a,_)</code> 5 · <code>(b,a)</code> 3.</p>
+<p><span class="eyebrow">Step 1</span> <code>(a,n)</code> and <code>(n,a)</code> tie at 8 — break ties by a fixed rule; here take <strong><code>(n,a) → na</code></strong>.</p>
+<ul>
+<li><code>banana_</code> → <code>b a na na _</code></li>
+<li><code>ana_</code> → <code>a na _</code></li>
+</ul>
+<p><span class="eyebrow">Step 2</span> Recount: <code>(a,na)</code> and <code>(na,_)</code> now tie at 5 (top) — fixed rule again takes <strong><code>(a,na) → ana</code></strong>.</p>
+<ul>
+<li><code>banana_</code> → <code>b ana na _</code></li>
+<li><code>ana_</code> → <code>ana _</code></li>
+</ul>
+<p><span class="eyebrow">Step 3</span> Recount: <code>(b,ana)</code>, <code>(ana,na)</code>, <code>(na,_)</code> all tie at 3 — fixed rule picks <strong><code>(b,ana) → bana</code></strong>.</p>
+<ul>
+<li><code>banana_</code> → <code>bana na _</code></li>
+<li><code>ana_</code> → <code>ana _</code></li>
+</ul>
+</div>
+<div class="reveal-box">
+<p><span class="reveal-label">Reflection</span> <strong><code>"banana"</code></strong> now tokenises as <strong><code>bana</code> + <code>na</code></strong> — two tokens, almost a single one.</p>
+<p><strong><code>"bandana"</code></strong> = <code>b a n d a n a _</code>. Apply the <em>learned</em> merges in order — <code>na</code>, then <code>ana</code>, then <code>bana</code>:</p>
+<ul>
+<li><code>na</code>: only the final <code>n a</code> merges (the first <code>n</code> is followed by <code>d</code>) → <code>b a n d a na _</code></li>
+<li><code>ana</code>: the <code>a na</code> merges → <code>b a n d ana _</code></li>
+<li><code>bana</code>: needs <code>b</code> next to <code>ana</code>, but <code>b</code> is followed by <code>a</code> → no merge.</li>
+</ul>
+<p>Result: <strong><code>b</code> + <code>a</code> + <code>n</code> + <code>d</code> + <code>ana</code></strong>. The model has <em>never seen</em> <code>"bandana"</code> yet reads it from known pieces.</p>
+<p>This is BPE’s guarantee: <strong>no OOV</strong>.</p>
+</div>
+</section></section>
+<section>
+<section id="part-2-sampling-strategies" class="title-slide slide level1 center" data-background-color="#0E1A2B">
+<h1>Part 2 · Sampling strategies</h1>
+
+</section>
+<section id="we-always-sample-but-how" class="slide level2">
+<h2>We always sample — but <em>how</em>?</h2>
+<p>At each step of generation, the model gives us a distribution <span class="math inline">p</span> over the next token. To pick one:</p>
+<div class="columns">
+<div class="column" style="width:33%;">
+<p><span class="pill">Argmax (greedy)</span></p>
+<p>Always pick the most likely.</p>
+<ul>
+<li>Deterministic.</li>
+<li>Often repetitive / dull.</li>
+<li>Bad for chat.</li>
+</ul>
+</div><div class="column" style="width:33%;">
+<p><span class="pill-blue">Sample from <span class="math inline">p</span></span></p>
+<p>Sample with original probabilities.</p>
+<ul>
+<li>Diverse.</li>
+<li>Sometimes wanders into low-probability nonsense.</li>
+</ul>
+</div><div class="column" style="width:33%;">
+<p><span class="pill-green">Beam search</span></p>
+<p>Track top-<span class="math inline">k</span> candidate sequences in parallel.</p>
+<ul>
+<li>Useful for translation.</li>
+<li>Boring for chat.</li>
+</ul>
+</div></div>
+</section>
+<section id="temperature" class="slide level2">
+<h2>Temperature</h2>
+<p>Adjust the softmax with a <strong>temperature</strong> <span class="math inline">\tau &gt; 0</span>:</p>
+<p><span class="math display">
+p_i \propto \exp\!\left(\frac{z_i}{\tau}\right)
+</span></p>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><span class="pill"><span class="math inline">\tau &lt; 1</span></span></p>
+<p>Sharpen the distribution. More confident, more deterministic.</p>
+</div><div class="column" style="width:50%;">
+<p><span class="pill-blue"><span class="math inline">\tau &gt; 1</span></span></p>
+<p>Flatten the distribution. More creative, more random.</p>
+</div></div>
+<div class="callout callout-tip callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Tip</strong></p>
+</div>
+<div class="callout-content">
+<p><span class="math inline">\tau = 0</span> reduces to argmax. <span class="math inline">\tau = 1</span> keeps the raw model probabilities. Most chat applications run somewhere in <span class="math inline">0.7</span>–<span class="math inline">1.0</span>.</p>
+<p>For technical/factual tasks, lower (≈0.2). For creative writing, higher (~1.2).</p>
+</div>
+</div>
+</div>
+</section>
+<section id="beam-search-for-translation-not-chat" class="slide level2">
+<h2>Beam search — for translation, not chat</h2>
+<p><span class="eyebrow">The “find the best whole sentence” approach</span></p>
+<div class="columns">
+<div class="column" style="width:55%;">
+<p><strong>Argmax</strong> picks one token at a time — locally optimal, globally myopic.</p>
+<p><strong>Beam search</strong> keeps the top <span class="math inline">k</span> candidate <em>sequences</em> in parallel, extending each. At the end, return the highest-scoring sequence overall.</p>
+<ul>
+<li><span class="math inline">k = 5</span> or <span class="math inline">10</span> is common.</li>
+<li>Used for translation, summarisation — anywhere there’s a “single best answer.”</li>
+</ul>
+</div><div class="column" style="width:45%;">
+<div class="card">
+<p><strong>Why not for chat.</strong> Beam search produces fluent but predictable text. The “best” sequence is often the most generic one. For chat, conversation, or creative writing, sampling is better.</p>
+<p><strong>Rule of thumb</strong>: beam search for one-shot tasks with a verifiable correct answer. Sampling for open-ended generation.</p>
+</div>
+</div></div>
+</section>
+<section id="top-k-and-top-p-nucleus" class="slide level2">
+<h2>Top-k and top-p (nucleus)</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><span class="pill-blue">Top-k</span></p>
+<p>Keep only the <span class="math inline">k</span> highest-probability tokens; renormalise; sample.</p>
+<ul>
+<li>Truncates the long tail of garbage.</li>
+<li><span class="math inline">k = 40</span> or 50 common.</li>
+<li>Same <span class="math inline">k</span> regardless of model confidence.</li>
+</ul>
+</div><div class="column" style="width:50%;">
+<p><span class="pill-green">Top-p (nucleus)</span></p>
+<p>Keep the smallest set of tokens whose cumulative probability exceeds <span class="math inline">p</span>; renormalise; sample.</p>
+<ul>
+<li><strong>Adapts</strong> to model confidence.</li>
+<li><span class="math inline">p = 0.9</span> common.</li>
+<li>Few tokens kept when model is confident; many when uncertain.</li>
+</ul>
+</div></div>
+<div class="callout callout-note callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Note</strong></p>
+</div>
+<div class="callout-content">
+<p>Combined with temperature, these give us four knobs on creativity: 1. Argmax / sampling switch. 2. Temperature. 3. Top-k. 4. Top-p.</p>
+<p>In practice, GPT-style chat models use a low temperature + top-p <span class="math inline">\approx 0.9</span>.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="when-top-k-and-top-p-disagree" class="slide level2">
+<h2>When top-k and top-p disagree</h2>
+<p>Two next-token distributions over the same six tokens — one from a confident model, one from an uncertain one:</p>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><span class="pill-blue">Peaked</span></p>
+<p><span class="math inline">p = [0.85,\ 0.06,\ 0.04,\ 0.03,\ 0.01,\ 0.01]</span></p>
+<ul>
+<li><strong>Top-p, <span class="math inline">p = 0.7</span></strong>: the first token alone gives <span class="math inline">0.85 \geq 0.7</span> → keeps <strong>1</strong> token.</li>
+<li><strong>Top-k, <span class="math inline">k = 3</span></strong>: keeps <strong>3</strong> tokens — including two the model rates at 6% and 4%.</li>
+</ul>
+</div><div class="column" style="width:50%;">
+<p><span class="pill-green">Flat</span></p>
+<p><span class="math inline">p = [0.25,\ 0.20,\ 0.20,\ 0.15,\ 0.10,\ 0.10]</span></p>
+<ul>
+<li><strong>Top-p, <span class="math inline">p = 0.7</span></strong>: <span class="math inline">0.25 + 0.20 + 0.20 = 0.65 &lt; 0.7</span>, so add the fourth → keeps <strong>4</strong> tokens.</li>
+<li><strong>Top-k, <span class="math inline">k = 3</span></strong>: keeps <strong>3</strong> — cutting a token the model rates at 15%.</li>
+</ul>
+</div></div>
+<p>Same settings, both times. Top-p kept 1 token in one case and 4 in the other.</p>
+</section>
+<section id="after-the-cut-renormalise" class="slide level2">
+<h2>After the cut — renormalise</h2>
+<p>Whatever survives the cut must sum to 1 again before we sample. Take the flat distribution under top-k, <span class="math inline">k = 3</span>:</p>
+<div class="card">
+<p><span class="math display">
+\begin{aligned}
+\text{kept} &amp;= [0.25,\ 0.20,\ 0.20], \qquad \text{sum} = 0.65 \\
+\text{renormalised} &amp;= \left[\tfrac{0.25}{0.65},\ \tfrac{0.20}{0.65},\ \tfrac{0.20}{0.65}\right] \approx [0.385,\ 0.308,\ 0.308]
+\end{aligned}
+</span></p>
+</div>
+<p>Then sample from the renormalised distribution as usual.</p>
+<div class="callout callout-tip callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Tip</strong></p>
+</div>
+<div class="callout-content">
+<p>The difference in one line: <strong>top-p adapts the cut to the model’s confidence; top-k cannot.</strong> When the model is sure, top-p gets out of the way. When it is unsure, top-p lets more candidates through.</p>
+</div>
+</div>
+</div>
+</section></section>
+<section>
+<section id="activity-sampling-strategies" class="title-slide slide level1 center" data-background-color="#0E1A2B">
+<h1>Activity · sampling strategies</h1>
+
+</section>
+<section id="activity-predict-the-output" class="slide level2">
+<h2>Activity · predict the output</h2>
+<p><span class="eyebrow"><span class="pause-cue">≈ 8 min</span> · in pairs</span></p>
+<div class="card">
+<p>We give a trained GPT the same 10-token prompt and generate 50 tokens with each sampling strategy:</p>
+<p>A. Greedy / argmax (<span class="math inline">\tau = 0</span>).</p>
+<p>B. Temperature <span class="math inline">\tau = 0.7</span>, top-p <span class="math inline">= 0.9</span>.</p>
+<p>C. Temperature <span class="math inline">\tau = 1.5</span>, no top-k/top-p.</p>
+<p>D. Temperature <span class="math inline">\tau = 0.7</span>, top-k <span class="math inline">= 1</span>.</p>
+<p><span class="eyebrow">Predict each output’s character — choose from:</span></p>
+<ol type="i">
+<li>Coherent and slightly varied.</li>
+<li>Deterministic; often repeats a phrase.</li>
+<li>Highly varied; sometimes nonsense.</li>
+<li>Slightly varied at the start, more chaotic later.</li>
+</ol>
+<p><span class="eyebrow">Bonus</span>: which two are functionally <strong>the same</strong>?</p>
+</div>
+<p><span class="muted">Five minutes.</span></p>
+</section>
+<section id="activity-answers" class="slide level2">
+<h2>Activity · answers</h2>
+<div class="card">
+<p>A: <strong>(ii)</strong> — argmax is deterministic; can repeat (“loop”).</p>
+<p>B: <strong>(i)</strong> — moderate <span class="math inline">\tau</span> + top-p is the modern chat default.</p>
+<p>C: <strong>(iii)</strong> — high temperature with no truncation lets the tail dominate.</p>
+<p>D: <strong>(ii)</strong> — top-k=1 collapses sampling to argmax regardless of temperature.</p>
+<p><strong>A and D are functionally the same.</strong> Both are deterministic.</p>
+</div>
+<div class="callout callout-tip callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Tip</strong></p>
+</div>
+<div class="callout-content">
+<p>Sampling is <strong>interface design</strong> for LLMs. Different products tune these for different feels — terse + factual, or rambling + creative. The same model produces different “personalities” depending on these knobs.</p>
+</div>
+</div>
+</div>
+</section></section>
+<section>
+<section id="part-3-beyond-a-base-gpt-a-map" class="title-slide slide level1 center" data-background-color="#0E1A2B">
+<h1>Part 3 · Beyond a base GPT — a map</h1>
+
+</section>
+<section id="a-reflection-on-what-youve-built" class="slide level2">
+<h2>A reflection on what you’ve built</h2>
+<p><span class="reveal-label">The reveal — sort of</span></p>
+<div class="card">
+<p>By end of today’s lab, your tiny GPT will have:</p>
+<ul>
+<li>A <strong>tokeniser</strong> (BPE).</li>
+<li>A <strong>token embedding</strong> matrix.</li>
+<li>A <strong>positional embedding</strong>.</li>
+<li><span class="math inline">N</span> <strong>transformer blocks</strong> with multi-head causal attention.</li>
+<li>A <strong>softmax + sampler</strong> producing one token at a time.</li>
+</ul>
+<p><strong>Same skeleton as GPT-4, Claude, Gemini.</strong> The differences are scale (you: millions of parameters; them: trillions), data, and post-training.</p>
+<p>You are no longer treating these models as black boxes.</p>
+</div>
+</section>
+<section id="pre-training-vs-post-training" class="slide level2">
+<h2>Pre-training vs post-training</h2>
+<p><span class="eyebrow">A frontier model’s full lifecycle</span></p>
+<div class="card">
+<p><span class="pill-blue">1. Pre-training</span></p>
+<p>What you built in this lab. Predict the next token over trillions of tokens of web text + books + code.</p>
+<ul>
+<li>Output: a “base model” — fluent, knowledgeable, useless as a chat assistant.</li>
+<li>Cost: tens of millions of dollars. Months of compute.</li>
+</ul>
+</div>
+<div class="card">
+<p><span class="pill">2. Supervised fine-tuning (SFT) — “instruction tuning”</span></p>
+<p>Continue training on (prompt, ideal-response) pairs. One example, role tokens included:</p>
+<p><span class="smaller"><code>&lt;|user|&gt;</code> Explain a p-value in two sentences. <code>&lt;|assistant|&gt;</code> A p-value is the probability of seeing data at least as extreme as yours if the null hypothesis were true. It is not the probability that the null is true. <code>&lt;|end|&gt;</code></span></p>
+<ul>
+<li>Output: a model that follows instructions.</li>
+<li>Where the pairs come from: paid writers; licensed data; model-generated drafts filtered by humans.</li>
+<li>Cost: ~10,000 to ~100,000 examples; a few days of compute.</li>
+</ul>
+</div>
+<div class="card">
+<p><span class="pill-green">3. Preference tuning (RLHF / DPO)</span></p>
+<p>Train the model to prefer responses that humans rate higher.</p>
+<ul>
+<li>Output: a model that’s helpful, honest, harmless.</li>
+<li>Cost: hundreds of thousands of human preference judgements.</li>
+<li>This is what makes a model helpful and harmless — and where the question of <em>whose</em> values get instilled begins.</li>
+</ul>
+</div>
+</section>
+<section id="rlhf-how-it-works" class="slide level2">
+<h2>RLHF — how it works</h2>
+<p><span class="eyebrow">Reinforcement learning from human feedback</span></p>
+<div class="card">
+<ol type="1">
+<li>Take an instruction-tuned model. Generate <strong>two</strong> responses per prompt.</li>
+<li>A human rater picks the better one.</li>
+<li>Train a <em>reward model</em> to predict the human’s choice.</li>
+<li>Use that reward model as the reward signal in <strong>PPO</strong> (a reinforcement learning algorithm) to fine-tune the original LLM.</li>
+<li>The LLM updates towards generating responses the reward model scores highly.</li>
+</ol>
+</div>
+<div class="callout callout-warning callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Warning</strong></p>
+</div>
+<div class="callout-content">
+<p><strong>Reward hacking</strong> is the central problem. The LLM learns to game the reward model — producing responses that <em>look</em> better without being better. Detecting and preventing this is half of modern alignment research.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="reward-hacking-you-get-what-you-reward" class="slide level2">
+<h2>Reward hacking — you get what you reward</h2>
+<p>The model optimises what raters <em>reward</em>. That is not the same as what raters <em>want</em>.</p>
+<div class="card">
+<p>Raters, on average:</p>
+<ul>
+<li>favour <strong>longer</strong> answers → models get wordy.</li>
+<li>favour <strong>agreement</strong> → models get sycophantic — they tell you what you already believe.</li>
+<li>favour a <strong>confident tone</strong> → models state guesses as facts.</li>
+</ul>
+</div>
+<div class="callout callout-warning callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Warning</strong></p>
+</div>
+<div class="callout-content">
+<p><strong>Goodhart’s law</strong>: when a measure becomes a target, it stops being a good measure.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="reward-hacking-a-miniature" class="slide level2">
+<h2>Reward hacking — a miniature</h2>
+<p><strong>Q: What is the capital of Australia?</strong></p>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><span class="pill-green">Answer A — hedged, correct</span></p>
+<p>“I believe it is Canberra — though Sydney and Melbourne are the cities most people guess.”</p>
+</div><div class="column" style="width:50%;">
+<p><span class="pill-amber">Answer B — confident, wrong</span></p>
+<p>“Sydney is the capital of Australia. As the country’s largest city and its economic centre, Sydney has been the seat of national life since federation.”</p>
+</div></div>
+<p>A reward model that has learned to favour length and confidence scores <strong>B higher</strong>. The correct answer loses.</p>
+<div class="card">
+<p><span class="eyebrow">Three partial fixes</span></p>
+<ul>
+<li><strong>Better rater instructions</strong> — tell raters to check facts and not to reward padding.</li>
+<li><strong>Penalising length</strong> — subtract a length term from the reward.</li>
+<li><strong>DPO’s implicit reward</strong> (next slide) — no separate reward model to over-optimise against; the rater biases stay in the preference data, though.</li>
+</ul>
+</div>
+</section>
+<section id="dpo-the-simpler-alternative" class="slide level2">
+<h2>DPO — the simpler alternative</h2>
+<p><span class="eyebrow">Direct Preference Optimization, Rafailov et al.&nbsp;2023</span></p>
+<div class="columns">
+<div class="column" style="width:55%;">
+<p>DPO skips the explicit reward model.</p>
+<ul>
+<li>Given (prompt, preferred response, dispreferred response) triples.</li>
+<li>Optimise the LLM <strong>directly</strong> to make the preferred response more likely.</li>
+<li>No reinforcement learning. No PPO. No reward model.</li>
+</ul>
+<p>Mathematically equivalent to RLHF in the limit, but simpler.</p>
+</div><div class="column" style="width:45%;">
+<div class="card">
+<p>Many recent open models (Llama 3, Qwen, Mistral) use DPO or a variant.</p>
+<p>Anthropic’s <strong>Constitutional AI</strong> is another approach — use the <em>model itself</em> (or a separate model) to critique and revise responses, then fine-tune on the revisions.</p>
+</div>
+</div></div>
+</section>
+<section id="context-windows-how-much-can-the-model-read" class="slide level2">
+<h2>Context windows — how much can the model read?</h2>
+<p>The <strong>context window</strong> is the maximum number of tokens the model can attend over in one pass — prompt and response together.</p>
+<div class="card">
+<p>Cost is the constraint: attention compute grows with the <strong>square</strong> of length — yesterday’s <span class="math inline">\mathcal{O}(T^2)</span> slide, back again. Double the window, quadruple the compute.</p>
+</div>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><span class="pill">2019</span></p>
+<p>GPT-2: <strong>1,024</strong> tokens.</p>
+<p>At ~0.75 words per token, that is <span class="math inline">1{,}024 \times 0.75 \approx 770</span> words — about two pages.</p>
+</div><div class="column" style="width:50%;">
+<p><span class="pill-blue">2025</span></p>
+<p>Production models reach ~<strong>2M</strong> tokens; Llama 4 Scout claims <strong>10M</strong>.</p>
+<p>2M tokens <span class="math inline">\approx</span> 1.5 million words — a few thousand pages.</p>
+</div></div>
+</section>
+<section id="lost-in-the-middle" class="slide level2">
+<h2>Lost in the middle</h2>
+<p>A long window is not the same as a well-used one.</p>
+<div class="card">
+<p><span class="citation" data-cites="liu2024lost">Liu et al. (<a href="#/see-you-tomorrow" role="doc-biblioref" onclick="">2024</a>)</span> placed one needed fact at different positions inside a long context and measured whether models answered with it:</p>
+<ul>
+<li>Fact at the <strong>start</strong> → high accuracy.</li>
+<li>Fact at the <strong>end</strong> → high accuracy.</li>
+<li>Fact in the <strong>middle</strong> → accuracy dips. The curve is <strong>U-shaped</strong>.</li>
+</ul>
+</div>
+<div class="callout callout-tip callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Tip</strong></p>
+</div>
+<div class="callout-content">
+<p>Dumping every document you own into a huge window underperforms <strong>retrieving the right passage</strong> and placing it in the prompt. That retrieval idea is the next slide.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="rag-give-the-model-an-open-book-exam" class="slide level2">
+<h2>RAG — give the model an open-book exam</h2>
+<p><span class="eyebrow"><span class="pause-cue">≈ 3 min</span> · think with your neighbour</span></p>
+<div class="card">
+<p>A base LLM answers from memory alone — and <strong>hallucinates</strong> when it doesn’t know.</p>
+<p>You have a database of 10,000 company documents and a Day-8 tool: you can <strong>embed</strong> any text into a vector and find the <strong>most similar</strong> documents.</p>
+</div>
+<div class="try-box">
+<p><span class="try-label">Try</span> Using only “embed a question” and “find similar documents”, <strong>how would you stop the model inventing answers</strong> about those 10,000 documents — <em>without retraining it</em>?</p>
+</div>
+<div class="fragment">
+<div class="reveal-box">
+<p><span class="reveal-label">Retrieval-augmented generation (RAG)</span></p>
+<ol type="1">
+<li><strong>Embed the user’s question</strong> (Day 8!).</li>
+<li><strong>Search</strong> the database for the most similar documents.</li>
+<li><strong>Inject</strong> those documents into the prompt as context.</li>
+<li>The model answers <em>from the supplied text</em>, not just memory.</li>
+</ol>
+<p>Used by ChatGPT browsing, Perplexity, and most enterprise LLM products. No retraining needed. <strong>The hard part is retrieval</strong> — getting the <em>right</em> documents into context is itself a hard problem, and the source of most RAG failures.</p>
+</div>
+</div>
+</section>
+<section id="two-ways-to-make-a-base-model-do-more" class="slide level2">
+<h2>Two ways to make a base model do more</h2>
+<p><span class="eyebrow">Both bolt onto the model you built — no new architecture</span></p>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><span class="pill-blue">Reach outward — tools &amp; agents</span></p>
+<p>Give the model a <strong>menu of tools</strong> it may invoke: web search, run Python, query a database, call any API you describe.</p>
+<p>The model decides <em>when</em> to call a tool and <em>what</em> to pass; the output is fed back as context.</p>
+<p>This is the foundation of the <strong>AI agents</strong> push of 2024–25 — systems that book travel, write and run code, file pull requests. We are early on this curve.</p>
+</div><div class="column" style="width:50%;">
+<p><span class="pill-green">Think longer — reasoning models</span></p>
+<p>Teach the model to <strong>think out loud</strong> before answering — OpenAI’s <strong>o1</strong>, Claude’s <strong>extended thinking</strong>, DeepSeek’s <strong>R1</strong>.</p>
+<p>It generates hidden “chain-of-thought” tokens, then answers.</p>
+<p>Trained by <strong>reinforcement learning on outcomes</strong> — rewarded for getting answers <em>right</em>, not for any particular trace. On Olympiad maths and competition coding the gap to prior LLMs is large.</p>
+</div></div>
+</section>
+<section id="lora-fine-tuning-without-touching-the-base-model" class="slide level2">
+<h2>LoRA — fine-tuning without touching the base model</h2>
+<p>Full fine-tuning updates <strong>every</strong> weight matrix in the network. For a 7B-parameter model that is 7 billion numbers to update and store — per task.</p>
+<p><strong>LoRA</strong> (low-rank adaptation; Hu et al., 2021) trains far fewer:</p>
+<div class="card">
+<p>Take one weight matrix <span class="math inline">\mathbf{W}</span>, of size <span class="math inline">d \times d</span>, where <span class="math inline">d</span> is the layer width.</p>
+<ul>
+<li><strong>Freeze</strong> <span class="math inline">\mathbf{W}</span> — it never changes.</li>
+<li>Learn a correction <span class="math inline">\Delta \mathbf{W} = \mathbf{B}\mathbf{A}</span>, where <span class="math inline">\mathbf{A}</span> is an <span class="math inline">r \times d</span> matrix and <span class="math inline">\mathbf{B}</span> is <span class="math inline">d \times r</span>.</li>
+<li><span class="math inline">r</span> is the <strong>rank</strong> of the correction — chosen small, <span class="math inline">r \ll d</span>.</li>
+<li>The layer now uses <span class="math inline">\mathbf{W} + \mathbf{B}\mathbf{A}</span>; only <span class="math inline">\mathbf{A}</span> and <span class="math inline">\mathbf{B}</span> are trained.</li>
+</ul>
+</div>
+<p>The product <span class="math inline">\mathbf{B}\mathbf{A}</span> is <span class="math inline">(d \times r)(r \times d) = d \times d</span> — the same shape as <span class="math inline">\mathbf{W}</span>, built from far fewer numbers.</p>
+</section>
+<section id="lora-the-arithmetic" class="slide level2">
+<h2>LoRA — the arithmetic</h2>
+<p>Take one <span class="math inline">768 \times 768</span> weight matrix (GPT-2’s width):</p>
+<div class="card">
+<p><span class="math display">
+\begin{aligned}
+\text{full matrix} &amp;: 768 \times 768 = 589{,}824 \text{ weights} \\
+\text{LoRA, } r = 8 &amp;: \underbrace{8 \times 768}_{\mathbf{A}} + \underbrace{768 \times 8}_{\mathbf{B}} = 6{,}144 + 6{,}144 = 12{,}288 \\
+\text{ratio} &amp;: 589{,}824 \div 12{,}288 = 48\times \text{ fewer}
+\end{aligned}
+</span></p>
+</div>
+<p><span class="muted">No new biases enter the count — LoRA adds only the two matrices, and the frozen layer keeps its own bias.</span></p>
+<p>Apply this to every attention matrix in the model and the trainable share is typically <strong>under 1%</strong> of the parameters.</p>
+</section>
+<section id="lora-your-turn" class="slide level2">
+<h2>LoRA — your turn</h2>
+<div class="try-box">
+<p><span class="try-label">Try it yourself</span> <strong>A rank-16 LoRA on a <span class="math inline">1{,}024 \times 1{,}024</span> matrix. How many trainable parameters, and how many times fewer than training the full matrix?</strong></p>
+</div>
+<div class="fragment">
+<div class="reveal-box">
+<p><span class="reveal-label">Answer</span> <span class="math inline">\mathbf{A}</span>: <span class="math inline">16 \times 1{,}024 = 16{,}384</span>. <span class="math inline">\mathbf{B}</span>: <span class="math inline">1{,}024 \times 16 = 16{,}384</span>. Total: <span class="math inline">2 \times 16 \times 1{,}024 = 32{,}768</span>.</p>
+<p>Full matrix: <span class="math inline">1{,}024 \times 1{,}024 = 1{,}048{,}576</span>. Ratio: <span class="math inline">1{,}048{,}576 \div 32{,}768 = 32</span>.</p>
+</div>
+</div>
+<div class="callout callout-tip callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Tip</strong></p>
+</div>
+<div class="callout-content">
+<p>Why people do this: <strong>one frozen base model, plus a small adapter file per task.</strong> Swap the adapter and you swap the behaviour — no full model copy each time.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="multimodal-extensions" class="slide level2">
+<h2>Multimodal extensions</h2>
+<p><span class="eyebrow">Not just text</span></p>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><span class="pill-blue">Vision-language models</span></p>
+<ul>
+<li>GPT-4V, Claude 3 Vision, Gemini.</li>
+<li>Images get patchified, embedded, fed into the transformer alongside text tokens.</li>
+<li>Same architecture; one new tokeniser-equivalent for pixels.</li>
+</ul>
+</div><div class="column" style="width:50%;">
+<p><span class="pill-blue">Audio + video</span></p>
+<ul>
+<li>Whisper for speech-to-text.</li>
+<li>GPT-4o native audio (sub-second latency).</li>
+<li>Sora, Veo for video generation.</li>
+<li>All variations on the transformer architecture.</li>
+</ul>
+</div></div>
+<div class="callout callout-tip callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Tip</strong></p>
+</div>
+<div class="callout-content">
+<p><strong>The transformer is modality-agnostic.</strong> Anything that can be turned into a sequence of vectors — text, image patches, audio frames, video frames, even amino-acid residues — can be fed through it.</p>
+<p>This is why “what is a transformer” matters: it is the sequence-modelling primitive underneath all of them.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="making-transformers-cheaper-to-run" class="slide level2">
+<h2>Making transformers cheaper to run</h2>
+<p><span class="eyebrow">The efficiency frontier — same idea, far less compute</span></p>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><span class="pill-blue">Longer context, cheaper attention</span></p>
+<ul>
+<li><strong>FlashAttention</strong> — memory-efficient tiling. Still <span class="math inline">O(N^2)</span>, just smaller constants. Now standard.</li>
+<li><strong>Sparse / sliding attention</strong> — attend to a local window; recover global reach by stacking layers (Longformer).</li>
+<li><strong>State-space models (Mamba)</strong> — replace attention with a learned recurrence. <span class="math inline">O(N)</span> in sequence length.</li>
+</ul>
+</div><div class="column" style="width:50%;">
+<p><span class="pill-green">Smaller, faster models</span></p>
+<ul>
+<li><strong>Quantisation</strong> — lower-precision weights (fp16 → int8 → int4). 4–8× smaller; slight quality loss.</li>
+<li><strong>Distillation</strong> — train a small model to mimic a big one (Llama 3.2 1B from Llama 3 70B).</li>
+<li><strong>Speculative decoding</strong> — a small model proposes tokens; the big one verifies in batch. 2–3× faster, no quality loss.</li>
+<li><strong>Mixture-of-experts (MoE)</strong> — route each token to a few “expert” sub-networks: huge total size, small <em>active</em> cost.</li>
+</ul>
+</div></div>
+<div class="callout callout-tip callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Tip</strong></p>
+</div>
+<div class="callout-content">
+<p><strong>The shift since 2023</strong>: matching frontier quality at a fraction of the cost. The cheapest API of 2025 outperforms the most expensive API of 2023. This course gives you the <strong>vocabulary</strong> to read any of these papers without getting lost.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="quantisation-the-memory-ledger" class="slide level2">
+<h2>Quantisation — the memory ledger</h2>
+<p>The last slide said quantised models are “4–8× smaller”. Here is where that comes from. Memory = number of parameters × bytes per parameter. For a 7-billion-parameter model:</p>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>Precision</th>
+<th>Bytes per weight</th>
+<th>Memory</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>fp32</td>
+<td>4</td>
+<td><span class="math inline">7\text{B} \times 4 = 28</span> GB</td>
+</tr>
+<tr class="even">
+<td>fp16</td>
+<td>2</td>
+<td><span class="math inline">7\text{B} \times 2 = 14</span> GB</td>
+</tr>
+<tr class="odd">
+<td>int8</td>
+<td>1</td>
+<td><span class="math inline">7\text{B} \times 1 = 7</span> GB</td>
+</tr>
+<tr class="even">
+<td>int4</td>
+<td>0.5</td>
+<td><span class="math inline">7\text{B} \times 0.5 = 3.5</span> GB</td>
+</tr>
+</tbody>
+</table>
+<div class="callout callout-tip callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Tip</strong></p>
+</div>
+<div class="callout-content">
+<p>28 GB needs a data-centre GPU. <strong>3.5 GB fits in an ordinary laptop’s memory</strong> — the same model, one-eighth the size. This is why you can run a 7B model at home!</p>
+</div>
+</div>
+</div>
+</section>
+<section id="quantisation-what-you-pay" class="slide level2">
+<h2>Quantisation — what you pay</h2>
+<p>Each weight is <strong>rounded to a coarser grid</strong>:</p>
+<div class="card">
+<ul>
+<li>int8 stores each weight as one of <span class="math inline">2^8 = 256</span> values.</li>
+<li>int4 stores each weight as one of <span class="math inline">2^4 = 16</span> values.</li>
+</ul>
+</div>
+<ul>
+<li>Quality falls little down to 4 bits; below that it falls apart.</li>
+<li>In the common case this is <strong>post-training quantisation</strong>: no retraining. Take the trained weights and round them, choosing the grid per group of weights so the large ones survive.</li>
+</ul>
+<div class="callout callout-note callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Note</strong></p>
+</div>
+<div class="callout-content">
+<p>Sixteen values per weight sounds destructive. It works because the model’s behaviour is spread across billions of weights — no single weight needs to be precise.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="open-vs-closed-source-llms" class="slide level2">
+<h2>Open vs closed-source LLMs</h2>
+<p><span class="eyebrow">A consequential split</span></p>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><span class="pill-amber">Closed (API only)</span></p>
+<p>GPT-5, Claude Opus 4.7, Gemini 2.5.</p>
+<ul>
+<li>Highest quality.</li>
+<li>Pay per token.</li>
+<li>Cannot inspect weights.</li>
+<li>Cannot fine-tune (mostly).</li>
+<li>Cannot run offline.</li>
+</ul>
+</div><div class="column" style="width:50%;">
+<p><span class="pill-green">Open-weights</span></p>
+<p>Llama 4, Qwen 3, Mistral, DeepSeek, Gemma.</p>
+<ul>
+<li>Quality has closed the gap (within ~1 year of frontier).</li>
+<li>Free to download and run.</li>
+<li>Can fine-tune for your data.</li>
+<li>Can run on local hardware.</li>
+<li>Can audit (partially) what the model knows.</li>
+</ul>
+</div></div>
+<div class="callout callout-tip callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Tip</strong></p>
+</div>
+<div class="callout-content">
+<p><strong>For research and reproducibility</strong>, open-weights models are increasingly attractive. For <em>peak</em> performance, closed APIs still win. For most applications in 2025+, the open models are <em>good enough</em> — and the math of inference cost favours them at scale.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="a-connection-to-social-science-llms-as-instruments" class="slide level2">
+<h2>A connection to social science — LLMs as instruments</h2>
+<div class="columns">
+<div class="column" style="width:55%;">
+<p>A growing research area:</p>
+<ul>
+<li><strong>Annotation at scale.</strong> LLMs labelling political speeches, social-media posts, news articles for sentiment, frame, ideology.</li>
+<li><strong>Synthetic respondents.</strong> Argyle et al.&nbsp;(2023): can an LLM impersonate a survey respondent of given demographics?</li>
+<li><strong>Construct measurement.</strong> Can we extract continuous measures of ideology, polarisation, frame, from text — at scale?</li>
+<li><strong>Translation + corpus analysis</strong> in low-resource languages.</li>
+</ul>
+</div><div class="column" style="width:45%;">
+<div class="callout callout-warning callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Warning</strong></p>
+</div>
+<div class="callout-content">
+<p><strong>Open questions in social science:</strong></p>
+<ul>
+<li>When the LLM gets it wrong, is the error random or systematic?</li>
+<li>Does the LLM encode the biases of <em>its</em> training corpus, contaminating the construct it measures?</li>
+<li>Should the LLM be considered a measurement <em>instrument</em> in the methodological sense?</li>
+</ul>
+<p>These are the questions today’s social-science methodologists are working on. Now you can join the conversation.</p>
+</div>
+</div>
+</div>
+</div></div>
+</section>
+<section id="take-stock" class="slide level2">
+<h2>Take stock</h2>
+<p><span class="eyebrow"><span class="pause-cue">Where you are at the end of Day 11</span></span></p>
+<div class="card">
+<p>You can:</p>
+<ol type="1">
+<li>Define and tokenise text with BPE.</li>
+<li>Explain why subword tokenisation has won.</li>
+<li>Sample from a language model with multiple strategies (greedy, top-k, top-p, temperature).</li>
+<li>Build, train, and sample from a small GPT — start to finish.</li>
+<li>Name the post-training steps (SFT, RLHF, DPO) that turn a base model into a chat product.</li>
+<li>Place the rest of the modern stack — RAG, tools, reasoning, multimodal, efficiency tricks — on a map relative to the GPT you built.</li>
+<li>Articulate at least one open social-science research question about LLMs as instruments.</li>
+</ol>
+<p><strong>This is the conceptual core of the modern AI landscape.</strong></p>
+</div>
+</section></section>
+<section>
+<section id="lab-brief-todays-afternoon" class="title-slide slide level1 center" data-background-color="#0E1A2B">
+<h1>Lab brief · today’s afternoon</h1>
+
+</section>
+<section id="todays-lab-90-minutes" class="slide level2">
+<h2>Today’s lab — 90 minutes</h2>
+<p><span class="eyebrow">Goals</span></p>
+<p>Take yesterday’s GPT and polish it:</p>
+<ol type="1">
+<li>Replace the character tokeniser with <strong>BPE</strong> (use <code>tiktoken</code> or hand-rolled).</li>
+<li>Re-tokenise the training corpus.</li>
+<li>Re-train (model definition is unchanged — only the embedding vocab size differs).</li>
+<li>Try <strong>different sampling strategies</strong> — greedy, top-k, top-p, varying temperature — on the same prompt.</li>
+<li><strong>Side-by-side comparison</strong> with yesterday’s character-level output.</li>
+</ol>
+<div class="card">
+<p><span class="eyebrow">Deliverable</span></p>
+<p>A short comparison document:</p>
+<ul>
+<li>Three sample outputs (char-level GPT, BPE-GPT at <span class="math inline">\tau=0.5</span>, BPE-GPT at <span class="math inline">\tau=1.2</span>).</li>
+<li>One paragraph: “What changed, and what does it tell me about the model?”</li>
+</ul>
+</div>
+<p><span class="muted">Stretch: try a non-English corpus. Watch what happens to the token count.</span></p>
+</section>
+<section id="see-you-tomorrow" class="slide level2 smaller scrollable" data-background-color="#0E1A2B">
+<h2>See you tomorrow</h2>
+<p><span class="eyebrow">Lecture 12 — <em>Ethics, limitations, and course recap</em></span></p>
+<div class="callout callout-tip callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Tip</strong></p>
+</div>
+<div class="callout-content">
+<p><strong>Tomorrow is the final lecture.</strong> It will be lighter on maths and heavier on discussion — including a substantive ethics plenary. Bring your skepticism.</p>
+</div>
+</div>
+</div>
+
+<div class="quarto-auto-generated-content">
+<div class="footer footer-default">
+<p>ME324 · AI and Deep Learning · LSE Summer School</p>
+</div>
+</div>
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list">
+<div id="ref-liu2024lost" class="csl-entry" role="listitem">
+Liu, N. F., Lin, K., Hewitt, J., Paranjape, A., Bevilacqua, M., Petroni, F., &amp; Liang, P. (2024). Lost in the middle: How language models use long contexts. <em>Transactions of the Association for Computational Linguistics</em>, <em>12</em>, 157–173.
+</div>
+</div>
+</section></section>
+    </div>
+  </div>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script>
+  <script src="../site_libs/revealjs/dist/reveal.js"></script>
+  <!-- reveal.js plugins -->
+  <script src="../site_libs/revealjs/plugin/quarto-line-highlight/line-highlight.js"></script>
+  <script src="../site_libs/revealjs/plugin/pdf-export/pdfexport.js"></script>
+  <script src="../site_libs/revealjs/plugin/reveal-menu/menu.js"></script>
+  <script src="../site_libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
+  <script src="../site_libs/revealjs/plugin/quarto-support/support.js"></script>
+  
+
+  <script src="../site_libs/revealjs/plugin/notes/notes.js"></script>
+  <script src="../site_libs/revealjs/plugin/search/search.js"></script>
+  <script src="../site_libs/revealjs/plugin/zoom/zoom.js"></script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script>
+
+  <script>
+
+      // Full list of configuration options available at:
+      // https://revealjs.com/config/
+      Reveal.initialize({
+'controlsAuto': true,
+'previewLinksAuto': false,
+'pdfSeparateFragments': false,
+'autoAnimateEasing': "ease",
+'autoAnimateDuration': 1,
+'autoAnimateUnmatched': true,
+'menu': {"side":"right","useTextContentForMissingTitles":true,"markers":false,"loadIcons":false,"custom":[{"title":"Tools","icon":"<i class=\"fas fa-gear\"></i>","content":"<ul class=\"slide-menu-items\">\n<li class=\"slide-tool-item active\" data-item=\"0\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.fullscreen(event)\"><kbd>f</kbd> Fullscreen</a></li>\n<li class=\"slide-tool-item\" data-item=\"1\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.speakerMode(event)\"><kbd>s</kbd> Speaker View</a></li>\n<li class=\"slide-tool-item\" data-item=\"2\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.overview(event)\"><kbd>o</kbd> Slide Overview</a></li>\n<li class=\"slide-tool-item\" data-item=\"3\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.togglePdfExport(event)\"><kbd>e</kbd> PDF Export Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"4\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.keyboardHelp(event)\"><kbd>?</kbd> Keyboard Help</a></li>\n</ul>"}],"openButton":true,"width":"third"},
+'smaller': true,
+ 
+        // Display controls in the bottom right corner
+        controls: false,
+
+        // Help the user learn the controls by providing hints, for example by
+        // bouncing the down arrow when they first encounter a vertical slide
+        controlsTutorial: false,
+
+        // Determines where controls appear, "edges" or "bottom-right"
+        controlsLayout: 'edges',
+
+        // Visibility rule for backwards navigation arrows; "faded", "hidden"
+        // or "visible"
+        controlsBackArrows: 'faded',
+
+        // Display a presentation progress bar
+        progress: true,
+
+        // Display the page number of the current slide
+        slideNumber: 'c/t',
+
+        // 'all', 'print', or 'speaker'
+        showSlideNumber: 'all',
+
+        // Add the current slide number to the URL hash so that reloading the
+        // page/copying the URL will return you to the same slide
+        hash: true,
+
+        // Start with 1 for the hash rather than 0
+        hashOneBasedIndex: false,
+
+        // Flags if we should monitor the hash and change slides accordingly
+        respondToHashChanges: true,
+
+        // Push each slide change to the browser history
+        history: false,
+
+        // Enable keyboard shortcuts for navigation
+        keyboard: true,
+
+        // Enable the slide overview mode
+        overview: true,
+
+        // Disables the default reveal.js slide layout (scaling and centering)
+        // so that you can use custom CSS layout
+        disableLayout: false,
+
+        // Vertical centering of slides
+        center: false,
+
+        // Enables touch navigation on devices with touch input
+        touch: true,
+
+        // Loop the presentation
+        loop: false,
+
+        // Change the presentation direction to be RTL
+        rtl: false,
+
+        // see https://revealjs.com/vertical-slides/#navigation-mode
+        navigationMode: 'linear',
+
+        // Randomizes the order of slides each time the presentation loads
+        shuffle: false,
+
+        // Turns fragments on and off globally
+        fragments: true,
+
+        // Flags whether to include the current fragment in the URL,
+        // so that reloading brings you to the same fragment position
+        fragmentInURL: false,
+
+        // Flags if the presentation is running in an embedded mode,
+        // i.e. contained within a limited portion of the screen
+        embedded: false,
+
+        // Flags if we should show a help overlay when the questionmark
+        // key is pressed
+        help: true,
+
+        // Flags if it should be possible to pause the presentation (blackout)
+        pause: true,
+
+        // Flags if speaker notes should be visible to all viewers
+        showNotes: false,
+
+        // Global override for autoplaying embedded media (null/true/false)
+        autoPlayMedia: null,
+
+        // Global override for preloading lazy-loaded iframes (null/true/false)
+        preloadIframes: null,
+
+        // Number of milliseconds between automatically proceeding to the
+        // next slide, disabled when set to 0, this value can be overwritten
+        // by using a data-autoslide attribute on your slides
+        autoSlide: 0,
+
+        // Stop auto-sliding after user input
+        autoSlideStoppable: true,
+
+        // Use this method for navigation when auto-sliding
+        autoSlideMethod: null,
+
+        // Specify the average time in seconds that you think you will spend
+        // presenting each slide. This is used to show a pacing timer in the
+        // speaker view
+        defaultTiming: null,
+
+        // Enable slide navigation via mouse wheel
+        mouseWheel: false,
+
+        // The display mode that will be used to show slides
+        display: 'block',
+
+        // Hide cursor if inactive
+        hideInactiveCursor: true,
+
+        // Time before the cursor is hidden (in ms)
+        hideCursorTime: 5000,
+
+        // Opens links in an iframe preview overlay
+        previewLinks: false,
+
+        // Transition style (none/fade/slide/convex/concave/zoom)
+        transition: 'none',
+
+        // Transition speed (default/fast/slow)
+        transitionSpeed: 'default',
+
+        // Transition style for full page slide backgrounds
+        // (none/fade/slide/convex/concave/zoom)
+        backgroundTransition: 'none',
+
+        // Number of slides away from the current that are visible
+        viewDistance: 3,
+
+        // Number of slides away from the current that are visible on mobile
+        // devices. It is advisable to set this to a lower number than
+        // viewDistance in order to save resources.
+        mobileViewDistance: 2,
+
+        // The "normal" size of the presentation, aspect ratio will be preserved
+        // when the presentation is scaled to fit different resolutions. Can be
+        // specified using percentage units.
+        width: 1280,
+
+        height: 760,
+
+        // Factor of the display size that should remain empty around the content
+        margin: 4.0e-2,
+
+        // Bounds for smallest/largest possible scale to apply to content
+        minScale: 0.4,
+
+        maxScale: 1.6,
+
+        // reveal.js plugins
+        plugins: [QuartoLineHighlight, PdfExport, RevealMenu, QuartoSupport,
+
+          RevealNotes,
+          RevealSearch,
+          RevealZoom
+        ]
+      });
+    </script>
+    <!--
+      ME324 — shrink-to-fit safety net for lecture decks.
+
+      reveal.js scales the whole 1280×760 canvas to the window, but it does nothing
+      about a slide whose content is taller than that canvas: the overflow is simply
+      clipped (or, on `.plenary` / `.transition` covers, hidden outright). This pass
+      measures every slide once after layout settles and, for any that overflow,
+      steps the slide down — font-size and figure heights together — until it fits
+      in the space above the running footer.
+
+      Slides that already fit are left completely alone, so a deck keeps a single
+      consistent type size except where a slide genuinely needs the help.
+
+      Anything still overflowing at MIN_SCALE is listed in the browser console —
+      those slides have too much content and want splitting in the .qmd.
+    -->
+    <style>
+      /* Lay out every slide (not just the current one) so it can be measured.
+         `display: block` matches what reveal.js gives a `.present` slide; the
+         theme's cover slides declare `display: flex !important` and so keep theirs.
+         Off-screen slides are already `opacity: 0`, so nothing becomes visible.
+         Note reveal.js *also* sets `display: none` inline on slides outside its
+         view distance — the script clears that separately, since no stylesheet
+         rule can win against an inline style. */
+      .reveal.me-fit-measuring .slides > section,
+      .reveal.me-fit-measuring .slides > section > section {
+        display: block;
+      }
+    </style>
+    <script>
+      (function () {
+        var MIN_SCALE = 0.55; // hard floor — below this, text stops being readable
+        var STEP = 0.98; // multiplicative creep per iteration
+        var MAX_ITER = 40;
+        var TOLERANCE = 2; // px of slack before we call a slide "overflowing"
+
+        function leafSections(slidesEl) {
+          return Array.prototype.filter.call(
+            slidesEl.querySelectorAll("section"),
+            function (s) {
+              return !s.querySelector("section"); // skip vertical-stack wrappers
+            }
+          );
+        }
+
+        function label(section) {
+          var h = section.querySelector("h1, h2, h3");
+          return (h ? h.textContent : section.id || "(untitled)").trim();
+        }
+
+        // How tall is this slide's content, really?
+        //
+        // `scrollHeight` is no use here: reveal.js gives every slide an explicit
+        // `height: 760px`, so a slide reports the full canvas whether it holds two
+        // bullets or twenty. Measure the bottom edge of the lowest child instead.
+        // Child rects come back in viewport pixels (the canvas is transform-scaled)
+        // whereas padding is in canvas pixels, hence the divide-then-add.
+        function contentHeight(section, canvasScale) {
+          var top = section.getBoundingClientRect().top;
+          var lowest = top;
+
+          Array.prototype.forEach.call(section.children, function (child) {
+            var r = child.getBoundingClientRect();
+            if (!r.height && !r.width) return; // skip anything not rendered
+            if (r.bottom > lowest) lowest = r.bottom;
+          });
+
+          var padBottom = parseFloat(getComputedStyle(section).paddingBottom) || 0;
+          return (lowest - top) / canvasScale + padBottom;
+        }
+
+        // Figures don't scale with font-size, so a slide dominated by a tall image
+        // can't be fixed by type alone. Cap them by the same factor as the text.
+        // `offsetHeight` is used rather than a client rect because it is already in
+        // canvas pixels, which is what the max-height we set needs to be in.
+        function figuresIn(section) {
+          return Array.prototype.map.call(
+            section.querySelectorAll("img, video, iframe"),
+            function (el) {
+              el.style.removeProperty("max-height");
+              return { el: el, height: el.offsetHeight };
+            }
+          );
+        }
+
+        function applyScale(section, figures, naturalFontPx, scale) {
+          section.style.setProperty(
+            "font-size",
+            (naturalFontPx * scale).toFixed(2) + "px",
+            "important"
+          );
+          figures.forEach(function (f) {
+            if (f.height > 0) {
+              f.el.style.setProperty(
+                "max-height",
+                (f.height * scale).toFixed(2) + "px",
+                "important"
+              );
+            }
+          });
+        }
+
+        // The running footer is painted over the slide, not inside it, so the last
+        // line of a full-height slide would collide with it. Work out how much of
+        // the canvas the footer covers, in canvas pixels.
+        function footerReserve(slidesEl, canvasScale) {
+          var footer = document.querySelector(".reveal .footer");
+          if (!footer || !footer.offsetHeight) return 0;
+
+          var overlap =
+            slidesEl.getBoundingClientRect().bottom -
+            footer.getBoundingClientRect().top;
+          return Math.max(0, overlap / canvasScale) + 6; // + breathing room
+        }
+
+        function fitAll() {
+          var revealEl = document.querySelector(".reveal");
+          var slidesEl = document.querySelector(".reveal .slides");
+          if (!revealEl || !slidesEl || !slidesEl.offsetHeight) return;
+
+          var canvasScale =
+            slidesEl.getBoundingClientRect().height / slidesEl.offsetHeight;
+          if (!canvasScale) return;
+
+          var available = slidesEl.offsetHeight - footerReserve(slidesEl, canvasScale);
+          if (!(available > 0)) return;
+
+          // --- force layout on every slide, including hidden ones ----------------
+          revealEl.classList.add("me-fit-measuring");
+          var allSections = Array.prototype.slice.call(
+            slidesEl.querySelectorAll("section")
+          );
+          var savedDisplay = allSections.map(function (s) {
+            var prev = s.style.display;
+            s.style.display = ""; // drop reveal's inline `display: none`
+            return prev;
+          });
+
+          var floored = [];
+
+          leafSections(slidesEl).forEach(function (section) {
+            // Always start from the slide's natural size so repeat passes are
+            // idempotent rather than compounding.
+            section.style.removeProperty("font-size");
+            var figures = figuresIn(section);
+            var naturalFontPx = parseFloat(getComputedStyle(section).fontSize);
+            if (!naturalFontPx) return;
+
+            if (contentHeight(section, canvasScale) <= available + TOLERANCE) {
+              delete section.dataset.meFitScale;
+              return;
+            }
+
+            var scale = 1;
+            for (var i = 0; i < MAX_ITER; i++) {
+              // Aim straight at the required ratio, then creep down — text reflow
+              // means height isn't perfectly linear in the scale factor.
+              var current = contentHeight(section, canvasScale);
+              scale = Math.max(
+                MIN_SCALE,
+                Math.min(scale * STEP, (available / current) * scale)
+              );
+              applyScale(section, figures, naturalFontPx, scale);
+              if (contentHeight(section, canvasScale) <= available + TOLERANCE) break;
+              if (scale <= MIN_SCALE) break;
+            }
+
+            section.dataset.meFitScale = scale.toFixed(3);
+            if (contentHeight(section, canvasScale) > available + TOLERANCE) {
+              floored.push(label(section));
+            }
+          });
+
+          // --- put reveal's own visibility bookkeeping back ----------------------
+          allSections.forEach(function (s, i) {
+            s.style.display = savedDisplay[i];
+          });
+          revealEl.classList.remove("me-fit-measuring");
+
+          if (floored.length && window.console) {
+            console.warn(
+              "[ME324] " +
+                floored.length +
+                " slide(s) still overflow at the minimum type size — consider " +
+                "splitting them:\n  • " +
+                floored.join("\n  • ")
+            );
+          }
+        }
+
+        // Wait for the things that change content height: web fonts, MathJax, and
+        // any images that haven't decoded yet.
+        function whenSettled(done) {
+          var waits = [];
+
+          if (document.fonts && document.fonts.ready) waits.push(document.fonts.ready);
+
+          if (window.MathJax && window.MathJax.startup && window.MathJax.startup.promise) {
+            waits.push(window.MathJax.startup.promise);
+          }
+
+          Array.prototype.forEach.call(document.images, function (img) {
+            if (img.complete) return;
+            waits.push(
+              new Promise(function (resolve) {
+                img.addEventListener("load", resolve, { once: true });
+                img.addEventListener("error", resolve, { once: true });
+              })
+            );
+          });
+
+          // Never block the deck on a hung asset.
+          var timeout = new Promise(function (resolve) {
+            setTimeout(resolve, 5000);
+          });
+
+          Promise.race([Promise.all(waits).catch(function () {}), timeout]).then(
+            function () {
+              requestAnimationFrame(function () {
+                requestAnimationFrame(done);
+              });
+            }
+          );
+        }
+
+        // The first pass is also a warm-up: it is what forces off-screen slides to
+        // lay out for the first time, which is what pulls in the web-font weights
+        // and finishes any deferred MathJax work they contain. Those land *after*
+        // we've measured, so a slide can grow by a line or two behind our back.
+        // fitAll() resets before it measures, so re-running it simply corrects.
+        function fitRepeatedly() {
+          fitAll();
+          whenSettled(function () {
+            fitAll();
+            setTimeout(fitAll, 1500);
+          });
+        }
+
+        function start() {
+          if (!window.Reveal) return;
+          if (Reveal.isReady && Reveal.isReady()) {
+            whenSettled(fitRepeatedly);
+          } else {
+            Reveal.on("ready", function () {
+              whenSettled(fitRepeatedly);
+            });
+          }
+        }
+
+        if (document.readyState === "complete") {
+          start();
+        } else {
+          window.addEventListener("load", start);
+        }
+      })();
+    </script>
+    <script id="quarto-html-after-body" type="application/javascript">
+    window.document.addEventListener("DOMContentLoaded", function (event) {
+      const toggleBodyColorMode = (bsSheetEl) => {
+        const mode = bsSheetEl.getAttribute("data-mode");
+        const bodyEl = window.document.querySelector("body");
+        if (mode === "dark") {
+          bodyEl.classList.add("quarto-dark");
+          bodyEl.classList.remove("quarto-light");
+        } else {
+          bodyEl.classList.add("quarto-light");
+          bodyEl.classList.remove("quarto-dark");
+        }
+      }
+      const toggleBodyColorPrimary = () => {
+        const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+        if (bsSheetEl) {
+          toggleBodyColorMode(bsSheetEl);
+        }
+      }
+      toggleBodyColorPrimary();  
+      const tabsets =  window.document.querySelectorAll(".panel-tabset-tabby")
+      tabsets.forEach(function(tabset) {
+        const tabby = new Tabby('#' + tabset.id);
+      });
+      const isCodeAnnotation = (el) => {
+        for (const clz of el.classList) {
+          if (clz.startsWith('code-annotation-')) {                     
+            return true;
+          }
+        }
+        return false;
+      }
+      const onCopySuccess = function(e) {
+        // button target
+        const button = e.trigger;
+        // don't keep focus
+        button.blur();
+        // flash "checked"
+        button.classList.add('code-copy-button-checked');
+        var currentTitle = button.getAttribute("title");
+        button.setAttribute("title", "Copied!");
+        let tooltip;
+        if (window.bootstrap) {
+          button.setAttribute("data-bs-toggle", "tooltip");
+          button.setAttribute("data-bs-placement", "left");
+          button.setAttribute("data-bs-title", "Copied!");
+          tooltip = new bootstrap.Tooltip(button, 
+            { trigger: "manual", 
+              customClass: "code-copy-button-tooltip",
+              offset: [0, -8]});
+          tooltip.show();    
+        }
+        setTimeout(function() {
+          if (tooltip) {
+            tooltip.hide();
+            button.removeAttribute("data-bs-title");
+            button.removeAttribute("data-bs-toggle");
+            button.removeAttribute("data-bs-placement");
+          }
+          button.setAttribute("title", currentTitle);
+          button.classList.remove('code-copy-button-checked');
+        }, 1000);
+        // clear code selection
+        e.clearSelection();
+      }
+      const getTextToCopy = function(trigger) {
+          const codeEl = trigger.previousElementSibling.cloneNode(true);
+          for (const childEl of codeEl.children) {
+            if (isCodeAnnotation(childEl)) {
+              childEl.remove();
+            }
+          }
+          return codeEl.innerText;
+      }
+      const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+        text: getTextToCopy
+      });
+      clipboard.on('success', onCopySuccess);
+      if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+        // For code content inside modals, clipBoardJS needs to be initialized with a container option
+        // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+        const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+          text: getTextToCopy,
+          container: window.document.getElementById('quarto-embedded-source-code-modal')
+        });
+        clipboardModal.on('success', onCopySuccess);
+      }
+        var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+        var mailtoRegex = new RegExp(/^mailto:/);
+          var filterRegex = new RegExp("https:\/\/ts-robinson\.com\/me324\/");
+        var isInternal = (href) => {
+            return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+        }
+        // Inspect non-navigation links and adorn them if external
+     	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+        for (var i=0; i<links.length; i++) {
+          const link = links[i];
+          if (!isInternal(link.href)) {
+            // undo the damage that might have been done by quarto-nav.js in the case of
+            // links that we want to consider external
+            if (link.dataset.originalHref !== undefined) {
+              link.href = link.dataset.originalHref;
+            }
+          }
+        }
+      function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+        const config = {
+          allowHTML: true,
+          maxWidth: 500,
+          delay: 100,
+          arrow: false,
+          appendTo: function(el) {
+              return el.closest('section.slide') || el.parentElement;
+          },
+          interactive: true,
+          interactiveBorder: 10,
+          theme: 'light-border',
+          placement: 'bottom-start',
+        };
+        if (contentFn) {
+          config.content = contentFn;
+        }
+        if (onTriggerFn) {
+          config.onTrigger = onTriggerFn;
+        }
+        if (onUntriggerFn) {
+          config.onUntrigger = onUntriggerFn;
+        }
+          config['offset'] = [0,0];
+          config['maxWidth'] = 700;
+        window.tippy(el, config); 
+      }
+      const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+      for (var i=0; i<noterefs.length; i++) {
+        const ref = noterefs[i];
+        tippyHover(ref, function() {
+          // use id or data attribute instead here
+          let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+          try { href = new URL(href).hash; } catch {}
+          const id = href.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note) {
+            return note.innerHTML;
+          } else {
+            return "";
+          }
+        });
+      }
+      const findCites = (el) => {
+        const parentEl = el.parentElement;
+        if (parentEl) {
+          const cites = parentEl.dataset.cites;
+          if (cites) {
+            return {
+              el,
+              cites: cites.split(' ')
+            };
+          } else {
+            return findCites(el.parentElement)
+          }
+        } else {
+          return undefined;
+        }
+      };
+      var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+      for (var i=0; i<bibliorefs.length; i++) {
+        const ref = bibliorefs[i];
+        const citeInfo = findCites(ref);
+        if (citeInfo) {
+          tippyHover(citeInfo.el, function() {
+            var popup = window.document.createElement('div');
+            citeInfo.cites.forEach(function(cite) {
+              var citeDiv = window.document.createElement('div');
+              citeDiv.classList.add('hanging-indent');
+              citeDiv.classList.add('csl-entry');
+              var biblioDiv = window.document.getElementById('ref-' + cite);
+              if (biblioDiv) {
+                citeDiv.innerHTML = biblioDiv.innerHTML;
+              }
+              popup.appendChild(citeDiv);
+            });
+            return popup.innerHTML;
+          });
+        }
+      }
+    });
+    </script>
+    
+
+</body></html>

@@ -26,6 +26,12 @@ listing:
       pdf: "lectures/pdf/lecture-08-text-embeddings.pdf"
     - path: "lectures/lecture-09-rnns.qmd"
       pdf: "lectures/pdf/lecture-09-rnns.pdf"
+    - path: "lectures/lecture-10-attention-transformers.qmd"
+      pdf: "lectures/pdf/lecture-10-attention-transformers.pdf"
+    - path: "lectures/lecture-11-tokenization-refinements.qmd"
+      pdf: "lectures/pdf/lecture-11-tokenization-refinements.pdf"
+    - path: "lectures/lecture-12-ethics-recap.qmd"
+      pdf: "lectures/pdf/lecture-12-ethics-recap.pdf"
   template: assets/lecture-grid.ejs
   sort: "date"
 ---
@@ -35,11 +41,6 @@ Each card opens the slide deck in your browser. Inside a deck: **→ / ←** to 
 and **?** for the full list of shortcuts.
 
 ::: {#lecture-listing}
-:::
-
-::: {.callout-note appearance="simple"}
-**Week 3 lectures are not posted yet.** They will appear as we reach them. The full twelve-lecture outline is on the
-[home page](index.qmd), and the [reading list](readings.qmd) covers all three weeks if you want to read ahead.
 :::
 
 ::: {.callout-tip}

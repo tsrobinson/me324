@@ -1,0 +1,855 @@
+---
+title: "Ethics, limitations, and course recap"
+subtitle: "Lecture 12 — Where deep learning still breaks, and what to do about it"
+author: "Dr Thomas Robinson"
+date: "2026-08-19"
+date-format: long
+bibliography: ../refs.bib
+format: 
+  revealjs:
+    smaller: true
+---
+
+# Part 1 · The course in 30 minutes {background-color="#0E1A2B"}
+
+## What you can do today that you couldn't three weeks ago
+
+::: {.columns}
+::: {.column width="50%"}
+[Week 1]{.pill}
+
+* Define "AI"; situate deep learning historically.
+* Forward-propagate through a perceptron by hand.
+* Read and draw a computational graph.
+* Implement backpropagation in <100 lines of Python.
+:::
+::: {.column width="50%"}
+[Week 2]{.pill-blue}
+
+* Train a feed-forward network in PyTorch.
+* Convolve an image; reason about kernels and pooling.
+* Build a CNN classifier on MNIST (≥98%).
+* Build a VAE that samples new MNIST digits.
+* Treat text as data; build a bigram language model.
+
+[Week 3]{.pill-green}
+
+* Build a recurrent network (RNN) for sequences.
+* Implement self-attention.
+* Build a tiny GPT from scratch.
+* Swap in BPE and improve sampling.
+:::
+:::
+
+## Five ideas that connect everything
+
+::: {.card}
+1. **Composition.** A network is a sequence of cheap operations (matmul + non-linearity). Stacking gives expressiveness.
+
+2. **Differentiability.** Every operation has a known gradient. The chain rule glues them.
+
+3. **Autodiff.** Backpropagation = reverse-mode autodiff. Linear cost in graph size.
+
+4. **Optimisation.** Define a loss. Step against the gradient. Repeat.
+
+5. **Scale.** The same building blocks at $10^4$ parameters and $10^{12}$ parameters. The only thing that changes is what you can express.
+:::
+
+::: {.callout-tip}
+If you remember nothing else from this course, remember these five. They are the **conceptual core** of everything.
+:::
+
+## The mental model you should leave with
+
+[A sketch that fits on a napkin]{.eyebrow}
+
+::: {.card}
+Every deep-learning model is:
+
+* A **stack of layers** — each does a small, differentiable computation.
+* **Trained** by gradient descent on a loss.
+* **Tuned** by you — picking architecture, loss, optimiser, data.
+
+That's it. CNNs change *what* each layer computes. RNNs and transformers change *how* tokens talk across positions. VAEs change *what* the model predicts. Everything else is detail.
+:::
+
+::: {.callout-tip}
+Hold this in your head and you'll be able to read any deep-learning paper in your field. The vocabulary differs; the underlying machinery does not.
+:::
+
+## How the course mapped to architectures
+
+::: {.card}
+* **L1-L4** — the engine. Autodiff and gradient descent.
+* **L5** — first real model. Feed-forward networks.
+* **L6** — first specialised model. CNNs for spatial data.
+* **L7** — first generative model. VAEs.
+* **L8-L11** — language. Embeddings → RNNs → transformers.
+* **L12** — context. What you've built. What it means.
+
+Every later lecture **reuses** the earlier ones. The CNN training loop is the FFN training loop with a different `model`. The transformer training loop is the same again. The mechanics never change.
+:::
+
+## What's *not* in this course
+
+[A list of things worth knowing that we didn't cover]{.eyebrow}
+
+::: {.columns}
+::: {.column width="50%"}
+* Reinforcement learning — RLHF (reinforcement learning from human feedback) and its optimisers, PPO (proximal policy optimisation) and DPO (direct preference optimisation).
+* Graph neural networks.
+* Diffusion models in depth (we sketched).
+* Self-supervised pre-training methods.
+* Multi-modal models (text + image jointly).
+* Long-context architectures (Mamba, RingAttention).
+:::
+::: {.column width="50%"}
+* Quantisation, distillation, model compression.
+* Federated learning, privacy-preserving ML.
+* Causal ML and double machine learning.
+* Bayesian deep learning.
+* MoE (mixture of experts).
+* Speculative decoding.
+:::
+:::
+
+::: {.card}
+Each of these is a course in itself. You now have the foundations to read into any of them.
+:::
+
+# Part 2 · Limitations + ethics {background-color="#0E1A2B"}
+
+## Where deep learning is *bad* — even at scale
+
+::: {.columns}
+::: {.column width="50%"}
+[Data-poor regimes]{.pill-amber}
+
+* Strong supervised performance needs thousands to millions of labelled examples.
+* Many small-data social-science problems work better with classical models.
+:::
+::: {.column width="50%"}
+[Long-horizon reasoning]{.pill-amber}
+
+* LLMs handle short, local reasoning well.
+* Long multi-step proofs, planning, mathematical rigour — still brittle.
+* Chain-of-thought helps. It doesn't solve.
+:::
+:::
+
+## Where deep learning *can't* do at all
+
+::: {.card}
+* **Causal inference from observational data.** Still needs assumptions you encode by hand — DL doesn't substitute for instrumental variables, RCTs, etc.
+
+* **Out-of-distribution generalisation.** Models break when test data diverges from training.
+
+* **Calibrated uncertainty.** "Knowing what they don't know" is hard. Confident hallucinations are everywhere.
+
+* **Anything resembling agency or intent.** A trained model has no goals, no beliefs, no plans. Anthropomorphism is dangerous.
+:::
+
+::: {.callout-warning}
+**LLMs hallucinate by design.** They produce *plausible continuations*, not *true statements*. Treating them as oracles is a category error.
+:::
+
+## Compute, energy, and the trade-off
+
+::: {.columns}
+::: {.column width="50%"}
+* Training GPT-4-scale models takes 10s of GWh.
+* Inference at scale (billions of queries/day) is a continuous load.
+* Cooling needs water. Chips need rare earths. The end of the cycle is e-waste.
+:::
+::: {.column width="50%"}
+* "Just use a smaller model" is harder than it sounds — capability drops fast below a threshold.
+* Efficiency improves (Moore's-like trends) but absolute demand grows faster.
+:::
+:::
+
+::: {.callout-warning}
+The footprint of *one* query is small. The footprint of these systems *existing at scale* is not. This is a policy question, not a technical one.
+:::
+
+## Environmental impact in detail
+
+[Beyond "AI uses a lot of compute"]{.eyebrow}
+
+::: {.columns}
+::: {.column width="50%"}
+[Training]{.pill-amber}
+
+* GPT-3 training: estimated **552 tonnes CO₂** (one-time cost).
+* GPT-4: estimated 10×–100× more.
+* Frontier models train multiple times per year.
+:::
+::: {.column width="50%"}
+[Inference]{.pill-amber}
+
+* A widely-circulated figure put one ChatGPT query at ~10× a Google search — but **treat this with caution**: it is disputed and rests on a ~2009 search-energy number; more recent estimates put a query much closer to a single search.
+* Aggregated across hundreds of millions of users per day, **inference dominates** training in cumulative impact.
+* Data centre water use for cooling is a separately growing concern.
+:::
+:::
+
+::: {.callout-warning}
+Aggregate impact also depends on **where** data centres are sited — moving to renewable-rich regions helps, but is only a partial fix.
+:::
+
+## Where bias comes from
+
+[Not just "the data"]{.eyebrow}
+
+::: {.card}
+A non-exhaustive map:
+
+1. **Data sampling** — who shows up in the training set, who doesn't.
+2. **Label noise** — when humans encode their own biases as ground truth.
+3. **Construct mismatch** — when the modelled variable is a proxy for what we actually care about (e.g. "creditworthiness" vs "ability to pay").
+4. **Optimisation target** — minimising aggregate error tolerates large subgroup error.
+5. **Deployment context** — a model trained on one population deployed on another.
+6. **Feedback loops** — biased predictions become future training data.
+:::
+
+::: {.callout-tip}
+**The technical fix can only address (1) and (4).** The rest are governance, methodology, and political problems. The "AI ethics" stack is half computer science, half social science.
+:::
+
+## Bias
+
+Models reflect their data. Data reflects the world. Both have problems.
+
+::: {.columns}
+::: {.column width="50%"}
+[Documented examples]{.pill-amber}
+
+* Facial recognition with much higher error rates on dark-skinned faces (Buolamwini & Gebru 2018).
+* Hiring screeners that downweight applicants from women's colleges.
+* Healthcare algorithms allocating less care to Black patients (Obermeyer et al. 2019).
+* LLMs producing racist completions of innocuous prompts.
+:::
+::: {.column width="50%"}
+[Don't be fooled by]{.pill}
+
+* "It's just learning patterns" — patterns *are* the bias.
+* Benchmarks that measure narrowly — overall accuracy hides disparate impact.
+* "We removed the protected attributes" — proxies remain.
+:::
+:::
+
+## Mitigation strategies for bias
+
+[What partially works]{.eyebrow}
+
+::: {.columns}
+::: {.column width="33%"}
+[Pre-processing]{.pill}
+
+Adjust the training data — rebalance subgroups, reweight, or filter.
+
+* Easy to implement.
+* Hard to specify "balanced".
+* Doesn't address (5) or (6).
+:::
+::: {.column width="33%"}
+[In-processing]{.pill}
+
+Add fairness constraints to the loss — penalise disparate outcomes during training.
+
+* Many constraint definitions exist (and conflict).
+* Trade-offs with accuracy.
+:::
+::: {.column width="33%"}
+[Post-processing]{.pill}
+
+Adjust model outputs after training to equalise outcomes across subgroups.
+
+* Doesn't require retraining.
+* Often the most tractable, especially when deploying third-party models.
+:::
+:::
+
+::: {.callout-warning}
+**But these are all partial.** The different notions of fairness can also *conflict with one another* — as the Stop & check ahead shows, you sometimes cannot satisfy them all at once.
+:::
+
+## Case study · the Dutch childcare benefits scandal
+
+[The *toeslagenaffaire* · Netherlands, mid-2010s to 2021]{.eyebrow}
+
+From the mid-2010s, the Dutch tax authority used a risk-scoring model to flag childcare-benefit claims for fraud investigation.
+
+::: {.card}
+**What happened**
+
+* **Tens of thousands of families** were wrongly accused of benefit fraud.
+* An accusation meant repaying benefits in full — often **tens of thousands of euros** — with the debt due at once.
+* Families were pushed into debt for years. Some lost homes and jobs over money they never owed.
+* In **January 2021**, the Dutch government resigned over the scandal.
+:::
+
+The technology was not exotic: a risk score computed from family features. Every failure in it has a name you learned in this course.
+
+## Case study · where it broke in our terms
+
+[Four failures, four concepts you already know]{.eyebrow}
+
+::: {.card}
+1. **The labels were not ground truth.** The model learned from past fraud *investigations*, not convictions. "Flagged before" became "high risk now" — the target variable encoded the old process, mistakes included.
+
+2. **Proxies did the work.** Nationality sat in the feature set — the Dutch data-protection authority later ruled its use unlawful — and a low income pushed the score up. The model discriminated on who people were, not on what they had done.
+
+3. **A high score triggered automated distrust.** Flagged families were treated as fraudsters by default: benefits stopped, repayment demanded, no human check on the individual case. The score *was* the decision.
+
+4. **The feedback loop never closed.** Appeals took years. The error signal that should have corrected the system — wrongly flagged families winning their cases — arrived too late to change it. In training terms: no gradient ever flowed back.
+:::
+
+::: {.callout-tip}
+Set this against the *Where bias comes from* map: label noise (2), construct mismatch (3), feedback loops (6) — running at national scale, with the power of the state behind the predictions.
+:::
+
+## Case study · what would have helped
+
+[Read this against the mitigation slide]{.eyebrow}
+
+::: {.card}
+* **Audit error rates by group.** Aggregate accuracy can look fine while one group carries the errors. A false-positive audit by nationality and income would have surfaced the harm years earlier.
+
+* **Keep a human who can overrule the score.** Not a human who clicks "confirm" — one with the authority, time, and information to say the model is wrong about *this* family.
+
+* **Contestability with deadlines.** An appeal that takes years is not an appeal. A binding clock turns "you may object" into an error signal that arrives in time to matter.
+
+* **Check the model against the world.** The scores were consistent with the training data throughout; the training data was wrong about the world. It is the question this course keeps asking — does the arithmetic match reality, or only the labels?
+:::
+
+::: {.callout-warning}
+Pre-, in-, and post-processing all apply here. None of them substitutes for the last three items — those fixes are institutional, not technical. Half computer science, half social science.
+:::
+
+## Stop & check — can a model be "fair"?
+
+[<span class="pause-cue">Stop & check</span> · 60 seconds in pairs]{.eyebrow}
+
+::: {.try-box}
+[Try]{.try-label}
+A recidivism-risk model is **calibrated**: among everyone it scores "high risk", the same fraction actually reoffend — *regardless of race*. A journalist then shows that, among people who did **not** reoffend, Black defendants were flagged "high risk" far more often than white defendants.
+
+**Is the model broken — or is something deeper going on?**
+:::
+
+::: {.fragment}
+::: {.reveal-box}
+[The reveal]{.reveal-label}
+This is exactly the **COMPAS** dispute (ProPublica vs. Northpointe, 2016). *Both sides were arithmetically correct.*
+
+**Chouldechova (2017)** proved why. When the base rate of reoffending differs across groups, **calibration** and **equal false-positive rates** cannot both hold at once (except in trivial cases). You are forced to *choose* which criterion to satisfy.
+
+That choice is **normative, not technical** — no amount of better engineering makes it go away.
+:::
+:::
+
+## Hallucination + misuse
+
+::: {.columns}
+::: {.column width="50%"}
+[Inherent]{.pill}
+
+* LLMs invent citations, statistics, court cases.
+* No internal "truth" signal — only plausibility.
+* Mitigations (retrieval-augmented generation — RAG — tool use, fine-tuning) reduce but don't eliminate.
+:::
+::: {.column width="50%"}
+[Weaponised]{.pill-amber}
+
+* Phishing at scale.
+* Personalised disinformation.
+* Synthetic media abuse (deepfakes, non-consensual intimate imagery — NCII).
+* Code that *almost works* — subtly broken security.
+:::
+:::
+
+## Privacy and data extraction
+
+[Two related concerns]{.eyebrow}
+
+::: {.columns}
+::: {.column width="50%"}
+[Training-data privacy]{.pill-amber}
+
+* LLMs memorise. Specific email addresses, phone numbers, code blocks, personal stories can be recovered from production models via prompt attacks.
+* Carlini et al. (2021): GPT-2 can be made to emit memorised training data with adversarial prompting.
+:::
+::: {.column width="50%"}
+[Inference-time privacy]{.pill-amber}
+
+* Every prompt you send to an API is data the provider can store, train on, or sell.
+* OpenAI explicitly logs interactions (with opt-out).
+* On-device / open-weights models avoid this entirely — but at a quality cost.
+:::
+:::
+
+::: {.callout-tip}
+For sensitive research data, **never** send identifiable records to a closed API without explicit clearance from your university's research-ethics committee (in the US, an Institutional Review Board, or IRB; health data carries extra rules such as the US HIPAA). Most commercial APIs are *not* GDPR-compliant by default.
+:::
+
+## AI safety and the existential question
+
+[A debate the field is having loudly]{.eyebrow}
+
+::: {.columns}
+::: {.column width="55%"}
+A serious-but-contested concern: as models become more capable, they may pursue goals misaligned with human intent — at scales where mistakes become catastrophic.
+
+* **Mechanistic interpretability** — understand what circuits inside a model do.
+* **Alignment research** — methods to make models do what we want, not what we incentivise.
+* **Evaluations + red-teaming** — test models for dangerous capabilities before release.
+
+Anthropic and Google DeepMind run large internal alignment teams; OpenAI has safety/alignment work too, though its dedicated *Superalignment* team was disbanded in 2024. Independent safety organisations — e.g. Redwood Research, the Alignment Research Center (ARC), and the UK's AI Security Institute — work alongside the labs.
+:::
+::: {.column width="45%"}
+::: {.callout-warning}
+**The disagreement is real.** Some serious researchers think this is the most important problem of the century. Others think it's overblown — a distraction from concrete current harms.
+
+You don't have to pick a side. You *should* know the debate exists, and have read at least one careful piece from each camp.
+:::
+:::
+:::
+
+## Governance and regulation
+
+[The institutional response]{.eyebrow}
+
+::: {.columns}
+::: {.column width="50%"}
+[Major recent frameworks]{.pill-blue}
+
+* **EU AI Act** (2024) — risk-tiered regulation; bans on social scoring, "high-risk" categories require audit.
+* **US executive order 14110** (Oct 2023) — set reporting requirements for large models, but was **revoked in Jan 2025**, so US federal requirements are now in flux.
+* **UK AI Safety Institute** (2023, **renamed the AI Security Institute in 2025**) — pre-deployment evaluations.
+* **China's interim measures** (2023) — registration + content controls.
+:::
+::: {.column width="50%"}
+[Hard open questions]{.pill-amber}
+
+* **Liability**: when an AI makes a harmful decision, who's responsible?
+* **Provenance**: how do we know what generated which content?
+* **Concentration**: does a small number of labs running frontier models pose systemic risk?
+* **Export controls**: should training compute be regulated like nuclear materials?
+:::
+:::
+
+## Labour
+
+::: {.card}
+We are early in a labour transition with no clear precedent in scale or speed.
+
+* Tasks that were full-time jobs three years ago are now done by LLMs — copy editing, junior coding, translation, customer support, illustration, paralegal work.
+* The benefits accrue mostly to capital, not labour.
+* The "winners" of the previous tech wave (software engineers) are now exposed too.
+:::
+
+::: {.callout-note}
+Whether you build these systems or use them, you have a stake in **how the gains are distributed**.
+:::
+
+## Labour displacement — the evidence so far
+
+[What we know, what we don't]{.eyebrow}
+
+::: {.columns}
+::: {.column width="50%"}
+[Studies showing displacement]{.pill-amber}
+
+* **Copywriting + translation**: Hui et al. (2023) found freelance demand for exposed work **fell** after ChatGPT's release (the headline magnitude is metric-dependent, and often smaller than early reports suggested).
+* **Illustration**: 15–30% revenue declines reported by professional illustrators.
+* **Customer support**: large vendors reducing headcount through 2024–25.
+:::
+::: {.column width="50%"}
+[Counter-evidence + complications]{.pill-blue}
+
+* **Demand grows when costs fall** — true historically; uncertain at this speed.
+* **Augmentation > replacement** in many studies (Brynjolfsson, Li & Raymond 2023).
+* **Reskilling** is plausible — but the time horizon for displacement may be shorter than reskilling.
+:::
+:::
+
+::: {.callout-warning}
+**The honest position**: we are early. Aggregate labour-market data lags by 1–3 years. Decisions are being made now — about policy, training, social safety nets — on weak evidence.
+:::
+
+## Copyright, consent, provenance
+
+* LLMs and image generators are trained on enormous corpora of human-created work, mostly **without explicit consent** of the creators.
+* Outputs sometimes regurgitate training data verbatim (memorisation).
+* Legal frameworks are still being written. The first major AI-copyright suits arrived **~2022–2023** — the GitHub Copilot class action (Nov 2022), *Getty Images v. Stability AI* and *Andersen v. Stability AI* (Jan 2023), the Authors Guild and *NYT v. OpenAI* (2023) — and many are still working through the courts.
+* Outputs are themselves often *uncopyrightable* (in the US, at least).
+
+::: {.callout-warning}
+**Provenance is increasingly a research problem of its own.** How do we track what generated what? How do we attribute when training data is laundered through a model? How do creators opt out?
+:::
+
+# Plenary · an ethics dilemma {background-color="#0E1A2B"}
+
+## Plenary · an ethics dilemma
+
+[<span class="pause-cue">≈ 30 min</span> · groups of 4–5]{.eyebrow}
+
+There are **two** scenarios this time. Read both — your group picks **one**.
+
+::: {.card}
+[The scenario]{.eyebrow}
+
+A national child welfare agency hires your firm to build a deep-learning model to **prioritise** which family-welfare cases caseworkers should investigate first. The agency receives more reports than it can investigate; prioritisation is currently done by overworked staff and is widely felt to be inconsistent.
+
+The data: 15 years of historical case files, including child outcomes (hospitalisation, court involvement, …) and family features (demographics, address, prior reports, contact with services).
+
+[Your team's mandate]{.eyebrow}
+
+Improve case prioritisation. **All design choices are yours.**
+:::
+
+## Plenary · what to discuss
+
+::: {.card}
+[In your group, discuss for 20 minutes]{.eyebrow}
+
+1. What **target variable** would you train on — and what does that choice encode about whose outcomes matter?
+
+2. What features would you **refuse to use**, even if they predict well?
+
+3. How would you **evaluate** the model — and what evaluation would convince you *not* to deploy?
+
+4. Who needs to **consent** to this system, and who gets to **contest** it?
+
+5. Is there a version of this project you would **refuse to take**?
+:::
+
+::: {.callout-warning}
+**This is a real situation** (the Allegheny Family Screening Tool is one canonical case). It is not a thought experiment.
+:::
+
+## Plenary · a second dilemma
+
+::: {.card}
+[The scenario]{.eyebrow}
+
+A research team wants to pretest policy survey questions in places where fieldwork is hard — conflict zones, closed regimes, hard-to-reach minorities. Their proposal: replace the human respondents with **synthetic respondents** — an LLM prompted to answer *as if* it were, say, a 45-year-old farmer in a named region — run across thousands of demographic profiles.
+:::
+
+::: {.columns}
+::: {.column width="50%"}
+[The pull]{.pill-green}
+
+* A pilot costs pounds, not tens of thousands.
+* Results arrive in an afternoon, not months.
+* No enumerators at risk. No real respondents to burden.
+:::
+::: {.column width="50%"}
+[The push]{.pill-amber}
+
+* Whose views is the model reporting? People matching the profile wrote little of the training data — the model may report what *others wrote about them*.
+* Training-data bias becomes **measurement bias** — the instrument is skewed before a single question is asked.
+* Nobody consented to being simulated. Who speaks for a group when a model claims to?
+:::
+:::
+
+::: {.callout-note}
+This is live research practice, not a hypothetical — Argyle et al. (2023), on your reading list, do a version of it for US public opinion.
+:::
+
+## Plenary · what to discuss (second dilemma)
+
+::: {.card}
+[If your group picks this one — same 20 minutes]{.eyebrow}
+
+1. What is the **quantity being measured** — public opinion, or the model's summary of text written about a group?
+
+2. Where would you accept synthetic respondents — **pretesting question wording**, or **estimating what people believe**? Is there a line?
+
+3. How would you **validate** the synthetic answers — and against what, if fieldwork is the thing you cannot do?
+
+4. No respondent was contacted, so no respondent consented. Does **consent** still apply — and whose?
+
+5. Is there a version of this project you would **refuse to take**?
+:::
+
+## Plenary · debrief
+
+[Some things people often surface in these discussions]{.eyebrow}
+
+::: {.card}
+* **Target selection is the foundational ethics question.** Training on "investigated and substantiated" replicates past investigation patterns — including their biases. Training on "child harm" requires a definition of harm.
+
+* **Proxies for race/class are everywhere.** Address, prior agency contact, school district, parents' occupation. "Removing the protected attribute" rarely suffices.
+
+* **Disparate-impact evaluation is non-negotiable.** Subgroup error rates, false-positive rates, magnitudes — not just aggregate accuracy.
+
+* **Consent and contestation are usually missing.** The families most affected typically have least voice in the design.
+
+* **"Refusal" is a professional option.** Not every project should be built. Especially not by people who didn't realise that until lecture 12.
+:::
+
+# Part 3 · What next + exam prep {background-color="#0E1A2B"}
+
+## What to read next
+
+[One curated list — not a firehose]{.eyebrow}
+
+::: {.columns}
+::: {.column width="50%"}
+[For technical depth]{.pill-blue}
+
+* Goodfellow, Bengio & Courville — *Deep Learning* (2016). Free online. The reference text.
+* Karpathy — *Neural Networks: Zero to Hero* (YouTube). The best teaching for transformers in recent memory.
+* Sutton & Barto — *Reinforcement Learning* — for the RLHF half of LLMs.
+* Distill.pub archive + the Hugging Face NLP course — visual and hands-on.
+:::
+::: {.column width="50%"}
+[For breadth + society]{.pill}
+
+* Russell — *Human Compatible*.
+* Crawford — *Atlas of AI*.
+* Mitchell — *Artificial Intelligence: A Guide for Thinking Humans*.
+* Bender, Gebru, McMillan-Major & Shmitchell — *On the Dangers of Stochastic Parrots* [@bender2021stochastic].
+:::
+:::
+
+::: {.card}
+[For social science specifically]{.eyebrow}
+
+* **Spirling (2023)** in *Nature* — why open-source models matter for research.
+* **Argyle et al. (2023)** — simulating human respondents with LLMs.
+* **Lall & Robinson (2022)** — deep learning for missing-data imputation (MIDAS).
+:::
+
+## Where AI research is moving — five bets
+
+[For your own next-step planning]{.eyebrow}
+
+::: {.card}
+1. **Multi-modal everything** — text, image, video, audio in one model. Already here for inputs; outputs are next.
+
+2. **Agents** — tool use, planning, multi-step task completion. Currently bad; rapidly improving.
+
+3. **Reasoning models** — o1, R1 family. RL on outcomes for chain-of-thought.
+
+4. **Efficiency** — small models that match big ones. Distillation + quantisation + sparse activations.
+
+5. **Personalisation** — models that adapt to *you* via short fine-tunes, persistent memory, or context engineering.
+:::
+
+::: {.callout-tip}
+Each of these has a 1–2 paper landing per week. You don't need to read all of them. But you should be able to *say what each is* and have a personal take on one.
+:::
+
+## How to keep up — without burning out
+
+::: {.card}
+1. **Follow a small, curated list of researchers** — not the firehose. Twitter/X is a low-signal medium for ML.
+2. **Read papers, not press releases.** The actual paper for any model is often less impressive than the press release.
+3. **Periodically re-implement landmark papers from scratch.** Especially once your day job stops requiring it.
+4. **Build something small you actually use.** The single best way to internalise a technique.
+:::
+
+::: {.callout-tip}
+The field moves fast in **press releases** and **product features**. The underlying ideas move much more slowly. You now know the slow part. Don't let the fast part demoralise you.
+:::
+
+## How to *use* AI in your own work
+
+[Concrete habits worth forming]{.eyebrow}
+
+::: {.card}
+1. **Verify before you trust.** Every fact, citation, statistic from an LLM gets a manual check.
+2. **Document your prompts** alongside your code. Treat prompts as part of your methodology.
+3. **Pre-register your evaluations** when using LLMs as measurement instruments.
+4. **Disclose** AI use in your publications. Most journals now require this.
+5. **Maintain skill in the underlying task.** If you can't write the code yourself, you can't supervise the LLM that does.
+:::
+
+::: {.callout-tip}
+The best researchers using AI in 2026 are not the ones who use it the most. They're the ones who use it *deliberately*, with clear ideas of where it helps and where it lies.
+:::
+
+## Quiz · the whole course in five questions
+
+[<span class="pause-cue">≈ 15 min</span> · whole room]{.eyebrow}
+
+Pen and paper — the same equipment as Friday's exam. Three questions here, two on the next slide.
+
+::: {.card}
+1. **A forward pass.** Weights $\mathbf{w} = [1, -2]$, bias $b = 0.5$, input $\mathbf{x} = [3, 1]$. Compute $y = \mathbf{w} \cdot \mathbf{x} + b$.
+
+2. **A parameter count.** A fully-connected layer maps 10 inputs to 4 outputs. How many parameters does it have, biases included?
+
+3. **An output shape.** A 32×32 image goes through one convolutional layer: a 5×5 kernel, stride 1, no padding. What size is the output?
+:::
+
+## Quiz · questions 4 and 5
+
+::: {.card}
+4. **Attention.** In self-attention, each token computes a query, a key, and a value. Give the role of each — one phrase per vector.
+
+5. **Sampling.** You set the generation temperature to 0. What does the model do at each step — and what is one reason you might not want that?
+:::
+
+[Question 1 is week 1; questions 2–3 are week 2; questions 4–5 are week 3. If all five feel routine, you are ready for Friday.]{.muted}
+
+## Quiz · answers 1–3
+
+::: {.card}
+[1 · Forward pass]{.eyebrow}
+
+$$
+y = (1 \times 3) + (-2 \times 1) + 0.5 = 3 - 2 + 0.5 = 1.5
+$$
+
+[2 · Parameter count]{.eyebrow}
+
+$$
+10 \times 4 \text{ weights} + 4 \text{ biases} = 40 + 4 = 44
+$$
+
+[3 · Output shape]{.eyebrow}
+
+$$
+\frac{32 + 2(0) - 5}{1} + 1 = 27 + 1 = 28 \quad \Rightarrow \quad 28 \times 28
+$$
+
+The same rule as lecture 6: $\lfloor (H + 2P - k)/s \rfloor + 1$.
+:::
+
+## Quiz · answers 4 and 5
+
+::: {.card}
+[4 · Attention]{.eyebrow}
+
+* **Query** — *"what am I looking for?"*
+* **Key** — *"what do I offer?"*
+* **Value** — *"if you attend to me, here's the content I'll contribute."*
+
+[5 · Temperature 0]{.eyebrow}
+
+$\tau = 0$ reduces sampling to **argmax**: at every step the model picks the single most likely token, so generation is deterministic — the same prompt gives the same text every time.
+
+One reason not to want that: the text turns repetitive and flat, and a confident wrong answer comes back wrong on every run.
+:::
+
+That's the course: a dot product, a count, a shape, three vectors, and a knob.
+
+## The final exam
+
+[<span class="pause-cue">Friday 21 August</span>]{.eyebrow}
+
+::: {.card}
+* **Two hours**, pen and paper. No laptops. No phones. No ChatGPT.
+* **Forty multiple-choice questions**, **six options** each, exactly one correct.
+* One mark each — marked out of 40, reported as a percentage.
+* **No negative marking.** A blank scores the same as a wrong answer, so **answer every question**.
+:::
+
+::: {.columns}
+::: {.column width="50%"}
+[Examinable]{.pill-green}
+
+* Anything in the slides.
+* Anything in the labs you completed.
+* Anything in the assigned readings.
+:::
+::: {.column width="50%"}
+[Not examinable]{.pill}
+
+* Detailed knowledge of specific papers beyond what we covered.
+* PyTorch syntax memorisation.
+* The optional further-reading textbooks.
+:::
+:::
+
+## What the questions look like
+
+[Two hours, forty questions — about three minutes each]{.eyebrow}
+
+::: {.columns}
+::: {.column width="50%"}
+[Roughly half are **calculations**]{.pill-blue}
+
+A forward pass, a gradient, an output shape, a parameter count, a softmax, a cosine, three steps of BPE. You work it out, then select the number you got.
+
+Any constants you need are printed in the question.
+:::
+::: {.column width="50%"}
+[The rest are **code and judgement**]{.pill}
+
+Read a few lines of PyTorch or pseudocode and say what is wrong, or put them in the right order.
+
+Or: here is a training curve / a validation result / a research design — what is *actually* going on?
+:::
+:::
+
+::: {.callout-warning appearance="simple"}
+**Arithmetic alone will not be enough.** On several questions two options carry the **same number** and differ only in the claim attached to it. Getting the number right is the first half of the work; deciding what it means is the second. **Read all six options before you choose.**
+:::
+
+::: {.card}
+The paper runs roughly in course order and **gets harder as it goes**. The last few questions are meant to stretch the strongest of you — if you get stuck, move on and come back.
+:::
+
+## How to study tonight
+
+::: {.card}
+1. Reread the **slides** from each lecture — and skim the **solution cells** of the labs you completed. Both are examinable.
+2. Be able to define every term in the eyebrow labels and pills across all 12 decks.
+3. Be able to **draw a computation graph** for a small expression and compute its gradient.
+4. Re-derive softmax + cross-entropy on paper.
+5. Sleep.
+:::
+
+::: {.callout-tip}
+**Don't try to learn anything new tonight.** Consolidate what you already know. The exam tests *understanding*, not last-minute information.
+:::
+
+## What I expect to see on Friday
+
+::: {.card}
+* You can work backprop through a small graph and read off the gradients.
+* You can compute a forward pass through a small MLP by hand.
+* You can name the components of a transformer and say what each does.
+* You can tell a good argument for using deep learning on a problem from a bad one.
+* You can read a PyTorch training loop and spot the line that is wrong.
+
+If you can do these, you'll pass. Most of you will do better than that.
+:::
+
+# A final word {background-color="#0E1A2B"}
+
+## A final word
+
+[Three weeks ago, AI was a black box.]{.eyebrow}
+
+Today, you have built every component of one — with your own hands and on paper. That changes how you read papers. How you read news. What you can build. And how you talk about these systems with people who haven't seen inside the box.
+
+::: {.card}
+**Thanks.**
+
+To **Kaifang Zhou**, your lab instructor and TA, for running the labs. And to this cohort, for showing up to three hours of lecture and 90 minutes of lab every weekday for three weeks.
+
+[Stay in touch. Office hours continue through the autumn. Many of you will return for MY475 — see you then.]{.smaller}
+
+[**Send me what you build. Send me what breaks.**]{.smaller}
+:::
+
+## The exam
+
+[Friday 21 August — final exam · two hours]{.eyebrow}
+
+[Bring]{.eyebrow}
+
+* A pen.
+* Photo ID.
+* A clear head.
+
+::: {.callout-tip}
+**Good luck — and thank you again.** It's been a privilege to teach this cohort.
+:::
+
+## References

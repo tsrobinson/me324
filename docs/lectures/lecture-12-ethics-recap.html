@@ -1,0 +1,2027 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-html/tabby.min.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/light-border.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-html.min.css" rel="stylesheet" data-mode="light">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
+  <meta name="generator" content="quarto-1.5.57">
+
+  <meta name="author" content="Dr Thomas Robinson">
+  <meta name="dcterms.date" content="2026-08-19">
+  <title>ME324 · AI &amp; Deep Learning – Ethics, limitations, and course recap</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+  <link rel="stylesheet" href="../site_libs/revealjs/dist/reset.css">
+  <link rel="stylesheet" href="../site_libs/revealjs/dist/reveal.css">
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+      vertical-align: middle;
+    }
+    /* CSS for citations */
+    div.csl-bib-body { }
+    div.csl-entry {
+      clear: both;
+      margin-bottom: 0em;
+    }
+    .hanging-indent div.csl-entry {
+      margin-left:2em;
+      text-indent:-2em;
+    }
+    div.csl-left-margin {
+      min-width:2em;
+      float:left;
+    }
+    div.csl-right-inline {
+      margin-left:2em;
+      padding-left:1em;
+    }
+    div.csl-indent {
+      margin-left: 2em;
+    }  </style>
+  <link rel="stylesheet" href="../site_libs/revealjs/dist/theme/quarto.css">
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
+  <link href="../site_libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
+  <link href="../site_libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
+  <link href="../site_libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
+  <link href="../site_libs/revealjs/plugin/quarto-support/footer.css" rel="stylesheet">
+  <style type="text/css">
+
+  .callout {
+    margin-top: 1em;
+    margin-bottom: 1em;  
+    border-radius: .25rem;
+  }
+
+  .callout.callout-style-simple { 
+    padding: 0em 0.5em;
+    border-left: solid #acacac .3rem;
+    border-right: solid 1px silver;
+    border-top: solid 1px silver;
+    border-bottom: solid 1px silver;
+    display: flex;
+  }
+
+  .callout.callout-style-default {
+    border-left: solid #acacac .3rem;
+    border-right: solid 1px silver;
+    border-top: solid 1px silver;
+    border-bottom: solid 1px silver;
+  }
+
+  .callout .callout-body-container {
+    flex-grow: 1;
+  }
+
+  .callout.callout-style-simple .callout-body {
+    font-size: 1rem;
+    font-weight: 400;
+  }
+
+  .callout.callout-style-default .callout-body {
+    font-size: 0.9rem;
+    font-weight: 400;
+  }
+
+  .callout.callout-titled.callout-style-simple .callout-body {
+    margin-top: 0.2em;
+  }
+
+  .callout:not(.callout-titled) .callout-body {
+      display: flex;
+  }
+
+  .callout:not(.no-icon).callout-titled.callout-style-simple .callout-content {
+    padding-left: 1.6em;
+  }
+
+  .callout.callout-titled .callout-header {
+    padding-top: 0.2em;
+    margin-bottom: -0.2em;
+  }
+
+  .callout.callout-titled .callout-title  p {
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+  }
+    
+  .callout.callout-titled.callout-style-simple .callout-content  p {
+    margin-top: 0;
+  }
+
+  .callout.callout-titled.callout-style-default .callout-content  p {
+    margin-top: 0.7em;
+  }
+
+  .callout.callout-style-simple div.callout-title {
+    border-bottom: none;
+    font-size: .9rem;
+    font-weight: 600;
+    opacity: 75%;
+  }
+
+  .callout.callout-style-default  div.callout-title {
+    border-bottom: none;
+    font-weight: 600;
+    opacity: 85%;
+    font-size: 0.9rem;
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+  }
+
+  .callout.callout-style-default div.callout-content {
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+  }
+
+  .callout.callout-style-simple .callout-icon::before {
+    height: 1rem;
+    width: 1rem;
+    display: inline-block;
+    content: "";
+    background-repeat: no-repeat;
+    background-size: 1rem 1rem;
+  }
+
+  .callout.callout-style-default .callout-icon::before {
+    height: 0.9rem;
+    width: 0.9rem;
+    display: inline-block;
+    content: "";
+    background-repeat: no-repeat;
+    background-size: 0.9rem 0.9rem;
+  }
+
+  .callout-title {
+    display: flex
+  }
+    
+  .callout-icon::before {
+    margin-top: 1rem;
+    padding-right: .5rem;
+  }
+
+  .callout.no-icon::before {
+    display: none !important;
+  }
+
+  .callout.callout-titled .callout-body > .callout-content > :last-child {
+    padding-bottom: 0.5rem;
+    margin-bottom: 0;
+  }
+
+  .callout.callout-titled .callout-icon::before {
+    margin-top: .5rem;
+    padding-right: .5rem;
+  }
+
+  .callout:not(.callout-titled) .callout-icon::before {
+    margin-top: 1rem;
+    padding-right: .5rem;
+  }
+
+  /* Callout Types */
+
+  div.callout-note {
+    border-left-color: #4582ec !important;
+  }
+
+  div.callout-note .callout-icon::before {
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAIKADAAQAAAABAAAAIAAAAACshmLzAAAEU0lEQVRYCcVXTWhcVRQ+586kSUMMxkyaElstCto2SIhitS5Ek8xUKV2poatCcVHtUlFQk8mbaaziwpWgglJwVaquitBOfhQXFlqlzSJpFSpIYyXNjBNiTCck7x2/8/LeNDOZxDuEkgOXe++553zfefee+/OYLOXFk3+1LLrRdiO81yNqZ6K9cG0P3MeFaMIQjXssE8Z1JzLO9ls20MBZX7oG8w9GxB0goaPrW5aNMp1yOZIa7Wv6o2ykpLtmAPs/vrG14Z+6d4jpbSKuhdcSyq9wGMPXjonwmESXrriLzFGOdDBLB8Y6MNYBu0dRokSygMA/mrun8MGFN3behm6VVAwg4WR3i6FvYK1T7MHo9BK7ydH+1uurECoouk5MPRyVSBrBHMYwVobG2aOXM07sWrn5qgB60rc6mcwIDJtQrnrEr44kmy+UO9r0u9O5/YbkS9juQckLed3DyW2XV/qWBBB3ptvI8EUY3I9p/67OW+g967TNr3Sotn3IuVlfMLVnsBwH4fsnebJvyGm5GeIUA3jljERmrv49SizPYuq+z7c2H/jlGC+Ghhupn/hcapqmcudB9jwJ/3jvnvu6vu5lVzF1fXyZuZZ7U8nRmVzytvT+H3kilYvH09mLWrQdwFSsFEsxFVs5fK7A0g8gMZjbif4ACpKbjv7gNGaD8bUrlk8x+KRflttr22JEMRUbTUwwDQScyzPgedQHZT0xnx7ujw2jfVfExwYHwOsDTjLdJ2ebmeQIlJ7neo41s/DrsL3kl+W2lWvAga0tR3zueGr6GL78M3ifH0rGXrBC2aAR8uYcIA5gwV8zIE8onoh8u0Fca/ciF7j1uOzEnqcIm59sEXoGc0+z6+H45V1CvAvHcD7THztu669cnp+L0okAeIc6zjbM/24LgGM1gZk7jnRu1aQWoU9sfUOuhrmtaPIO3YY1KLLWZaEO5TKUbMY5zx8W9UJ6elpLwKXbsaZ4EFl7B4bMtDv0iRipKoDQT2sNQI9b1utXFdYisi+wzZ/ri/1m7QfDgEuvgUUEIJPq3DhX/5DWNqIXDOweC2wvIR90Oq3lDpdMIgD2r0dXvGdsEW5H6x6HLRJYU7C69VefO1x8Gde1ZFSJLfWS1jbCnhtOPxmpfv2LXOA2Xk2tvnwKKPFuZ/oRmwBwqRQDcKNeVQkYcOjtWVBuM/JuYw5b6isojIkYxyYAFn5K7ZBF10fea52y8QltAg6jnMqNHFBmGkQ1j+U43HMi2xMar1Nv0zGsf1s8nUsmUtPOOrbFIR8bHFDMB5zL13Gmr/kGlCkUzedTzzmzsaJXhYawnA3UmARpiYj5ooJZiUoxFRtK3X6pgNPv+IZVPcnwbOl6f+aBaO1CNvPW9n9LmCp01nuSaTRF2YxHqZ8DYQT6WsXT+RD6eUztwYLZ8rM+rcPxamv1VQzFUkzFXvkiVrySGQgJNvXHJAxiU3/NwiC03rSf05VBaPtu/Z7/B8Yn/w7eguloAAAAAElFTkSuQmCC');
+  }
+
+  div.callout-note.callout-style-default .callout-title {
+    background-color: #dae6fb
+  }
+
+  div.callout-important {
+    border-left-color: #d9534f !important;
+  }
+
+  div.callout-important .callout-icon::before {
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAIKADAAQAAAABAAAAIAAAAACshmLzAAAEKklEQVRYCcVXTWhcVRS+575MJym48A+hSRFr00ySRQhURRfd2HYjk2SSTokuBCkU2o0LoSKKraKIBTcuFCoidGFD08nkBzdREbpQ1EDNIv8qSGMFUboImMSZd4/f9zJv8ibJMC8xJQfO3HPPPef7zrvvvnvviIkpC9nsw0UttFunbUhpFzFtarSd6WJkStVMw5xyVqYTvkwfzuf/5FgtkVoB0729j1rjXwThS7Vio+Mo6DNnvLfahoZ+i/o32lULuJ3NNiz7q6+pyAUkJaFF6JwaM2lUJlV0MlnQn5aTRbEu0SEqHUa0A4AdiGuB1kFXRfVyg5d87+Dg4DL6m2TLAub60ilj7A1Ec4odSAc8X95sHh7+ZRPCFo6Fnp7HfU/fBng/hi10CjCnWnJjsxvDNxWw0NfV6Rv5GgP3I3jGWXumdTD/3cbEOP2ZbOZp69yniG3FQ9z1jD7bnBu9Fc2tKGC2q+uAJOQHBDRiZX1x36o7fWBs7J9ownbtO+n0/qWkvW7UPIfc37WgT6ZGR++EOJyeQDSb9UB+DZ1G6DdLDzyS+b/kBCYGsYgJbSQHuThGKRcw5xdeQf8YdNHsc6ePXrlSYMBuSIAFTGAtQo+VuALo4BX83N190NWZWbynBjhOHsmNfFWLeL6v+ynsA58zDvvAC8j5PkbOcXCMg2PZFk3q8MjI7WAG/Dp9AwP7jdGBOOQkAvlFUB+irtm16I1Zw9YBcpGTGXYmk3kQIC/Cds55l+iMI3jqhjAuaoe+am2Jw5GT3Nbz3CkE12NavmzN5+erJW7046n/CH1RO/RVa8lBLozXk9uqykkGAyRXLWlLv5jyp4RFsG5vGVzpDLnIjTWgnRy2Rr+tDKvRc7Y8AyZq10jj8DqXdnIRNtFZb+t/ZRtXcDiVnzpqx8mPcDWxgARUqx0W1QB9MeUZiNrV4qP+Ehc+BpNgATsTX8ozYKL2NtFYAHc84fG7ndxUPr+AR/iQSns7uSUufAymwDOb2+NjK27lEFocm/EE2WpyIy/Hi66MWuMKJn8RvxIcj87IM5Vh9663ziW36kR0HNenXuxmfaD8JC7tfKbrhFr7LiZCrMjrzTeGx+PmkosrkNzW94ObzwocJ7A1HokLolY+AvkTiD/q1H0cN48c5EL8Crkttsa/AXQVDmutfyku0E7jShx49XqV3MFK8IryDhYVbj7Sj2P2eBxwcXoe8T8idsKKPRcnZw1b+slFTubwUwhktrfnAt7J++jwQtLZcm3sr9LQrjRzz6cfMv9aLvgmnAGvpoaGLxM4mAEaLV7iAzQ3oU0IvD5x9ix3yF2RAAuYAOO2f7PEFWCXZ4C9Pb2UsgDeVnFSpbFK7/IWu7TPTvBqzbGdCHOJQSxiEjt6IyZmxQyEJHv6xyQsYk//moVFsN2zP6fRImjfq7/n/wFDguUQFNEwugAAAABJRU5ErkJggg==');
+  }
+
+  div.callout-important.callout-style-default .callout-title {
+    background-color: #f7dddc
+  }
+
+  div.callout-warning {
+    border-left-color: #f0ad4e !important;
+  }
+
+  div.callout-warning .callout-icon::before {
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAIKADAAQAAAABAAAAIAAAAACshmLzAAAETklEQVRYCeVWW2gcVRg+58yaTUnizqbipZeX4uWhBEniBaoUX1Ioze52t7sRq6APio9V9MEaoWlVsFasRq0gltaAPuxms8lu0gcviE/FFOstVbSIxgcv6SU7EZqmdc7v9+9mJtNks51NTUH84ed889/PP+cmxP+d5FIbMJmNbpREu4WUkiTtCicKny0l1pIKmBzovF2S+hIJHX8iEu3hZJ5lNZGqyRrGSIQpq15AzF28jgpeY6yk6GVdrfFqdrD6Iw+QlB8g0YS2g7dyQmXM/IDhBhT0UCiRf59lfqmmDvzRt6kByV/m4JjtzuaujMUM2c5Z2d6JdKrRb3K2q6mA+oYVz8JnDdKPmmNthzkAk/lN63sYPgevrguc72aZX/L9C6x09GYyxBgCX4NlvyGUHOKELlm5rXeR1kchuChJt4SSwyddZRXgvwMGvYo4QSlk3/zkHD8UHxwVJA6zjZZqP8v8kK8OWLnIZtLyCAJagYC4rTGW/9Pqj92N/c+LUaAj27movwbi19tk/whRCIE7Q9vyI6yvRpftAKVTdUjOW40X3h5OXsKCdmFcx0xlLJoSuQngnrJe7Kcjm4OMq9FlC7CMmScQANuNvjfP3PjGXDBaUQmbp296S5L4DrpbrHN1T87ZVEZVCzg1FF0Ft+dKrlLukI+/c9ENo+TvlTDbYFvuKPtQ9+l052rXrgKoWkDAFnvh0wTOmYn8R5f4k/jN/fZiCM1tQx9jQQ4ANhqG4hiL0qIFTGViG9DKB7GYzgubnpofgYRwO+DFjh0Zin2m4b/97EDkXkc+f6xYAPX0KK2I/7fUQuwzuwo/L3AkcjugPNixC8cHf0FyPjWlItmLxWw4Ou9YsQCr5fijMGoD/zpdRy95HRysyXA74MWOnscpO4j2y3HAVisw85hX5+AFBRSHt4ShfLFkIMXTqyKFc46xdzQM6XbAi702a7sy04J0+feReMFKp5q9esYLCqAZYw/k14E/xcLLsFElaornTuJB0svMuJINy8xkIYuL+xPAlWRceH6+HX7THJ0djLUom46zREu7tTkxwmf/FdOZ/sh6Q8qvEAiHpm4PJ4a/doJe0gH1t+aHRgCzOvBvJedEK5OFE5jpm4AGP2a8Dxe3gGJ/pAutug9Gp6he92CsSsWBaEcxGx0FHytmIpuqGkOpldqNYQK8cSoXvd+xLxXADw0kf6UkJNFtdo5MOgaLjiQOQHcn+A6h5NuL2s0qsC2LOM75PcF3yr5STuBSAcGG+meA14K/CI21HcS4LBT6tv0QAh8Dr5l93AhZzG5ZJ4VxAqdZUEl9z7WJ4aN+svMvwHHL21UKTd1mqvChH7/Za5xzXBBKrUcB0TQ+Ulgkfbi/H/YT5EptrGzsEK7tR1B7ln9BBwckYfMiuSqklSznIuoIIOM42MQO+QnduCoFCI0bpkzjCjddHPN/F+2Yu+sd9bKNpVwHhbS3LluK/0zgfwD0xYI5dXuzlQAAAABJRU5ErkJggg==');
+  }
+
+  div.callout-warning.callout-style-default .callout-title {
+    background-color: #fcefdc
+  }
+
+  div.callout-tip {
+    border-left-color: #02b875 !important;
+  }
+
+  div.callout-tip .callout-icon::before {
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAIKADAAQAAAABAAAAIAAAAACshmLzAAADr0lEQVRYCe1XTWgTQRj9ZjZV8a9SPIkKgj8I1bMHsUWrqYLVg4Ue6v9BwZOxSYsIerFao7UiUryIqJcqgtpimhbBXoSCVxUFe9CTiogUrUp2Pt+3aUI2u5vdNh4dmMzOzHvvezuz8xNFM0mjnbXaNu1MvFWRXkXEyE6aYOYJpdW4IXuA4r0fo8qqSMDBU0v1HJUgVieAXxzCsdE/YJTdFcVIZQNMyhruOMJKXYFoLfIfIvVIMWdsrd+Rpd86ZmyzzjJmLStqRn0v8lzkb4rVIXvnpScOJuAn2ACC65FkPzEdEy4TPWRLJ2h7z4cArXzzaOdKlbOvKKX25Wl00jSnrwVxAg3o4dRxhO13RBSdNvH0xSARv3adTXbBdTf64IWO2vH0LT+cv4GR1DJt+DUItaQogeBX/chhbTBxEiZ6gftlDNXTrvT7co4ub5A6gp9HIcHvzTa46OS5fBeP87Qm0fQkr4FsYgVQ7Qg+ZayaDg9jhg1GkWj8RG6lkeSacrrHgDaxdoBiZPg+NXV/KifMuB6//JmYH4CntVEHy/keA6x4h4CU5oFy8GzrBS18cLJMXcljAKB6INjWsRcuZBWVaS3GDrqB7rdapVIeA+isQ57Eev9eCqzqOa81CY05VLd6SamW2wA2H3SiTbnbSxmzfp7WtKZkqy4mdyAlGx7ennghYf8voqp9cLSgKdqNfa6RdRsAAkPwRuJZNbpByn+RrJi1RXTwdi8RQF6ymDwGMAtZ6TVE+4uoKh+MYkcLsT0Hk8eAienbiGdjJHZTpmNjlbFJNKDVAp2fJlYju6IreQxQ08UJDNYdoLSl6AadO+fFuCQqVMB1NJwPm69T04Wv5WhfcWyfXQB+wXRs1pt+nCknRa0LVzSA/2B+a9+zQJadb7IyyV24YAxKp2Jqs3emZTuNnKxsah+uabKbMk7CbTgJx/zIgQYErIeTKRQ9yD9wxVof5YolPHqaWo7TD6tJlh7jQnK5z2n3+fGdggIOx2kaa2YI9QWarc5Ce1ipNWMKeSG4DysFF52KBmTNMmn5HqCFkwy34rDg05gDwgH3bBi+sgFhN/e8QvRn8kbamCOhgrZ9GJhFDgfcMHzFb6BAtjKpFhzTjwv1KCVuxHvCbsSiEz4CANnj84cwHdFXAbAOJ4LTSAawGWFn5tDhLMYz6nWeU2wJfIhmIJBefcd/A5FWQWGgrWzyORZ3Q6HuV+Jf0Bj+BTX69fm1zWgK7By1YTXchFDORywnfQ7GpzOo6S+qECrsx2ifVQAAAABJRU5ErkJggg==');
+  }
+
+  div.callout-tip.callout-style-default .callout-title {
+    background-color: #ccf1e3
+  }
+
+  div.callout-caution {
+    border-left-color: #fd7e14 !important;
+  }
+
+  div.callout-caution .callout-icon::before {
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAIKADAAQAAAABAAAAIAAAAACshmLzAAACV0lEQVRYCdVWzWoUQRCuqp2ICBLJXgITZL1EfQDBW/bkzUMUD7klD+ATSHBEfAIfQO+iXsWDxJsHL96EHAwhgzlkg8nBg25XWb0zIb0zs9muYYWkoKeru+vn664fBqElyZNuyh167NXJ8Ut8McjbmEraKHkd7uAnAFku+VWdb3reSmRV8PKSLfZ0Gjn3a6Xlcq9YGb6tADjn+lUfTXtVmaZ1KwBIvFI11rRXlWlatwIAAv2asaa9mlB9wwygiDX26qaw1yYPzFXg2N1GgG0FMF8Oj+VIx7E/03lHx8UhvYyNZLN7BwSPgekXXLribw7w5/c8EF+DBK5idvDVYtEEwMeYefjjLAdEyQ3M9nfOkgnPTEkYU+sxMq0BxNR6jExrAI31H1rzvLEfRIdgcv1XEdj6QTQAS2wtstEALLG1yEZ3QhH6oDX7ExBSFEkFINXH98NTrme5IOaaA7kIfiu2L8A3qhH9zRbukdCqdsA98TdElyeMe5BI8Rs2xHRIsoTSSVFfCFCWGPn9XHb4cdobRIWABNf0add9jakDjQJpJ1bTXOJXnnRXHRf+dNL1ZV1MBRCXhMbaHqGI1JkKIL7+i8uffuP6wVQAzO7+qVEbF6NbS0LJureYcWXUUhH66nLR5rYmva+2tjRFtojkM2aD76HEGAD3tPtKM309FJg5j/K682ywcWJ3PASCcycH/22u+Bh7Aa0ehM2Fu4z0SAE81HF9RkB21c5bEn4Dzw+/qNOyXr3DCTQDMBOdhi4nAgiFDGCinIa2owCEChUwD8qzd03PG+qdW/4fDzjUMcE1ZpIAAAAASUVORK5CYII=');
+  }
+
+  div.callout-caution.callout-style-default .callout-title {
+    background-color: #ffe5d0
+  }
+
+  </style>
+  <style type="text/css">
+    .reveal div.sourceCode {
+      margin: 0;
+      overflow: auto;
+    }
+    .reveal div.hanging-indent {
+      margin-left: 1em;
+      text-indent: -1em;
+    }
+    .reveal .slide:not(.center) {
+      height: 100%;
+    }
+    .reveal .slide.scrollable {
+      overflow-y: auto;
+    }
+    .reveal .footnotes {
+      height: 100%;
+      overflow-y: auto;
+    }
+    .reveal .slide .absolute {
+      position: absolute;
+      display: block;
+    }
+    .reveal .footnotes ol {
+      counter-reset: ol;
+      list-style-type: none; 
+      margin-left: 0;
+    }
+    .reveal .footnotes ol li:before {
+      counter-increment: ol;
+      content: counter(ol) ". "; 
+    }
+    .reveal .footnotes ol li > p:first-child {
+      display: inline-block;
+    }
+    .reveal .slide ul,
+    .reveal .slide ol {
+      margin-bottom: 0.5em;
+    }
+    .reveal .slide ul li,
+    .reveal .slide ol li {
+      margin-top: 0.4em;
+      margin-bottom: 0.2em;
+    }
+    .reveal .slide ul[role="tablist"] li {
+      margin-bottom: 0;
+    }
+    .reveal .slide ul li > *:first-child,
+    .reveal .slide ol li > *:first-child {
+      margin-block-start: 0;
+    }
+    .reveal .slide ul li > *:last-child,
+    .reveal .slide ol li > *:last-child {
+      margin-block-end: 0;
+    }
+    .reveal .slide .columns:nth-child(3) {
+      margin-block-start: 0.8em;
+    }
+    .reveal blockquote {
+      box-shadow: none;
+    }
+    .reveal .tippy-content>* {
+      margin-top: 0.2em;
+      margin-bottom: 0.7em;
+    }
+    .reveal .tippy-content>*:last-child {
+      margin-bottom: 0.2em;
+    }
+    .reveal .slide > img.stretch.quarto-figure-center,
+    .reveal .slide > img.r-stretch.quarto-figure-center {
+      display: block;
+      margin-left: auto;
+      margin-right: auto; 
+    }
+    .reveal .slide > img.stretch.quarto-figure-left,
+    .reveal .slide > img.r-stretch.quarto-figure-left  {
+      display: block;
+      margin-left: 0;
+      margin-right: auto; 
+    }
+    .reveal .slide > img.stretch.quarto-figure-right,
+    .reveal .slide > img.r-stretch.quarto-figure-right  {
+      display: block;
+      margin-left: auto;
+      margin-right: 0; 
+    }
+  </style>
+<meta property="og:title" content="Ethics, limitations, and course recap – ME324 · AI &amp; Deep Learning">
+<meta property="og:description" content="Lecture 12 — Where deep learning still breaks, and what to do about it">
+<meta property="og:site_name" content="ME324 · AI &amp; Deep Learning">
+</head>
+<body class="quarto-light">
+  <div class="reveal">
+    <div class="slides">
+
+<section id="title-slide" class="quarto-title-block center">
+  <h1 class="title">Ethics, limitations, and course recap</h1>
+  <p class="subtitle">Lecture 12 — Where deep learning still breaks, and what to do about it</p>
+
+<div class="quarto-title-authors">
+<div class="quarto-title-author">
+<div class="quarto-title-author-name">
+Dr Thomas Robinson 
+</div>
+</div>
+</div>
+
+  <p class="date">August 19, 2026</p>
+</section>
+<section>
+<section id="part-1-the-course-in-30-minutes" class="title-slide slide level1 center" data-background-color="#0E1A2B">
+<h1>Part 1 · The course in 30 minutes</h1>
+
+</section>
+<section id="what-you-can-do-today-that-you-couldnt-three-weeks-ago" class="slide level2">
+<h2>What you can do today that you couldn’t three weeks ago</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><span class="pill">Week 1</span></p>
+<ul>
+<li>Define “AI”; situate deep learning historically.</li>
+<li>Forward-propagate through a perceptron by hand.</li>
+<li>Read and draw a computational graph.</li>
+<li>Implement backpropagation in &lt;100 lines of Python.</li>
+</ul>
+</div><div class="column" style="width:50%;">
+<p><span class="pill-blue">Week 2</span></p>
+<ul>
+<li>Train a feed-forward network in PyTorch.</li>
+<li>Convolve an image; reason about kernels and pooling.</li>
+<li>Build a CNN classifier on MNIST (≥98%).</li>
+<li>Build a VAE that samples new MNIST digits.</li>
+<li>Treat text as data; build a bigram language model.</li>
+</ul>
+<p><span class="pill-green">Week 3</span></p>
+<ul>
+<li>Build a recurrent network (RNN) for sequences.</li>
+<li>Implement self-attention.</li>
+<li>Build a tiny GPT from scratch.</li>
+<li>Swap in BPE and improve sampling.</li>
+</ul>
+</div></div>
+</section>
+<section id="five-ideas-that-connect-everything" class="slide level2">
+<h2>Five ideas that connect everything</h2>
+<div class="card">
+<ol type="1">
+<li><p><strong>Composition.</strong> A network is a sequence of cheap operations (matmul + non-linearity). Stacking gives expressiveness.</p></li>
+<li><p><strong>Differentiability.</strong> Every operation has a known gradient. The chain rule glues them.</p></li>
+<li><p><strong>Autodiff.</strong> Backpropagation = reverse-mode autodiff. Linear cost in graph size.</p></li>
+<li><p><strong>Optimisation.</strong> Define a loss. Step against the gradient. Repeat.</p></li>
+<li><p><strong>Scale.</strong> The same building blocks at <span class="math inline">10^4</span> parameters and <span class="math inline">10^{12}</span> parameters. The only thing that changes is what you can express.</p></li>
+</ol>
+</div>
+<div class="callout callout-tip callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Tip</strong></p>
+</div>
+<div class="callout-content">
+<p>If you remember nothing else from this course, remember these five. They are the <strong>conceptual core</strong> of everything.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="the-mental-model-you-should-leave-with" class="slide level2">
+<h2>The mental model you should leave with</h2>
+<p><span class="eyebrow">A sketch that fits on a napkin</span></p>
+<div class="card">
+<p>Every deep-learning model is:</p>
+<ul>
+<li>A <strong>stack of layers</strong> — each does a small, differentiable computation.</li>
+<li><strong>Trained</strong> by gradient descent on a loss.</li>
+<li><strong>Tuned</strong> by you — picking architecture, loss, optimiser, data.</li>
+</ul>
+<p>That’s it. CNNs change <em>what</em> each layer computes. RNNs and transformers change <em>how</em> tokens talk across positions. VAEs change <em>what</em> the model predicts. Everything else is detail.</p>
+</div>
+<div class="callout callout-tip callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Tip</strong></p>
+</div>
+<div class="callout-content">
+<p>Hold this in your head and you’ll be able to read any deep-learning paper in your field. The vocabulary differs; the underlying machinery does not.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="how-the-course-mapped-to-architectures" class="slide level2">
+<h2>How the course mapped to architectures</h2>
+<div class="card">
+<ul>
+<li><strong>L1-L4</strong> — the engine. Autodiff and gradient descent.</li>
+<li><strong>L5</strong> — first real model. Feed-forward networks.</li>
+<li><strong>L6</strong> — first specialised model. CNNs for spatial data.</li>
+<li><strong>L7</strong> — first generative model. VAEs.</li>
+<li><strong>L8-L11</strong> — language. Embeddings → RNNs → transformers.</li>
+<li><strong>L12</strong> — context. What you’ve built. What it means.</li>
+</ul>
+<p>Every later lecture <strong>reuses</strong> the earlier ones. The CNN training loop is the FFN training loop with a different <code>model</code>. The transformer training loop is the same again. The mechanics never change.</p>
+</div>
+</section>
+<section id="whats-not-in-this-course" class="slide level2">
+<h2>What’s <em>not</em> in this course</h2>
+<p><span class="eyebrow">A list of things worth knowing that we didn’t cover</span></p>
+<div class="columns">
+<div class="column" style="width:50%;">
+<ul>
+<li>Reinforcement learning — RLHF (reinforcement learning from human feedback) and its optimisers, PPO (proximal policy optimisation) and DPO (direct preference optimisation).</li>
+<li>Graph neural networks.</li>
+<li>Diffusion models in depth (we sketched).</li>
+<li>Self-supervised pre-training methods.</li>
+<li>Multi-modal models (text + image jointly).</li>
+<li>Long-context architectures (Mamba, RingAttention).</li>
+</ul>
+</div><div class="column" style="width:50%;">
+<ul>
+<li>Quantisation, distillation, model compression.</li>
+<li>Federated learning, privacy-preserving ML.</li>
+<li>Causal ML and double machine learning.</li>
+<li>Bayesian deep learning.</li>
+<li>MoE (mixture of experts).</li>
+<li>Speculative decoding.</li>
+</ul>
+</div></div>
+<div class="card">
+<p>Each of these is a course in itself. You now have the foundations to read into any of them.</p>
+</div>
+</section></section>
+<section>
+<section id="part-2-limitations-ethics" class="title-slide slide level1 center" data-background-color="#0E1A2B">
+<h1>Part 2 · Limitations + ethics</h1>
+
+</section>
+<section id="where-deep-learning-is-bad-even-at-scale" class="slide level2">
+<h2>Where deep learning is <em>bad</em> — even at scale</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><span class="pill-amber">Data-poor regimes</span></p>
+<ul>
+<li>Strong supervised performance needs thousands to millions of labelled examples.</li>
+<li>Many small-data social-science problems work better with classical models.</li>
+</ul>
+</div><div class="column" style="width:50%;">
+<p><span class="pill-amber">Long-horizon reasoning</span></p>
+<ul>
+<li>LLMs handle short, local reasoning well.</li>
+<li>Long multi-step proofs, planning, mathematical rigour — still brittle.</li>
+<li>Chain-of-thought helps. It doesn’t solve.</li>
+</ul>
+</div></div>
+</section>
+<section id="where-deep-learning-cant-do-at-all" class="slide level2">
+<h2>Where deep learning <em>can’t</em> do at all</h2>
+<div class="card">
+<ul>
+<li><p><strong>Causal inference from observational data.</strong> Still needs assumptions you encode by hand — DL doesn’t substitute for instrumental variables, RCTs, etc.</p></li>
+<li><p><strong>Out-of-distribution generalisation.</strong> Models break when test data diverges from training.</p></li>
+<li><p><strong>Calibrated uncertainty.</strong> “Knowing what they don’t know” is hard. Confident hallucinations are everywhere.</p></li>
+<li><p><strong>Anything resembling agency or intent.</strong> A trained model has no goals, no beliefs, no plans. Anthropomorphism is dangerous.</p></li>
+</ul>
+</div>
+<div class="callout callout-warning callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Warning</strong></p>
+</div>
+<div class="callout-content">
+<p><strong>LLMs hallucinate by design.</strong> They produce <em>plausible continuations</em>, not <em>true statements</em>. Treating them as oracles is a category error.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="compute-energy-and-the-trade-off" class="slide level2">
+<h2>Compute, energy, and the trade-off</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<ul>
+<li>Training GPT-4-scale models takes 10s of GWh.</li>
+<li>Inference at scale (billions of queries/day) is a continuous load.</li>
+<li>Cooling needs water. Chips need rare earths. The end of the cycle is e-waste.</li>
+</ul>
+</div><div class="column" style="width:50%;">
+<ul>
+<li>“Just use a smaller model” is harder than it sounds — capability drops fast below a threshold.</li>
+<li>Efficiency improves (Moore’s-like trends) but absolute demand grows faster.</li>
+</ul>
+</div></div>
+<div class="callout callout-warning callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Warning</strong></p>
+</div>
+<div class="callout-content">
+<p>The footprint of <em>one</em> query is small. The footprint of these systems <em>existing at scale</em> is not. This is a policy question, not a technical one.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="environmental-impact-in-detail" class="slide level2">
+<h2>Environmental impact in detail</h2>
+<p><span class="eyebrow">Beyond “AI uses a lot of compute”</span></p>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><span class="pill-amber">Training</span></p>
+<ul>
+<li>GPT-3 training: estimated <strong>552 tonnes CO₂</strong> (one-time cost).</li>
+<li>GPT-4: estimated 10×–100× more.</li>
+<li>Frontier models train multiple times per year.</li>
+</ul>
+</div><div class="column" style="width:50%;">
+<p><span class="pill-amber">Inference</span></p>
+<ul>
+<li>A widely-circulated figure put one ChatGPT query at ~10× a Google search — but <strong>treat this with caution</strong>: it is disputed and rests on a ~2009 search-energy number; more recent estimates put a query much closer to a single search.</li>
+<li>Aggregated across hundreds of millions of users per day, <strong>inference dominates</strong> training in cumulative impact.</li>
+<li>Data centre water use for cooling is a separately growing concern.</li>
+</ul>
+</div></div>
+<div class="callout callout-warning callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Warning</strong></p>
+</div>
+<div class="callout-content">
+<p>Aggregate impact also depends on <strong>where</strong> data centres are sited — moving to renewable-rich regions helps, but is only a partial fix.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="where-bias-comes-from" class="slide level2">
+<h2>Where bias comes from</h2>
+<p><span class="eyebrow">Not just “the data”</span></p>
+<div class="card">
+<p>A non-exhaustive map:</p>
+<ol type="1">
+<li><strong>Data sampling</strong> — who shows up in the training set, who doesn’t.</li>
+<li><strong>Label noise</strong> — when humans encode their own biases as ground truth.</li>
+<li><strong>Construct mismatch</strong> — when the modelled variable is a proxy for what we actually care about (e.g.&nbsp;“creditworthiness” vs “ability to pay”).</li>
+<li><strong>Optimisation target</strong> — minimising aggregate error tolerates large subgroup error.</li>
+<li><strong>Deployment context</strong> — a model trained on one population deployed on another.</li>
+<li><strong>Feedback loops</strong> — biased predictions become future training data.</li>
+</ol>
+</div>
+<div class="callout callout-tip callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Tip</strong></p>
+</div>
+<div class="callout-content">
+<p><strong>The technical fix can only address (1) and (4).</strong> The rest are governance, methodology, and political problems. The “AI ethics” stack is half computer science, half social science.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="bias" class="slide level2">
+<h2>Bias</h2>
+<p>Models reflect their data. Data reflects the world. Both have problems.</p>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><span class="pill-amber">Documented examples</span></p>
+<ul>
+<li>Facial recognition with much higher error rates on dark-skinned faces (Buolamwini &amp; Gebru 2018).</li>
+<li>Hiring screeners that downweight applicants from women’s colleges.</li>
+<li>Healthcare algorithms allocating less care to Black patients (Obermeyer et al.&nbsp;2019).</li>
+<li>LLMs producing racist completions of innocuous prompts.</li>
+</ul>
+</div><div class="column" style="width:50%;">
+<p><span class="pill">Don’t be fooled by</span></p>
+<ul>
+<li>“It’s just learning patterns” — patterns <em>are</em> the bias.</li>
+<li>Benchmarks that measure narrowly — overall accuracy hides disparate impact.</li>
+<li>“We removed the protected attributes” — proxies remain.</li>
+</ul>
+</div></div>
+</section>
+<section id="mitigation-strategies-for-bias" class="slide level2">
+<h2>Mitigation strategies for bias</h2>
+<p><span class="eyebrow">What partially works</span></p>
+<div class="columns">
+<div class="column" style="width:33%;">
+<p><span class="pill">Pre-processing</span></p>
+<p>Adjust the training data — rebalance subgroups, reweight, or filter.</p>
+<ul>
+<li>Easy to implement.</li>
+<li>Hard to specify “balanced”.</li>
+<li>Doesn’t address (5) or (6).</li>
+</ul>
+</div><div class="column" style="width:33%;">
+<p><span class="pill">In-processing</span></p>
+<p>Add fairness constraints to the loss — penalise disparate outcomes during training.</p>
+<ul>
+<li>Many constraint definitions exist (and conflict).</li>
+<li>Trade-offs with accuracy.</li>
+</ul>
+</div><div class="column" style="width:33%;">
+<p><span class="pill">Post-processing</span></p>
+<p>Adjust model outputs after training to equalise outcomes across subgroups.</p>
+<ul>
+<li>Doesn’t require retraining.</li>
+<li>Often the most tractable, especially when deploying third-party models.</li>
+</ul>
+</div></div>
+<div class="callout callout-warning callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Warning</strong></p>
+</div>
+<div class="callout-content">
+<p><strong>But these are all partial.</strong> The different notions of fairness can also <em>conflict with one another</em> — as the Stop &amp; check ahead shows, you sometimes cannot satisfy them all at once.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="case-study-the-dutch-childcare-benefits-scandal" class="slide level2">
+<h2>Case study · the Dutch childcare benefits scandal</h2>
+<p><span class="eyebrow">The <em>toeslagenaffaire</em> · Netherlands, mid-2010s to 2021</span></p>
+<p>From the mid-2010s, the Dutch tax authority used a risk-scoring model to flag childcare-benefit claims for fraud investigation.</p>
+<div class="card">
+<p><strong>What happened</strong></p>
+<ul>
+<li><strong>Tens of thousands of families</strong> were wrongly accused of benefit fraud.</li>
+<li>An accusation meant repaying benefits in full — often <strong>tens of thousands of euros</strong> — with the debt due at once.</li>
+<li>Families were pushed into debt for years. Some lost homes and jobs over money they never owed.</li>
+<li>In <strong>January 2021</strong>, the Dutch government resigned over the scandal.</li>
+</ul>
+</div>
+<p>The technology was not exotic: a risk score computed from family features. Every failure in it has a name you learned in this course.</p>
+</section>
+<section id="case-study-where-it-broke-in-our-terms" class="slide level2">
+<h2>Case study · where it broke in our terms</h2>
+<p><span class="eyebrow">Four failures, four concepts you already know</span></p>
+<div class="card">
+<ol type="1">
+<li><p><strong>The labels were not ground truth.</strong> The model learned from past fraud <em>investigations</em>, not convictions. “Flagged before” became “high risk now” — the target variable encoded the old process, mistakes included.</p></li>
+<li><p><strong>Proxies did the work.</strong> Nationality sat in the feature set — the Dutch data-protection authority later ruled its use unlawful — and a low income pushed the score up. The model discriminated on who people were, not on what they had done.</p></li>
+<li><p><strong>A high score triggered automated distrust.</strong> Flagged families were treated as fraudsters by default: benefits stopped, repayment demanded, no human check on the individual case. The score <em>was</em> the decision.</p></li>
+<li><p><strong>The feedback loop never closed.</strong> Appeals took years. The error signal that should have corrected the system — wrongly flagged families winning their cases — arrived too late to change it. In training terms: no gradient ever flowed back.</p></li>
+</ol>
+</div>
+<div class="callout callout-tip callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Tip</strong></p>
+</div>
+<div class="callout-content">
+<p>Set this against the <em>Where bias comes from</em> map: label noise (2), construct mismatch (3), feedback loops (6) — running at national scale, with the power of the state behind the predictions.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="case-study-what-would-have-helped" class="slide level2">
+<h2>Case study · what would have helped</h2>
+<p><span class="eyebrow">Read this against the mitigation slide</span></p>
+<div class="card">
+<ul>
+<li><p><strong>Audit error rates by group.</strong> Aggregate accuracy can look fine while one group carries the errors. A false-positive audit by nationality and income would have surfaced the harm years earlier.</p></li>
+<li><p><strong>Keep a human who can overrule the score.</strong> Not a human who clicks “confirm” — one with the authority, time, and information to say the model is wrong about <em>this</em> family.</p></li>
+<li><p><strong>Contestability with deadlines.</strong> An appeal that takes years is not an appeal. A binding clock turns “you may object” into an error signal that arrives in time to matter.</p></li>
+<li><p><strong>Check the model against the world.</strong> The scores were consistent with the training data throughout; the training data was wrong about the world. It is the question this course keeps asking — does the arithmetic match reality, or only the labels?</p></li>
+</ul>
+</div>
+<div class="callout callout-warning callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Warning</strong></p>
+</div>
+<div class="callout-content">
+<p>Pre-, in-, and post-processing all apply here. None of them substitutes for the last three items — those fixes are institutional, not technical. Half computer science, half social science.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="stop-check-can-a-model-be-fair" class="slide level2">
+<h2>Stop &amp; check — can a model be “fair”?</h2>
+<p><span class="eyebrow"><span class="pause-cue">Stop &amp; check</span> · 60 seconds in pairs</span></p>
+<div class="try-box">
+<p><span class="try-label">Try</span> A recidivism-risk model is <strong>calibrated</strong>: among everyone it scores “high risk”, the same fraction actually reoffend — <em>regardless of race</em>. A journalist then shows that, among people who did <strong>not</strong> reoffend, Black defendants were flagged “high risk” far more often than white defendants.</p>
+<p><strong>Is the model broken — or is something deeper going on?</strong></p>
+</div>
+<div class="fragment">
+<div class="reveal-box">
+<p><span class="reveal-label">The reveal</span> This is exactly the <strong>COMPAS</strong> dispute (ProPublica vs.&nbsp;Northpointe, 2016). <em>Both sides were arithmetically correct.</em></p>
+<p><strong>Chouldechova (2017)</strong> proved why. When the base rate of reoffending differs across groups, <strong>calibration</strong> and <strong>equal false-positive rates</strong> cannot both hold at once (except in trivial cases). You are forced to <em>choose</em> which criterion to satisfy.</p>
+<p>That choice is <strong>normative, not technical</strong> — no amount of better engineering makes it go away.</p>
+</div>
+</div>
+</section>
+<section id="hallucination-misuse" class="slide level2">
+<h2>Hallucination + misuse</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><span class="pill">Inherent</span></p>
+<ul>
+<li>LLMs invent citations, statistics, court cases.</li>
+<li>No internal “truth” signal — only plausibility.</li>
+<li>Mitigations (retrieval-augmented generation — RAG — tool use, fine-tuning) reduce but don’t eliminate.</li>
+</ul>
+</div><div class="column" style="width:50%;">
+<p><span class="pill-amber">Weaponised</span></p>
+<ul>
+<li>Phishing at scale.</li>
+<li>Personalised disinformation.</li>
+<li>Synthetic media abuse (deepfakes, non-consensual intimate imagery — NCII).</li>
+<li>Code that <em>almost works</em> — subtly broken security.</li>
+</ul>
+</div></div>
+</section>
+<section id="privacy-and-data-extraction" class="slide level2">
+<h2>Privacy and data extraction</h2>
+<p><span class="eyebrow">Two related concerns</span></p>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><span class="pill-amber">Training-data privacy</span></p>
+<ul>
+<li>LLMs memorise. Specific email addresses, phone numbers, code blocks, personal stories can be recovered from production models via prompt attacks.</li>
+<li>Carlini et al.&nbsp;(2021): GPT-2 can be made to emit memorised training data with adversarial prompting.</li>
+</ul>
+</div><div class="column" style="width:50%;">
+<p><span class="pill-amber">Inference-time privacy</span></p>
+<ul>
+<li>Every prompt you send to an API is data the provider can store, train on, or sell.</li>
+<li>OpenAI explicitly logs interactions (with opt-out).</li>
+<li>On-device / open-weights models avoid this entirely — but at a quality cost.</li>
+</ul>
+</div></div>
+<div class="callout callout-tip callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Tip</strong></p>
+</div>
+<div class="callout-content">
+<p>For sensitive research data, <strong>never</strong> send identifiable records to a closed API without explicit clearance from your university’s research-ethics committee (in the US, an Institutional Review Board, or IRB; health data carries extra rules such as the US HIPAA). Most commercial APIs are <em>not</em> GDPR-compliant by default.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="ai-safety-and-the-existential-question" class="slide level2">
+<h2>AI safety and the existential question</h2>
+<p><span class="eyebrow">A debate the field is having loudly</span></p>
+<div class="columns">
+<div class="column" style="width:55%;">
+<p>A serious-but-contested concern: as models become more capable, they may pursue goals misaligned with human intent — at scales where mistakes become catastrophic.</p>
+<ul>
+<li><strong>Mechanistic interpretability</strong> — understand what circuits inside a model do.</li>
+<li><strong>Alignment research</strong> — methods to make models do what we want, not what we incentivise.</li>
+<li><strong>Evaluations + red-teaming</strong> — test models for dangerous capabilities before release.</li>
+</ul>
+<p>Anthropic and Google DeepMind run large internal alignment teams; OpenAI has safety/alignment work too, though its dedicated <em>Superalignment</em> team was disbanded in 2024. Independent safety organisations — e.g.&nbsp;Redwood Research, the Alignment Research Center (ARC), and the UK’s AI Security Institute — work alongside the labs.</p>
+</div><div class="column" style="width:45%;">
+<div class="callout callout-warning callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Warning</strong></p>
+</div>
+<div class="callout-content">
+<p><strong>The disagreement is real.</strong> Some serious researchers think this is the most important problem of the century. Others think it’s overblown — a distraction from concrete current harms.</p>
+<p>You don’t have to pick a side. You <em>should</em> know the debate exists, and have read at least one careful piece from each camp.</p>
+</div>
+</div>
+</div>
+</div></div>
+</section>
+<section id="governance-and-regulation" class="slide level2">
+<h2>Governance and regulation</h2>
+<p><span class="eyebrow">The institutional response</span></p>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><span class="pill-blue">Major recent frameworks</span></p>
+<ul>
+<li><strong>EU AI Act</strong> (2024) — risk-tiered regulation; bans on social scoring, “high-risk” categories require audit.</li>
+<li><strong>US executive order 14110</strong> (Oct 2023) — set reporting requirements for large models, but was <strong>revoked in Jan 2025</strong>, so US federal requirements are now in flux.</li>
+<li><strong>UK AI Safety Institute</strong> (2023, <strong>renamed the AI Security Institute in 2025</strong>) — pre-deployment evaluations.</li>
+<li><strong>China’s interim measures</strong> (2023) — registration + content controls.</li>
+</ul>
+</div><div class="column" style="width:50%;">
+<p><span class="pill-amber">Hard open questions</span></p>
+<ul>
+<li><strong>Liability</strong>: when an AI makes a harmful decision, who’s responsible?</li>
+<li><strong>Provenance</strong>: how do we know what generated which content?</li>
+<li><strong>Concentration</strong>: does a small number of labs running frontier models pose systemic risk?</li>
+<li><strong>Export controls</strong>: should training compute be regulated like nuclear materials?</li>
+</ul>
+</div></div>
+</section>
+<section id="labour" class="slide level2">
+<h2>Labour</h2>
+<div class="card">
+<p>We are early in a labour transition with no clear precedent in scale or speed.</p>
+<ul>
+<li>Tasks that were full-time jobs three years ago are now done by LLMs — copy editing, junior coding, translation, customer support, illustration, paralegal work.</li>
+<li>The benefits accrue mostly to capital, not labour.</li>
+<li>The “winners” of the previous tech wave (software engineers) are now exposed too.</li>
+</ul>
+</div>
+<div class="callout callout-note callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Note</strong></p>
+</div>
+<div class="callout-content">
+<p>Whether you build these systems or use them, you have a stake in <strong>how the gains are distributed</strong>.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="labour-displacement-the-evidence-so-far" class="slide level2">
+<h2>Labour displacement — the evidence so far</h2>
+<p><span class="eyebrow">What we know, what we don’t</span></p>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><span class="pill-amber">Studies showing displacement</span></p>
+<ul>
+<li><strong>Copywriting + translation</strong>: Hui et al.&nbsp;(2023) found freelance demand for exposed work <strong>fell</strong> after ChatGPT’s release (the headline magnitude is metric-dependent, and often smaller than early reports suggested).</li>
+<li><strong>Illustration</strong>: 15–30% revenue declines reported by professional illustrators.</li>
+<li><strong>Customer support</strong>: large vendors reducing headcount through 2024–25.</li>
+</ul>
+</div><div class="column" style="width:50%;">
+<p><span class="pill-blue">Counter-evidence + complications</span></p>
+<ul>
+<li><strong>Demand grows when costs fall</strong> — true historically; uncertain at this speed.</li>
+<li><strong>Augmentation &gt; replacement</strong> in many studies (Brynjolfsson, Li &amp; Raymond 2023).</li>
+<li><strong>Reskilling</strong> is plausible — but the time horizon for displacement may be shorter than reskilling.</li>
+</ul>
+</div></div>
+<div class="callout callout-warning callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Warning</strong></p>
+</div>
+<div class="callout-content">
+<p><strong>The honest position</strong>: we are early. Aggregate labour-market data lags by 1–3 years. Decisions are being made now — about policy, training, social safety nets — on weak evidence.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="copyright-consent-provenance" class="slide level2">
+<h2>Copyright, consent, provenance</h2>
+<ul>
+<li>LLMs and image generators are trained on enormous corpora of human-created work, mostly <strong>without explicit consent</strong> of the creators.</li>
+<li>Outputs sometimes regurgitate training data verbatim (memorisation).</li>
+<li>Legal frameworks are still being written. The first major AI-copyright suits arrived <strong>~2022–2023</strong> — the GitHub Copilot class action (Nov 2022), <em>Getty Images v. Stability AI</em> and <em>Andersen v. Stability AI</em> (Jan 2023), the Authors Guild and <em>NYT v. OpenAI</em> (2023) — and many are still working through the courts.</li>
+<li>Outputs are themselves often <em>uncopyrightable</em> (in the US, at least).</li>
+</ul>
+<div class="callout callout-warning callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Warning</strong></p>
+</div>
+<div class="callout-content">
+<p><strong>Provenance is increasingly a research problem of its own.</strong> How do we track what generated what? How do we attribute when training data is laundered through a model? How do creators opt out?</p>
+</div>
+</div>
+</div>
+</section></section>
+<section>
+<section id="plenary-an-ethics-dilemma" class="title-slide slide level1 center" data-background-color="#0E1A2B">
+<h1>Plenary · an ethics dilemma</h1>
+
+</section>
+<section id="plenary-an-ethics-dilemma-1" class="slide level2">
+<h2>Plenary · an ethics dilemma</h2>
+<p><span class="eyebrow"><span class="pause-cue">≈ 30 min</span> · groups of 4–5</span></p>
+<p>There are <strong>two</strong> scenarios this time. Read both — your group picks <strong>one</strong>.</p>
+<div class="card">
+<p><span class="eyebrow">The scenario</span></p>
+<p>A national child welfare agency hires your firm to build a deep-learning model to <strong>prioritise</strong> which family-welfare cases caseworkers should investigate first. The agency receives more reports than it can investigate; prioritisation is currently done by overworked staff and is widely felt to be inconsistent.</p>
+<p>The data: 15 years of historical case files, including child outcomes (hospitalisation, court involvement, …) and family features (demographics, address, prior reports, contact with services).</p>
+<p><span class="eyebrow">Your team’s mandate</span></p>
+<p>Improve case prioritisation. <strong>All design choices are yours.</strong></p>
+</div>
+</section>
+<section id="plenary-what-to-discuss" class="slide level2">
+<h2>Plenary · what to discuss</h2>
+<div class="card">
+<p><span class="eyebrow">In your group, discuss for 20 minutes</span></p>
+<ol type="1">
+<li><p>What <strong>target variable</strong> would you train on — and what does that choice encode about whose outcomes matter?</p></li>
+<li><p>What features would you <strong>refuse to use</strong>, even if they predict well?</p></li>
+<li><p>How would you <strong>evaluate</strong> the model — and what evaluation would convince you <em>not</em> to deploy?</p></li>
+<li><p>Who needs to <strong>consent</strong> to this system, and who gets to <strong>contest</strong> it?</p></li>
+<li><p>Is there a version of this project you would <strong>refuse to take</strong>?</p></li>
+</ol>
+</div>
+<div class="callout callout-warning callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Warning</strong></p>
+</div>
+<div class="callout-content">
+<p><strong>This is a real situation</strong> (the Allegheny Family Screening Tool is one canonical case). It is not a thought experiment.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="plenary-a-second-dilemma" class="slide level2">
+<h2>Plenary · a second dilemma</h2>
+<div class="card">
+<p><span class="eyebrow">The scenario</span></p>
+<p>A research team wants to pretest policy survey questions in places where fieldwork is hard — conflict zones, closed regimes, hard-to-reach minorities. Their proposal: replace the human respondents with <strong>synthetic respondents</strong> — an LLM prompted to answer <em>as if</em> it were, say, a 45-year-old farmer in a named region — run across thousands of demographic profiles.</p>
+</div>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><span class="pill-green">The pull</span></p>
+<ul>
+<li>A pilot costs pounds, not tens of thousands.</li>
+<li>Results arrive in an afternoon, not months.</li>
+<li>No enumerators at risk. No real respondents to burden.</li>
+</ul>
+</div><div class="column" style="width:50%;">
+<p><span class="pill-amber">The push</span></p>
+<ul>
+<li>Whose views is the model reporting? People matching the profile wrote little of the training data — the model may report what <em>others wrote about them</em>.</li>
+<li>Training-data bias becomes <strong>measurement bias</strong> — the instrument is skewed before a single question is asked.</li>
+<li>Nobody consented to being simulated. Who speaks for a group when a model claims to?</li>
+</ul>
+</div></div>
+<div class="callout callout-note callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Note</strong></p>
+</div>
+<div class="callout-content">
+<p>This is live research practice, not a hypothetical — Argyle et al.&nbsp;(2023), on your reading list, do a version of it for US public opinion.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="plenary-what-to-discuss-second-dilemma" class="slide level2">
+<h2>Plenary · what to discuss (second dilemma)</h2>
+<div class="card">
+<p><span class="eyebrow">If your group picks this one — same 20 minutes</span></p>
+<ol type="1">
+<li><p>What is the <strong>quantity being measured</strong> — public opinion, or the model’s summary of text written about a group?</p></li>
+<li><p>Where would you accept synthetic respondents — <strong>pretesting question wording</strong>, or <strong>estimating what people believe</strong>? Is there a line?</p></li>
+<li><p>How would you <strong>validate</strong> the synthetic answers — and against what, if fieldwork is the thing you cannot do?</p></li>
+<li><p>No respondent was contacted, so no respondent consented. Does <strong>consent</strong> still apply — and whose?</p></li>
+<li><p>Is there a version of this project you would <strong>refuse to take</strong>?</p></li>
+</ol>
+</div>
+</section>
+<section id="plenary-debrief" class="slide level2">
+<h2>Plenary · debrief</h2>
+<p><span class="eyebrow">Some things people often surface in these discussions</span></p>
+<div class="card">
+<ul>
+<li><p><strong>Target selection is the foundational ethics question.</strong> Training on “investigated and substantiated” replicates past investigation patterns — including their biases. Training on “child harm” requires a definition of harm.</p></li>
+<li><p><strong>Proxies for race/class are everywhere.</strong> Address, prior agency contact, school district, parents’ occupation. “Removing the protected attribute” rarely suffices.</p></li>
+<li><p><strong>Disparate-impact evaluation is non-negotiable.</strong> Subgroup error rates, false-positive rates, magnitudes — not just aggregate accuracy.</p></li>
+<li><p><strong>Consent and contestation are usually missing.</strong> The families most affected typically have least voice in the design.</p></li>
+<li><p><strong>“Refusal” is a professional option.</strong> Not every project should be built. Especially not by people who didn’t realise that until lecture 12.</p></li>
+</ul>
+</div>
+</section></section>
+<section>
+<section id="part-3-what-next-exam-prep" class="title-slide slide level1 center" data-background-color="#0E1A2B">
+<h1>Part 3 · What next + exam prep</h1>
+
+</section>
+<section id="what-to-read-next" class="slide level2">
+<h2>What to read next</h2>
+<p><span class="eyebrow">One curated list — not a firehose</span></p>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><span class="pill-blue">For technical depth</span></p>
+<ul>
+<li>Goodfellow, Bengio &amp; Courville — <em>Deep Learning</em> (2016). Free online. The reference text.</li>
+<li>Karpathy — <em>Neural Networks: Zero to Hero</em> (YouTube). The best teaching for transformers in recent memory.</li>
+<li>Sutton &amp; Barto — <em>Reinforcement Learning</em> — for the RLHF half of LLMs.</li>
+<li>Distill.pub archive + the Hugging Face NLP course — visual and hands-on.</li>
+</ul>
+</div><div class="column" style="width:50%;">
+<p><span class="pill">For breadth + society</span></p>
+<ul>
+<li>Russell — <em>Human Compatible</em>.</li>
+<li>Crawford — <em>Atlas of AI</em>.</li>
+<li>Mitchell — <em>Artificial Intelligence: A Guide for Thinking Humans</em>.</li>
+<li>Bender, Gebru, McMillan-Major &amp; Shmitchell — <em>On the Dangers of Stochastic Parrots</em> <span class="citation" data-cites="bender2021stochastic">(<a href="#/references" role="doc-biblioref" onclick="">Bender et al., 2021</a>)</span>.</li>
+</ul>
+</div></div>
+<div class="card">
+<p><span class="eyebrow">For social science specifically</span></p>
+<ul>
+<li><strong>Spirling (2023)</strong> in <em>Nature</em> — why open-source models matter for research.</li>
+<li><strong>Argyle et al.&nbsp;(2023)</strong> — simulating human respondents with LLMs.</li>
+<li><strong>Lall &amp; Robinson (2022)</strong> — deep learning for missing-data imputation (MIDAS).</li>
+</ul>
+</div>
+</section>
+<section id="where-ai-research-is-moving-five-bets" class="slide level2">
+<h2>Where AI research is moving — five bets</h2>
+<p><span class="eyebrow">For your own next-step planning</span></p>
+<div class="card">
+<ol type="1">
+<li><p><strong>Multi-modal everything</strong> — text, image, video, audio in one model. Already here for inputs; outputs are next.</p></li>
+<li><p><strong>Agents</strong> — tool use, planning, multi-step task completion. Currently bad; rapidly improving.</p></li>
+<li><p><strong>Reasoning models</strong> — o1, R1 family. RL on outcomes for chain-of-thought.</p></li>
+<li><p><strong>Efficiency</strong> — small models that match big ones. Distillation + quantisation + sparse activations.</p></li>
+<li><p><strong>Personalisation</strong> — models that adapt to <em>you</em> via short fine-tunes, persistent memory, or context engineering.</p></li>
+</ol>
+</div>
+<div class="callout callout-tip callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Tip</strong></p>
+</div>
+<div class="callout-content">
+<p>Each of these has a 1–2 paper landing per week. You don’t need to read all of them. But you should be able to <em>say what each is</em> and have a personal take on one.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="how-to-keep-up-without-burning-out" class="slide level2">
+<h2>How to keep up — without burning out</h2>
+<div class="card">
+<ol type="1">
+<li><strong>Follow a small, curated list of researchers</strong> — not the firehose. Twitter/X is a low-signal medium for ML.</li>
+<li><strong>Read papers, not press releases.</strong> The actual paper for any model is often less impressive than the press release.</li>
+<li><strong>Periodically re-implement landmark papers from scratch.</strong> Especially once your day job stops requiring it.</li>
+<li><strong>Build something small you actually use.</strong> The single best way to internalise a technique.</li>
+</ol>
+</div>
+<div class="callout callout-tip callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Tip</strong></p>
+</div>
+<div class="callout-content">
+<p>The field moves fast in <strong>press releases</strong> and <strong>product features</strong>. The underlying ideas move much more slowly. You now know the slow part. Don’t let the fast part demoralise you.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="how-to-use-ai-in-your-own-work" class="slide level2">
+<h2>How to <em>use</em> AI in your own work</h2>
+<p><span class="eyebrow">Concrete habits worth forming</span></p>
+<div class="card">
+<ol type="1">
+<li><strong>Verify before you trust.</strong> Every fact, citation, statistic from an LLM gets a manual check.</li>
+<li><strong>Document your prompts</strong> alongside your code. Treat prompts as part of your methodology.</li>
+<li><strong>Pre-register your evaluations</strong> when using LLMs as measurement instruments.</li>
+<li><strong>Disclose</strong> AI use in your publications. Most journals now require this.</li>
+<li><strong>Maintain skill in the underlying task.</strong> If you can’t write the code yourself, you can’t supervise the LLM that does.</li>
+</ol>
+</div>
+<div class="callout callout-tip callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Tip</strong></p>
+</div>
+<div class="callout-content">
+<p>The best researchers using AI in 2026 are not the ones who use it the most. They’re the ones who use it <em>deliberately</em>, with clear ideas of where it helps and where it lies.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="quiz-the-whole-course-in-five-questions" class="slide level2">
+<h2>Quiz · the whole course in five questions</h2>
+<p><span class="eyebrow"><span class="pause-cue">≈ 15 min</span> · whole room</span></p>
+<p>Pen and paper — the same equipment as Friday’s exam. Three questions here, two on the next slide.</p>
+<div class="card">
+<ol type="1">
+<li><p><strong>A forward pass.</strong> Weights <span class="math inline">\mathbf{w} = [1, -2]</span>, bias <span class="math inline">b = 0.5</span>, input <span class="math inline">\mathbf{x} = [3, 1]</span>. Compute <span class="math inline">y = \mathbf{w} \cdot \mathbf{x} + b</span>.</p></li>
+<li><p><strong>A parameter count.</strong> A fully-connected layer maps 10 inputs to 4 outputs. How many parameters does it have, biases included?</p></li>
+<li><p><strong>An output shape.</strong> A 32×32 image goes through one convolutional layer: a 5×5 kernel, stride 1, no padding. What size is the output?</p></li>
+</ol>
+</div>
+</section>
+<section id="quiz-questions-4-and-5" class="slide level2">
+<h2>Quiz · questions 4 and 5</h2>
+<div class="card">
+<ol start="4" type="1">
+<li><p><strong>Attention.</strong> In self-attention, each token computes a query, a key, and a value. Give the role of each — one phrase per vector.</p></li>
+<li><p><strong>Sampling.</strong> You set the generation temperature to 0. What does the model do at each step — and what is one reason you might not want that?</p></li>
+</ol>
+</div>
+<p><span class="muted">Question 1 is week 1; questions 2–3 are week 2; questions 4–5 are week 3. If all five feel routine, you are ready for Friday.</span></p>
+</section>
+<section id="quiz-answers-13" class="slide level2">
+<h2>Quiz · answers 1–3</h2>
+<div class="card">
+<p><span class="eyebrow">1 · Forward pass</span></p>
+<p><span class="math display">
+y = (1 \times 3) + (-2 \times 1) + 0.5 = 3 - 2 + 0.5 = 1.5
+</span></p>
+<p><span class="eyebrow">2 · Parameter count</span></p>
+<p><span class="math display">
+10 \times 4 \text{ weights} + 4 \text{ biases} = 40 + 4 = 44
+</span></p>
+<p><span class="eyebrow">3 · Output shape</span></p>
+<p><span class="math display">
+\frac{32 + 2(0) - 5}{1} + 1 = 27 + 1 = 28 \quad \Rightarrow \quad 28 \times 28
+</span></p>
+<p>The same rule as lecture 6: <span class="math inline">\lfloor (H + 2P - k)/s \rfloor + 1</span>.</p>
+</div>
+</section>
+<section id="quiz-answers-4-and-5" class="slide level2">
+<h2>Quiz · answers 4 and 5</h2>
+<div class="card">
+<p><span class="eyebrow">4 · Attention</span></p>
+<ul>
+<li><strong>Query</strong> — <em>“what am I looking for?”</em></li>
+<li><strong>Key</strong> — <em>“what do I offer?”</em></li>
+<li><strong>Value</strong> — <em>“if you attend to me, here’s the content I’ll contribute.”</em></li>
+</ul>
+<p><span class="eyebrow">5 · Temperature 0</span></p>
+<p><span class="math inline">\tau = 0</span> reduces sampling to <strong>argmax</strong>: at every step the model picks the single most likely token, so generation is deterministic — the same prompt gives the same text every time.</p>
+<p>One reason not to want that: the text turns repetitive and flat, and a confident wrong answer comes back wrong on every run.</p>
+</div>
+<p>That’s the course: a dot product, a count, a shape, three vectors, and a knob.</p>
+</section>
+<section id="the-final-exam" class="slide level2">
+<h2>The final exam</h2>
+<p><span class="eyebrow"><span class="pause-cue">Friday 21 August</span></span></p>
+<div class="card">
+<ul>
+<li><strong>Two hours</strong>, pen and paper. No laptops. No phones. No ChatGPT.</li>
+<li><strong>Forty multiple-choice questions</strong>, <strong>six options</strong> each, exactly one correct.</li>
+<li>One mark each — marked out of 40, reported as a percentage.</li>
+<li><strong>No negative marking.</strong> A blank scores the same as a wrong answer, so <strong>answer every question</strong>.</li>
+</ul>
+</div>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><span class="pill-green">Examinable</span></p>
+<ul>
+<li>Anything in the slides.</li>
+<li>Anything in the labs you completed.</li>
+<li>Anything in the assigned readings.</li>
+</ul>
+</div><div class="column" style="width:50%;">
+<p><span class="pill">Not examinable</span></p>
+<ul>
+<li>Detailed knowledge of specific papers beyond what we covered.</li>
+<li>PyTorch syntax memorisation.</li>
+<li>The optional further-reading textbooks.</li>
+</ul>
+</div></div>
+</section>
+<section id="what-the-questions-look-like" class="slide level2">
+<h2>What the questions look like</h2>
+<p><span class="eyebrow">Two hours, forty questions — about three minutes each</span></p>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><span class="pill-blue">Roughly half are <strong>calculations</strong></span></p>
+<p>A forward pass, a gradient, an output shape, a parameter count, a softmax, a cosine, three steps of BPE. You work it out, then select the number you got.</p>
+<p>Any constants you need are printed in the question.</p>
+</div><div class="column" style="width:50%;">
+<p><span class="pill">The rest are <strong>code and judgement</strong></span></p>
+<p>Read a few lines of PyTorch or pseudocode and say what is wrong, or put them in the right order.</p>
+<p>Or: here is a training curve / a validation result / a research design — what is <em>actually</em> going on?</p>
+</div></div>
+<div class="callout callout-warning callout-style-simple">
+<div class="callout-body">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-content">
+<p><strong>Arithmetic alone will not be enough.</strong> On several questions two options carry the <strong>same number</strong> and differ only in the claim attached to it. Getting the number right is the first half of the work; deciding what it means is the second. <strong>Read all six options before you choose.</strong></p>
+</div>
+</div>
+</div>
+<div class="card">
+<p>The paper runs roughly in course order and <strong>gets harder as it goes</strong>. The last few questions are meant to stretch the strongest of you — if you get stuck, move on and come back.</p>
+</div>
+</section>
+<section id="how-to-study-tonight" class="slide level2">
+<h2>How to study tonight</h2>
+<div class="card">
+<ol type="1">
+<li>Reread the <strong>slides</strong> from each lecture — and skim the <strong>solution cells</strong> of the labs you completed. Both are examinable.</li>
+<li>Be able to define every term in the eyebrow labels and pills across all 12 decks.</li>
+<li>Be able to <strong>draw a computation graph</strong> for a small expression and compute its gradient.</li>
+<li>Re-derive softmax + cross-entropy on paper.</li>
+<li>Sleep.</li>
+</ol>
+</div>
+<div class="callout callout-tip callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Tip</strong></p>
+</div>
+<div class="callout-content">
+<p><strong>Don’t try to learn anything new tonight.</strong> Consolidate what you already know. The exam tests <em>understanding</em>, not last-minute information.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="what-i-expect-to-see-on-friday" class="slide level2">
+<h2>What I expect to see on Friday</h2>
+<div class="card">
+<ul>
+<li>You can work backprop through a small graph and read off the gradients.</li>
+<li>You can compute a forward pass through a small MLP by hand.</li>
+<li>You can name the components of a transformer and say what each does.</li>
+<li>You can tell a good argument for using deep learning on a problem from a bad one.</li>
+<li>You can read a PyTorch training loop and spot the line that is wrong.</li>
+</ul>
+<p>If you can do these, you’ll pass. Most of you will do better than that.</p>
+</div>
+</section></section>
+<section>
+<section id="a-final-word" class="title-slide slide level1 center" data-background-color="#0E1A2B">
+<h1>A final word</h1>
+
+</section>
+<section id="a-final-word-1" class="slide level2">
+<h2>A final word</h2>
+<p><span class="eyebrow">Three weeks ago, AI was a black box.</span></p>
+<p>Today, you have built every component of one — with your own hands and on paper. That changes how you read papers. How you read news. What you can build. And how you talk about these systems with people who haven’t seen inside the box.</p>
+<div class="card">
+<p><strong>Thanks.</strong></p>
+<p>To <strong>Kaifang Zhou</strong>, your lab instructor and TA, for running the labs. And to this cohort, for showing up to three hours of lecture and 90 minutes of lab every weekday for three weeks.</p>
+<p><span class="smaller">Stay in touch. Office hours continue through the autumn. Many of you will return for MY475 — see you then.</span></p>
+<p><span class="smaller"><strong>Send me what you build. Send me what breaks.</strong></span></p>
+</div>
+</section>
+<section id="the-exam" class="slide level2">
+<h2>The exam</h2>
+<p><span class="eyebrow">Friday 21 August — final exam · two hours</span></p>
+<p><span class="eyebrow">Bring</span></p>
+<ul>
+<li>A pen.</li>
+<li>Photo ID.</li>
+<li>A clear head.</li>
+</ul>
+<div class="callout callout-tip callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Tip</strong></p>
+</div>
+<div class="callout-content">
+<p><strong>Good luck — and thank you again.</strong> It’s been a privilege to teach this cohort.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="references" class="slide level2 smaller scrollable">
+<h2>References</h2>
+
+<div class="quarto-auto-generated-content">
+<div class="footer footer-default">
+<p>ME324 · AI and Deep Learning · LSE Summer School</p>
+</div>
+</div>
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list">
+<div id="ref-bender2021stochastic" class="csl-entry" role="listitem">
+Bender, E. M., Gebru, T., McMillan-Major, A., &amp; Shmitchell, S. (2021). On the dangers of stochastic parrots: Can language models be too big? <em>Proceedings of FAccT</em>.
+</div>
+</div>
+</section></section>
+    </div>
+  </div>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script>
+  <script src="../site_libs/revealjs/dist/reveal.js"></script>
+  <!-- reveal.js plugins -->
+  <script src="../site_libs/revealjs/plugin/quarto-line-highlight/line-highlight.js"></script>
+  <script src="../site_libs/revealjs/plugin/pdf-export/pdfexport.js"></script>
+  <script src="../site_libs/revealjs/plugin/reveal-menu/menu.js"></script>
+  <script src="../site_libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
+  <script src="../site_libs/revealjs/plugin/quarto-support/support.js"></script>
+  
+
+  <script src="../site_libs/revealjs/plugin/notes/notes.js"></script>
+  <script src="../site_libs/revealjs/plugin/search/search.js"></script>
+  <script src="../site_libs/revealjs/plugin/zoom/zoom.js"></script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script>
+
+  <script>
+
+      // Full list of configuration options available at:
+      // https://revealjs.com/config/
+      Reveal.initialize({
+'controlsAuto': true,
+'previewLinksAuto': false,
+'pdfSeparateFragments': false,
+'autoAnimateEasing': "ease",
+'autoAnimateDuration': 1,
+'autoAnimateUnmatched': true,
+'menu': {"side":"right","useTextContentForMissingTitles":true,"markers":false,"loadIcons":false,"custom":[{"title":"Tools","icon":"<i class=\"fas fa-gear\"></i>","content":"<ul class=\"slide-menu-items\">\n<li class=\"slide-tool-item active\" data-item=\"0\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.fullscreen(event)\"><kbd>f</kbd> Fullscreen</a></li>\n<li class=\"slide-tool-item\" data-item=\"1\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.speakerMode(event)\"><kbd>s</kbd> Speaker View</a></li>\n<li class=\"slide-tool-item\" data-item=\"2\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.overview(event)\"><kbd>o</kbd> Slide Overview</a></li>\n<li class=\"slide-tool-item\" data-item=\"3\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.togglePdfExport(event)\"><kbd>e</kbd> PDF Export Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"4\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.keyboardHelp(event)\"><kbd>?</kbd> Keyboard Help</a></li>\n</ul>"}],"openButton":true,"width":"third"},
+'smaller': true,
+ 
+        // Display controls in the bottom right corner
+        controls: false,
+
+        // Help the user learn the controls by providing hints, for example by
+        // bouncing the down arrow when they first encounter a vertical slide
+        controlsTutorial: false,
+
+        // Determines where controls appear, "edges" or "bottom-right"
+        controlsLayout: 'edges',
+
+        // Visibility rule for backwards navigation arrows; "faded", "hidden"
+        // or "visible"
+        controlsBackArrows: 'faded',
+
+        // Display a presentation progress bar
+        progress: true,
+
+        // Display the page number of the current slide
+        slideNumber: 'c/t',
+
+        // 'all', 'print', or 'speaker'
+        showSlideNumber: 'all',
+
+        // Add the current slide number to the URL hash so that reloading the
+        // page/copying the URL will return you to the same slide
+        hash: true,
+
+        // Start with 1 for the hash rather than 0
+        hashOneBasedIndex: false,
+
+        // Flags if we should monitor the hash and change slides accordingly
+        respondToHashChanges: true,
+
+        // Push each slide change to the browser history
+        history: false,
+
+        // Enable keyboard shortcuts for navigation
+        keyboard: true,
+
+        // Enable the slide overview mode
+        overview: true,
+
+        // Disables the default reveal.js slide layout (scaling and centering)
+        // so that you can use custom CSS layout
+        disableLayout: false,
+
+        // Vertical centering of slides
+        center: false,
+
+        // Enables touch navigation on devices with touch input
+        touch: true,
+
+        // Loop the presentation
+        loop: false,
+
+        // Change the presentation direction to be RTL
+        rtl: false,
+
+        // see https://revealjs.com/vertical-slides/#navigation-mode
+        navigationMode: 'linear',
+
+        // Randomizes the order of slides each time the presentation loads
+        shuffle: false,
+
+        // Turns fragments on and off globally
+        fragments: true,
+
+        // Flags whether to include the current fragment in the URL,
+        // so that reloading brings you to the same fragment position
+        fragmentInURL: false,
+
+        // Flags if the presentation is running in an embedded mode,
+        // i.e. contained within a limited portion of the screen
+        embedded: false,
+
+        // Flags if we should show a help overlay when the questionmark
+        // key is pressed
+        help: true,
+
+        // Flags if it should be possible to pause the presentation (blackout)
+        pause: true,
+
+        // Flags if speaker notes should be visible to all viewers
+        showNotes: false,
+
+        // Global override for autoplaying embedded media (null/true/false)
+        autoPlayMedia: null,
+
+        // Global override for preloading lazy-loaded iframes (null/true/false)
+        preloadIframes: null,
+
+        // Number of milliseconds between automatically proceeding to the
+        // next slide, disabled when set to 0, this value can be overwritten
+        // by using a data-autoslide attribute on your slides
+        autoSlide: 0,
+
+        // Stop auto-sliding after user input
+        autoSlideStoppable: true,
+
+        // Use this method for navigation when auto-sliding
+        autoSlideMethod: null,
+
+        // Specify the average time in seconds that you think you will spend
+        // presenting each slide. This is used to show a pacing timer in the
+        // speaker view
+        defaultTiming: null,
+
+        // Enable slide navigation via mouse wheel
+        mouseWheel: false,
+
+        // The display mode that will be used to show slides
+        display: 'block',
+
+        // Hide cursor if inactive
+        hideInactiveCursor: true,
+
+        // Time before the cursor is hidden (in ms)
+        hideCursorTime: 5000,
+
+        // Opens links in an iframe preview overlay
+        previewLinks: false,
+
+        // Transition style (none/fade/slide/convex/concave/zoom)
+        transition: 'none',
+
+        // Transition speed (default/fast/slow)
+        transitionSpeed: 'default',
+
+        // Transition style for full page slide backgrounds
+        // (none/fade/slide/convex/concave/zoom)
+        backgroundTransition: 'none',
+
+        // Number of slides away from the current that are visible
+        viewDistance: 3,
+
+        // Number of slides away from the current that are visible on mobile
+        // devices. It is advisable to set this to a lower number than
+        // viewDistance in order to save resources.
+        mobileViewDistance: 2,
+
+        // The "normal" size of the presentation, aspect ratio will be preserved
+        // when the presentation is scaled to fit different resolutions. Can be
+        // specified using percentage units.
+        width: 1280,
+
+        height: 760,
+
+        // Factor of the display size that should remain empty around the content
+        margin: 4.0e-2,
+
+        // Bounds for smallest/largest possible scale to apply to content
+        minScale: 0.4,
+
+        maxScale: 1.6,
+
+        // reveal.js plugins
+        plugins: [QuartoLineHighlight, PdfExport, RevealMenu, QuartoSupport,
+
+          RevealNotes,
+          RevealSearch,
+          RevealZoom
+        ]
+      });
+    </script>
+    <!--
+      ME324 — shrink-to-fit safety net for lecture decks.
+
+      reveal.js scales the whole 1280×760 canvas to the window, but it does nothing
+      about a slide whose content is taller than that canvas: the overflow is simply
+      clipped (or, on `.plenary` / `.transition` covers, hidden outright). This pass
+      measures every slide once after layout settles and, for any that overflow,
+      steps the slide down — font-size and figure heights together — until it fits
+      in the space above the running footer.
+
+      Slides that already fit are left completely alone, so a deck keeps a single
+      consistent type size except where a slide genuinely needs the help.
+
+      Anything still overflowing at MIN_SCALE is listed in the browser console —
+      those slides have too much content and want splitting in the .qmd.
+    -->
+    <style>
+      /* Lay out every slide (not just the current one) so it can be measured.
+         `display: block` matches what reveal.js gives a `.present` slide; the
+         theme's cover slides declare `display: flex !important` and so keep theirs.
+         Off-screen slides are already `opacity: 0`, so nothing becomes visible.
+         Note reveal.js *also* sets `display: none` inline on slides outside its
+         view distance — the script clears that separately, since no stylesheet
+         rule can win against an inline style. */
+      .reveal.me-fit-measuring .slides > section,
+      .reveal.me-fit-measuring .slides > section > section {
+        display: block;
+      }
+    </style>
+    <script>
+      (function () {
+        var MIN_SCALE = 0.55; // hard floor — below this, text stops being readable
+        var STEP = 0.98; // multiplicative creep per iteration
+        var MAX_ITER = 40;
+        var TOLERANCE = 2; // px of slack before we call a slide "overflowing"
+
+        function leafSections(slidesEl) {
+          return Array.prototype.filter.call(
+            slidesEl.querySelectorAll("section"),
+            function (s) {
+              return !s.querySelector("section"); // skip vertical-stack wrappers
+            }
+          );
+        }
+
+        function label(section) {
+          var h = section.querySelector("h1, h2, h3");
+          return (h ? h.textContent : section.id || "(untitled)").trim();
+        }
+
+        // How tall is this slide's content, really?
+        //
+        // `scrollHeight` is no use here: reveal.js gives every slide an explicit
+        // `height: 760px`, so a slide reports the full canvas whether it holds two
+        // bullets or twenty. Measure the bottom edge of the lowest child instead.
+        // Child rects come back in viewport pixels (the canvas is transform-scaled)
+        // whereas padding is in canvas pixels, hence the divide-then-add.
+        function contentHeight(section, canvasScale) {
+          var top = section.getBoundingClientRect().top;
+          var lowest = top;
+
+          Array.prototype.forEach.call(section.children, function (child) {
+            var r = child.getBoundingClientRect();
+            if (!r.height && !r.width) return; // skip anything not rendered
+            if (r.bottom > lowest) lowest = r.bottom;
+          });
+
+          var padBottom = parseFloat(getComputedStyle(section).paddingBottom) || 0;
+          return (lowest - top) / canvasScale + padBottom;
+        }
+
+        // Figures don't scale with font-size, so a slide dominated by a tall image
+        // can't be fixed by type alone. Cap them by the same factor as the text.
+        // `offsetHeight` is used rather than a client rect because it is already in
+        // canvas pixels, which is what the max-height we set needs to be in.
+        function figuresIn(section) {
+          return Array.prototype.map.call(
+            section.querySelectorAll("img, video, iframe"),
+            function (el) {
+              el.style.removeProperty("max-height");
+              return { el: el, height: el.offsetHeight };
+            }
+          );
+        }
+
+        function applyScale(section, figures, naturalFontPx, scale) {
+          section.style.setProperty(
+            "font-size",
+            (naturalFontPx * scale).toFixed(2) + "px",
+            "important"
+          );
+          figures.forEach(function (f) {
+            if (f.height > 0) {
+              f.el.style.setProperty(
+                "max-height",
+                (f.height * scale).toFixed(2) + "px",
+                "important"
+              );
+            }
+          });
+        }
+
+        // The running footer is painted over the slide, not inside it, so the last
+        // line of a full-height slide would collide with it. Work out how much of
+        // the canvas the footer covers, in canvas pixels.
+        function footerReserve(slidesEl, canvasScale) {
+          var footer = document.querySelector(".reveal .footer");
+          if (!footer || !footer.offsetHeight) return 0;
+
+          var overlap =
+            slidesEl.getBoundingClientRect().bottom -
+            footer.getBoundingClientRect().top;
+          return Math.max(0, overlap / canvasScale) + 6; // + breathing room
+        }
+
+        function fitAll() {
+          var revealEl = document.querySelector(".reveal");
+          var slidesEl = document.querySelector(".reveal .slides");
+          if (!revealEl || !slidesEl || !slidesEl.offsetHeight) return;
+
+          var canvasScale =
+            slidesEl.getBoundingClientRect().height / slidesEl.offsetHeight;
+          if (!canvasScale) return;
+
+          var available = slidesEl.offsetHeight - footerReserve(slidesEl, canvasScale);
+          if (!(available > 0)) return;
+
+          // --- force layout on every slide, including hidden ones ----------------
+          revealEl.classList.add("me-fit-measuring");
+          var allSections = Array.prototype.slice.call(
+            slidesEl.querySelectorAll("section")
+          );
+          var savedDisplay = allSections.map(function (s) {
+            var prev = s.style.display;
+            s.style.display = ""; // drop reveal's inline `display: none`
+            return prev;
+          });
+
+          var floored = [];
+
+          leafSections(slidesEl).forEach(function (section) {
+            // Always start from the slide's natural size so repeat passes are
+            // idempotent rather than compounding.
+            section.style.removeProperty("font-size");
+            var figures = figuresIn(section);
+            var naturalFontPx = parseFloat(getComputedStyle(section).fontSize);
+            if (!naturalFontPx) return;
+
+            if (contentHeight(section, canvasScale) <= available + TOLERANCE) {
+              delete section.dataset.meFitScale;
+              return;
+            }
+
+            var scale = 1;
+            for (var i = 0; i < MAX_ITER; i++) {
+              // Aim straight at the required ratio, then creep down — text reflow
+              // means height isn't perfectly linear in the scale factor.
+              var current = contentHeight(section, canvasScale);
+              scale = Math.max(
+                MIN_SCALE,
+                Math.min(scale * STEP, (available / current) * scale)
+              );
+              applyScale(section, figures, naturalFontPx, scale);
+              if (contentHeight(section, canvasScale) <= available + TOLERANCE) break;
+              if (scale <= MIN_SCALE) break;
+            }
+
+            section.dataset.meFitScale = scale.toFixed(3);
+            if (contentHeight(section, canvasScale) > available + TOLERANCE) {
+              floored.push(label(section));
+            }
+          });
+
+          // --- put reveal's own visibility bookkeeping back ----------------------
+          allSections.forEach(function (s, i) {
+            s.style.display = savedDisplay[i];
+          });
+          revealEl.classList.remove("me-fit-measuring");
+
+          if (floored.length && window.console) {
+            console.warn(
+              "[ME324] " +
+                floored.length +
+                " slide(s) still overflow at the minimum type size — consider " +
+                "splitting them:\n  • " +
+                floored.join("\n  • ")
+            );
+          }
+        }
+
+        // Wait for the things that change content height: web fonts, MathJax, and
+        // any images that haven't decoded yet.
+        function whenSettled(done) {
+          var waits = [];
+
+          if (document.fonts && document.fonts.ready) waits.push(document.fonts.ready);
+
+          if (window.MathJax && window.MathJax.startup && window.MathJax.startup.promise) {
+            waits.push(window.MathJax.startup.promise);
+          }
+
+          Array.prototype.forEach.call(document.images, function (img) {
+            if (img.complete) return;
+            waits.push(
+              new Promise(function (resolve) {
+                img.addEventListener("load", resolve, { once: true });
+                img.addEventListener("error", resolve, { once: true });
+              })
+            );
+          });
+
+          // Never block the deck on a hung asset.
+          var timeout = new Promise(function (resolve) {
+            setTimeout(resolve, 5000);
+          });
+
+          Promise.race([Promise.all(waits).catch(function () {}), timeout]).then(
+            function () {
+              requestAnimationFrame(function () {
+                requestAnimationFrame(done);
+              });
+            }
+          );
+        }
+
+        // The first pass is also a warm-up: it is what forces off-screen slides to
+        // lay out for the first time, which is what pulls in the web-font weights
+        // and finishes any deferred MathJax work they contain. Those land *after*
+        // we've measured, so a slide can grow by a line or two behind our back.
+        // fitAll() resets before it measures, so re-running it simply corrects.
+        function fitRepeatedly() {
+          fitAll();
+          whenSettled(function () {
+            fitAll();
+            setTimeout(fitAll, 1500);
+          });
+        }
+
+        function start() {
+          if (!window.Reveal) return;
+          if (Reveal.isReady && Reveal.isReady()) {
+            whenSettled(fitRepeatedly);
+          } else {
+            Reveal.on("ready", function () {
+              whenSettled(fitRepeatedly);
+            });
+          }
+        }
+
+        if (document.readyState === "complete") {
+          start();
+        } else {
+          window.addEventListener("load", start);
+        }
+      })();
+    </script>
+    <script id="quarto-html-after-body" type="application/javascript">
+    window.document.addEventListener("DOMContentLoaded", function (event) {
+      const toggleBodyColorMode = (bsSheetEl) => {
+        const mode = bsSheetEl.getAttribute("data-mode");
+        const bodyEl = window.document.querySelector("body");
+        if (mode === "dark") {
+          bodyEl.classList.add("quarto-dark");
+          bodyEl.classList.remove("quarto-light");
+        } else {
+          bodyEl.classList.add("quarto-light");
+          bodyEl.classList.remove("quarto-dark");
+        }
+      }
+      const toggleBodyColorPrimary = () => {
+        const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+        if (bsSheetEl) {
+          toggleBodyColorMode(bsSheetEl);
+        }
+      }
+      toggleBodyColorPrimary();  
+      const tabsets =  window.document.querySelectorAll(".panel-tabset-tabby")
+      tabsets.forEach(function(tabset) {
+        const tabby = new Tabby('#' + tabset.id);
+      });
+      const isCodeAnnotation = (el) => {
+        for (const clz of el.classList) {
+          if (clz.startsWith('code-annotation-')) {                     
+            return true;
+          }
+        }
+        return false;
+      }
+      const onCopySuccess = function(e) {
+        // button target
+        const button = e.trigger;
+        // don't keep focus
+        button.blur();
+        // flash "checked"
+        button.classList.add('code-copy-button-checked');
+        var currentTitle = button.getAttribute("title");
+        button.setAttribute("title", "Copied!");
+        let tooltip;
+        if (window.bootstrap) {
+          button.setAttribute("data-bs-toggle", "tooltip");
+          button.setAttribute("data-bs-placement", "left");
+          button.setAttribute("data-bs-title", "Copied!");
+          tooltip = new bootstrap.Tooltip(button, 
+            { trigger: "manual", 
+              customClass: "code-copy-button-tooltip",
+              offset: [0, -8]});
+          tooltip.show();    
+        }
+        setTimeout(function() {
+          if (tooltip) {
+            tooltip.hide();
+            button.removeAttribute("data-bs-title");
+            button.removeAttribute("data-bs-toggle");
+            button.removeAttribute("data-bs-placement");
+          }
+          button.setAttribute("title", currentTitle);
+          button.classList.remove('code-copy-button-checked');
+        }, 1000);
+        // clear code selection
+        e.clearSelection();
+      }
+      const getTextToCopy = function(trigger) {
+          const codeEl = trigger.previousElementSibling.cloneNode(true);
+          for (const childEl of codeEl.children) {
+            if (isCodeAnnotation(childEl)) {
+              childEl.remove();
+            }
+          }
+          return codeEl.innerText;
+      }
+      const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+        text: getTextToCopy
+      });
+      clipboard.on('success', onCopySuccess);
+      if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+        // For code content inside modals, clipBoardJS needs to be initialized with a container option
+        // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+        const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+          text: getTextToCopy,
+          container: window.document.getElementById('quarto-embedded-source-code-modal')
+        });
+        clipboardModal.on('success', onCopySuccess);
+      }
+        var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+        var mailtoRegex = new RegExp(/^mailto:/);
+          var filterRegex = new RegExp("https:\/\/ts-robinson\.com\/me324\/");
+        var isInternal = (href) => {
+            return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+        }
+        // Inspect non-navigation links and adorn them if external
+     	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+        for (var i=0; i<links.length; i++) {
+          const link = links[i];
+          if (!isInternal(link.href)) {
+            // undo the damage that might have been done by quarto-nav.js in the case of
+            // links that we want to consider external
+            if (link.dataset.originalHref !== undefined) {
+              link.href = link.dataset.originalHref;
+            }
+          }
+        }
+      function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+        const config = {
+          allowHTML: true,
+          maxWidth: 500,
+          delay: 100,
+          arrow: false,
+          appendTo: function(el) {
+              return el.closest('section.slide') || el.parentElement;
+          },
+          interactive: true,
+          interactiveBorder: 10,
+          theme: 'light-border',
+          placement: 'bottom-start',
+        };
+        if (contentFn) {
+          config.content = contentFn;
+        }
+        if (onTriggerFn) {
+          config.onTrigger = onTriggerFn;
+        }
+        if (onUntriggerFn) {
+          config.onUntrigger = onUntriggerFn;
+        }
+          config['offset'] = [0,0];
+          config['maxWidth'] = 700;
+        window.tippy(el, config); 
+      }
+      const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+      for (var i=0; i<noterefs.length; i++) {
+        const ref = noterefs[i];
+        tippyHover(ref, function() {
+          // use id or data attribute instead here
+          let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+          try { href = new URL(href).hash; } catch {}
+          const id = href.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note) {
+            return note.innerHTML;
+          } else {
+            return "";
+          }
+        });
+      }
+      const findCites = (el) => {
+        const parentEl = el.parentElement;
+        if (parentEl) {
+          const cites = parentEl.dataset.cites;
+          if (cites) {
+            return {
+              el,
+              cites: cites.split(' ')
+            };
+          } else {
+            return findCites(el.parentElement)
+          }
+        } else {
+          return undefined;
+        }
+      };
+      var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+      for (var i=0; i<bibliorefs.length; i++) {
+        const ref = bibliorefs[i];
+        const citeInfo = findCites(ref);
+        if (citeInfo) {
+          tippyHover(citeInfo.el, function() {
+            var popup = window.document.createElement('div');
+            citeInfo.cites.forEach(function(cite) {
+              var citeDiv = window.document.createElement('div');
+              citeDiv.classList.add('hanging-indent');
+              citeDiv.classList.add('csl-entry');
+              var biblioDiv = window.document.getElementById('ref-' + cite);
+              if (biblioDiv) {
+                citeDiv.innerHTML = biblioDiv.innerHTML;
+              }
+              popup.appendChild(citeDiv);
+            });
+            return popup.innerHTML;
+          });
+        }
+      }
+    });
+    </script>
+    
+
+</body></html>

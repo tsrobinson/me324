@@ -11,9 +11,7 @@ project:
   # resources so a full render, which wipes docs/, copies them back in.
   resources:
     - lectures/pdf
-  # Only released material is listed here. Weeks 2-3 (lectures 6-12, labs 6-12)
-  # exist on disk but are deliberately NOT rendered or published yet -- add the
-  # relevant lines below (and drop them from .gitignore) to release them.
+  # Only released material is listed here.
   render:
     - index.qmd
     - lectures.qmd
@@ -29,6 +27,9 @@ project:
     - lectures/lecture-07-generative-images.qmd
     - lectures/lecture-08-text-embeddings.qmd
     - lectures/lecture-09-rnns.qmd
+    - lectures/lecture-10-attention-transformers.qmd
+    - lectures/lecture-11-tokenization-refinements.qmd
+    - lectures/lecture-12-ethics-recap.qmd
     - labs/lab-01-setup-and-tensors.ipynb
     - labs/lab-02-perceptron-numpy.ipynb
     - labs/lab-03-value-forward.ipynb

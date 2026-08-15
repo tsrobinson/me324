@@ -44,10 +44,3 @@ assessment/data/*
 
 # Internal working documents.
 *.docx
-
-# Weeks 2-3, released day by day. To publish one: delete its line here, add the
-# file to `render:` in _quarto.yml, add it to the listing in lectures.qmd or the
-# table in labs.qmd, then re-render and commit.
-lectures/lecture-10-*
-lectures/lecture-11-*
-lectures/lecture-12-*

@@ -1,0 +1,1046 @@
+---
+title: "Building your own text-generating AI (4/4)"
+subtitle: "Lecture 11 — Tokenisation, sampling, and what you've built"
+author: "Dr Thomas Robinson"
+date: "2026-08-18"
+date-format: long
+bibliography: ../refs.bib
+format: 
+  revealjs:
+    smaller: true
+---
+
+# Show & tell · your GPTs {background-color="#0E1A2B"}
+
+## Plenary · read your GPT aloud
+
+[<span class="pause-cue">≈ 10 min</span> · whole room]{.eyebrow}
+
+Yesterday you each built a tiny GPT and brought away **one generated sample** — the funniest line, or the one that shouldn't have made sense but did.
+
+::: {.try-box}
+[Share with the room]{.try-label}
+
+Read **one line** your model produced. In a sentence or two, tell us:
+
+1. Why you picked it — coherent? funny? eerily plausible?
+2. **One failure mode** you noticed — repetition, invented non-words, losing the thread mid-sentence, confident nonsense.
+:::
+
+::: {.callout-tip}
+Three weeks ago this was a black box. Yesterday *you trained a transformer that produces English.* It is small and it is flawed — and that is exactly what today is about: better **tokens** (Part 1), better **sampling** (Part 2), and a **map of everything that sits between your tiny GPT and ChatGPT** (Part 3).
+:::
+
+## Warm-up · three questions from last time
+
+[<span class="pause-cue">≈ 5 min</span> · shout it out]{.eyebrow}
+
+::: {.card}
+1. In attention, what are the roles of the **query**, the **key**, and the **value** — one phrase each?
+2. Why do we divide the attention scores by $\sqrt{d}$?
+3. What does the **causal mask** block, and why do we need it?
+:::
+
+## Warm-up · answers
+
+::: {.card}
+1. **Query**: what I am looking for. **Key**: what I contain. **Value**: what I hand over if matched.
+2. Dot products grow with dimension. Unscaled, the scores saturate the softmax and one token takes nearly all the weight. Dividing by $\sqrt{d}$ keeps the scores in a range where the softmax still spreads attention.
+3. It blocks attention to **future tokens**. Without it, next-token prediction could read the answer it is supposed to predict.
+:::
+
+# Part 1 · Tokenisation {background-color="#0E1A2B"}
+
+## Three levels of tokenisation
+
+::: {.columns}
+::: {.column width="33%"}
+[Character]{.pill-blue}
+
+* Tiny vocab (~100).
+* Sequences are **long** — typically 4× longer than word-level.
+* Model spends compute learning spelling.
+* What our labs have used since Lab 8.
+:::
+::: {.column width="33%"}
+[Word]{.pill-amber}
+
+* Huge vocab (10⁵+).
+* OOV (out-of-vocabulary) is a real failure mode.
+* Embedding matrix is gigantic.
+* What 1990s/2000s NLP used.
+:::
+::: {.column width="33%"}
+[Subword]{.pill-green}
+
+* Vocab ~32k–128k.
+* No OOV — rare words just split into smaller pieces.
+* What every modern LLM uses.
+* The topic of this lecture.
+:::
+:::
+
+## Where compute goes — and why tokenisation matters
+
+For a transformer with width $d$ trained on $T$ tokens at sequence length $L$:
+
+::: {.card}
+* Self-attention cost per layer: $\mathcal{O}(L^2 d)$.
+* Feed-forward cost: $\mathcal{O}(L d^2)$.
+* Memory for the attention matrix: $\mathcal{O}(L^2)$.
+:::
+
+::: {.callout-tip}
+**Longer sequences are quadratically more expensive.**
+
+Halving the average tokens-per-word — by better tokenisation — halves the sequence length. And **quarters the attention compute**.
+
+Tokenisation choices have downstream cost implications.
+:::
+
+## Token cost varies by language
+
+[The hidden cost of being non-English]{.eyebrow}
+
+::: {.columns}
+::: {.column width="55%"}
+"Hello, how are you today?" in GPT-4's tokeniser:
+
+* **English**: 7 tokens.
+* **Spanish**: 8 tokens.
+* **Chinese**: 10 tokens.
+* **Burmese**: 71 tokens.
+* **Tamil**: 49 tokens.
+
+Same content. **Ten times the cost** for some languages.
+:::
+::: {.column width="45%"}
+::: {.card}
+This is a structural inequity. API pricing is per token. Context windows are per token. A Burmese-speaking user pays ten times more *and* fits one-tenth the conversation.
+
+Petrov et al. (2023) — *Language Model Tokenizers Introduce Unfairness Between Languages*.
+:::
+:::
+:::
+
+## Tokenisation's strangest bugs
+
+[Surprises you'll meet in the wild]{.eyebrow}
+
+::: {.columns}
+::: {.column width="50%"}
+[Numbers]{.pill-amber}
+
+GPT-4 tokenises numbers **inconsistently**:
+
+* Some years are a **single token**.
+* An *adjacent* year can split into **several** tokens.
+* There's no clean rule — it depends on what was frequent in the training data.
+
+A model that sees `2024` as one atom but `2025` as three pieces has no stable notion of "a year," let alone how to add one. This inconsistency is part of why LLMs are **bad at arithmetic**.
+:::
+::: {.column width="50%"}
+[Glitch tokens]{.pill-amber}
+
+Some tokens appear in the vocabulary but rarely in training data. The model has no idea what they mean.
+
+* `" SolidGoldMagikarp"` produced bizarre, evasive output in GPT-2/GPT-3-era models.
+* Reddit-derived artefacts; the vocabulary outlived the user.
+:::
+:::
+
+::: {.callout-tip}
+**The lesson**: vocabulary is a one-shot decision made before training. Mistakes cascade for the model's whole life. Modern tokenisers (cl100k, o200k) try harder to avoid these.
+:::
+
+## Byte-pair encoding — the standard
+
+[The BPE algorithm — start with bytes]{.eyebrow}
+
+Initialise: every byte is a token. Vocab size 256.
+
+Repeat until target vocab size (e.g. 50,000):
+
+::: {.card}
+1. Count all adjacent token **pairs** in the corpus.
+2. Find the most frequent pair.
+3. Merge it into a new token.
+4. Add the new token to the vocabulary.
+:::
+
+::: {.callout-note}
+**That's the whole algorithm.** It was invented for data compression in the 1990s. Sennrich, Haddow & Birch (2016) applied it to neural machine translation. It is now the default tokeniser in every major LLM.
+:::
+
+## A worked BPE example
+
+[Tiny corpus]{.eyebrow}
+
+`low low low low low lowest newer newer newer newer newer wider`
+
+::: {.columns}
+::: {.column width="50%"}
+[Initial state]{.pill-blue}
+
+Single characters. Words become sequences (using `_` for word-end):
+
+* `l o w _` × 5
+* `l o w e s t _` × 1
+* `n e w e r _` × 5
+* `w i d e r _` × 1
+:::
+::: {.column width="50%"}
+[Most-frequent pair counts]{.pill-blue}
+
+* `(e, r)` appears 6 times
+* `(l, o)` appears 6 times
+* `(o, w)` appears 6 times
+* `(n, e)` appears 5 times
+
+(Tie-break by alphabetical order, say.)
+:::
+:::
+
+::: {.card}
+**Merge `(e, r)` → new token `er`.** Repeat.
+:::
+
+## BPE merges — step by step
+
+Each row applies **exactly one** merge. The cell shows the *full* token sequence of every word afterwards, so you can see what changed:
+
+| Step | Merge | Corpus after this merge |
+|---|---|---|
+| 0 | *(start)* | `l o w _`×5 · `l o w e s t _` · `n e w e r _`×5 · `w i d e r _` |
+| 1 | `(e,r)→er` | `l o w _`×5 · `l o w e s t _` · `n e w er _`×5 · `w i d er _` |
+| 2 | `(er,_)→er_` | `l o w _`×5 · `l o w e s t _` · `n e w er_`×5 · `w i d er_` |
+| 3 | `(l,o)→lo` | `lo w _`×5 · `lo w e s t _` · `n e w er_`×5 · `w i d er_` |
+| 4 | `(lo,w)→low` | `low _`×5 · `low e s t _` · `n e w er_`×5 · `w i d er_` |
+| 5 | `(low,_)→low_` | `low_`×5 · `low e s t _` · `n e w er_`×5 · `w i d er_` |
+
+::: {.card}
+After these five merges the frequent word `low_` is already a **single token**. Keep going and `newer_`, `wider_` collapse too.
+
+The rare word `lowest_` stays split — `low e s t _` — but it **reuses the `low` piece** it shares with the common word. That sharing is the whole point: the model can spell a word it has barely seen out of pieces it knows well. **No word is ever out-of-vocabulary.**
+:::
+
+## How modern tokenisers look
+
+::: {.columns}
+::: {.column width="50%"}
+[GPT-2]{.pill}
+
+Byte-level BPE — operates on raw utf-8 bytes. Any text works.
+
+Vocab: 50,257.
+:::
+::: {.column width="50%"}
+[GPT-4 / Claude]{.pill}
+
+`cl100k_base` and variants — larger vocabularies, refined merge ordering for code + multilingual text.
+
+Vocab: ~100,000+.
+:::
+:::
+
+::: {.callout-note}
+**Try [OpenAI's tokeniser visualiser](https://platform.openai.com/tokenizer).** Type a sentence in English, then in another language. Watch the token count change.
+:::
+
+## Byte-level BPE — the missing detail
+
+Our worked examples merged **characters**. Run BPE that way at scale and there is a hole:
+
+::: {.columns}
+::: {.column width="50%"}
+[Character-level BPE]{.pill-amber}
+
+* Base vocabulary = the characters seen in training.
+* Unicode has ~150,000 characters. No corpus contains them all.
+* Meet a new one at test time — a rare script, a fresh emoji — and the tokeniser has no token for it. The model gets `<unk>`.
+:::
+::: {.column width="50%"}
+[Byte-level BPE — GPT-2's fix]{.pill-green}
+
+* Run BPE on **bytes**, not characters.
+* Base vocabulary = **all 256 byte values**.
+* Every string a computer stores is a byte sequence, so every possible string is representable.
+* There is no unknown token, ever.
+:::
+:::
+
+## Bytes in practice — one character is not one byte
+
+In UTF-8, common Latin characters take one byte each; everything else takes more:
+
+::: {.card}
+* `café` → `c`, `a`, `f` at one byte each, `é` at **two** (`0xC3 0xA9`): $3 \times 1 + 2 = 5$ bytes.
+* 🤖 → **four** bytes (`0xF0 0x9F 0xA4 0x96`).
+:::
+
+If 🤖 is rare in the training corpus, no merge ever forms it. The tokeniser hands the model **four single-byte tokens**, and the model has to piece the robot together itself.
+
+::: {.try-box}
+[Try it yourself]{.try-label}
+**Why can byte-level BPE never meet an out-of-vocabulary string?**
+:::
+
+::: {.fragment}
+::: {.reveal-box}
+[Answer]{.reveal-label}
+Every string is stored as a sequence of bytes, and all 256 possible byte values are in the vocabulary. Worst case, a string tokenises byte by byte — but it always tokenises.
+:::
+:::
+
+# Plenary · BPE by hand {background-color="#0E1A2B"}
+
+## Plenary · BPE by hand
+
+[<span class="pause-cue">≈ 10 min</span> · in pairs]{.eyebrow}
+
+::: {.card}
+[Tiny corpus]{.eyebrow}
+
+`"banana banana banana ana ana"`
+
+Use a `_` to mark word ends. Each character + `_` starts as a token.
+
+[Task]{.eyebrow}
+
+Do **three** BPE merges by hand. After each, write down:
+
+1. Which pair you merged.
+2. The current state of the corpus.
+3. The current vocabulary.
+:::
+
+::: {.try-box}
+[Reflection]{.try-label}
+After your three merges, would `"banana"` be a single token or several? What about `"bandana"` (a word the corpus has never seen)?
+:::
+
+[Six minutes.]{.muted}
+
+## Plenary · answers
+
+::: {.card}
+[Start]{.eyebrow} `banana_` = `b a n a n a _` (×3) · `ana_` = `a n a _` (×2)
+
+[Initial pair counts]{.eyebrow} `(a,n)` 8 · `(n,a)` 8 · `(a,_)` 5 · `(b,a)` 3.
+
+[Step 1]{.eyebrow} `(a,n)` and `(n,a)` tie at 8 — break ties by a fixed rule; here take **`(n,a) → na`**.
+
+* `banana_` → `b a na na _`
+* `ana_` → `a na _`
+
+[Step 2]{.eyebrow} Recount: `(a,na)` and `(na,_)` now tie at 5 (top) — fixed rule again takes **`(a,na) → ana`**.
+
+* `banana_` → `b ana na _`
+* `ana_` → `ana _`
+
+[Step 3]{.eyebrow} Recount: `(b,ana)`, `(ana,na)`, `(na,_)` all tie at 3 — fixed rule picks **`(b,ana) → bana`**.
+
+* `banana_` → `bana na _`
+* `ana_` → `ana _`
+:::
+
+::: {.reveal-box}
+[Reflection]{.reveal-label}
+**`"banana"`** now tokenises as **`bana` + `na`** — two tokens, almost a single one.
+
+**`"bandana"`** = `b a n d a n a _`. Apply the *learned* merges in order — `na`, then `ana`, then `bana`:
+
+* `na`: only the final `n a` merges (the first `n` is followed by `d`) → `b a n d a na _`
+* `ana`: the `a na` merges → `b a n d ana _`
+* `bana`: needs `b` next to `ana`, but `b` is followed by `a` → no merge.
+
+Result: **`b` + `a` + `n` + `d` + `ana`**. The model has *never seen* `"bandana"` yet reads it from known pieces.
+
+This is BPE's guarantee: **no OOV**.
+:::
+
+# Part 2 · Sampling strategies {background-color="#0E1A2B"}
+
+## We always sample — but *how*?
+
+At each step of generation, the model gives us a distribution $p$ over the next token. To pick one:
+
+::: {.columns}
+::: {.column width="33%"}
+[Argmax (greedy)]{.pill}
+
+Always pick the most likely.
+
+* Deterministic.
+* Often repetitive / dull.
+* Bad for chat.
+:::
+::: {.column width="33%"}
+[Sample from $p$]{.pill-blue}
+
+Sample with original probabilities.
+
+* Diverse.
+* Sometimes wanders into low-probability nonsense.
+:::
+::: {.column width="33%"}
+[Beam search]{.pill-green}
+
+Track top-$k$ candidate sequences in parallel.
+
+* Useful for translation.
+* Boring for chat.
+:::
+:::
+
+## Temperature
+
+Adjust the softmax with a **temperature** $\tau > 0$:
+
+$$
+p_i \propto \exp\!\left(\frac{z_i}{\tau}\right)
+$$
+
+::: {.columns}
+::: {.column width="50%"}
+[$\tau < 1$]{.pill}
+
+Sharpen the distribution. More confident, more deterministic.
+:::
+::: {.column width="50%"}
+[$\tau > 1$]{.pill-blue}
+
+Flatten the distribution. More creative, more random.
+:::
+:::
+
+::: {.callout-tip}
+$\tau = 0$ reduces to argmax. $\tau = 1$ keeps the raw model probabilities. Most chat applications run somewhere in $0.7$–$1.0$.
+
+For technical/factual tasks, lower (≈0.2). For creative writing, higher (~1.2).
+:::
+
+## Beam search — for translation, not chat
+
+[The "find the best whole sentence" approach]{.eyebrow}
+
+::: {.columns}
+::: {.column width="55%"}
+**Argmax** picks one token at a time — locally optimal, globally myopic.
+
+**Beam search** keeps the top $k$ candidate *sequences* in parallel, extending each. At the end, return the highest-scoring sequence overall.
+
+* $k = 5$ or $10$ is common.
+* Used for translation, summarisation — anywhere there's a "single best answer."
+:::
+::: {.column width="45%"}
+::: {.card}
+**Why not for chat.** Beam search produces fluent but predictable text. The "best" sequence is often the most generic one. For chat, conversation, or creative writing, sampling is better.
+
+**Rule of thumb**: beam search for one-shot tasks with a verifiable correct answer. Sampling for open-ended generation.
+:::
+:::
+:::
+
+## Top-k and top-p (nucleus)
+
+::: {.columns}
+::: {.column width="50%"}
+[Top-k]{.pill-blue}
+
+Keep only the $k$ highest-probability tokens; renormalise; sample.
+
+* Truncates the long tail of garbage.
+* $k = 40$ or 50 common.
+* Same $k$ regardless of model confidence.
+:::
+::: {.column width="50%"}
+[Top-p (nucleus)]{.pill-green}
+
+Keep the smallest set of tokens whose cumulative probability exceeds $p$; renormalise; sample.
+
+* **Adapts** to model confidence.
+* $p = 0.9$ common.
+* Few tokens kept when model is confident; many when uncertain.
+:::
+:::
+
+::: {.callout-note}
+Combined with temperature, these give us four knobs on creativity:
+1. Argmax / sampling switch.
+2. Temperature.
+3. Top-k.
+4. Top-p.
+
+In practice, GPT-style chat models use a low temperature + top-p $\approx 0.9$.
+:::
+
+## When top-k and top-p disagree
+
+Two next-token distributions over the same six tokens — one from a confident model, one from an uncertain one:
+
+::: {.columns}
+::: {.column width="50%"}
+[Peaked]{.pill-blue}
+
+$p = [0.85,\ 0.06,\ 0.04,\ 0.03,\ 0.01,\ 0.01]$
+
+* **Top-p, $p = 0.7$**: the first token alone gives $0.85 \geq 0.7$ → keeps **1** token.
+* **Top-k, $k = 3$**: keeps **3** tokens — including two the model rates at 6% and 4%.
+:::
+::: {.column width="50%"}
+[Flat]{.pill-green}
+
+$p = [0.25,\ 0.20,\ 0.20,\ 0.15,\ 0.10,\ 0.10]$
+
+* **Top-p, $p = 0.7$**: $0.25 + 0.20 + 0.20 = 0.65 < 0.7$, so add the fourth → keeps **4** tokens.
+* **Top-k, $k = 3$**: keeps **3** — cutting a token the model rates at 15%.
+:::
+:::
+
+Same settings, both times. Top-p kept 1 token in one case and 4 in the other.
+
+## After the cut — renormalise
+
+Whatever survives the cut must sum to 1 again before we sample. Take the flat distribution under top-k, $k = 3$:
+
+::: {.card}
+$$
+\begin{aligned}
+\text{kept} &= [0.25,\ 0.20,\ 0.20], \qquad \text{sum} = 0.65 \\
+\text{renormalised} &= \left[\tfrac{0.25}{0.65},\ \tfrac{0.20}{0.65},\ \tfrac{0.20}{0.65}\right] \approx [0.385,\ 0.308,\ 0.308]
+\end{aligned}
+$$
+:::
+
+Then sample from the renormalised distribution as usual.
+
+::: {.callout-tip}
+The difference in one line: **top-p adapts the cut to the model's confidence; top-k cannot.** When the model is sure, top-p gets out of the way. When it is unsure, top-p lets more candidates through.
+:::
+
+# Activity · sampling strategies {background-color="#0E1A2B"}
+
+## Activity · predict the output
+
+[<span class="pause-cue">≈ 8 min</span> · in pairs]{.eyebrow}
+
+::: {.card}
+We give a trained GPT the same 10-token prompt and generate 50 tokens with each sampling strategy:
+
+A. Greedy / argmax ($\tau = 0$).
+
+B. Temperature $\tau = 0.7$, top-p $= 0.9$.
+
+C. Temperature $\tau = 1.5$, no top-k/top-p.
+
+D. Temperature $\tau = 0.7$, top-k $= 1$.
+
+[Predict each output's character — choose from:]{.eyebrow}
+
+(i) Coherent and slightly varied.
+(ii) Deterministic; often repeats a phrase.
+(iii) Highly varied; sometimes nonsense.
+(iv) Slightly varied at the start, more chaotic later.
+
+[Bonus]{.eyebrow}: which two are functionally **the same**?
+:::
+
+[Five minutes.]{.muted}
+
+## Activity · answers
+
+::: {.card}
+A: **(ii)** — argmax is deterministic; can repeat ("loop").
+
+B: **(i)** — moderate $\tau$ + top-p is the modern chat default.
+
+C: **(iii)** — high temperature with no truncation lets the tail dominate.
+
+D: **(ii)** — top-k=1 collapses sampling to argmax regardless of temperature.
+
+**A and D are functionally the same.** Both are deterministic.
+:::
+
+::: {.callout-tip}
+Sampling is **interface design** for LLMs. Different products tune these for different feels — terse + factual, or rambling + creative. The same model produces different "personalities" depending on these knobs.
+:::
+
+# Part 3 · Beyond a base GPT — a map {background-color="#0E1A2B"}
+
+## A reflection on what you've built
+
+[The reveal — sort of]{.reveal-label}
+
+::: {.card}
+By end of today's lab, your tiny GPT will have:
+
+* A **tokeniser** (BPE).
+* A **token embedding** matrix.
+* A **positional embedding**.
+* $N$ **transformer blocks** with multi-head causal attention.
+* A **softmax + sampler** producing one token at a time.
+
+**Same skeleton as GPT-4, Claude, Gemini.** The differences are scale (you: millions of parameters; them: trillions), data, and post-training.
+
+You are no longer treating these models as black boxes.
+:::
+
+## Pre-training vs post-training
+
+[A frontier model's full lifecycle]{.eyebrow}
+
+::: {.card}
+[1. Pre-training]{.pill-blue}
+
+What you built in this lab. Predict the next token over trillions of tokens of web text + books + code.
+
+* Output: a "base model" — fluent, knowledgeable, useless as a chat assistant.
+* Cost: tens of millions of dollars. Months of compute.
+:::
+
+::: {.card}
+[2. Supervised fine-tuning (SFT) — "instruction tuning"]{.pill}
+
+Continue training on (prompt, ideal-response) pairs. One example, role tokens included:
+
+[`<|user|>` Explain a p-value in two sentences. `<|assistant|>` A p-value is the probability of seeing data at least as extreme as yours if the null hypothesis were true. It is not the probability that the null is true. `<|end|>`]{.smaller}
+
+* Output: a model that follows instructions.
+* Where the pairs come from: paid writers; licensed data; model-generated drafts filtered by humans.
+* Cost: ~10,000 to ~100,000 examples; a few days of compute.
+:::
+
+::: {.card}
+[3. Preference tuning (RLHF / DPO)]{.pill-green}
+
+Train the model to prefer responses that humans rate higher.
+
+* Output: a model that's helpful, honest, harmless.
+* Cost: hundreds of thousands of human preference judgements.
+* This is what makes a model helpful and harmless — and where the question of *whose* values get instilled begins.
+:::
+
+## RLHF — how it works
+
+[Reinforcement learning from human feedback]{.eyebrow}
+
+::: {.card}
+1. Take an instruction-tuned model. Generate **two** responses per prompt.
+2. A human rater picks the better one.
+3. Train a *reward model* to predict the human's choice.
+4. Use that reward model as the reward signal in **PPO** (a reinforcement learning algorithm) to fine-tune the original LLM.
+5. The LLM updates towards generating responses the reward model scores highly.
+:::
+
+::: {.callout-warning}
+**Reward hacking** is the central problem. The LLM learns to game the reward model — producing responses that *look* better without being better. Detecting and preventing this is half of modern alignment research.
+:::
+
+## Reward hacking — you get what you reward
+
+The model optimises what raters *reward*. That is not the same as what raters *want*.
+
+::: {.card}
+Raters, on average:
+
+* favour **longer** answers → models get wordy.
+* favour **agreement** → models get sycophantic — they tell you what you already believe.
+* favour a **confident tone** → models state guesses as facts.
+:::
+
+::: {.callout-warning}
+**Goodhart's law**: when a measure becomes a target, it stops being a good measure.
+:::
+
+## Reward hacking — a miniature
+
+**Q: What is the capital of Australia?**
+
+::: {.columns}
+::: {.column width="50%"}
+[Answer A — hedged, correct]{.pill-green}
+
+"I believe it is Canberra — though Sydney and Melbourne are the cities most people guess."
+:::
+::: {.column width="50%"}
+[Answer B — confident, wrong]{.pill-amber}
+
+"Sydney is the capital of Australia. As the country's largest city and its economic centre, Sydney has been the seat of national life since federation."
+:::
+:::
+
+A reward model that has learned to favour length and confidence scores **B higher**. The correct answer loses.
+
+::: {.card}
+[Three partial fixes]{.eyebrow}
+
+* **Better rater instructions** — tell raters to check facts and not to reward padding.
+* **Penalising length** — subtract a length term from the reward.
+* **DPO's implicit reward** (next slide) — no separate reward model to over-optimise against; the rater biases stay in the preference data, though.
+:::
+
+## DPO — the simpler alternative
+
+[Direct Preference Optimization, Rafailov et al. 2023]{.eyebrow}
+
+::: {.columns}
+::: {.column width="55%"}
+DPO skips the explicit reward model.
+
+* Given (prompt, preferred response, dispreferred response) triples.
+* Optimise the LLM **directly** to make the preferred response more likely.
+* No reinforcement learning. No PPO. No reward model.
+
+Mathematically equivalent to RLHF in the limit, but simpler.
+:::
+::: {.column width="45%"}
+::: {.card}
+Many recent open models (Llama 3, Qwen, Mistral) use DPO or a variant.
+
+Anthropic's **Constitutional AI** is another approach — use the *model itself* (or a separate model) to critique and revise responses, then fine-tune on the revisions.
+:::
+:::
+:::
+
+## Context windows — how much can the model read?
+
+The **context window** is the maximum number of tokens the model can attend over in one pass — prompt and response together.
+
+::: {.card}
+Cost is the constraint: attention compute grows with the **square** of length — yesterday's $\mathcal{O}(T^2)$ slide, back again. Double the window, quadruple the compute.
+:::
+
+::: {.columns}
+::: {.column width="50%"}
+[2019]{.pill}
+
+GPT-2: **1,024** tokens.
+
+At ~0.75 words per token, that is $1{,}024 \times 0.75 \approx 770$ words — about two pages.
+:::
+::: {.column width="50%"}
+[2025]{.pill-blue}
+
+Production models reach ~**2M** tokens; Llama 4 Scout claims **10M**.
+
+2M tokens $\approx$ 1.5 million words — a few thousand pages.
+:::
+:::
+
+## Lost in the middle
+
+A long window is not the same as a well-used one.
+
+::: {.card}
+@liu2024lost placed one needed fact at different positions inside a long context and measured whether models answered with it:
+
+* Fact at the **start** → high accuracy.
+* Fact at the **end** → high accuracy.
+* Fact in the **middle** → accuracy dips. The curve is **U-shaped**.
+:::
+
+::: {.callout-tip}
+Dumping every document you own into a huge window underperforms **retrieving the right passage** and placing it in the prompt. That retrieval idea is the next slide.
+:::
+
+## RAG — give the model an open-book exam
+
+[<span class="pause-cue">≈ 3 min</span> · think with your neighbour]{.eyebrow}
+
+::: {.card}
+A base LLM answers from memory alone — and **hallucinates** when it doesn't know.
+
+You have a database of 10,000 company documents and a Day-8 tool: you can **embed** any text into a vector and find the **most similar** documents.
+:::
+
+::: {.try-box}
+[Try]{.try-label}
+Using only "embed a question" and "find similar documents", **how would you stop the model inventing answers** about those 10,000 documents — *without retraining it*?
+:::
+
+::: {.fragment}
+::: {.reveal-box}
+[Retrieval-augmented generation (RAG)]{.reveal-label}
+
+1. **Embed the user's question** (Day 8!).
+2. **Search** the database for the most similar documents.
+3. **Inject** those documents into the prompt as context.
+4. The model answers *from the supplied text*, not just memory.
+
+Used by ChatGPT browsing, Perplexity, and most enterprise LLM products. No retraining needed. **The hard part is retrieval** — getting the *right* documents into context is itself a hard problem, and the source of most RAG failures.
+:::
+:::
+
+## Two ways to make a base model do more
+
+[Both bolt onto the model you built — no new architecture]{.eyebrow}
+
+::: {.columns}
+::: {.column width="50%"}
+[Reach outward — tools & agents]{.pill-blue}
+
+Give the model a **menu of tools** it may invoke: web search, run Python, query a database, call any API you describe.
+
+The model decides *when* to call a tool and *what* to pass; the output is fed back as context.
+
+This is the foundation of the **AI agents** push of 2024–25 — systems that book travel, write and run code, file pull requests. We are early on this curve.
+:::
+::: {.column width="50%"}
+[Think longer — reasoning models]{.pill-green}
+
+Teach the model to **think out loud** before answering — OpenAI's **o1**, Claude's **extended thinking**, DeepSeek's **R1**.
+
+It generates hidden "chain-of-thought" tokens, then answers.
+
+Trained by **reinforcement learning on outcomes** — rewarded for getting answers *right*, not for any particular trace. On Olympiad maths and competition coding the gap to prior LLMs is large.
+:::
+:::
+
+## LoRA — fine-tuning without touching the base model
+
+Full fine-tuning updates **every** weight matrix in the network. For a 7B-parameter model that is 7 billion numbers to update and store — per task.
+
+**LoRA** (low-rank adaptation; Hu et al., 2021) trains far fewer:
+
+::: {.card}
+Take one weight matrix $\mathbf{W}$, of size $d \times d$, where $d$ is the layer width.
+
+* **Freeze** $\mathbf{W}$ — it never changes.
+* Learn a correction $\Delta \mathbf{W} = \mathbf{B}\mathbf{A}$, where $\mathbf{A}$ is an $r \times d$ matrix and $\mathbf{B}$ is $d \times r$.
+* $r$ is the **rank** of the correction — chosen small, $r \ll d$.
+* The layer now uses $\mathbf{W} + \mathbf{B}\mathbf{A}$; only $\mathbf{A}$ and $\mathbf{B}$ are trained.
+:::
+
+The product $\mathbf{B}\mathbf{A}$ is $(d \times r)(r \times d) = d \times d$ — the same shape as $\mathbf{W}$, built from far fewer numbers.
+
+## LoRA — the arithmetic
+
+Take one $768 \times 768$ weight matrix (GPT-2's width):
+
+::: {.card}
+$$
+\begin{aligned}
+\text{full matrix} &: 768 \times 768 = 589{,}824 \text{ weights} \\
+\text{LoRA, } r = 8 &: \underbrace{8 \times 768}_{\mathbf{A}} + \underbrace{768 \times 8}_{\mathbf{B}} = 6{,}144 + 6{,}144 = 12{,}288 \\
+\text{ratio} &: 589{,}824 \div 12{,}288 = 48\times \text{ fewer}
+\end{aligned}
+$$
+:::
+
+[No new biases enter the count — LoRA adds only the two matrices, and the frozen layer keeps its own bias.]{.muted}
+
+Apply this to every attention matrix in the model and the trainable share is typically **under 1%** of the parameters.
+
+## LoRA — your turn
+
+::: {.try-box}
+[Try it yourself]{.try-label}
+**A rank-16 LoRA on a $1{,}024 \times 1{,}024$ matrix. How many trainable parameters, and how many times fewer than training the full matrix?**
+:::
+
+::: {.fragment}
+::: {.reveal-box}
+[Answer]{.reveal-label}
+$\mathbf{A}$: $16 \times 1{,}024 = 16{,}384$. $\mathbf{B}$: $1{,}024 \times 16 = 16{,}384$. Total: $2 \times 16 \times 1{,}024 = 32{,}768$.
+
+Full matrix: $1{,}024 \times 1{,}024 = 1{,}048{,}576$. Ratio: $1{,}048{,}576 \div 32{,}768 = 32$.
+:::
+:::
+
+::: {.callout-tip}
+Why people do this: **one frozen base model, plus a small adapter file per task.** Swap the adapter and you swap the behaviour — no full model copy each time.
+:::
+
+## Multimodal extensions
+
+[Not just text]{.eyebrow}
+
+::: {.columns}
+::: {.column width="50%"}
+[Vision-language models]{.pill-blue}
+
+* GPT-4V, Claude 3 Vision, Gemini.
+* Images get patchified, embedded, fed into the transformer alongside text tokens.
+* Same architecture; one new tokeniser-equivalent for pixels.
+:::
+::: {.column width="50%"}
+[Audio + video]{.pill-blue}
+
+* Whisper for speech-to-text.
+* GPT-4o native audio (sub-second latency).
+* Sora, Veo for video generation.
+* All variations on the transformer architecture.
+:::
+:::
+
+::: {.callout-tip}
+**The transformer is modality-agnostic.** Anything that can be turned into a sequence of vectors — text, image patches, audio frames, video frames, even amino-acid residues — can be fed through it.
+
+This is why "what is a transformer" matters: it is the sequence-modelling primitive underneath all of them.
+:::
+
+## Making transformers cheaper to run
+
+[The efficiency frontier — same idea, far less compute]{.eyebrow}
+
+::: {.columns}
+::: {.column width="50%"}
+[Longer context, cheaper attention]{.pill-blue}
+
+* **FlashAttention** — memory-efficient tiling. Still $O(N^2)$, just smaller constants. Now standard.
+* **Sparse / sliding attention** — attend to a local window; recover global reach by stacking layers (Longformer).
+* **State-space models (Mamba)** — replace attention with a learned recurrence. $O(N)$ in sequence length.
+:::
+::: {.column width="50%"}
+[Smaller, faster models]{.pill-green}
+
+* **Quantisation** — lower-precision weights (fp16 → int8 → int4). 4–8× smaller; slight quality loss.
+* **Distillation** — train a small model to mimic a big one (Llama 3.2 1B from Llama 3 70B).
+* **Speculative decoding** — a small model proposes tokens; the big one verifies in batch. 2–3× faster, no quality loss.
+* **Mixture-of-experts (MoE)** — route each token to a few "expert" sub-networks: huge total size, small *active* cost.
+:::
+:::
+
+::: {.callout-tip}
+**The shift since 2023**: matching frontier quality at a fraction of the cost. The cheapest API of 2025 outperforms the most expensive API of 2023. This course gives you the **vocabulary** to read any of these papers without getting lost.
+:::
+
+## Quantisation — the memory ledger
+
+The last slide said quantised models are "4–8× smaller". Here is where that comes from. Memory = number of parameters × bytes per parameter. For a 7-billion-parameter model:
+
+| Precision | Bytes per weight | Memory |
+|---|---|---|
+| fp32 | 4 | $7\text{B} \times 4 = 28$ GB |
+| fp16 | 2 | $7\text{B} \times 2 = 14$ GB |
+| int8 | 1 | $7\text{B} \times 1 = 7$ GB |
+| int4 | 0.5 | $7\text{B} \times 0.5 = 3.5$ GB |
+
+::: {.callout-tip}
+28 GB needs a data-centre GPU. **3.5 GB fits in an ordinary laptop's memory** — the same model, one-eighth the size. This is why you can run a 7B model at home!
+:::
+
+## Quantisation — what you pay
+
+Each weight is **rounded to a coarser grid**:
+
+::: {.card}
+* int8 stores each weight as one of $2^8 = 256$ values.
+* int4 stores each weight as one of $2^4 = 16$ values.
+:::
+
+* Quality falls little down to 4 bits; below that it falls apart.
+* In the common case this is **post-training quantisation**: no retraining. Take the trained weights and round them, choosing the grid per group of weights so the large ones survive.
+
+::: {.callout-note}
+Sixteen values per weight sounds destructive. It works because the model's behaviour is spread across billions of weights — no single weight needs to be precise.
+:::
+
+## Open vs closed-source LLMs
+
+[A consequential split]{.eyebrow}
+
+::: {.columns}
+::: {.column width="50%"}
+[Closed (API only)]{.pill-amber}
+
+GPT-5, Claude Opus 4.7, Gemini 2.5.
+
+* Highest quality.
+* Pay per token.
+* Cannot inspect weights.
+* Cannot fine-tune (mostly).
+* Cannot run offline.
+:::
+::: {.column width="50%"}
+[Open-weights]{.pill-green}
+
+Llama 4, Qwen 3, Mistral, DeepSeek, Gemma.
+
+* Quality has closed the gap (within ~1 year of frontier).
+* Free to download and run.
+* Can fine-tune for your data.
+* Can run on local hardware.
+* Can audit (partially) what the model knows.
+:::
+:::
+
+::: {.callout-tip}
+**For research and reproducibility**, open-weights models are increasingly attractive. For *peak* performance, closed APIs still win. For most applications in 2025+, the open models are *good enough* — and the math of inference cost favours them at scale.
+:::
+
+## A connection to social science — LLMs as instruments
+
+::: {.columns}
+::: {.column width="55%"}
+A growing research area:
+
+* **Annotation at scale.** LLMs labelling political speeches, social-media posts, news articles for sentiment, frame, ideology.
+* **Synthetic respondents.** Argyle et al. (2023): can an LLM impersonate a survey respondent of given demographics?
+* **Construct measurement.** Can we extract continuous measures of ideology, polarisation, frame, from text — at scale?
+* **Translation + corpus analysis** in low-resource languages.
+:::
+::: {.column width="45%"}
+::: {.callout-warning}
+**Open questions in social science:**
+
+* When the LLM gets it wrong, is the error random or systematic?
+* Does the LLM encode the biases of *its* training corpus, contaminating the construct it measures?
+* Should the LLM be considered a measurement *instrument* in the methodological sense?
+
+These are the questions today's social-science methodologists are working on. Now you can join the conversation.
+:::
+:::
+:::
+
+## Take stock
+
+[<span class="pause-cue">Where you are at the end of Day 11</span>]{.eyebrow}
+
+::: {.card}
+You can:
+
+1. Define and tokenise text with BPE.
+2. Explain why subword tokenisation has won.
+3. Sample from a language model with multiple strategies (greedy, top-k, top-p, temperature).
+4. Build, train, and sample from a small GPT — start to finish.
+5. Name the post-training steps (SFT, RLHF, DPO) that turn a base model into a chat product.
+6. Place the rest of the modern stack — RAG, tools, reasoning, multimodal, efficiency tricks — on a map relative to the GPT you built.
+7. Articulate at least one open social-science research question about LLMs as instruments.
+
+**This is the conceptual core of the modern AI landscape.**
+:::
+
+# Lab brief · today's afternoon {background-color="#0E1A2B"}
+
+## Today's lab — 90 minutes
+
+[Goals]{.eyebrow}
+
+Take yesterday's GPT and polish it:
+
+1. Replace the character tokeniser with **BPE** (use `tiktoken` or hand-rolled).
+2. Re-tokenise the training corpus.
+3. Re-train (model definition is unchanged — only the embedding vocab size differs).
+4. Try **different sampling strategies** — greedy, top-k, top-p, varying temperature — on the same prompt.
+5. **Side-by-side comparison** with yesterday's character-level output.
+
+::: {.card}
+[Deliverable]{.eyebrow}
+
+A short comparison document:
+
+* Three sample outputs (char-level GPT, BPE-GPT at $\tau=0.5$, BPE-GPT at $\tau=1.2$).
+* One paragraph: "What changed, and what does it tell me about the model?"
+:::
+
+[Stretch: try a non-English corpus. Watch what happens to the token count.]{.muted}
+
+## See you tomorrow {background-color="#0E1A2B"}
+
+[Lecture 12 — *Ethics, limitations, and course recap*]{.eyebrow}
+
+::: {.callout-tip}
+**Tomorrow is the final lecture.** It will be lighter on maths and heavier on discussion — including a substantive ethics plenary. Bring your skepticism.
+:::
