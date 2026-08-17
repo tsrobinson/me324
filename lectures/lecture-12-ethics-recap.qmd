@@ -743,6 +743,7 @@ That's the course: a dot product, a count, a shape, three vectors, and a knob.
 
 ::: {.card}
 * **Two hours**, pen and paper. No laptops. No phones. No ChatGPT.
+* **Calculators are allowed.** Bring one.
 * **Forty multiple-choice questions**, **six options** each, exactly one correct.
 * One mark each — marked out of 40, reported as a percentage.
 * **No negative marking.** A blank scores the same as a wrong answer, so **answer every question**.
@@ -845,6 +846,7 @@ To **Kaifang Zhou**, your lab instructor and TA, for running the labs. And to th
 [Bring]{.eyebrow}
 
 * A pen.
+* A calculator.
 * A clear head.
 
 ::: {.callout-tip}
