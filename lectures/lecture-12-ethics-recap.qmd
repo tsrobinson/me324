@@ -845,7 +845,6 @@ To **Kaifang Zhou**, your lab instructor and TA, for running the labs. And to th
 [Bring]{.eyebrow}
 
 * A pen.
-* Photo ID.
 * A clear head.
 
 ::: {.callout-tip}
