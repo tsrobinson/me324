@@ -81,7 +81,7 @@ Each day pairs a **3-hour lecture** with a **90-minute lab**. The lectures build
 :::
 ::: {.g-col-12 .g-col-md-4}
 ::: {.callout-tip appearance="minimal"}
-**Final exam** — Friday 21 August, two hours, pen-and-paper.
+**[Final exam](exam.qmd)** — Friday 21 August, two hours, pen-and-paper.
 :::
 :::
 :::

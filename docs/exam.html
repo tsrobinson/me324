@@ -6,8 +6,9 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="description" content="What the final exam covers, what the questions look like, and how to revise for it.">
 
-<title>Labs – ME324 · AI &amp; Deep Learning</title>
+<title>Final exam – ME324 · AI &amp; Deep Learning</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -68,8 +69,8 @@ ul.task-list li input[type="checkbox"] {
 <style>html{ scroll-behavior: smooth; }</style>
 
 
-<meta property="og:title" content="Labs – ME324 · AI &amp; Deep Learning">
-<meta property="og:description" content="Twelve 90-minute computer workshops">
+<meta property="og:title" content="Final exam – ME324 · AI &amp; Deep Learning">
+<meta property="og:description" content="What the final exam covers, what the questions look like, and how to revise for it.">
 <meta property="og:site_name" content="ME324 · AI &amp; Deep Learning">
 </head>
 
@@ -99,7 +100,7 @@ ul.task-list li input[type="checkbox"] {
 <span class="menu-text">Lectures</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link active" href="./labs.html" aria-current="page"> 
+    <a class="nav-link" href="./labs.html"> 
 <span class="menu-text">Labs</span></a>
   </li>  
   <li class="nav-item">
@@ -107,7 +108,7 @@ ul.task-list li input[type="checkbox"] {
 <span class="menu-text">Midterm</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./exam.html"> 
+    <a class="nav-link active" href="./exam.html" aria-current="page"> 
 <span class="menu-text">Exam</span></a>
   </li>  
   <li class="nav-item">
@@ -129,24 +130,40 @@ ul.task-list li input[type="checkbox"] {
     </nav>
 </header>
 <!-- content -->
-<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul class="collapse">
+  <li><a href="#what-is-examinable" id="toc-what-is-examinable" class="nav-link active" data-scroll-target="#what-is-examinable">What is examinable</a></li>
+  <li><a href="#what-the-questions-look-like" id="toc-what-the-questions-look-like" class="nav-link" data-scroll-target="#what-the-questions-look-like">What the questions look like</a></li>
+  <li><a href="#pacing" id="toc-pacing" class="nav-link" data-scroll-target="#pacing">Pacing</a></li>
+  <li><a href="#how-to-revise" id="toc-how-to-revise" class="nav-link" data-scroll-target="#how-to-revise">How to revise</a></li>
+  <li><a href="#what-you-should-be-able-to-do" id="toc-what-you-should-be-able-to-do" class="nav-link" data-scroll-target="#what-you-should-be-able-to-do">What you should be able to do</a></li>
+  <li><a href="#one-last-thing" id="toc-one-last-thing" class="nav-link" data-scroll-target="#one-last-thing">One last thing</a></li>
+  </ul>
+<div class="toc-actions"><ul class="collapse"><li><a href="https://github.com/tsrobinson/me324/blob/main/exam.qmd" class="toc-action"><i class="bi bi-github"></i>View source</a></li></ul></div></nav>
     </div>
 <!-- main -->
-<main class="content column-page" id="quarto-document-content">
+<main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Labs</h1>
-<p class="subtitle lead">Twelve 90-minute computer workshops</p>
+<h1 class="title">Final exam</h1>
+<p class="subtitle lead">Friday 21 August 2026 · two hours · pen and paper</p>
+</div>
+
+<div>
+  <div class="description">
+    What the final exam covers, what the questions look like, and how to revise for it.
+  </div>
 </div>
 
 
-
-<div class="quarto-title-meta column-page">
+<div class="quarto-title-meta">
 
     
   
@@ -158,87 +175,75 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p>The labs are a single project assembled over three weeks: each day reuses the previous day’s code, ending in a transformer language model you build yourself.</p>
-<p>Each lab is a guided walkthrough with <code># TODO</code> cells for you to fill in, and worked solutions at the very bottom. Don’t scroll to the solutions until you’ve had a real go–the point is the struggle, not the finished cell!</p>
-<p><strong>To run a lab:</strong> click <strong>Open in Colab</strong> (recommended — free GPU for the later labs), or <strong>view</strong> the read-only page here, or download the <strong>.ipynb</strong>. The first cell of every lab sets things up; just run top to bottom.</p>
-<table class="table-striped table-hover caption-top table">
-<colgroup>
-<col style="width: 6%">
-<col style="width: 50%">
-<col style="width: 44%">
-</colgroup>
-<thead>
-<tr class="header">
-<th style="text-align: center;">#</th>
-<th style="text-align: left;">Lab</th>
-<th style="text-align: left;">Run it</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: center;"><strong>1</strong></td>
-<td style="text-align: left;"><strong>Setup, tensors &amp; probing an LLM</strong><br>Get into Colab, meet PyTorch tensors, and poke a real chatbot.</td>
-<td style="text-align: left;"><a href="https://colab.research.google.com/github/tsrobinson/me324/blob/main/labs/lab-01-setup-and-tensors.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg" class="img-fluid" alt="Open in Colab"></a><br><a href="labs/lab-01-setup-and-tensors.html">view</a> · <a href="https://github.com/tsrobinson/me324/raw/main/labs/lab-01-setup-and-tensors.ipynb">.ipynb</a></td>
-</tr>
-<tr class="even">
-<td style="text-align: center;"><strong>2</strong></td>
-<td style="text-align: left;"><strong>A neuron by hand (NumPy)</strong><br>Build a perceptron and a 2-layer net from scratch; compare to logistic regression.</td>
-<td style="text-align: left;"><a href="https://colab.research.google.com/github/tsrobinson/me324/blob/main/labs/lab-02-perceptron-numpy.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg" class="img-fluid" alt="Open in Colab"></a><br><a href="labs/lab-02-perceptron-numpy.html">view</a> · <a href="https://github.com/tsrobinson/me324/raw/main/labs/lab-02-perceptron-numpy.ipynb">.ipynb</a></td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;"><strong>3</strong></td>
-<td style="text-align: left;"><strong>Build the <code>Value</code> autograd engine</strong><br>Implement the forward pass of a micrograd-style computation graph.</td>
-<td style="text-align: left;"><a href="https://colab.research.google.com/github/tsrobinson/me324/blob/main/labs/lab-03-value-forward.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg" class="img-fluid" alt="Open in Colab"></a><br><a href="labs/lab-03-value-forward.html">view</a> · <a href="https://github.com/tsrobinson/me324/raw/main/labs/lab-03-value-forward.ipynb">.ipynb</a></td>
-</tr>
-<tr class="even">
-<td style="text-align: center;"><strong>4</strong></td>
-<td style="text-align: left;"><strong>Backprop &amp; training by hand</strong><br>Add <code>backward()</code>, grad-check it, and train a tiny net with your own autograd.</td>
-<td style="text-align: left;"><a href="https://colab.research.google.com/github/tsrobinson/me324/blob/main/labs/lab-04-backprop-autograd.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg" class="img-fluid" alt="Open in Colab"></a><br><a href="labs/lab-04-backprop-autograd.html">view</a> · <a href="https://github.com/tsrobinson/me324/raw/main/labs/lab-04-backprop-autograd.ipynb">.ipynb</a></td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;"><strong>5</strong></td>
-<td style="text-align: left;"><strong>Feed-forward networks in PyTorch</strong><br>Rebuild yesterday’s net with <code>nn.Module</code>, autograd, and an optimizer.</td>
-<td style="text-align: left;"><a href="https://colab.research.google.com/github/tsrobinson/me324/blob/main/labs/lab-05-pytorch-feedforward.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg" class="img-fluid" alt="Open in Colab"></a><br><a href="labs/lab-05-pytorch-feedforward.html">view</a> · <a href="https://github.com/tsrobinson/me324/raw/main/labs/lab-05-pytorch-feedforward.ipynb">.ipynb</a></td>
-</tr>
-<tr class="even">
-<td style="text-align: center;"><strong>6</strong></td>
-<td style="text-align: left;"><strong>Classifying images (CNNs)</strong><br>Train a convolutional network on FashionMNIST and look at what its filters learn.</td>
-<td style="text-align: left;"><a href="https://colab.research.google.com/github/tsrobinson/me324/blob/main/labs/lab-06-cnn-images.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg" class="img-fluid" alt="Open in Colab"></a><br><a href="labs/lab-06-cnn-images.html">view</a> · <a href="https://github.com/tsrobinson/me324/raw/main/labs/lab-06-cnn-images.ipynb">.ipynb</a></td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;"><strong>7</strong></td>
-<td style="text-align: left;"><strong>Generating images (autoencoders &amp; VAEs)</strong><br>Build an autoencoder, upgrade it to a VAE, and sample new MNIST digits.</td>
-<td style="text-align: left;"><a href="https://colab.research.google.com/github/tsrobinson/me324/blob/main/labs/lab-07-autoencoders-vae.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg" class="img-fluid" alt="Open in Colab"></a><br><a href="labs/lab-07-autoencoders-vae.html">view</a> · <a href="https://github.com/tsrobinson/me324/raw/main/labs/lab-07-autoencoders-vae.ipynb">.ipynb</a></td>
-</tr>
-<tr class="even">
-<td style="text-align: center;"><strong>8</strong></td>
-<td style="text-align: left;"><strong>Text generation 1/4: characters &amp; bigrams</strong><br>Tokenise tiny-shakespeare and train your first language model — a character bigram.</td>
-<td style="text-align: left;"><a href="https://colab.research.google.com/github/tsrobinson/me324/blob/main/labs/lab-08-char-bigram.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg" class="img-fluid" alt="Open in Colab"></a><br><a href="labs/lab-08-char-bigram.html">view</a> · <a href="https://github.com/tsrobinson/me324/raw/main/labs/lab-08-char-bigram.ipynb">.ipynb</a></td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;"><strong>9</strong></td>
-<td style="text-align: left;"><strong>Text generation 2/4: recurrent networks</strong><br>Hand-roll an RNN and a GRU, train them on tiny-shakespeare, and compare to yesterday’s bigram model.</td>
-<td style="text-align: left;"><a href="https://colab.research.google.com/github/tsrobinson/me324/blob/main/labs/lab-09-rnn.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg" class="img-fluid" alt="Open in Colab"></a><br><a href="labs/lab-09-rnn.html">view</a> · <a href="https://github.com/tsrobinson/me324/raw/main/labs/lab-09-rnn.ipynb">.ipynb</a></td>
-</tr>
-<tr class="even">
-<td style="text-align: center;"><strong>10</strong></td>
-<td style="text-align: left;"><strong>Text generation 3/4: attention &amp; transformers</strong><br>Implement attention by hand and build a small GPT from scratch.</td>
-<td style="text-align: left;"><a href="https://colab.research.google.com/github/tsrobinson/me324/blob/main/labs/lab-10-transformer-gpt.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg" class="img-fluid" alt="Open in Colab"></a><br><a href="labs/lab-10-transformer-gpt.html">view</a> · <a href="https://github.com/tsrobinson/me324/raw/main/labs/lab-10-transformer-gpt.ipynb">.ipynb</a></td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;"><strong>11</strong></td>
-<td style="text-align: left;"><strong>Text generation 4/4: tokenisation &amp; sampling</strong><br>Train a byte-pair encoder, write a sampler, and run the capstone: your own microGPT.</td>
-<td style="text-align: left;"><a href="https://colab.research.google.com/github/tsrobinson/me324/blob/main/labs/lab-11-bpe-sampling-capstone.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg" class="img-fluid" alt="Open in Colab"></a><br><a href="labs/lab-11-bpe-sampling-capstone.html">view</a> · <a href="https://github.com/tsrobinson/me324/raw/main/labs/lab-11-bpe-sampling-capstone.ipynb">.ipynb</a></td>
-</tr>
-<tr class="even">
-<td style="text-align: center;"><strong>12</strong></td>
-<td style="text-align: left;"><strong>Ethics &amp; red-teaming</strong><br>Measure bias in word vectors, red-team a language model, and reflect on what you built.</td>
-<td style="text-align: left;"><a href="https://colab.research.google.com/github/tsrobinson/me324/blob/main/labs/lab-12-ethics-redteam.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg" class="img-fluid" alt="Open in Colab"></a><br><a href="labs/lab-12-ethics-redteam.html">view</a> · <a href="https://github.com/tsrobinson/me324/raw/main/labs/lab-12-ethics-redteam.ipynb">.ipynb</a></td>
-</tr>
-</tbody>
-</table>
+<div class="callout callout-style-simple callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+What the exam is
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li><strong>Friday 21 August, two hours.</strong> Pen and paper. No laptops, no phones.</li>
+<li><strong>Forty multiple-choice questions</strong>, six options each, exactly one correct answer per question.</li>
+<li>One mark per question.</li>
+<li><strong>No negative marking.</strong> A blank scores the same as a wrong answer, so answer all forty.</li>
+<li><strong>Calculators are allowed.</strong> Bring one, plus a pen and photo ID.</li>
+</ul>
+</div>
+</div>
+<p>A few of you have asked for more detail about Friday’s exam. Here is everything I can usefully tell you. We will also go through some of it again in Wednesday’s lecture, which will recap the course plus give some further exam guidance.</p>
+<p>The paper is in five parts and runs roughly in the course order — what a network is, how it learns, vision models, text models, then judgement questions. It gets harder as it goes. The last five questions are some of the hardest on the paper and they are there to stretch you. But remember that a good performance on the remainder of the paper is already an excellent effort!</p>
+<section id="what-is-examinable" class="level2">
+<h2 class="anchored" data-anchor-id="what-is-examinable">What is examinable</h2>
+<ul>
+<li>Anything in the <a href="./lectures.html">slides</a>.</li>
+<li>Anything in the <a href="./labs.html">labs</a> you completed, including the solution cells.</li>
+</ul>
+<p>Not examinable: memorised PyTorch syntax, detail of specific papers beyond what we covered in the lecture, and the optional further-reading textbooks.</p>
+<p>Every lecture appears somewhere on the paper. The largest single block is the mechanical core — lectures 2 to 5, the forward pass, backpropagation and the training loop, because everything afterwards is built on it (as we have now seen).</p>
+</section>
+<section id="what-the-questions-look-like" class="level2">
+<h2 class="anchored" data-anchor-id="what-the-questions-look-like">What the questions look like</h2>
+<p>Roughly half are <strong>calculations</strong>: a forward pass, a gradient, an output shape, a parameter count, a softmax, a cosine similarity, a few steps of BPE etc. You work it out on paper, then select the number you got. Any constant you need is printed in the question.</p>
+<p>The rest are <strong>code reading and/or judgement</strong>: here are a few lines of PyTorch or pseudocode, say what is wrong with them or put them in the right order. Or: here is a training curve, a validation result, a research design — what is actually going on?</p>
+<p>Make sure you do the following:</p>
+<p><strong>Read all six options.</strong> On several questions two options carry the same number but differ in the claim attached to it. Neither of a matching pair is necessarily right — sometimes both are wrong and the answer is a third option — so judge every option on its own.</p>
+<p><strong>The arithmetic is deliberately small.</strong> The numbers were chosen to come out cleanly. If a calculation is turning into a mess, you have probably made a slip somewhere earlier. Go back and check, or mark the question and move on.</p>
+</section>
+<section id="pacing" class="level2">
+<h2 class="anchored" data-anchor-id="pacing">Pacing</h2>
+<p>Most questions take about two minutes in the first two parts, and about three minutes from question 19 onwards. A small number require several steps of calculation and may take noticeably longer than their neighbours.</p>
+<p>Banking the quick questions is worth more than finishing any single slow one.</p>
+</section>
+<section id="how-to-revise" class="level2">
+<h2 class="anchored" data-anchor-id="how-to-revise">How to revise</h2>
+<p>Make sure to keep up with lectures 10 to 12 and finish the <a href="./labs.html">labs</a> — this week’s material is on the paper too.</p>
+<p>Reread the <a href="./lectures.html">slides</a> for all twelve lectures in order.</p>
+<p>Do make sure you complete the Moodle quizzes to practise this sort of multiple-choice exam.</p>
+<p>Make sure you know how to calculate, by hand:</p>
+<ul>
+<li>a forward pass through a small network</li>
+<li>backpropagation through a small computation graph, reading off each gradient</li>
+<li>a softmax, and a cross-entropy loss</li>
+<li>a small convolution, and the output shape it produces</li>
+<li>an attention block from embeddings to output — Q, K, V, scaled scores, mask, softmax, weighted sum</li>
+<li>three merges of BPE</li>
+</ul>
+</section>
+<section id="what-you-should-be-able-to-do" class="level2">
+<h2 class="anchored" data-anchor-id="what-you-should-be-able-to-do">What you should be able to do</h2>
+<p>Check the “take stock” slides from each <a href="./lectures.html">lecture</a>. This is the exhaustive list I used to build the exam!</p>
+</section>
+<section id="one-last-thing" class="level2">
+<h2 class="anchored" data-anchor-id="one-last-thing">One last thing</h2>
+<p>In three weeks, you have now built every component of a language model with your own hands, and checked the maths on paper. I’ve designed this exam to let you show that. It only asks you to do the things you have already done in the lectures or labs, on smaller numbers, but under time pressure.</p>
+<p>Good luck! Kaifang and I are around for questions until Friday.</p>
 
 
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
@@ -674,7 +679,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 </div>   
     <div class="nav-footer-center">
 <p>Dr Thomas Robinson · Lab instructor: Kaifang Zhou</p>
-<div class="toc-actions"><ul><li><a href="https://github.com/tsrobinson/me324/blob/main/labs.qmd" class="toc-action"><i class="bi bi-github"></i>View source</a></li></ul></div></div>
+<div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/tsrobinson/me324/blob/main/exam.qmd" class="toc-action"><i class="bi bi-github"></i>View source</a></li></ul></div></div>
     <div class="nav-footer-right">
 <p>Built with <a href="https://quarto.org">Quarto</a></p>
 </div>

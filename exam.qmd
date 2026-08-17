@@ -1,0 +1,75 @@
+---
+title: "Final exam"
+subtitle: "Friday 21 August 2026 · two hours · pen and paper"
+description: "What the final exam covers, what the questions look like, and how to revise for it."
+toc: true
+toc-depth: 2
+---
+
+::: {.callout-important appearance="simple"}
+## What the exam is
+
+* **Friday 21 August, two hours.** Pen and paper. No laptops, no phones.
+* **Forty multiple-choice questions**, six options each, exactly one correct answer per question.
+* One mark per question.
+* **No negative marking.** A blank scores the same as a wrong answer, so answer all forty.
+* **Calculators are allowed.** Bring one, plus a pen and photo ID.
+:::
+
+A few of you have asked for more detail about Friday's exam. Here is everything I can usefully tell you. We will also go through some of it again in Wednesday's lecture, which will recap the course plus give some further exam guidance.
+
+The paper is in five parts and runs roughly in the course order — what a network is, how it learns, vision models, text models, then judgement questions. It gets harder as it goes. The last five questions are some of the hardest on the paper and they are there to stretch you. But remember that a good performance on the remainder of the paper is already an excellent effort!
+
+## What is examinable
+
+* Anything in the [slides](lectures.qmd).
+* Anything in the [labs](labs.qmd) you completed, including the solution cells.
+
+Not examinable: memorised PyTorch syntax, detail of specific papers beyond what we covered in the lecture, and the optional further-reading textbooks.
+
+Every lecture appears somewhere on the paper. The largest single block is the mechanical core — lectures 2 to 5, the forward pass, backpropagation and the training loop, because everything afterwards is built on it (as we have now seen).
+
+## What the questions look like
+
+Roughly half are **calculations**: a forward pass, a gradient, an output shape, a parameter count, a softmax, a cosine similarity, a few steps of BPE etc. You work it out on paper, then select the number you got. Any constant you need is printed in the question.
+
+The rest are **code reading and/or judgement**: here are a few lines of PyTorch or pseudocode, say what is wrong with them or put them in the right order. Or: here is a training curve, a validation result, a research design — what is actually going on?
+
+Make sure you do the following:
+
+**Read all six options.** On several questions two options carry the same number but differ in the claim attached to it. Neither of a matching pair is necessarily right — sometimes both are wrong and the answer is a third option — so judge every option on its own.
+
+**The arithmetic is deliberately small.** The numbers were chosen to come out cleanly. If a calculation is turning into a mess, you have probably made a slip somewhere earlier. Go back and check, or mark the question and move on.
+
+## Pacing
+
+Most questions take about two minutes in the first two parts, and about three minutes from question 19 onwards. A small number require several steps of calculation and may take noticeably longer than their neighbours.
+
+Banking the quick questions is worth more than finishing any single slow one.
+
+## How to revise
+
+Make sure to keep up with lectures 10 to 12 and finish the [labs](labs.qmd) — this week's material is on the paper too.
+
+Reread the [slides](lectures.qmd) for all twelve lectures in order.
+
+Do make sure you complete the Moodle quizzes to practise this sort of multiple-choice exam.
+
+Make sure you know how to calculate, by hand:
+
+* a forward pass through a small network
+* backpropagation through a small computation graph, reading off each gradient
+* a softmax, and a cross-entropy loss
+* a small convolution, and the output shape it produces
+* an attention block from embeddings to output — Q, K, V, scaled scores, mask, softmax, weighted sum
+* three merges of BPE
+
+## What you should be able to do
+
+Check the "take stock" slides from each [lecture](lectures.qmd). This is the exhaustive list I used to build the exam!
+
+## One last thing
+
+In three weeks, you have now built every component of a language model with your own hands, and checked the maths on paper. I've designed this exam to let you show that. It only asks you to do the things you have already done in the lectures or labs, on smaller numbers, but under time pressure.
+
+Good luck! Kaifang and I are around for questions until Friday.

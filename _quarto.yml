@@ -18,6 +18,7 @@ project:
     - labs.qmd
     - readings.qmd
     - midterm.qmd
+    - exam.qmd
     - lectures/lecture-01-what-is-ai.qmd
     - lectures/lecture-02-deep-models-primer.qmd
     - lectures/lecture-03-computational-graphs.qmd
@@ -77,6 +78,8 @@ website:
         text: Labs
       - href: midterm.qmd
         text: Midterm
+      - href: exam.qmd
+        text: Exam
       - href: readings.qmd
         text: Readings
     right:
