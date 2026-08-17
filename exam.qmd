@@ -13,7 +13,7 @@ toc-depth: 2
 * **Forty multiple-choice questions**, six options each, exactly one correct answer per question.
 * One mark per question.
 * **No negative marking.** A blank scores the same as a wrong answer, so answer all forty.
-* **Calculators are allowed.** Bring one, plus a pen and photo ID.
+* **Calculators are allowed.** Bring one (plus a pen).
 :::
 
 A few of you have asked for more detail about Friday's exam. Here is everything I can usefully tell you. We will also go through some of it again in Wednesday's lecture, which will recap the course plus give some further exam guidance.
