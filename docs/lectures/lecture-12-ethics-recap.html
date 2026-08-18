@@ -438,46 +438,6 @@ Dr Thomas Robinson
 </div>
 </div>
 </section>
-<section id="the-mental-model-you-should-leave-with" class="slide level2">
-<h2>The mental model you should leave with</h2>
-<p><span class="eyebrow">A sketch that fits on a napkin</span></p>
-<div class="card">
-<p>Every deep-learning model is:</p>
-<ul>
-<li>A <strong>stack of layers</strong> — each does a small, differentiable computation.</li>
-<li><strong>Trained</strong> by gradient descent on a loss.</li>
-<li><strong>Tuned</strong> by you — picking architecture, loss, optimiser, data.</li>
-</ul>
-<p>That’s it. CNNs change <em>what</em> each layer computes. RNNs and transformers change <em>how</em> tokens talk across positions. VAEs change <em>what</em> the model predicts. Everything else is detail.</p>
-</div>
-<div class="callout callout-tip callout-titled callout-style-default">
-<div class="callout-body">
-<div class="callout-title">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<p><strong>Tip</strong></p>
-</div>
-<div class="callout-content">
-<p>Hold this in your head and you’ll be able to read any deep-learning paper in your field. The vocabulary differs; the underlying machinery does not.</p>
-</div>
-</div>
-</div>
-</section>
-<section id="how-the-course-mapped-to-architectures" class="slide level2">
-<h2>How the course mapped to architectures</h2>
-<div class="card">
-<ul>
-<li><strong>L1-L4</strong> — the engine. Autodiff and gradient descent.</li>
-<li><strong>L5</strong> — first real model. Feed-forward networks.</li>
-<li><strong>L6</strong> — first specialised model. CNNs for spatial data.</li>
-<li><strong>L7</strong> — first generative model. VAEs.</li>
-<li><strong>L8-L11</strong> — language. Embeddings → RNNs → transformers.</li>
-<li><strong>L12</strong> — context. What you’ve built. What it means.</li>
-</ul>
-<p>Every later lecture <strong>reuses</strong> the earlier ones. The CNN training loop is the FFN training loop with a different <code>model</code>. The transformer training loop is the same again. The mechanics never change.</p>
-</div>
-</section>
 <section id="whats-not-in-this-course" class="slide level2">
 <h2>What’s <em>not</em> in this course</h2>
 <p><span class="eyebrow">A list of things worth knowing that we didn’t cover</span></p>
@@ -552,35 +512,6 @@ Dr Thomas Robinson
 </div>
 </div>
 </section>
-<section id="compute-energy-and-the-trade-off" class="slide level2">
-<h2>Compute, energy, and the trade-off</h2>
-<div class="columns">
-<div class="column" style="width:50%;">
-<ul>
-<li>Training GPT-4-scale models takes 10s of GWh.</li>
-<li>Inference at scale (billions of queries/day) is a continuous load.</li>
-<li>Cooling needs water. Chips need rare earths. The end of the cycle is e-waste.</li>
-</ul>
-</div><div class="column" style="width:50%;">
-<ul>
-<li>“Just use a smaller model” is harder than it sounds — capability drops fast below a threshold.</li>
-<li>Efficiency improves (Moore’s-like trends) but absolute demand grows faster.</li>
-</ul>
-</div></div>
-<div class="callout callout-warning callout-titled callout-style-default">
-<div class="callout-body">
-<div class="callout-title">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<p><strong>Warning</strong></p>
-</div>
-<div class="callout-content">
-<p>The footprint of <em>one</em> query is small. The footprint of these systems <em>existing at scale</em> is not. This is a policy question, not a technical one.</p>
-</div>
-</div>
-</div>
-</section>
 <section id="environmental-impact-in-detail" class="slide level2">
 <h2>Environmental impact in detail</h2>
 <p><span class="eyebrow">Beyond “AI uses a lot of compute”</span></p>
@@ -609,7 +540,7 @@ Dr Thomas Robinson
 <p><strong>Warning</strong></p>
 </div>
 <div class="callout-content">
-<p>Aggregate impact also depends on <strong>where</strong> data centres are sited — moving to renewable-rich regions helps, but is only a partial fix.</p>
+<p>The footprint of <em>one</em> query is small. The footprint of these systems <em>existing at scale</em> is not — and it depends on <strong>where</strong> data centres are sited. Moving to renewable-rich regions helps, but is only a partial fix. This is a policy question, not a technical one.</p>
 </div>
 </div>
 </div>
@@ -804,6 +735,253 @@ Dr Thomas Robinson
 </ul>
 </div></div>
 </section>
+<section id="how-would-you-know-if-its-any-good" class="slide level2">
+<h2>How would you know if it’s any good?</h2>
+<p><span class="eyebrow">The question this course has been quietly dodging</span></p>
+<p>For twelve lectures, validation meant one thing: hold out some data, compute the loss on it, compare. That works when each input has one right answer and you have it written down.</p>
+<div class="card">
+<p>Ask a model to summarise a document, draft a reply, or code a variable from an interview transcript. There are many good answers and no key to mark against. The held-out loss still computes — it just stops telling you what you want to know.</p>
+<p>Three questions get run together under the word “validation”:</p>
+<ol type="1">
+<li><strong>Is it capable?</strong> How good is this model, in general?</li>
+<li><strong>Is it valid for my task?</strong> Does it measure the thing I say it measures, on my data?</li>
+<li><strong>Is it safe to deploy?</strong> What happens when it fails, or when someone attacks it?</li>
+</ol>
+</div>
+<div class="callout callout-tip callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Tip</strong></p>
+</div>
+<div class="callout-content">
+<p>Different questions, different evidence. Most arguments about whether an AI system “works” are two people answering different ones.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="four-kinds-of-evidence" class="slide level2">
+<h2>Four kinds of evidence</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><span class="pill-blue">Benchmarks</span></p>
+<p>A fixed set of questions with known answers. MMLU, GPQA, SWE-bench.</p>
+<ul>
+<li>Cheap, repeatable, comparable across models.</li>
+<li>Measures the benchmark, not your task.</li>
+</ul>
+<p><span class="pill-blue">Task-specific held-out sets</span></p>
+<p>Your own data, labelled by hand, held back.</p>
+<ul>
+<li>The only evidence about <em>your</em> task.</li>
+<li>Costs human hours. Goes stale as the model changes.</li>
+</ul>
+</div><div class="column" style="width:50%;">
+<p><span class="pill-green">Human preference</span></p>
+<p>Show people two outputs, ask which is better. Chatbot Arena does this at scale.</p>
+<ul>
+<li>Captures quality no metric writes down.</li>
+<li>Measures what people <em>like</em>. Fluent and wrong beats terse and right.</li>
+</ul>
+<p><span class="pill-green">Deployment monitoring</span></p>
+<p>Watch the system in use — failures, complaints, appeals, subgroup error rates.</p>
+<ul>
+<li>The only evidence about the real distribution.</li>
+<li>Arrives after the harm.</li>
+</ul>
+</div></div>
+<div class="callout callout-warning callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Warning</strong></p>
+</div>
+<div class="callout-content">
+<p>The Dutch case failed at all four. No held-out audit by group, no monitoring that closed the loop inside a decade.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="why-benchmarks-stop-working" class="slide level2">
+<h2>Why benchmarks stop working</h2>
+<p><span class="eyebrow">Two failure modes, both well documented</span></p>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><span class="pill-amber">Saturation</span></p>
+<p>MMLU <span class="citation" data-cites="hendrycks2021measuring">(<a href="#/references" role="doc-biblioref" onclick="">Hendrycks et al., 2021</a>)</span> — 15,908 questions across 57 subjects, released 2020.</p>
+<ul>
+<li>GPT-3 (2020): <strong>43.9%</strong>.</li>
+<li>Frontier models by 2024–25: <strong>88–90%</strong>.</li>
+<li>Estimated human-expert ceiling: <strong>89.8%</strong>.</li>
+</ul>
+<p>At the ceiling, the benchmark stops separating models. Everyone scores the same.</p>
+</div><div class="column" style="width:50%;">
+<p><span class="pill-amber">Contamination</span></p>
+<p>Benchmarks are public, so they end up in the training corpus. The model has seen the test.</p>
+<p>Zhang et al.&nbsp;(2024) <span class="citation" data-cites="zhang2024gsm1k">(<a href="#/references" role="doc-biblioref" onclick="">Zhang et al., 2024</a>)</span> commissioned <strong>GSM1k</strong> — 1,000 fresh grade-school maths problems in the style of the standard GSM8k benchmark.</p>
+<ul>
+<li>Some model families scored up to <strong>13 points lower</strong> on the fresh set.</li>
+<li>Frontier models dropped much less.</li>
+</ul>
+</div></div>
+<div class="card">
+<p>The response: build benchmarks that resist both. GPQA <span class="citation" data-cites="rein2024gpqa">(<a href="#/references" role="doc-biblioref" onclick="">Rein et al., 2024</a>)</span> is written to be <em>Google-proof</em> — PhD-level experts score <strong>65%</strong>, while skilled non-experts with over 30 minutes of unrestricted web search score <strong>34%</strong>. Others keep the test set private, or commission a fresh one each year.</p>
+</div>
+</section>
+<section id="how-much-does-a-two-point-lead-mean" class="slide level2">
+<h2>How much does a two-point lead mean?</h2>
+<p><span class="eyebrow">A benchmark score is a sample mean. Treat it like one.</span></p>
+<div class="card">
+<p>A model answers <strong>400</strong> benchmark questions and gets <strong>90%</strong> right. That proportion has a standard error:</p>
+<p><span class="math display">
+\text{SE} = \sqrt{\frac{p(1-p)}{n}} = \sqrt{\frac{0.9 \times 0.1}{400}} = \sqrt{0.000225} = 0.015
+</span></p>
+<p>So 1.5 percentage points, and a 95% interval of roughly <strong>87.1% to 92.9%</strong>.</p>
+<p>Now a rival model scores <strong>91%</strong> on its own 400 questions. The standard error of the <em>difference</em> is about <strong>2.1 points</strong> — larger than the 2-point lead itself. The leaderboard gap is noise.</p>
+</div>
+<div class="callout callout-tip callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Tip</strong></p>
+</div>
+<div class="callout-content">
+<p>Miller (2024) <span class="citation" data-cites="miller2024errorbars">(<a href="#/references" role="doc-biblioref" onclick="">Miller, 2024</a>)</span> sets out the fixes: report standard errors, <strong>cluster</strong> them when questions share a passage (up to <strong>3×</strong> the naive figure), and run both models on the <em>same</em> questions so you can analyse paired differences — which shrinks the error bar a long way.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="using-a-model-to-mark-a-model" class="slide level2">
+<h2>Using a model to mark a model</h2>
+<p><span class="eyebrow">LLM-as-judge — the current workhorse</span></p>
+<p>Human rating is the gold standard and costs pounds per comparison. So: prompt a strong model with the question, the two answers, and a rubric, and ask it which is better.</p>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><span class="pill-green">Does it work?</span></p>
+<p>Zheng et al.&nbsp;(2023) <span class="citation" data-cites="zheng2023judging">(<a href="#/references" role="doc-biblioref" onclick="">Zheng et al., 2023</a>)</span> checked GPT-4’s judgements against human preferences on MT-Bench.</p>
+<ul>
+<li>Judge agrees with humans: <strong>≈85%</strong>.</li>
+<li>Two humans agree with each other: <strong>81%</strong>.</li>
+</ul>
+<p>The judge matches human agreement levels — which is the ceiling, not a licence.</p>
+</div><div class="column" style="width:50%;">
+<p><span class="pill-amber">Known biases</span></p>
+<ul>
+<li><strong>Position</strong> — which answer was shown first.</li>
+<li><strong>Verbosity</strong> — longer answers score higher.</li>
+<li><strong>Self-preference</strong> — a model rates its own output above a rival’s.</li>
+</ul>
+<p>Mitigations: run each pair in both orders and average, give the judge a reference answer, and calibrate against a human-labelled subset first.</p>
+</div></div>
+<div class="callout callout-warning callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Warning</strong></p>
+</div>
+<div class="callout-content">
+<p>The judge is a model with the same blind spots as the thing it is judging. It will not catch a mistake both of them make.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="stop-check-is-90-agreement-good-enough" class="slide level2">
+<h2>Stop &amp; check — is 90% agreement good enough?</h2>
+<p><span class="eyebrow"><span class="pause-cue">Stop &amp; check</span> · 60 seconds in pairs</span></p>
+<div class="try-box">
+<p><span class="try-label">Try</span> You use an LLM to label 10,000 news articles for whether they are about immigration. You hand-code 100 yourself to check. The model agrees with you on <strong>90</strong> of them.</p>
+<p><strong>Is that good enough to run your regression on the other 9,900?</strong></p>
+</div>
+<div class="fragment">
+<div class="reveal-box">
+<p><span class="reveal-label">The reveal</span> Suppose 10 of your 100 articles really are about immigration, and the model finds 5 of them while flagging 5 articles that aren’t.</p>
+<ul>
+<li>Accuracy: <span class="math inline">(5 + 85)/100 = \mathbf{90\%}</span>.</li>
+<li>A model that answers “no” every time: also <span class="math inline">\mathbf{90\%}</span>. Your model has beaten it by nothing.</li>
+<li>It misses <strong>half</strong> the immigration articles, and half of what it flags is wrong.</li>
+</ul>
+<p><strong>Cohen’s <span class="math inline">\kappa</span></strong> rescales agreement against chance: <span class="math inline">\kappa = (p_o - p_e)/(1 - p_e)</span>, with <span class="math inline">p_o</span> the observed agreement and <span class="math inline">p_e</span> what two raters would hit at random. Both say yes 10% of the time, so <span class="math inline">p_e = (0.1)(0.1) + (0.9)(0.9) = 0.82</span>:</p>
+<p><span class="math display">
+\kappa = \frac{0.90 - 0.82}{1 - 0.82} = \frac{0.08}{0.18} \approx 0.44
+</span></p>
+</div>
+</div>
+</section>
+<section id="what-to-do-about-the-other-9900" class="slide level2">
+<h2>What to do about the other 9,900</h2>
+<p><span class="eyebrow">The state of the art for LLM labels in research</span></p>
+<div class="card">
+<p>Egami et al.&nbsp;(2023) <span class="citation" data-cites="egami2023imperfect">(<a href="#/references" role="doc-biblioref" onclick="">Egami et al., 2023</a>)</span> show the sharper version: feeding LLM labels straight into a downstream regression gives <strong>biased coefficients and confidence intervals that don’t cover</strong> — at 80–90% accuracy, the range where a researcher would call the labels fine. The bias comes from the errors being <em>correlated with the thing you are studying</em>.</p>
+</div>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><span class="pill-green">The fix</span></p>
+<p>Keep a random, hand-coded <strong>gold-standard subset</strong>. Run the model on everything, then use the subset to correct the estimate and the standard errors.</p>
+<ul>
+<li><strong>DSL</strong> (design-based supervised learning) in political science.</li>
+<li><strong>PPI</strong> (prediction-powered inference), Angelopoulos et al.&nbsp;(2023) in <em>Science</em> <span class="citation" data-cites="angelopoulos2023ppi">(<a href="#/references" role="doc-biblioref" onclick="">Angelopoulos et al., 2023</a>)</span> — same idea, same guarantee.</li>
+</ul>
+</div><div class="column" style="width:50%;">
+<p><span class="pill">What you get</span></p>
+<ul>
+<li>Valid inference <strong>even if the labels are badly biased</strong>.</li>
+<li>Tighter intervals when the model is good, correct ones when it isn’t.</li>
+<li>The cost is the subset — a few hundred documents, coded properly.</li>
+</ul>
+</div></div>
+<div class="callout callout-tip callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Tip</strong></p>
+</div>
+<div class="callout-content">
+<p>This is the honest answer to “can I use an LLM to code my data?” Yes — as long as you also hand-code enough of it to find out how wrong the model was.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="how-do-you-test-for-harm" class="slide level2">
+<h2>How do you test for harm?</h2>
+<p><span class="eyebrow">Capability evaluation, from the other direction</span></p>
+<p>Accuracy asks <em>how often is it right</em>. Safety evaluation asks <em>what is the worst thing it will do if someone tries</em>.</p>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><span class="pill-amber">Red-teaming</span></p>
+<p>People — and now models — attack the system to make it fail.</p>
+<p>The UK AI Safety Institute tested five publicly deployed LLMs in <strong>May 2024</strong>: all were highly vulnerable to <strong>basic</strong> jailbreaks, and some produced harmful outputs with no jailbreak attempt at all.</p>
+</div><div class="column" style="width:50%;">
+<p><span class="pill-amber">Dangerous-capability evals</span></p>
+<p>Can it assist a cyber-attack, or with chemical and biological weapons? Can it act on its own over long horizons?</p>
+<p><strong>Human-uplift studies</strong> ask the harder question: does the model make a non-expert <em>more</em> capable than a search engine would? That is the counterfactual that matters.</p>
+</div></div>
+<div class="card">
+<p>Run by the labs themselves — Anthropic’s Responsible Scaling Policy, OpenAI’s Preparedness Framework, Google DeepMind’s Frontier Safety Framework — and by third parties. We come back to who watches the watchers shortly.</p>
+</div>
+<div class="callout callout-warning callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Warning</strong></p>
+</div>
+<div class="callout-content">
+<p>A failed elicitation is not proof of absence. It shows <em>this</em> attempt didn’t find the capability. Someone with more time, better prompts, or fine-tuning access may.</p>
+</div>
+</div>
+</div>
+</section>
 <section id="privacy-and-data-extraction" class="slide level2">
 <h2>Privacy and data extraction</h2>
 <p><span class="eyebrow">Two related concerns</span></p>
@@ -887,30 +1065,6 @@ Dr Thomas Robinson
 </ul>
 </div></div>
 </section>
-<section id="labour" class="slide level2">
-<h2>Labour</h2>
-<div class="card">
-<p>We are early in a labour transition with no clear precedent in scale or speed.</p>
-<ul>
-<li>Tasks that were full-time jobs three years ago are now done by LLMs — copy editing, junior coding, translation, customer support, illustration, paralegal work.</li>
-<li>The benefits accrue mostly to capital, not labour.</li>
-<li>The “winners” of the previous tech wave (software engineers) are now exposed too.</li>
-</ul>
-</div>
-<div class="callout callout-note callout-titled callout-style-default">
-<div class="callout-body">
-<div class="callout-title">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<p><strong>Note</strong></p>
-</div>
-<div class="callout-content">
-<p>Whether you build these systems or use them, you have a stake in <strong>how the gains are distributed</strong>.</p>
-</div>
-</div>
-</div>
-</section>
 <section id="labour-displacement-the-evidence-so-far" class="slide level2">
 <h2>Labour displacement — the evidence so far</h2>
 <p><span class="eyebrow">What we know, what we don’t</span></p>
@@ -939,7 +1093,7 @@ Dr Thomas Robinson
 <p><strong>Warning</strong></p>
 </div>
 <div class="callout-content">
-<p><strong>The honest position</strong>: we are early. Aggregate labour-market data lags by 1–3 years. Decisions are being made now — about policy, training, social safety nets — on weak evidence.</p>
+<p><strong>The honest position</strong>: we are early. Aggregate labour-market data lags by 1–3 years. Decisions are being made now — about policy, training, social safety nets — on weak evidence. Whether you build these systems or use them, you have a stake in <strong>how the gains are distributed</strong>.</p>
 </div>
 </div>
 </div>
@@ -1103,6 +1257,7 @@ Dr Thomas Robinson
 <li><strong>Spirling (2023)</strong> in <em>Nature</em> — why open-source models matter for research.</li>
 <li><strong>Argyle et al.&nbsp;(2023)</strong> — simulating human respondents with LLMs.</li>
 <li><strong>Lall &amp; Robinson (2022)</strong> — deep learning for missing-data imputation (MIDAS).</li>
+<li><strong>Egami et al.&nbsp;(2023)</strong> — how to put LLM labels in a regression without breaking your standard errors.</li>
 </ul>
 </div>
 </section>
@@ -1132,30 +1287,6 @@ Dr Thomas Robinson
 </div>
 </div>
 </section>
-<section id="how-to-keep-up-without-burning-out" class="slide level2">
-<h2>How to keep up — without burning out</h2>
-<div class="card">
-<ol type="1">
-<li><strong>Follow a small, curated list of researchers</strong> — not the firehose. Twitter/X is a low-signal medium for ML.</li>
-<li><strong>Read papers, not press releases.</strong> The actual paper for any model is often less impressive than the press release.</li>
-<li><strong>Periodically re-implement landmark papers from scratch.</strong> Especially once your day job stops requiring it.</li>
-<li><strong>Build something small you actually use.</strong> The single best way to internalise a technique.</li>
-</ol>
-</div>
-<div class="callout callout-tip callout-titled callout-style-default">
-<div class="callout-body">
-<div class="callout-title">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<p><strong>Tip</strong></p>
-</div>
-<div class="callout-content">
-<p>The field moves fast in <strong>press releases</strong> and <strong>product features</strong>. The underlying ideas move much more slowly. You now know the slow part. Don’t let the fast part demoralise you.</p>
-</div>
-</div>
-</div>
-</section>
 <section id="how-to-use-ai-in-your-own-work" class="slide level2">
 <h2>How to <em>use</em> AI in your own work</h2>
 <p><span class="eyebrow">Concrete habits worth forming</span></p>
@@ -1163,7 +1294,7 @@ Dr Thomas Robinson
 <ol type="1">
 <li><strong>Verify before you trust.</strong> Every fact, citation, statistic from an LLM gets a manual check.</li>
 <li><strong>Document your prompts</strong> alongside your code. Treat prompts as part of your methodology.</li>
-<li><strong>Pre-register your evaluations</strong> when using LLMs as measurement instruments.</li>
+<li><strong>Pre-register your evaluations</strong>, and hand-code a gold-standard subset, whenever an LLM is doing measurement for you.</li>
 <li><strong>Disclose</strong> AI use in your publications. Most journals now require this.</li>
 <li><strong>Maintain skill in the underlying task.</strong> If you can’t write the code yourself, you can’t supervise the LLM that does.</li>
 </ol>
@@ -1317,19 +1448,6 @@ y = (1 \times 3) + (-2 \times 1) + 0.5 = 3 - 2 + 0.5 = 1.5
 </div>
 </div>
 </div>
-</section>
-<section id="what-i-expect-to-see-on-friday" class="slide level2">
-<h2>What I expect to see on Friday</h2>
-<div class="card">
-<ul>
-<li>You can work backprop through a small graph and read off the gradients.</li>
-<li>You can compute a forward pass through a small MLP by hand.</li>
-<li>You can name the components of a transformer and say what each does.</li>
-<li>You can tell a good argument for using deep learning on a problem from a bad one.</li>
-<li>You can read a PyTorch training loop and spot the line that is wrong.</li>
-</ul>
-<p>If you can do these, you’ll pass. Most of you will do better than that.</p>
-</div>
 </section></section>
 <section>
 <section id="a-final-word" class="title-slide slide level1 center" data-background-color="#0E1A2B">
@@ -1346,16 +1464,6 @@ y = (1 \times 3) + (-2 \times 1) + 0.5 = 3 - 2 + 0.5 = 1.5
 <p><span class="smaller">Stay in touch. Office hours continue through the autumn. Many of you will return for MY475 — see you then.</span></p>
 <p><span class="smaller"><strong>Send me what you build. Send me what breaks.</strong></span></p>
 </div>
-</section>
-<section id="the-exam" class="slide level2">
-<h2>The exam</h2>
-<p><span class="eyebrow">Friday 21 August — final exam · two hours</span></p>
-<p><span class="eyebrow">Bring</span></p>
-<ul>
-<li>A pen.</li>
-<li>A calculator.</li>
-<li>A clear head.</li>
-</ul>
 <div class="callout callout-tip callout-titled callout-style-default">
 <div class="callout-body">
 <div class="callout-title">
@@ -1365,7 +1473,7 @@ y = (1 \times 3) + (-2 \times 1) + 0.5 = 3 - 2 + 0.5 = 1.5
 <p><strong>Tip</strong></p>
 </div>
 <div class="callout-content">
-<p><strong>Good luck — and thank you again.</strong> It’s been a privilege to teach this cohort.</p>
+<p><strong>Good luck on Friday — and thank you again.</strong> It’s been a privilege to teach this cohort.</p>
 </div>
 </div>
 </div>
@@ -1379,8 +1487,29 @@ y = (1 \times 3) + (-2 \times 1) + 0.5 = 3 - 2 + 0.5 = 1.5
 </div>
 </div>
 <div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list">
+<div id="ref-angelopoulos2023ppi" class="csl-entry" role="listitem">
+Angelopoulos, A. N., Bates, S., Fannjiang, C., Jordan, M. I., &amp; Zrnic, T. (2023). Prediction-powered inference. <em>Science</em>, <em>382</em>(6671), 669–674.
+</div>
 <div id="ref-bender2021stochastic" class="csl-entry" role="listitem">
 Bender, E. M., Gebru, T., McMillan-Major, A., &amp; Shmitchell, S. (2021). On the dangers of stochastic parrots: Can language models be too big? <em>Proceedings of FAccT</em>.
+</div>
+<div id="ref-egami2023imperfect" class="csl-entry" role="listitem">
+Egami, N., Jacobs-Harukawa, M., Stewart, B. M., &amp; Wei, H. (2023). Using imperfect surrogates for downstream inference: Design-based supervised learning for social science applications of large language models. <em>Advances in Neural Information Processing Systems (NeurIPS)</em>.
+</div>
+<div id="ref-hendrycks2021measuring" class="csl-entry" role="listitem">
+Hendrycks, D., Burns, C., Basart, S., Zou, A., Mazeika, M., Song, D., &amp; Steinhardt, J. (2021). Measuring massive multitask language understanding. <em>International Conference on Learning Representations (ICLR)</em>.
+</div>
+<div id="ref-miller2024errorbars" class="csl-entry" role="listitem">
+Miller, E. (2024). <em>Adding error bars to evals: A statistical approach to language model evaluations</em>.
+</div>
+<div id="ref-rein2024gpqa" class="csl-entry" role="listitem">
+Rein, D., Hou, B. L., Stickland, A. C., Petty, J., Pang, R. Y., Dirani, J., Michael, J., &amp; Bowman, S. R. (2024). <span>GPQA</span>: A graduate-level google-proof q&amp;a benchmark. <em>Conference on Language Modeling (COLM)</em>.
+</div>
+<div id="ref-zhang2024gsm1k" class="csl-entry" role="listitem">
+Zhang, H., Da, J., Lee, D., Robinson, V., Wu, C., Song, W., Zhao, T., Raja, P., Slack, D., Lyu, Q., Hendryx, S., Kaplan, R., Lunati, M., &amp; Yue, S. (2024). A careful examination of large language model performance on grade school arithmetic. <em>Advances in Neural Information Processing Systems (NeurIPS)</em>.
+</div>
+<div id="ref-zheng2023judging" class="csl-entry" role="listitem">
+Zheng, L., Chiang, W.-L., Sheng, Y., Zhuang, S., Wu, Z., Zhuang, Y., Lin, Z., Li, Z., Li, D., Xing, E. P., Zhang, H., Gonzalez, J. E., &amp; Stoica, I. (2023). Judging <span>LLM</span>-as-a-judge with <span>MT-Bench</span> and chatbot arena. <em>Advances in Neural Information Processing Systems (NeurIPS) Datasets and Benchmarks Track</em>.
 </div>
 </div>
 </section></section>

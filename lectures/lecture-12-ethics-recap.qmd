@@ -59,37 +59,6 @@ format:
 If you remember nothing else from this course, remember these five. They are the **conceptual core** of everything.
 :::
 
-## The mental model you should leave with
-
-[A sketch that fits on a napkin]{.eyebrow}
-
-::: {.card}
-Every deep-learning model is:
-
-* A **stack of layers** — each does a small, differentiable computation.
-* **Trained** by gradient descent on a loss.
-* **Tuned** by you — picking architecture, loss, optimiser, data.
-
-That's it. CNNs change *what* each layer computes. RNNs and transformers change *how* tokens talk across positions. VAEs change *what* the model predicts. Everything else is detail.
-:::
-
-::: {.callout-tip}
-Hold this in your head and you'll be able to read any deep-learning paper in your field. The vocabulary differs; the underlying machinery does not.
-:::
-
-## How the course mapped to architectures
-
-::: {.card}
-* **L1-L4** — the engine. Autodiff and gradient descent.
-* **L5** — first real model. Feed-forward networks.
-* **L6** — first specialised model. CNNs for spatial data.
-* **L7** — first generative model. VAEs.
-* **L8-L11** — language. Embeddings → RNNs → transformers.
-* **L12** — context. What you've built. What it means.
-
-Every later lecture **reuses** the earlier ones. The CNN training loop is the FFN training loop with a different `model`. The transformer training loop is the same again. The mechanics never change.
-:::
-
 ## What's *not* in this course
 
 [A list of things worth knowing that we didn't cover]{.eyebrow}
@@ -153,24 +122,6 @@ Each of these is a course in itself. You now have the foundations to read into a
 **LLMs hallucinate by design.** They produce *plausible continuations*, not *true statements*. Treating them as oracles is a category error.
 :::
 
-## Compute, energy, and the trade-off
-
-::: {.columns}
-::: {.column width="50%"}
-* Training GPT-4-scale models takes 10s of GWh.
-* Inference at scale (billions of queries/day) is a continuous load.
-* Cooling needs water. Chips need rare earths. The end of the cycle is e-waste.
-:::
-::: {.column width="50%"}
-* "Just use a smaller model" is harder than it sounds — capability drops fast below a threshold.
-* Efficiency improves (Moore's-like trends) but absolute demand grows faster.
-:::
-:::
-
-::: {.callout-warning}
-The footprint of *one* query is small. The footprint of these systems *existing at scale* is not. This is a policy question, not a technical one.
-:::
-
 ## Environmental impact in detail
 
 [Beyond "AI uses a lot of compute"]{.eyebrow}
@@ -193,7 +144,7 @@ The footprint of *one* query is small. The footprint of these systems *existing 
 :::
 
 ::: {.callout-warning}
-Aggregate impact also depends on **where** data centres are sited — moving to renewable-rich regions helps, but is only a partial fix.
+The footprint of *one* query is small. The footprint of these systems *existing at scale* is not — and it depends on **where** data centres are sited. Moving to renewable-rich regions helps, but is only a partial fix. This is a policy question, not a technical one.
 :::
 
 ## Where bias comes from
@@ -368,6 +319,238 @@ That choice is **normative, not technical** — no amount of better engineering 
 :::
 :::
 
+## How would you know if it's any good?
+
+[The question this course has been quietly dodging]{.eyebrow}
+
+For twelve lectures, validation meant one thing: hold out some data, compute the loss on it, compare. That works when each input has one right answer and you have it written down.
+
+::: {.card}
+Ask a model to summarise a document, draft a reply, or code a variable from an interview transcript. There are many good answers and no key to mark against. The held-out loss still computes — it just stops telling you what you want to know.
+
+Three questions get run together under the word "validation":
+
+1. **Is it capable?** How good is this model, in general?
+2. **Is it valid for my task?** Does it measure the thing I say it measures, on my data?
+3. **Is it safe to deploy?** What happens when it fails, or when someone attacks it?
+:::
+
+::: {.callout-tip}
+Different questions, different evidence. Most arguments about whether an AI system "works" are two people answering different ones.
+:::
+
+## Four kinds of evidence
+
+::: {.columns}
+::: {.column width="50%"}
+[Benchmarks]{.pill-blue}
+
+A fixed set of questions with known answers. MMLU, GPQA, SWE-bench.
+
+* Cheap, repeatable, comparable across models.
+* Measures the benchmark, not your task.
+
+[Task-specific held-out sets]{.pill-blue}
+
+Your own data, labelled by hand, held back.
+
+* The only evidence about *your* task.
+* Costs human hours. Goes stale as the model changes.
+:::
+::: {.column width="50%"}
+[Human preference]{.pill-green}
+
+Show people two outputs, ask which is better. Chatbot Arena does this at scale.
+
+* Captures quality no metric writes down.
+* Measures what people *like*. Fluent and wrong beats terse and right.
+
+[Deployment monitoring]{.pill-green}
+
+Watch the system in use — failures, complaints, appeals, subgroup error rates.
+
+* The only evidence about the real distribution.
+* Arrives after the harm.
+:::
+:::
+
+::: {.callout-warning}
+The Dutch case failed at all four. No held-out audit by group, no monitoring that closed the loop inside a decade.
+:::
+
+## Why benchmarks stop working
+
+[Two failure modes, both well documented]{.eyebrow}
+
+::: {.columns}
+::: {.column width="50%"}
+[Saturation]{.pill-amber}
+
+MMLU [@hendrycks2021measuring] — 15,908 questions across 57 subjects, released 2020.
+
+* GPT-3 (2020): **43.9%**.
+* Frontier models by 2024–25: **88–90%**.
+* Estimated human-expert ceiling: **89.8%**.
+
+At the ceiling, the benchmark stops separating models. Everyone scores the same.
+:::
+::: {.column width="50%"}
+[Contamination]{.pill-amber}
+
+Benchmarks are public, so they end up in the training corpus. The model has seen the test.
+
+Zhang et al. (2024) [@zhang2024gsm1k] commissioned **GSM1k** — 1,000 fresh grade-school maths problems in the style of the standard GSM8k benchmark.
+
+* Some model families scored up to **13 points lower** on the fresh set.
+* Frontier models dropped much less.
+:::
+:::
+
+::: {.card}
+The response: build benchmarks that resist both. GPQA [@rein2024gpqa] is written to be *Google-proof* — PhD-level experts score **65%**, while skilled non-experts with over 30 minutes of unrestricted web search score **34%**. Others keep the test set private, or commission a fresh one each year.
+:::
+
+## How much does a two-point lead mean?
+
+[A benchmark score is a sample mean. Treat it like one.]{.eyebrow}
+
+::: {.card}
+A model answers **400** benchmark questions and gets **90%** right. That proportion has a standard error:
+
+$$
+\text{SE} = \sqrt{\frac{p(1-p)}{n}} = \sqrt{\frac{0.9 \times 0.1}{400}} = \sqrt{0.000225} = 0.015
+$$
+
+So 1.5 percentage points, and a 95% interval of roughly **87.1% to 92.9%**.
+
+Now a rival model scores **91%** on its own 400 questions. The standard error of the *difference* is about **2.1 points** — larger than the 2-point lead itself. The leaderboard gap is noise.
+:::
+
+::: {.callout-tip}
+Miller (2024) [@miller2024errorbars] sets out the fixes: report standard errors, **cluster** them when questions share a passage (up to **3×** the naive figure), and run both models on the *same* questions so you can analyse paired differences — which shrinks the error bar a long way.
+:::
+
+## Using a model to mark a model
+
+[LLM-as-judge — the current workhorse]{.eyebrow}
+
+Human rating is the gold standard and costs pounds per comparison. So: prompt a strong model with the question, the two answers, and a rubric, and ask it which is better.
+
+::: {.columns}
+::: {.column width="50%"}
+[Does it work?]{.pill-green}
+
+Zheng et al. (2023) [@zheng2023judging] checked GPT-4's judgements against human preferences on MT-Bench.
+
+* Judge agrees with humans: **≈85%**.
+* Two humans agree with each other: **81%**.
+
+The judge matches human agreement levels — which is the ceiling, not a licence.
+:::
+::: {.column width="50%"}
+[Known biases]{.pill-amber}
+
+* **Position** — which answer was shown first.
+* **Verbosity** — longer answers score higher.
+* **Self-preference** — a model rates its own output above a rival's.
+
+Mitigations: run each pair in both orders and average, give the judge a reference answer, and calibrate against a human-labelled subset first.
+:::
+:::
+
+::: {.callout-warning}
+The judge is a model with the same blind spots as the thing it is judging. It will not catch a mistake both of them make.
+:::
+
+## Stop & check — is 90% agreement good enough?
+
+[<span class="pause-cue">Stop & check</span> · 60 seconds in pairs]{.eyebrow}
+
+::: {.try-box}
+[Try]{.try-label}
+You use an LLM to label 10,000 news articles for whether they are about immigration. You hand-code 100 yourself to check. The model agrees with you on **90** of them.
+
+**Is that good enough to run your regression on the other 9,900?**
+:::
+
+::: {.fragment}
+::: {.reveal-box}
+[The reveal]{.reveal-label}
+Suppose 10 of your 100 articles really are about immigration, and the model finds 5 of them while flagging 5 articles that aren't.
+
+* Accuracy: $(5 + 85)/100 = \mathbf{90\%}$.
+* A model that answers "no" every time: also $\mathbf{90\%}$. Your model has beaten it by nothing.
+* It misses **half** the immigration articles, and half of what it flags is wrong.
+
+**Cohen's $\kappa$** rescales agreement against chance: $\kappa = (p_o - p_e)/(1 - p_e)$, with $p_o$ the observed agreement and $p_e$ what two raters would hit at random. Both say yes 10% of the time, so $p_e = (0.1)(0.1) + (0.9)(0.9) = 0.82$:
+
+$$
+\kappa = \frac{0.90 - 0.82}{1 - 0.82} = \frac{0.08}{0.18} \approx 0.44
+$$
+:::
+:::
+
+## What to do about the other 9,900
+
+[The state of the art for LLM labels in research]{.eyebrow}
+
+::: {.card}
+Egami et al. (2023) [@egami2023imperfect] show the sharper version: feeding LLM labels straight into a downstream regression gives **biased coefficients and confidence intervals that don't cover** — at 80–90% accuracy, the range where a researcher would call the labels fine. The bias comes from the errors being *correlated with the thing you are studying*.
+:::
+
+::: {.columns}
+::: {.column width="50%"}
+[The fix]{.pill-green}
+
+Keep a random, hand-coded **gold-standard subset**. Run the model on everything, then use the subset to correct the estimate and the standard errors.
+
+* **DSL** (design-based supervised learning) in political science.
+* **PPI** (prediction-powered inference), Angelopoulos et al. (2023) in *Science* [@angelopoulos2023ppi] — same idea, same guarantee.
+:::
+::: {.column width="50%"}
+[What you get]{.pill}
+
+* Valid inference **even if the labels are badly biased**.
+* Tighter intervals when the model is good, correct ones when it isn't.
+* The cost is the subset — a few hundred documents, coded properly.
+:::
+:::
+
+::: {.callout-tip}
+This is the honest answer to "can I use an LLM to code my data?" Yes — as long as you also hand-code enough of it to find out how wrong the model was.
+:::
+
+## How do you test for harm?
+
+[Capability evaluation, from the other direction]{.eyebrow}
+
+Accuracy asks *how often is it right*. Safety evaluation asks *what is the worst thing it will do if someone tries*.
+
+::: {.columns}
+::: {.column width="50%"}
+[Red-teaming]{.pill-amber}
+
+People — and now models — attack the system to make it fail.
+
+The UK AI Safety Institute tested five publicly deployed LLMs in **May 2024**: all were highly vulnerable to **basic** jailbreaks, and some produced harmful outputs with no jailbreak attempt at all.
+:::
+::: {.column width="50%"}
+[Dangerous-capability evals]{.pill-amber}
+
+Can it assist a cyber-attack, or with chemical and biological weapons? Can it act on its own over long horizons?
+
+**Human-uplift studies** ask the harder question: does the model make a non-expert *more* capable than a search engine would? That is the counterfactual that matters.
+:::
+:::
+
+::: {.card}
+Run by the labs themselves — Anthropic's Responsible Scaling Policy, OpenAI's Preparedness Framework, Google DeepMind's Frontier Safety Framework — and by third parties. We come back to who watches the watchers shortly.
+:::
+
+::: {.callout-warning}
+A failed elicitation is not proof of absence. It shows *this* attempt didn't find the capability. Someone with more time, better prompts, or fine-tuning access may.
+:::
+
 ## Privacy and data extraction
 
 [Two related concerns]{.eyebrow}
@@ -438,20 +621,6 @@ You don't have to pick a side. You *should* know the debate exists, and have rea
 :::
 :::
 
-## Labour
-
-::: {.card}
-We are early in a labour transition with no clear precedent in scale or speed.
-
-* Tasks that were full-time jobs three years ago are now done by LLMs — copy editing, junior coding, translation, customer support, illustration, paralegal work.
-* The benefits accrue mostly to capital, not labour.
-* The "winners" of the previous tech wave (software engineers) are now exposed too.
-:::
-
-::: {.callout-note}
-Whether you build these systems or use them, you have a stake in **how the gains are distributed**.
-:::
-
 ## Labour displacement — the evidence so far
 
 [What we know, what we don't]{.eyebrow}
@@ -474,7 +643,7 @@ Whether you build these systems or use them, you have a stake in **how the gains
 :::
 
 ::: {.callout-warning}
-**The honest position**: we are early. Aggregate labour-market data lags by 1–3 years. Decisions are being made now — about policy, training, social safety nets — on weak evidence.
+**The honest position**: we are early. Aggregate labour-market data lags by 1–3 years. Decisions are being made now — about policy, training, social safety nets — on weak evidence. Whether you build these systems or use them, you have a stake in **how the gains are distributed**.
 :::
 
 ## Copyright, consent, provenance
@@ -620,6 +789,7 @@ This is live research practice, not a hypothetical — Argyle et al. (2023), on 
 * **Spirling (2023)** in *Nature* — why open-source models matter for research.
 * **Argyle et al. (2023)** — simulating human respondents with LLMs.
 * **Lall & Robinson (2022)** — deep learning for missing-data imputation (MIDAS).
+* **Egami et al. (2023)** — how to put LLM labels in a regression without breaking your standard errors.
 :::
 
 ## Where AI research is moving — five bets
@@ -642,19 +812,6 @@ This is live research practice, not a hypothetical — Argyle et al. (2023), on 
 Each of these has a 1–2 paper landing per week. You don't need to read all of them. But you should be able to *say what each is* and have a personal take on one.
 :::
 
-## How to keep up — without burning out
-
-::: {.card}
-1. **Follow a small, curated list of researchers** — not the firehose. Twitter/X is a low-signal medium for ML.
-2. **Read papers, not press releases.** The actual paper for any model is often less impressive than the press release.
-3. **Periodically re-implement landmark papers from scratch.** Especially once your day job stops requiring it.
-4. **Build something small you actually use.** The single best way to internalise a technique.
-:::
-
-::: {.callout-tip}
-The field moves fast in **press releases** and **product features**. The underlying ideas move much more slowly. You now know the slow part. Don't let the fast part demoralise you.
-:::
-
 ## How to *use* AI in your own work
 
 [Concrete habits worth forming]{.eyebrow}
@@ -662,7 +819,7 @@ The field moves fast in **press releases** and **product features**. The underly
 ::: {.card}
 1. **Verify before you trust.** Every fact, citation, statistic from an LLM gets a manual check.
 2. **Document your prompts** alongside your code. Treat prompts as part of your methodology.
-3. **Pre-register your evaluations** when using LLMs as measurement instruments.
+3. **Pre-register your evaluations**, and hand-code a gold-standard subset, whenever an LLM is doing measurement for you.
 4. **Disclose** AI use in your publications. Most journals now require this.
 5. **Maintain skill in the underlying task.** If you can't write the code yourself, you can't supervise the LLM that does.
 :::
@@ -809,18 +966,6 @@ The paper runs roughly in course order and **gets harder as it goes**. The last 
 **Don't try to learn anything new tonight.** Consolidate what you already know. The exam tests *understanding*, not last-minute information.
 :::
 
-## What I expect to see on Friday
-
-::: {.card}
-* You can work backprop through a small graph and read off the gradients.
-* You can compute a forward pass through a small MLP by hand.
-* You can name the components of a transformer and say what each does.
-* You can tell a good argument for using deep learning on a problem from a bad one.
-* You can read a PyTorch training loop and spot the line that is wrong.
-
-If you can do these, you'll pass. Most of you will do better than that.
-:::
-
 # A final word {background-color="#0E1A2B"}
 
 ## A final word
@@ -839,18 +984,8 @@ To **Kaifang Zhou**, your lab instructor and TA, for running the labs. And to th
 [**Send me what you build. Send me what breaks.**]{.smaller}
 :::
 
-## The exam
-
-[Friday 21 August — final exam · two hours]{.eyebrow}
-
-[Bring]{.eyebrow}
-
-* A pen.
-* A calculator.
-* A clear head.
-
 ::: {.callout-tip}
-**Good luck — and thank you again.** It's been a privilege to teach this cohort.
+**Good luck on Friday — and thank you again.** It's been a privilege to teach this cohort.
 :::
 
 ## References
