@@ -30,8 +30,6 @@ listing:
       pdf: "lectures/pdf/lecture-10-attention-transformers.pdf"
     - path: "lectures/lecture-11-tokenization-refinements.qmd"
       pdf: "lectures/pdf/lecture-11-tokenization-refinements.pdf"
-    - path: "lectures/lecture-12-ethics-recap.qmd"
-      pdf: "lectures/pdf/lecture-12-ethics-recap.pdf"
   template: assets/lecture-grid.ejs
   sort: "date"
 ---
@@ -45,4 +43,8 @@ and **?** for the full list of shortcuts.
 
 ::: {.callout-tip}
 The decks are the primary study resource for the **final exam**.
+:::
+
+::: {.callout-note}
+Lecture 12 is being revised and will be posted here shortly.
 :::

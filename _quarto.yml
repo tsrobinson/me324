@@ -30,7 +30,8 @@ project:
     - lectures/lecture-09-rnns.qmd
     - lectures/lecture-10-attention-transformers.qmd
     - lectures/lecture-11-tokenization-refinements.qmd
-    - lectures/lecture-12-ethics-recap.qmd
+    # lecture 12 is held back while it is revised — restore this line, the
+    # lectures.qmd entry, and its PDF when it goes back up.
     - labs/lab-01-setup-and-tensors.ipynb
     - labs/lab-02-perceptron-numpy.ipynb
     - labs/lab-03-value-forward.ipynb
