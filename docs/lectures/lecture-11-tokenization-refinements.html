@@ -379,37 +379,6 @@ Dr Thomas Robinson
 
   <p class="date">August 18, 2026</p>
 </section>
-<section>
-<section id="show-tell-your-gpts" class="title-slide slide level1 center" data-background-color="#0E1A2B">
-<h1>Show &amp; tell · your GPTs</h1>
-
-</section>
-<section id="plenary-read-your-gpt-aloud" class="slide level2">
-<h2>Plenary · read your GPT aloud</h2>
-<p><span class="eyebrow"><span class="pause-cue">≈ 10 min</span> · whole room</span></p>
-<p>Yesterday you each built a tiny GPT and brought away <strong>one generated sample</strong> — the funniest line, or the one that shouldn’t have made sense but did.</p>
-<div class="try-box">
-<p><span class="try-label">Share with the room</span></p>
-<p>Read <strong>one line</strong> your model produced. In a sentence or two, tell us:</p>
-<ol type="1">
-<li>Why you picked it — coherent? funny? eerily plausible?</li>
-<li><strong>One failure mode</strong> you noticed — repetition, invented non-words, losing the thread mid-sentence, confident nonsense.</li>
-</ol>
-</div>
-<div class="callout callout-tip callout-titled callout-style-default">
-<div class="callout-body">
-<div class="callout-title">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<p><strong>Tip</strong></p>
-</div>
-<div class="callout-content">
-<p>Three weeks ago this was a black box. Yesterday <em>you trained a transformer that produces English.</em> It is small and it is flawed — and that is exactly what today is about: better <strong>tokens</strong> (Part 1), better <strong>sampling</strong> (Part 2), and a <strong>map of everything that sits between your tiny GPT and ChatGPT</strong> (Part 3).</p>
-</div>
-</div>
-</div>
-</section>
 <section id="warm-up-three-questions-from-last-time" class="slide level2">
 <h2>Warm-up · three questions from last time</h2>
 <p><span class="eyebrow"><span class="pause-cue">≈ 5 min</span> · shout it out</span></p>
@@ -430,7 +399,7 @@ Dr Thomas Robinson
 <li>It blocks attention to <strong>future tokens</strong>. Without it, next-token prediction could read the answer it is supposed to predict.</li>
 </ol>
 </div>
-</section></section>
+</section>
 <section>
 <section id="part-1-tokenisation" class="title-slide slide level1 center" data-background-color="#0E1A2B">
 <h1>Part 1 · Tokenisation</h1>
@@ -451,7 +420,7 @@ Dr Thomas Robinson
 <p><span class="pill-amber">Word</span></p>
 <ul>
 <li>Huge vocab (10⁵+).</li>
-<li>OOV (out-of-vocabulary) is a real failure mode.</li>
+<li>OOV (out-of-vocabulary) failure mode.</li>
 <li>Embedding matrix is gigantic.</li>
 <li>What 1990s/2000s NLP used.</li>
 </ul>
@@ -467,12 +436,12 @@ Dr Thomas Robinson
 </section>
 <section id="where-compute-goes-and-why-tokenisation-matters" class="slide level2">
 <h2>Where compute goes — and why tokenisation matters</h2>
-<p>For a transformer with width <span class="math inline">d</span> trained on <span class="math inline">T</span> tokens at sequence length <span class="math inline">L</span>:</p>
+<p>For a transformer with width <span class="math inline">d</span> at sequence length <span class="math inline">T</span> — yesterday’s <span class="math inline">T</span>, one position per token:</p>
 <div class="card">
 <ul>
-<li>Self-attention cost per layer: <span class="math inline">\mathcal{O}(L^2 d)</span>.</li>
-<li>Feed-forward cost: <span class="math inline">\mathcal{O}(L d^2)</span>.</li>
-<li>Memory for the attention matrix: <span class="math inline">\mathcal{O}(L^2)</span>.</li>
+<li>Self-attention cost per layer: <span class="math inline">\mathcal{O}(T^2 d)</span>.</li>
+<li>Feed-forward cost: <span class="math inline">\mathcal{O}(T d^2)</span>.</li>
+<li>Memory for the attention matrix: <span class="math inline">\mathcal{O}(T^2)</span>.</li>
 </ul>
 </div>
 <div class="callout callout-tip callout-titled callout-style-default">
@@ -524,7 +493,10 @@ Dr Thomas Robinson
 <li>An <em>adjacent</em> year can split into <strong>several</strong> tokens.</li>
 <li>There’s no clean rule — it depends on what was frequent in the training data.</li>
 </ul>
-<p>A model that sees <code>2024</code> as one atom but <code>2025</code> as three pieces has no stable notion of “a year,” let alone how to add one. This inconsistency is part of why LLMs are <strong>bad at arithmetic</strong>.</p>
+<p>A model that sees <code>2024</code> as one atom but <code>2025</code> as three pieces has no stable notion of “a year”</p>
+<ul>
+<li>This inconsistency is part of why LLMs are sometimes <strong>bad at arithmetic</strong></li>
+</ul>
 </div><div class="column" style="width:50%;">
 <p><span class="pill-amber">Glitch tokens</span></p>
 <p>Some tokens appear in the vocabulary but rarely in training data. The model has no idea what they mean.</p>
@@ -539,10 +511,93 @@ Dr Thomas Robinson
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
-<p><strong>Tip</strong></p>
+<p><strong>The lesson</strong></p>
 </div>
 <div class="callout-content">
-<p><strong>The lesson</strong>: vocabulary is a one-shot decision made before training. Mistakes cascade for the model’s whole life. Modern tokenisers (cl100k, o200k) try harder to avoid these.</p>
+<p>Vocabulary is a one-shot decision made before training. Mistakes persist for the model’s lifespan. Modern tokenisers (cl100k, o200k) try harder to avoid these.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="how-many-rs-in-strawberry" class="slide level2">
+<h2>How many r’s in strawberry?</h2>
+<p><span class="eyebrow">The failure we saw at the beginning of the course</span></p>
+<p>Ask a frontier model to count the r’s in “strawberry” and it has, famously, answered <strong>two</strong>.</p>
+<div class="columns">
+<div class="column" style="width:52%;">
+<p><span class="pill-amber">What the model actually receives</span></p>
+<p>Not <code>s</code> <code>t</code> <code>r</code> <code>a</code> <code>w</code> <code>b</code> <code>e</code> <code>r</code> <code>r</code> <code>y</code>.</p>
+<p>Something closer to <code>str</code> <code>aw</code> <code>berry</code> — three tokens, three vectors.</p>
+<p>The letters were gone before the model saw anything. There is no <code>r</code> in its input to count.</p>
+</div><div class="column" style="width:48%;">
+<p><span class="pill-blue">So it answers from memory</span></p>
+<p>Spelling a token means recalling which characters it <em>stood for</em>, which is a fact about the tokeniser, not about the text.</p>
+<p>The model answers from what it has read <em>about</em> spelling, rather than by looking.</p>
+</div></div>
+<div class="callout callout-tip callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>The model reasons over tokens, not characters or digits.</strong></p>
+</div>
+<div class="callout-content">
+<p>It is why spacing the word out — <code>s t r a w b e r r y</code> — often fixes it, why “write code to count them” fixes it every time, and why a reasoning model that spells the word out first gets there too.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="what-is-a-byte" class="slide level2">
+<h2>What is a byte?</h2>
+<p><span class="eyebrow">The unit everything else is built from</span></p>
+<p>A <strong>byte</strong> is 8 bits. Each bit is 0 or 1, so a byte has <span class="math inline">2^8 = 256</span> possible values — the whole numbers 0 to 255.</p>
+<div class="columns">
+<div class="column" style="width:48%;">
+<p><span class="pill-blue">Text is stored as numbers</span></p>
+<p>A computer has no notion of a letter. It stores a number, and an <strong>encoding</strong> says which number means which character. The standard is UTF-8.</p>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>Character</th>
+<th>Stored as</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>A</code></td>
+<td>65</td>
+</tr>
+<tr class="even">
+<td><code>a</code></td>
+<td>97</td>
+</tr>
+<tr class="odd">
+<td><code>!</code></td>
+<td>33</td>
+</tr>
+<tr class="even">
+<td><em>space</em></td>
+<td>32</td>
+</tr>
+</tbody>
+</table>
+</div><div class="column" style="width:52%;">
+<p><span class="pill-green">The alphabet is only 256 long</span></p>
+<p>So <code>low</code> reaches the computer as <code>108</code> <code>111</code> <code>119</code>.</p>
+<p>Your name, this sentence, every training corpus ever scraped — all of it is a sequence of numbers from 0 to 255.</p>
+<p>There are 256 of them, and there will never be a 257th.</p>
+</div></div>
+<div class="callout callout-note callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Note</strong></p>
+</div>
+<div class="callout-content">
+<p>Not every character is one byte — <code>é</code> takes two, an emoji takes four. We’ll come back to that once BPE is running.</p>
 </div>
 </div>
 </div>
@@ -581,79 +636,101 @@ Dr Thomas Robinson
 <div class="columns">
 <div class="column" style="width:50%;">
 <p><span class="pill-blue">Initial state</span></p>
-<p>Single characters. Words become sequences (using <code>_</code> for word-end):</p>
+<p>Single characters. Each box is <strong>one token</strong> (<code>_</code> marks the word end):</p>
 <ul>
-<li><code>l o w _</code> × 5</li>
-<li><code>l o w e s t _</code> × 1</li>
-<li><code>n e w e r _</code> × 5</li>
-<li><code>w i d e r _</code> × 1</li>
+<li><code>l</code> <code>o</code> <code>w</code> <code>_</code> ×5</li>
+<li><code>l</code> <code>o</code> <code>w</code> <code>e</code> <code>s</code> <code>t</code> <code>_</code> ×1</li>
+<li><code>n</code> <code>e</code> <code>w</code> <code>e</code> <code>r</code> <code>_</code> ×5</li>
+<li><code>w</code> <code>i</code> <code>d</code> <code>e</code> <code>r</code> <code>_</code> ×1</li>
 </ul>
 </div><div class="column" style="width:50%;">
 <p><span class="pill-blue">Most-frequent pair counts</span></p>
 <ul>
-<li><code>(e, r)</code> appears 6 times</li>
-<li><code>(l, o)</code> appears 6 times</li>
-<li><code>(o, w)</code> appears 6 times</li>
-<li><code>(n, e)</code> appears 5 times</li>
+<li><code>(e,r)</code> · <code>(l,o)</code> · <code>(o,w)</code> · <code>(r,_)</code> · <code>(w,e)</code> — <strong>6 each</strong></li>
+<li><code>(n,e)</code> · <code>(e,w)</code> · <code>(w,_)</code> — 5 each</li>
 </ul>
-<p>(Tie-break by alphabetical order, say.)</p>
+<p>Five pairs tie at the top. Break ties by a fixed rule; here we take <code>(e,r)</code>.</p>
 </div></div>
 <div class="card">
-<p><strong>Merge <code>(e, r)</code> → new token <code>er</code>.</strong> Repeat.</p>
+<p><strong>Merge <code>(e,r)</code> → new token <span class="tok-new"><code>er</code></span>.</strong> Repeat.</p>
 </div>
 </section>
 <section id="bpe-merges-step-by-step" class="slide level2">
 <h2>BPE merges — step by step</h2>
-<p>Each row applies <strong>exactly one</strong> merge. The cell shows the <em>full</em> token sequence of every word afterwards, so you can see what changed:</p>
-<table class="caption-top">
+<p>Each row applies <strong>exactly one</strong> merge. Every box is one token, and a box like <span class="tok-new"><code>er</code></span> is the token that row’s merge just created. Read <strong>down</strong> a column to watch one word collapse:</p>
+<table class="caption-top" style="width:100%;">
 <colgroup>
-<col style="width: 33%">
-<col style="width: 33%">
-<col style="width: 33%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
 </colgroup>
 <thead>
 <tr class="header">
 <th>Step</th>
 <th>Merge</th>
-<th>Corpus after this merge</th>
+<th>low ×5</th>
+<th>lowest</th>
+<th>newer ×5</th>
+<th>wider</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td>0</td>
 <td><em>(start)</em></td>
-<td><code>l o w _</code>×5 · <code>l o w e s t _</code> · <code>n e w e r _</code>×5 · <code>w i d e r _</code></td>
+<td><code>l</code> <code>o</code> <code>w</code> <code>_</code></td>
+<td><code>l</code> <code>o</code> <code>w</code> <code>e</code> <code>s</code> <code>t</code> <code>_</code></td>
+<td><code>n</code> <code>e</code> <code>w</code> <code>e</code> <code>r</code> <code>_</code></td>
+<td><code>w</code> <code>i</code> <code>d</code> <code>e</code> <code>r</code> <code>_</code></td>
 </tr>
 <tr class="even">
 <td>1</td>
 <td><code>(e,r)→er</code></td>
-<td><code>l o w _</code>×5 · <code>l o w e s t _</code> · <code>n e w er _</code>×5 · <code>w i d er _</code></td>
+<td><code>l</code> <code>o</code> <code>w</code> <code>_</code></td>
+<td><code>l</code> <code>o</code> <code>w</code> <code>e</code> <code>s</code> <code>t</code> <code>_</code></td>
+<td><code>n</code> <code>e</code> <code>w</code> <span class="tok-new"><code>er</code></span> <code>_</code></td>
+<td><code>w</code> <code>i</code> <code>d</code> <span class="tok-new"><code>er</code></span> <code>_</code></td>
 </tr>
 <tr class="odd">
 <td>2</td>
 <td><code>(er,_)→er_</code></td>
-<td><code>l o w _</code>×5 · <code>l o w e s t _</code> · <code>n e w er_</code>×5 · <code>w i d er_</code></td>
+<td><code>l</code> <code>o</code> <code>w</code> <code>_</code></td>
+<td><code>l</code> <code>o</code> <code>w</code> <code>e</code> <code>s</code> <code>t</code> <code>_</code></td>
+<td><code>n</code> <code>e</code> <code>w</code> <span class="tok-new"><code>er_</code></span></td>
+<td><code>w</code> <code>i</code> <code>d</code> <span class="tok-new"><code>er_</code></span></td>
 </tr>
 <tr class="even">
 <td>3</td>
 <td><code>(l,o)→lo</code></td>
-<td><code>lo w _</code>×5 · <code>lo w e s t _</code> · <code>n e w er_</code>×5 · <code>w i d er_</code></td>
+<td><span class="tok-new"><code>lo</code></span> <code>w</code> <code>_</code></td>
+<td><span class="tok-new"><code>lo</code></span> <code>w</code> <code>e</code> <code>s</code> <code>t</code> <code>_</code></td>
+<td><code>n</code> <code>e</code> <code>w</code> <code>er_</code></td>
+<td><code>w</code> <code>i</code> <code>d</code> <code>er_</code></td>
 </tr>
 <tr class="odd">
 <td>4</td>
 <td><code>(lo,w)→low</code></td>
-<td><code>low _</code>×5 · <code>low e s t _</code> · <code>n e w er_</code>×5 · <code>w i d er_</code></td>
+<td><span class="tok-new"><code>low</code></span> <code>_</code></td>
+<td><span class="tok-new"><code>low</code></span> <code>e</code> <code>s</code> <code>t</code> <code>_</code></td>
+<td><code>n</code> <code>e</code> <code>w</code> <code>er_</code></td>
+<td><code>w</code> <code>i</code> <code>d</code> <code>er_</code></td>
 </tr>
 <tr class="even">
 <td>5</td>
 <td><code>(low,_)→low_</code></td>
-<td><code>low_</code>×5 · <code>low e s t _</code> · <code>n e w er_</code>×5 · <code>w i d er_</code></td>
+<td><span class="tok-new"><code>low_</code></span></td>
+<td><code>low</code> <code>e</code> <code>s</code> <code>t</code> <code>_</code></td>
+<td><code>n</code> <code>e</code> <code>w</code> <code>er_</code></td>
+<td><code>w</code> <code>i</code> <code>d</code> <code>er_</code></td>
 </tr>
 </tbody>
 </table>
 <div class="card">
-<p>After these five merges the frequent word <code>low_</code> is already a <strong>single token</strong>. Keep going and <code>newer_</code>, <code>wider_</code> collapse too.</p>
-<p>The rare word <code>lowest_</code> stays split — <code>low e s t _</code> — but it <strong>reuses the <code>low</code> piece</strong> it shares with the common word. That sharing is the whole point: the model can spell a word it has barely seen out of pieces it knows well. <strong>No word is ever out-of-vocabulary.</strong></p>
+<p>Four boxes down to one: after five merges the frequent word <code>low_</code> is a <strong>single token</strong>. Keep going and <code>newer_</code>, <code>wider_</code> collapse too.</p>
+<p>The rare word <code>lowest_</code> stays split — five boxes — but the first one is <code>low</code>, the <strong>same piece</strong> the common word uses. That sharing is the point: the model can spell a word it has barely seen out of pieces it knows well. <strong>No word is ever out-of-vocabulary.</strong></p>
 </div>
 </section>
 <section id="how-modern-tokenisers-look" class="slide level2">
@@ -684,14 +761,14 @@ Dr Thomas Robinson
 </section>
 <section id="byte-level-bpe-the-missing-detail" class="slide level2">
 <h2>Byte-level BPE — the missing detail</h2>
-<p>Our worked examples merged <strong>characters</strong>. Run BPE that way at scale and there is a hole:</p>
+<p>Our worked examples merged <strong>characters</strong>. But this won’t work for every possible word in our vocabulary:</p>
 <div class="columns">
 <div class="column" style="width:50%;">
 <p><span class="pill-amber">Character-level BPE</span></p>
 <ul>
 <li>Base vocabulary = the characters seen in training.</li>
 <li>Unicode has ~150,000 characters. No corpus contains them all.</li>
-<li>Meet a new one at test time — a rare script, a fresh emoji — and the tokeniser has no token for it. The model gets <code>&lt;unk&gt;</code>.</li>
+<li>Meet a new one at test time — a rare script, a fresh emoji — and the tokeniser has no token for it (and so gets assigned <code>&lt;unk&gt;</code>).</li>
 </ul>
 </div><div class="column" style="width:50%;">
 <p><span class="pill-green">Byte-level BPE — GPT-2’s fix</span></p>
@@ -712,7 +789,11 @@ Dr Thomas Robinson
 <li>🤖 → <strong>four</strong> bytes (<code>0xF0 0x9F 0xA4 0x96</code>).</li>
 </ul>
 </div>
-<p>If 🤖 is rare in the training corpus, no merge ever forms it. The tokeniser hands the model <strong>four single-byte tokens</strong>, and the model has to piece the robot together itself.</p>
+<p>If 🤖 is rare in the training corpus, no merge ever forms it</p>
+<ul>
+<li>The tokeniser hands the model <strong>four single-byte tokens</strong></li>
+<li>The model has to piece the robot together itself</li>
+</ul>
 <div class="try-box">
 <p><span class="try-label">Try it yourself</span> <strong>Why can byte-level BPE never meet an out-of-vocabulary string?</strong></p>
 </div>
@@ -750,33 +831,33 @@ Dr Thomas Robinson
 <section id="plenary-answers" class="slide level2">
 <h2>Plenary · answers</h2>
 <div class="card">
-<p><span class="eyebrow">Start</span> <code>banana_</code> = <code>b a n a n a _</code> (×3) · <code>ana_</code> = <code>a n a _</code> (×2)</p>
+<p><span class="eyebrow">Start</span> “banana” = <code>b</code> <code>a</code> <code>n</code> <code>a</code> <code>n</code> <code>a</code> <code>_</code> (×3) · “ana” = <code>a</code> <code>n</code> <code>a</code> <code>_</code> (×2)</p>
 <p><span class="eyebrow">Initial pair counts</span> <code>(a,n)</code> 8 · <code>(n,a)</code> 8 · <code>(a,_)</code> 5 · <code>(b,a)</code> 3.</p>
 <p><span class="eyebrow">Step 1</span> <code>(a,n)</code> and <code>(n,a)</code> tie at 8 — break ties by a fixed rule; here take <strong><code>(n,a) → na</code></strong>.</p>
 <ul>
-<li><code>banana_</code> → <code>b a na na _</code></li>
-<li><code>ana_</code> → <code>a na _</code></li>
+<li>“banana” → <code>b</code> <code>a</code> <span class="tok-new"><code>na</code></span> <span class="tok-new"><code>na</code></span> <code>_</code></li>
+<li>“ana” → <code>a</code> <span class="tok-new"><code>na</code></span> <code>_</code></li>
 </ul>
 <p><span class="eyebrow">Step 2</span> Recount: <code>(a,na)</code> and <code>(na,_)</code> now tie at 5 (top) — fixed rule again takes <strong><code>(a,na) → ana</code></strong>.</p>
 <ul>
-<li><code>banana_</code> → <code>b ana na _</code></li>
-<li><code>ana_</code> → <code>ana _</code></li>
+<li>“banana” → <code>b</code> <span class="tok-new"><code>ana</code></span> <code>na</code> <code>_</code></li>
+<li>“ana” → <span class="tok-new"><code>ana</code></span> <code>_</code></li>
 </ul>
 <p><span class="eyebrow">Step 3</span> Recount: <code>(b,ana)</code>, <code>(ana,na)</code>, <code>(na,_)</code> all tie at 3 — fixed rule picks <strong><code>(b,ana) → bana</code></strong>.</p>
 <ul>
-<li><code>banana_</code> → <code>bana na _</code></li>
-<li><code>ana_</code> → <code>ana _</code></li>
+<li>“banana” → <span class="tok-new"><code>bana</code></span> <code>na</code> <code>_</code></li>
+<li>“ana” → <code>ana</code> <code>_</code></li>
 </ul>
 </div>
 <div class="reveal-box">
-<p><span class="reveal-label">Reflection</span> <strong><code>"banana"</code></strong> now tokenises as <strong><code>bana</code> + <code>na</code></strong> — two tokens, almost a single one.</p>
-<p><strong><code>"bandana"</code></strong> = <code>b a n d a n a _</code>. Apply the <em>learned</em> merges in order — <code>na</code>, then <code>ana</code>, then <code>bana</code>:</p>
+<p><span class="reveal-label">Reflection</span> <strong>“banana”</strong> now tokenises as <code>bana</code> <code>na</code> <code>_</code> — three boxes, down from seven.</p>
+<p><strong>“bandana”</strong> starts as <code>b</code> <code>a</code> <code>n</code> <code>d</code> <code>a</code> <code>n</code> <code>a</code> <code>_</code>. Apply the <em>learned</em> merges in order — <code>na</code>, then <code>ana</code>, then <code>bana</code>:</p>
 <ul>
-<li><code>na</code>: only the final <code>n a</code> merges (the first <code>n</code> is followed by <code>d</code>) → <code>b a n d a na _</code></li>
-<li><code>ana</code>: the <code>a na</code> merges → <code>b a n d ana _</code></li>
+<li><code>na</code>: only the final <code>n a</code> merges (the first <code>n</code> is followed by <code>d</code>) → <code>b</code> <code>a</code> <code>n</code> <code>d</code> <code>a</code> <span class="tok-new"><code>na</code></span> <code>_</code></li>
+<li><code>ana</code>: the <code>a na</code> merges → <code>b</code> <code>a</code> <code>n</code> <code>d</code> <span class="tok-new"><code>ana</code></span> <code>_</code></li>
 <li><code>bana</code>: needs <code>b</code> next to <code>ana</code>, but <code>b</code> is followed by <code>a</code> → no merge.</li>
 </ul>
-<p>Result: <strong><code>b</code> + <code>a</code> + <code>n</code> + <code>d</code> + <code>ana</code></strong>. The model has <em>never seen</em> <code>"bandana"</code> yet reads it from known pieces.</p>
+<p>Result: <code>b</code> <code>a</code> <code>n</code> <code>d</code> <code>ana</code> <code>_</code>. The model has <em>never seen</em> “bandana” yet reads it from known pieces.</p>
 <p>This is BPE’s guarantee: <strong>no OOV</strong>.</p>
 </div>
 </section></section>
@@ -806,7 +887,7 @@ Dr Thomas Robinson
 </ul>
 </div><div class="column" style="width:33%;">
 <p><span class="pill-green">Beam search</span></p>
-<p>Track top-<span class="math inline">k</span> candidate sequences in parallel.</p>
+<p>Track top-<span class="math inline">B</span> candidate sequences in parallel.</p>
 <ul>
 <li>Useful for translation.</li>
 <li>Boring for chat.</li>
@@ -848,20 +929,60 @@ p_i \propto \exp\!\left(\frac{z_i}{\tau}\right)
 <div class="columns">
 <div class="column" style="width:55%;">
 <p><strong>Argmax</strong> picks one token at a time — locally optimal, globally myopic.</p>
-<p><strong>Beam search</strong> keeps the top <span class="math inline">k</span> candidate <em>sequences</em> in parallel, extending each. At the end, return the highest-scoring sequence overall.</p>
+<p><strong>Beam search</strong> keeps the top <span class="math inline">B</span> candidate <em>sequences</em> in parallel, extending each. At the end, return the highest-scoring sequence overall. <span class="math inline">B</span> is the <strong>beam width</strong>.</p>
 <ul>
-<li><span class="math inline">k = 5</span> or <span class="math inline">10</span> is common.</li>
+<li><span class="math inline">B = 5</span> or <span class="math inline">10</span> is common.</li>
 <li>Used for translation, summarisation — anywhere there’s a “single best answer.”</li>
 </ul>
 </div><div class="column" style="width:45%;">
 <div class="card">
-<p><strong>Why not for chat.</strong> Beam search produces fluent but predictable text. The “best” sequence is often the most generic one. For chat, conversation, or creative writing, sampling is better.</p>
-<p><strong>Rule of thumb</strong>: beam search for one-shot tasks with a verifiable correct answer. Sampling for open-ended generation.</p>
+<p><strong>Why not for chat.</strong> Beam search produces fluent but predictable text.</p>
+<ul>
+<li>The “best” sequence is often generic</li>
+<li>For chat, conversation, or creative writing, sampling is better (feels more human)</li>
+</ul>
+<p><strong>Rule of thumb</strong>: beam search for one-shot tasks with a verifiable correct answer. Use sampling for open-ended generation.</p>
 </div>
 </div></div>
 </section>
+<section id="what-does-beam-search-cost" class="slide level2">
+<h2>What does beam search cost?</h2>
+<p><span class="eyebrow">Searching harder is not free</span></p>
+<p>A beam width of <span class="math inline">B</span> means <span class="math inline">B</span> live sequences. Each one needs its <strong>own forward pass at every step</strong>.</p>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><span class="pill-amber">Per generated token</span></p>
+<ul>
+<li><span class="math inline">B</span> forward passes, not 1.</li>
+<li><span class="math inline">B</span> KV caches held in memory — yesterday’s cache, once per beam.</li>
+<li>Score all <span class="math inline">B \times V</span> continuations, keep the best <span class="math inline">B</span>.</li>
+</ul>
+<p>With <span class="math inline">V \approx 50{,}000</span> and <span class="math inline">B = 5</span>, that last step sorts 250,000 numbers. Nothing, next to five passes through the network.</p>
+</div><div class="column" style="width:50%;">
+<p><span class="pill-blue">The bill</span></p>
+<ul>
+<li><span class="math inline">B = 5</span> → <strong>5× the compute</strong> and <strong>5× the KV-cache memory</strong>, for every token generated. The weights are shared, so they are not multiplied.</li>
+<li>The <span class="math inline">B</span> passes batch together, so on an idle GPU the wall-clock is kinder than 5×. The FLOPs and the memory bandwidth are not.</li>
+<li>When you are serving users, the batch is already full. Then it is a straight <strong>5× cut in throughput</strong>.</li>
+</ul>
+</div></div>
+<div class="callout callout-tip callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Tip</strong></p>
+</div>
+<div class="callout-content">
+<p>Translation pays this happily — outputs are short and there is one right answer. A chat model would pay it on every token of every reply, forever, and get <em>more</em> generic text for the money. Holtzman et al.&nbsp;(2019) made exactly that argument, and proposed top-p instead. That’s the next slide.</p>
+</div>
+</div>
+</div>
+</section>
 <section id="top-k-and-top-p-nucleus" class="slide level2">
 <h2>Top-k and top-p (nucleus)</h2>
+<p>Both cut tokens out of the distribution, then <strong>renormalise</strong> — divide by what’s left, so the survivors sum to 1 again — and sample from what remains.</p>
 <div class="columns">
 <div class="column" style="width:50%;">
 <p><span class="pill-blue">Top-k</span></p>
@@ -889,7 +1010,13 @@ p_i \propto \exp\!\left(\frac{z_i}{\tau}\right)
 <p><strong>Note</strong></p>
 </div>
 <div class="callout-content">
-<p>Combined with temperature, these give us four knobs on creativity: 1. Argmax / sampling switch. 2. Temperature. 3. Top-k. 4. Top-p.</p>
+<p>Combined with temperature, we have four hyperparameters on creativity:</p>
+<ol type="1">
+<li>Argmax / sampling switch</li>
+<li>Temperature</li>
+<li>Top-k</li>
+<li>Top-p</li>
+</ol>
 <p>In practice, GPT-style chat models use a low temperature + top-p <span class="math inline">\approx 0.9</span>.</p>
 </div>
 </div>
@@ -915,6 +1042,19 @@ p_i \propto \exp\!\left(\frac{z_i}{\tau}\right)
 </ul>
 </div></div>
 <p>Same settings, both times. Top-p kept 1 token in one case and 4 in the other.</p>
+<div class="callout callout-tip callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Tip</strong></p>
+</div>
+<div class="callout-content">
+<p>The difference in one line: <strong>top-p adapts the cut to the model’s confidence; top-k cannot.</strong> When the model is sure, top-p gets out of the way. When it is unsure, top-p lets more candidates through.</p>
+</div>
+</div>
+</div>
 </section>
 <section id="after-the-cut-renormalise" class="slide level2">
 <h2>After the cut — renormalise</h2>
@@ -928,6 +1068,58 @@ p_i \propto \exp\!\left(\frac{z_i}{\tau}\right)
 </span></p>
 </div>
 <p>Then sample from the renormalised distribution as usual.</p>
+</section>
+<section id="how-does-generation-know-when-to-stop" class="slide level2">
+<h2>How does generation know when to stop?</h2>
+<p><span class="eyebrow">When should we stop picking?</span></p>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><span class="pill-green">The EOS token</span></p>
+<p>The vocabulary holds a token meaning <em>“the text ends here”</em>. GPT-2 writes it <code>&lt;|endoftext|&gt;</code>.</p>
+<ul>
+<li>It is <strong>added by hand</strong>, not built by BPE merges — no byte sequence spells it.</li>
+<li>The model is trained to predict it, so it is one more entry in the softmax.</li>
+<li>Sample it, and generation stops.</li>
+</ul>
+</div><div class="column" style="width:50%;">
+<p><span class="pill-blue">The two blunter tools</span></p>
+<ul>
+<li><strong><code>max_tokens</code></strong> — a hard ceiling. Your lab sampler’s <code>max_new_tokens</code> is this, and only this.</li>
+<li><strong>Stop sequences</strong> — the caller names a string (<code>"\n\n"</code>, <code>"User:"</code>); generation halts when it appears.</li>
+</ul>
+<p>So a reply ends one of three ways: the model chose to, your budget ran out, or a string matched.</p>
+</div></div>
+<div class="callout callout-tip callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Special tokens are also what makes a chat model</strong></p>
+</div>
+<div class="callout-content">
+<p>The same trick wraps every turn of a conversation in markers the model was trained to recognise — a <strong>chat template</strong>. It is why an API takes a list of role-tagged messages rather than one string: the tokeniser turns those roles into special tokens before the model reads a word.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="back-to-text-decoding" class="slide level2">
+<h2>Back to text — decoding</h2>
+<p><span class="eyebrow">The return trip</span></p>
+<p>Our sampler emits token IDs. Turning them back into a string is a lookup (with one trap)</p>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><span class="pill-blue">The lookup</span></p>
+<p>Each token ID maps to a <strong>byte sequence</strong>. Concatenate the bytes for the whole output, then decode once as UTF-8.</p>
+<p><code>low</code> <code>er</code> → <code>108</code> <code>111</code> <code>119</code> <code>101</code> <code>114</code> → “lower”.</p>
+</div><div class="column" style="width:50%;">
+<p><span class="pill-amber">The trap</span></p>
+<p><strong>Don’t decode token by token.</strong> One character can span several tokens — <code>é</code> is two bytes, 🤖 is four, and no merge need ever have joined them.</p>
+<p>Decode each token alone and a multi-byte character arrives broken — Python hands you <code>�</code>, the replacement character.</p>
+<ul>
+<li>You will meet this in the lab if you print while you sample.</li>
+</ul>
+</div></div>
 <div class="callout callout-tip callout-titled callout-style-default">
 <div class="callout-body">
 <div class="callout-title">
@@ -937,7 +1129,7 @@ p_i \propto \exp\!\left(\frac{z_i}{\tau}\right)
 <p><strong>Tip</strong></p>
 </div>
 <div class="callout-content">
-<p>The difference in one line: <strong>top-p adapts the cut to the model’s confidence; top-k cannot.</strong> When the model is sure, top-p gets out of the way. When it is unsure, top-p lets more candidates through.</p>
+<p>Bytes in, bytes out. The byte sequence is what round-trips; token boundaries are an implementation detail the text does not respect.</p>
 </div>
 </div>
 </div>
@@ -991,17 +1183,17 @@ p_i \propto \exp\!\left(\frac{z_i}{\tau}\right)
 </div>
 </section></section>
 <section>
-<section id="part-3-beyond-a-base-gpt-a-map" class="title-slide slide level1 center" data-background-color="#0E1A2B">
-<h1>Part 3 · Beyond a base GPT — a map</h1>
+<section id="part-3-beyond-a-base-gpt" class="title-slide slide level1 center" data-background-color="#0E1A2B">
+<h1>Part 3 · Beyond a base GPT</h1>
 
 </section>
 <section id="a-reflection-on-what-youve-built" class="slide level2">
 <h2>A reflection on what you’ve built</h2>
 <p><span class="reveal-label">The reveal — sort of</span></p>
 <div class="card">
-<p>By end of today’s lab, your tiny GPT will have:</p>
+<p>By end of tomorrow’s lab, your tiny GPT will have:</p>
 <ul>
-<li>A <strong>tokeniser</strong> (BPE).</li>
+<li>A proper <strong>tokeniser</strong> (BPE).</li>
 <li>A <strong>token embedding</strong> matrix.</li>
 <li>A <strong>positional embedding</strong>.</li>
 <li><span class="math inline">N</span> <strong>transformer blocks</strong> with multi-head causal attention.</li>
@@ -1011,17 +1203,22 @@ p_i \propto \exp\!\left(\frac{z_i}{\tau}\right)
 <p>You are no longer treating these models as black boxes.</p>
 </div>
 </section>
-<section id="pre-training-vs-post-training" class="slide level2">
-<h2>Pre-training vs post-training</h2>
+<section id="pre-training" class="slide level2">
+<h2>Pre-training</h2>
 <p><span class="eyebrow">A frontier model’s full lifecycle</span></p>
 <div class="card">
 <p><span class="pill-blue">1. Pre-training</span></p>
-<p>What you built in this lab. Predict the next token over trillions of tokens of web text + books + code.</p>
+<p>What we have built so far.</p>
 <ul>
+<li>Predict the next token over trillions of tokens of web text + books + code.</li>
 <li>Output: a “base model” — fluent, knowledgeable, useless as a chat assistant.</li>
 <li>Cost: tens of millions of dollars. Months of compute.</li>
 </ul>
 </div>
+</section>
+<section id="post-training" class="slide level2">
+<h2>Post-training</h2>
+<p><span class="eyebrow">A frontier model’s full lifecycle (continued)</span></p>
 <div class="card">
 <p><span class="pill">2. Supervised fine-tuning (SFT) — “instruction tuning”</span></p>
 <p>Continue training on (prompt, ideal-response) pairs. One example, role tokens included:</p>
@@ -1063,7 +1260,10 @@ p_i \propto \exp\!\left(\frac{z_i}{\tau}\right)
 <p><strong>Warning</strong></p>
 </div>
 <div class="callout-content">
-<p><strong>Reward hacking</strong> is the central problem. The LLM learns to game the reward model — producing responses that <em>look</em> better without being better. Detecting and preventing this is half of modern alignment research.</p>
+<p><strong>Reward hacking</strong> is a critical issue with RLHF. The LLM learns to <em>game</em> the reward model–producing responses that <em>look</em> better without being better.</p>
+<ul>
+<li>Detecting and preventing this is a lot of what constitutes “alignment research”</li>
+</ul>
 </div>
 </div>
 </div>
@@ -1074,9 +1274,12 @@ p_i \propto \exp\!\left(\frac{z_i}{\tau}\right)
 <div class="card">
 <p>Raters, on average:</p>
 <ul>
-<li>favour <strong>longer</strong> answers → models get wordy.</li>
-<li>favour <strong>agreement</strong> → models get sycophantic — they tell you what you already believe.</li>
-<li>favour a <strong>confident tone</strong> → models state guesses as facts.</li>
+<li><p>favour <strong>longer</strong> answers → models get wordy.</p></li>
+<li><p>favour <strong>agreement</strong> → models get sycophantic — they tell you what you already believe.</p></li>
+<li><p>favour a <strong>confident tone</strong> → models state guesses as facts.</p>
+<ul>
+<li>Cf. current issues with Opus 5</li>
+</ul></li>
 </ul>
 </div>
 <div class="callout callout-warning callout-titled callout-style-default">
@@ -1109,7 +1312,7 @@ p_i \propto \exp\!\left(\frac{z_i}{\tau}\right)
 <p><span class="eyebrow">Three partial fixes</span></p>
 <ul>
 <li><strong>Better rater instructions</strong> — tell raters to check facts and not to reward padding.</li>
-<li><strong>Penalising length</strong> — subtract a length term from the reward.</li>
+<li><strong>Penalising length</strong> — subtract a length term from the reward (a form of indirect regularisation)</li>
 <li><strong>DPO’s implicit reward</strong> (next slide) — no separate reward model to over-optimise against; the rater biases stay in the preference data, though.</li>
 </ul>
 </div>
@@ -1167,23 +1370,23 @@ p_i \propto \exp\!\left(\frac{z_i}{\tau}\right)
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
-<p><strong>Tip</strong></p>
+<p><strong>Retrieval</strong></p>
 </div>
 <div class="callout-content">
-<p>Dumping every document you own into a huge window underperforms <strong>retrieving the right passage</strong> and placing it in the prompt. That retrieval idea is the next slide.</p>
+<p>Dumping every document you own into a huge window underperforms <strong>retrieving the right passage</strong> and placing it in the prompt.</p>
 </div>
 </div>
 </div>
 </section>
-<section id="rag-give-the-model-an-open-book-exam" class="slide level2">
-<h2>RAG — give the model an open-book exam</h2>
-<p><span class="eyebrow"><span class="pause-cue">≈ 3 min</span> · think with your neighbour</span></p>
+<section id="rag-gives-the-model-an-open-book-exam" class="slide level2">
+<h2>RAG gives the model an “open-book” exam</h2>
+<p><span class="eyebrow"><span class="pause-cue">≈ 3 min</span></span></p>
 <div class="card">
 <p>A base LLM answers from memory alone — and <strong>hallucinates</strong> when it doesn’t know.</p>
-<p>You have a database of 10,000 company documents and a Day-8 tool: you can <strong>embed</strong> any text into a vector and find the <strong>most similar</strong> documents.</p>
+<p>You have a database of 10,000 company documents and the ability to embed any document.</p>
 </div>
 <div class="try-box">
-<p><span class="try-label">Try</span> Using only “embed a question” and “find similar documents”, <strong>how would you stop the model inventing answers</strong> about those 10,000 documents — <em>without retraining it</em>?</p>
+<p><span class="try-label">Try</span> <strong>How would you stop the model inventing answers</strong> about those 10,000 documents — <em>without retraining it</em>?</p>
 </div>
 <div class="fragment">
 <div class="reveal-box">
@@ -1194,7 +1397,7 @@ p_i \propto \exp\!\left(\frac{z_i}{\tau}\right)
 <li><strong>Inject</strong> those documents into the prompt as context.</li>
 <li>The model answers <em>from the supplied text</em>, not just memory.</li>
 </ol>
-<p>Used by ChatGPT browsing, Perplexity, and most enterprise LLM products. No retraining needed. <strong>The hard part is retrieval</strong> — getting the <em>right</em> documents into context is itself a hard problem, and the source of most RAG failures.</p>
+<p>Used by ChatGPT browsing, Perplexity, and most enterprise LLM products. No retraining needed. <strong>The hard part is retrieval</strong> — getting the <em>right</em> documents into context is itself a hard problem.</p>
 </div>
 </div>
 </section>
@@ -1206,12 +1409,18 @@ p_i \propto \exp\!\left(\frac{z_i}{\tau}\right)
 <p><span class="pill-blue">Reach outward — tools &amp; agents</span></p>
 <p>Give the model a <strong>menu of tools</strong> it may invoke: web search, run Python, query a database, call any API you describe.</p>
 <p>The model decides <em>when</em> to call a tool and <em>what</em> to pass; the output is fed back as context.</p>
-<p>This is the foundation of the <strong>AI agents</strong> push of 2024–25 — systems that book travel, write and run code, file pull requests. We are early on this curve.</p>
+<p>This is the foundation of the <strong>AI agents</strong> push of 2024–25 — systems that book travel, write and run code, file pull requests</p>
+<ul>
+<li>We can watch as this becomes ever more ubiquitous</li>
+</ul>
 </div><div class="column" style="width:50%;">
 <p><span class="pill-green">Think longer — reasoning models</span></p>
 <p>Teach the model to <strong>think out loud</strong> before answering — OpenAI’s <strong>o1</strong>, Claude’s <strong>extended thinking</strong>, DeepSeek’s <strong>R1</strong>.</p>
 <p>It generates hidden “chain-of-thought” tokens, then answers.</p>
-<p>Trained by <strong>reinforcement learning on outcomes</strong> — rewarded for getting answers <em>right</em>, not for any particular trace. On Olympiad maths and competition coding the gap to prior LLMs is large.</p>
+<p>Trained by <strong>reinforcement learning on outcomes</strong> — rewarded for getting answers <em>right</em>, not for any particular trace.</p>
+<ul>
+<li>Starting to make <em>real</em> in-roads on mathematical problems, among others</li>
+</ul>
 </div></div>
 </section>
 <section id="lora-fine-tuning-without-touching-the-base-model" class="slide level2">
@@ -1242,7 +1451,7 @@ p_i \propto \exp\!\left(\frac{z_i}{\tau}\right)
 </span></p>
 </div>
 <p><span class="muted">No new biases enter the count — LoRA adds only the two matrices, and the frozen layer keeps its own bias.</span></p>
-<p>Apply this to every attention matrix in the model and the trainable share is typically <strong>under 1%</strong> of the parameters.</p>
+<p>Applied to every attention matrix in the model, the trainable share is typically <strong>under 1%</strong> of the parameters.</p>
 </section>
 <section id="lora-your-turn" class="slide level2">
 <h2>LoRA — your turn</h2>
@@ -1253,7 +1462,6 @@ p_i \propto \exp\!\left(\frac{z_i}{\tau}\right)
 <div class="reveal-box">
 <p><span class="reveal-label">Answer</span> <span class="math inline">\mathbf{A}</span>: <span class="math inline">16 \times 1{,}024 = 16{,}384</span>. <span class="math inline">\mathbf{B}</span>: <span class="math inline">1{,}024 \times 16 = 16{,}384</span>. Total: <span class="math inline">2 \times 16 \times 1{,}024 = 32{,}768</span>.</p>
 <p>Full matrix: <span class="math inline">1{,}024 \times 1{,}024 = 1{,}048{,}576</span>. Ratio: <span class="math inline">1{,}048{,}576 \div 32{,}768 = 32</span>.</p>
-</div>
 </div>
 <div class="callout callout-tip callout-titled callout-style-default">
 <div class="callout-body">
@@ -1268,6 +1476,7 @@ p_i \propto \exp\!\left(\frac{z_i}{\tau}\right)
 </div>
 </div>
 </div>
+</div>
 </section>
 <section id="multimodal-extensions" class="slide level2">
 <h2>Multimodal extensions</h2>
@@ -1277,8 +1486,8 @@ p_i \propto \exp\!\left(\frac{z_i}{\tau}\right)
 <p><span class="pill-blue">Vision-language models</span></p>
 <ul>
 <li>GPT-4V, Claude 3 Vision, Gemini.</li>
-<li>Images get patchified, embedded, fed into the transformer alongside text tokens.</li>
-<li>Same architecture; one new tokeniser-equivalent for pixels.</li>
+<li>Images get <strong>patchified</strong> — cut into a grid of squares — then embedded and fed in alongside text tokens.</li>
+<li>Same architecture; one new tokeniser-equivalent for pixels. Next slide.</li>
 </ul>
 </div><div class="column" style="width:50%;">
 <p><span class="pill-blue">Audio + video</span></p>
@@ -1295,14 +1504,41 @@ p_i \propto \exp\!\left(\frac{z_i}{\tau}\right)
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
-<p><strong>Tip</strong></p>
+<p><strong>The transformer is modality-agnostic</strong></p>
 </div>
 <div class="callout-content">
-<p><strong>The transformer is modality-agnostic.</strong> Anything that can be turned into a sequence of vectors — text, image patches, audio frames, video frames, even amino-acid residues — can be fed through it.</p>
+<p>Anything that can be turned into a sequence of vectors — text, image patches, audio frames, video frames, even amino-acid residues — can be fed through it.</p>
 <p>This is why “what is a transformer” matters: it is the sequence-modelling primitive underneath all of them.</p>
 </div>
 </div>
 </div>
+</section>
+<section id="how-does-an-image-become-tokens" class="slide level2">
+<h2>How does an image become tokens?</h2>
+<p><span class="eyebrow">Patchifying — the tokeniser for pixels</span></p>
+<p>A transformer takes a sequence of vectors. An image isn’t one in the same sense as text, so we build one:</p>
+<div class="card">
+<ol type="1">
+<li>Cut the image into a grid of fixed-size squares. <strong>16×16 pixels</strong> is the standard.</li>
+<li>Flatten each patch — <span class="math inline">16 \times 16 \times 3 = 768</span> numbers.</li>
+<li>Project it to the model’s width <span class="math inline">d</span> with a learned linear layer.</li>
+<li>That vector is a token.</li>
+</ol>
+<ul>
+<li>Add a positional embedding and feed it in.</li>
+</ul>
+</div>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><span class="pill-amber">Why not one token per pixel?</span></p>
+<p>A 224×224 image, straight in: <span class="math inline">T = 50{,}176</span>.</p>
+<p>Cut into 16×16 patches: <span class="math inline">(224/16)^2 = 196</span> patches, so <span class="math inline">T = 196</span>.</p>
+<p><strong>256× shorter</strong> — and attention is quadratic, so about <strong>65,000× less attention compute</strong>.</p>
+</div><div class="column" style="width:50%;">
+<p><span class="pill-green">The same knob, again</span></p>
+<p>Patch size does for pixels what tokens-per-word does for text. Bigger patches, shorter sequence, cheaper attention, coarser detail.</p>
+<p>Dosovitskiy et al.&nbsp;(2020) — <em>An Image is Worth 16×16 Words</em>. The title is the whole idea.</p>
+</div></div>
 </section>
 <section id="making-transformers-cheaper-to-run" class="slide level2">
 <h2>Making transformers cheaper to run</h2>
@@ -1311,9 +1547,9 @@ p_i \propto \exp\!\left(\frac{z_i}{\tau}\right)
 <div class="column" style="width:50%;">
 <p><span class="pill-blue">Longer context, cheaper attention</span></p>
 <ul>
-<li><strong>FlashAttention</strong> — memory-efficient tiling. Still <span class="math inline">O(N^2)</span>, just smaller constants. Now standard.</li>
+<li><strong>FlashAttention</strong> — memory-efficient tiling. Still <span class="math inline">O(T^2)</span>, just smaller constants. Now standard.</li>
 <li><strong>Sparse / sliding attention</strong> — attend to a local window; recover global reach by stacking layers (Longformer).</li>
-<li><strong>State-space models (Mamba)</strong> — replace attention with a learned recurrence. <span class="math inline">O(N)</span> in sequence length.</li>
+<li><strong>State-space models (Mamba)</strong> — replace attention with a learned recurrence. <span class="math inline">O(T)</span> in sequence length.</li>
 </ul>
 </div><div class="column" style="width:50%;">
 <p><span class="pill-green">Smaller, faster models</span></p>
@@ -1452,39 +1688,6 @@ p_i \propto \exp\!\left(\frac{z_i}{\tau}\right)
 </div>
 </div>
 </section>
-<section id="a-connection-to-social-science-llms-as-instruments" class="slide level2">
-<h2>A connection to social science — LLMs as instruments</h2>
-<div class="columns">
-<div class="column" style="width:55%;">
-<p>A growing research area:</p>
-<ul>
-<li><strong>Annotation at scale.</strong> LLMs labelling political speeches, social-media posts, news articles for sentiment, frame, ideology.</li>
-<li><strong>Synthetic respondents.</strong> Argyle et al.&nbsp;(2023): can an LLM impersonate a survey respondent of given demographics?</li>
-<li><strong>Construct measurement.</strong> Can we extract continuous measures of ideology, polarisation, frame, from text — at scale?</li>
-<li><strong>Translation + corpus analysis</strong> in low-resource languages.</li>
-</ul>
-</div><div class="column" style="width:45%;">
-<div class="callout callout-warning callout-titled callout-style-default">
-<div class="callout-body">
-<div class="callout-title">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<p><strong>Warning</strong></p>
-</div>
-<div class="callout-content">
-<p><strong>Open questions in social science:</strong></p>
-<ul>
-<li>When the LLM gets it wrong, is the error random or systematic?</li>
-<li>Does the LLM encode the biases of <em>its</em> training corpus, contaminating the construct it measures?</li>
-<li>Should the LLM be considered a measurement <em>instrument</em> in the methodological sense?</li>
-</ul>
-<p>These are the questions today’s social-science methodologists are working on. Now you can join the conversation.</p>
-</div>
-</div>
-</div>
-</div></div>
-</section>
 <section id="take-stock" class="slide level2">
 <h2>Take stock</h2>
 <p><span class="eyebrow"><span class="pause-cue">Where you are at the end of Day 11</span></span></p>
@@ -1503,8 +1706,8 @@ p_i \propto \exp\!\left(\frac{z_i}{\tau}\right)
 </div>
 </section></section>
 <section>
-<section id="lab-brief-todays-afternoon" class="title-slide slide level1 center" data-background-color="#0E1A2B">
-<h1>Lab brief · today’s afternoon</h1>
+<section id="lab-brief" class="title-slide slide level1 center" data-background-color="#0E1A2B">
+<h1>Lab brief</h1>
 
 </section>
 <section id="todays-lab-90-minutes" class="slide level2">
@@ -1531,19 +1734,6 @@ p_i \propto \exp\!\left(\frac{z_i}{\tau}\right)
 <section id="see-you-tomorrow" class="slide level2 smaller scrollable" data-background-color="#0E1A2B">
 <h2>See you tomorrow</h2>
 <p><span class="eyebrow">Lecture 12 — <em>Ethics, limitations, and course recap</em></span></p>
-<div class="callout callout-tip callout-titled callout-style-default">
-<div class="callout-body">
-<div class="callout-title">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<p><strong>Tip</strong></p>
-</div>
-<div class="callout-content">
-<p><strong>Tomorrow is the final lecture.</strong> It will be lighter on maths and heavier on discussion — including a substantive ethics plenary. Bring your skepticism.</p>
-</div>
-</div>
-</div>
 
 <div class="quarto-auto-generated-content">
 <div class="footer footer-default">

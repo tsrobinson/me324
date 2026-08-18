@@ -1761,14 +1761,14 @@
     "href": "lectures/lecture-11-tokenization-refinements.html#three-levels-of-tokenisation",
     "title": "Building your own text-generating AI (4/4)",
     "section": "Three levels of tokenisation",
-    "text": "Three levels of tokenisation\n\n\nCharacter\n\nTiny vocab (~100).\nSequences are long — typically 4× longer than word-level.\nModel spends compute learning spelling.\nWhat our labs have used since Lab 8.\n\n\nWord\n\nHuge vocab (10⁵+).\nOOV (out-of-vocabulary) is a real failure mode.\nEmbedding matrix is gigantic.\nWhat 1990s/2000s NLP used.\n\n\nSubword\n\nVocab ~32k–128k.\nNo OOV — rare words just split into smaller pieces.\nWhat every modern LLM uses.\nThe topic of this lecture."
+    "text": "Three levels of tokenisation\n\n\nCharacter\n\nTiny vocab (~100).\nSequences are long — typically 4× longer than word-level.\nModel spends compute learning spelling.\nWhat our labs have used since Lab 8.\n\n\nWord\n\nHuge vocab (10⁵+).\nOOV (out-of-vocabulary) failure mode.\nEmbedding matrix is gigantic.\nWhat 1990s/2000s NLP used.\n\n\nSubword\n\nVocab ~32k–128k.\nNo OOV — rare words just split into smaller pieces.\nWhat every modern LLM uses.\nThe topic of this lecture."
   },
   {
     "objectID": "lectures/lecture-11-tokenization-refinements.html#where-compute-goes-and-why-tokenisation-matters",
     "href": "lectures/lecture-11-tokenization-refinements.html#where-compute-goes-and-why-tokenisation-matters",
     "title": "Building your own text-generating AI (4/4)",
     "section": "Where compute goes — and why tokenisation matters",
-    "text": "Where compute goes — and why tokenisation matters\nFor a transformer with width d trained on T tokens at sequence length L:\n\n\nSelf-attention cost per layer: \\mathcal{O}(L^2 d).\nFeed-forward cost: \\mathcal{O}(L d^2).\nMemory for the attention matrix: \\mathcal{O}(L^2).\n\n\n\n\n\n\n\n\nTip\n\n\nLonger sequences are quadratically more expensive.\nHalving the average tokens-per-word — by better tokenisation — halves the sequence length. And quarters the attention compute.\nTokenisation choices have downstream cost implications."
+    "text": "Where compute goes — and why tokenisation matters\nFor a transformer with width d at sequence length T — yesterday’s T, one position per token:\n\n\nSelf-attention cost per layer: \\mathcal{O}(T^2 d).\nFeed-forward cost: \\mathcal{O}(T d^2).\nMemory for the attention matrix: \\mathcal{O}(T^2).\n\n\n\n\n\n\n\n\nTip\n\n\nLonger sequences are quadratically more expensive.\nHalving the average tokens-per-word — by better tokenisation — halves the sequence length. And quarters the attention compute.\nTokenisation choices have downstream cost implications."
   },
   {
     "objectID": "lectures/lecture-11-tokenization-refinements.html#token-cost-varies-by-language",
@@ -1782,7 +1782,7 @@
     "href": "lectures/lecture-11-tokenization-refinements.html#tokenisations-strangest-bugs",
     "title": "Building your own text-generating AI (4/4)",
     "section": "Tokenisation’s strangest bugs",
-    "text": "Tokenisation’s strangest bugs\nSurprises you’ll meet in the wild\n\n\nNumbers\nGPT-4 tokenises numbers inconsistently:\n\nSome years are a single token.\nAn adjacent year can split into several tokens.\nThere’s no clean rule — it depends on what was frequent in the training data.\n\nA model that sees 2024 as one atom but 2025 as three pieces has no stable notion of “a year,” let alone how to add one. This inconsistency is part of why LLMs are bad at arithmetic.\n\nGlitch tokens\nSome tokens appear in the vocabulary but rarely in training data. The model has no idea what they mean.\n\n\" SolidGoldMagikarp\" produced bizarre, evasive output in GPT-2/GPT-3-era models.\nReddit-derived artefacts; the vocabulary outlived the user.\n\n\n\n\n\n\n\n\nTip\n\n\nThe lesson: vocabulary is a one-shot decision made before training. Mistakes cascade for the model’s whole life. Modern tokenisers (cl100k, o200k) try harder to avoid these."
+    "text": "Tokenisation’s strangest bugs\nSurprises you’ll meet in the wild\n\n\nNumbers\nGPT-4 tokenises numbers inconsistently:\n\nSome years are a single token.\nAn adjacent year can split into several tokens.\nThere’s no clean rule — it depends on what was frequent in the training data.\n\nA model that sees 2024 as one atom but 2025 as three pieces has no stable notion of “a year”\n\nThis inconsistency is part of why LLMs are sometimes bad at arithmetic\n\n\nGlitch tokens\nSome tokens appear in the vocabulary but rarely in training data. The model has no idea what they mean.\n\n\" SolidGoldMagikarp\" produced bizarre, evasive output in GPT-2/GPT-3-era models.\nReddit-derived artefacts; the vocabulary outlived the user.\n\n\n\n\n\n\n\n\nThe lesson\n\n\nVocabulary is a one-shot decision made before training. Mistakes persist for the model’s lifespan. Modern tokenisers (cl100k, o200k) try harder to avoid these."
   },
   {
     "objectID": "lectures/lecture-11-tokenization-refinements.html#byte-pair-encoding-the-standard",
@@ -1796,14 +1796,14 @@
     "href": "lectures/lecture-11-tokenization-refinements.html#a-worked-bpe-example",
     "title": "Building your own text-generating AI (4/4)",
     "section": "A worked BPE example",
-    "text": "A worked BPE example\nTiny corpus\nlow low low low low lowest newer newer newer newer newer wider\n\n\nInitial state\nSingle characters. Words become sequences (using _ for word-end):\n\nl o w _ × 5\nl o w e s t _ × 1\nn e w e r _ × 5\nw i d e r _ × 1\n\n\nMost-frequent pair counts\n\n(e, r) appears 6 times\n(l, o) appears 6 times\n(o, w) appears 6 times\n(n, e) appears 5 times\n\n(Tie-break by alphabetical order, say.)\n\n\nMerge (e, r) → new token er. Repeat."
+    "text": "A worked BPE example\nTiny corpus\nlow low low low low lowest newer newer newer newer newer wider\n\n\nInitial state\nSingle characters. Each box is one token (_ marks the word end):\n\nl o w _ ×5\nl o w e s t _ ×1\nn e w e r _ ×5\nw i d e r _ ×1\n\n\nMost-frequent pair counts\n\n(e,r) · (l,o) · (o,w) · (r,_) · (w,e) — 6 each\n(n,e) · (e,w) · (w,_) — 5 each\n\nFive pairs tie at the top. Break ties by a fixed rule; here we take (e,r).\n\n\nMerge (e,r) → new token er. Repeat."
   },
   {
     "objectID": "lectures/lecture-11-tokenization-refinements.html#bpe-merges-step-by-step",
     "href": "lectures/lecture-11-tokenization-refinements.html#bpe-merges-step-by-step",
     "title": "Building your own text-generating AI (4/4)",
     "section": "BPE merges — step by step",
-    "text": "BPE merges — step by step\nEach row applies exactly one merge. The cell shows the full token sequence of every word afterwards, so you can see what changed:\n\n\n\n\n\n\n\n\nStep\nMerge\nCorpus after this merge\n\n\n\n\n0\n(start)\nl o w _×5 · l o w e s t _ · n e w e r _×5 · w i d e r _\n\n\n1\n(e,r)→er\nl o w _×5 · l o w e s t _ · n e w er _×5 · w i d er _\n\n\n2\n(er,_)→er_\nl o w _×5 · l o w e s t _ · n e w er_×5 · w i d er_\n\n\n3\n(l,o)→lo\nlo w _×5 · lo w e s t _ · n e w er_×5 · w i d er_\n\n\n4\n(lo,w)→low\nlow _×5 · low e s t _ · n e w er_×5 · w i d er_\n\n\n5\n(low,_)→low_\nlow_×5 · low e s t _ · n e w er_×5 · w i d er_\n\n\n\n\nAfter these five merges the frequent word low_ is already a single token. Keep going and newer_, wider_ collapse too.\nThe rare word lowest_ stays split — low e s t _ — but it reuses the low piece it shares with the common word. That sharing is the whole point: the model can spell a word it has barely seen out of pieces it knows well. No word is ever out-of-vocabulary."
+    "text": "BPE merges — step by step\nEach row applies exactly one merge. Every box is one token, and a box like er is the token that row’s merge just created. Read down a column to watch one word collapse:\n\n\n\n\n\n\n\n\n\n\n\nStep\nMerge\nlow ×5\nlowest\nnewer ×5\nwider\n\n\n\n\n0\n(start)\nl o w _\nl o w e s t _\nn e w e r _\nw i d e r _\n\n\n1\n(e,r)→er\nl o w _\nl o w e s t _\nn e w er _\nw i d er _\n\n\n2\n(er,_)→er_\nl o w _\nl o w e s t _\nn e w er_\nw i d er_\n\n\n3\n(l,o)→lo\nlo w _\nlo w e s t _\nn e w er_\nw i d er_\n\n\n4\n(lo,w)→low\nlow _\nlow e s t _\nn e w er_\nw i d er_\n\n\n5\n(low,_)→low_\nlow_\nlow e s t _\nn e w er_\nw i d er_\n\n\n\n\nFour boxes down to one: after five merges the frequent word low_ is a single token. Keep going and newer_, wider_ collapse too.\nThe rare word lowest_ stays split — five boxes — but the first one is low, the same piece the common word uses. That sharing is the point: the model can spell a word it has barely seen out of pieces it knows well. No word is ever out-of-vocabulary."
   },
   {
     "objectID": "lectures/lecture-11-tokenization-refinements.html#how-modern-tokenisers-look",
@@ -1817,14 +1817,14 @@
     "href": "lectures/lecture-11-tokenization-refinements.html#byte-level-bpe-the-missing-detail",
     "title": "Building your own text-generating AI (4/4)",
     "section": "Byte-level BPE — the missing detail",
-    "text": "Byte-level BPE — the missing detail\nOur worked examples merged characters. Run BPE that way at scale and there is a hole:\n\n\nCharacter-level BPE\n\nBase vocabulary = the characters seen in training.\nUnicode has ~150,000 characters. No corpus contains them all.\nMeet a new one at test time — a rare script, a fresh emoji — and the tokeniser has no token for it. The model gets &lt;unk&gt;.\n\n\nByte-level BPE — GPT-2’s fix\n\nRun BPE on bytes, not characters.\nBase vocabulary = all 256 byte values.\nEvery string a computer stores is a byte sequence, so every possible string is representable.\nThere is no unknown token, ever."
+    "text": "Byte-level BPE — the missing detail\nOur worked examples merged characters. But this won’t work for every possible word in our vocabulary:\n\n\nCharacter-level BPE\n\nBase vocabulary = the characters seen in training.\nUnicode has ~150,000 characters. No corpus contains them all.\nMeet a new one at test time — a rare script, a fresh emoji — and the tokeniser has no token for it (and so gets assigned &lt;unk&gt;).\n\n\nByte-level BPE — GPT-2’s fix\n\nRun BPE on bytes, not characters.\nBase vocabulary = all 256 byte values.\nEvery string a computer stores is a byte sequence, so every possible string is representable.\nThere is no unknown token, ever."
   },
   {
     "objectID": "lectures/lecture-11-tokenization-refinements.html#bytes-in-practice-one-character-is-not-one-byte",
     "href": "lectures/lecture-11-tokenization-refinements.html#bytes-in-practice-one-character-is-not-one-byte",
     "title": "Building your own text-generating AI (4/4)",
     "section": "Bytes in practice — one character is not one byte",
-    "text": "Bytes in practice — one character is not one byte\nIn UTF-8, common Latin characters take one byte each; everything else takes more:\n\n\ncafé → c, a, f at one byte each, é at two (0xC3 0xA9): 3 \\times 1 + 2 = 5 bytes.\n🤖 → four bytes (0xF0 0x9F 0xA4 0x96).\n\n\nIf 🤖 is rare in the training corpus, no merge ever forms it. The tokeniser hands the model four single-byte tokens, and the model has to piece the robot together itself.\n\nTry it yourself Why can byte-level BPE never meet an out-of-vocabulary string?\n\n\n\nAnswer Every string is stored as a sequence of bytes, and all 256 possible byte values are in the vocabulary. Worst case, a string tokenises byte by byte — but it always tokenises."
+    "text": "Bytes in practice — one character is not one byte\nIn UTF-8, common Latin characters take one byte each; everything else takes more:\n\n\ncafé → c, a, f at one byte each, é at two (0xC3 0xA9): 3 \\times 1 + 2 = 5 bytes.\n🤖 → four bytes (0xF0 0x9F 0xA4 0x96).\n\n\nIf 🤖 is rare in the training corpus, no merge ever forms it\n\nThe tokeniser hands the model four single-byte tokens\nThe model has to piece the robot together itself\n\n\nTry it yourself Why can byte-level BPE never meet an out-of-vocabulary string?\n\n\n\nAnswer Every string is stored as a sequence of bytes, and all 256 possible byte values are in the vocabulary. Worst case, a string tokenises byte by byte — but it always tokenises."
   },
   {
     "objectID": "lectures/lecture-11-tokenization-refinements.html#plenary-bpe-by-hand-1",
@@ -1838,14 +1838,14 @@
     "href": "lectures/lecture-11-tokenization-refinements.html#plenary-answers",
     "title": "Building your own text-generating AI (4/4)",
     "section": "Plenary · answers",
-    "text": "Plenary · answers\n\nStart banana_ = b a n a n a _ (×3) · ana_ = a n a _ (×2)\nInitial pair counts (a,n) 8 · (n,a) 8 · (a,_) 5 · (b,a) 3.\nStep 1 (a,n) and (n,a) tie at 8 — break ties by a fixed rule; here take (n,a) → na.\n\nbanana_ → b a na na _\nana_ → a na _\n\nStep 2 Recount: (a,na) and (na,_) now tie at 5 (top) — fixed rule again takes (a,na) → ana.\n\nbanana_ → b ana na _\nana_ → ana _\n\nStep 3 Recount: (b,ana), (ana,na), (na,_) all tie at 3 — fixed rule picks (b,ana) → bana.\n\nbanana_ → bana na _\nana_ → ana _\n\n\n\nReflection \"banana\" now tokenises as bana + na — two tokens, almost a single one.\n\"bandana\" = b a n d a n a _. Apply the learned merges in order — na, then ana, then bana:\n\nna: only the final n a merges (the first n is followed by d) → b a n d a na _\nana: the a na merges → b a n d ana _\nbana: needs b next to ana, but b is followed by a → no merge.\n\nResult: b + a + n + d + ana. The model has never seen \"bandana\" yet reads it from known pieces.\nThis is BPE’s guarantee: no OOV."
+    "text": "Plenary · answers\n\nStart “banana” = b a n a n a _ (×3) · “ana” = a n a _ (×2)\nInitial pair counts (a,n) 8 · (n,a) 8 · (a,_) 5 · (b,a) 3.\nStep 1 (a,n) and (n,a) tie at 8 — break ties by a fixed rule; here take (n,a) → na.\n\n“banana” → b a na na _\n“ana” → a na _\n\nStep 2 Recount: (a,na) and (na,_) now tie at 5 (top) — fixed rule again takes (a,na) → ana.\n\n“banana” → b ana na _\n“ana” → ana _\n\nStep 3 Recount: (b,ana), (ana,na), (na,_) all tie at 3 — fixed rule picks (b,ana) → bana.\n\n“banana” → bana na _\n“ana” → ana _\n\n\n\nReflection “banana” now tokenises as bana na _ — three boxes, down from seven.\n“bandana” starts as b a n d a n a _. Apply the learned merges in order — na, then ana, then bana:\n\nna: only the final n a merges (the first n is followed by d) → b a n d a na _\nana: the a na merges → b a n d ana _\nbana: needs b next to ana, but b is followed by a → no merge.\n\nResult: b a n d ana _. The model has never seen “bandana” yet reads it from known pieces.\nThis is BPE’s guarantee: no OOV."
   },
   {
     "objectID": "lectures/lecture-11-tokenization-refinements.html#we-always-sample-but-how",
     "href": "lectures/lecture-11-tokenization-refinements.html#we-always-sample-but-how",
     "title": "Building your own text-generating AI (4/4)",
     "section": "We always sample — but how?",
-    "text": "We always sample — but how?\nAt each step of generation, the model gives us a distribution p over the next token. To pick one:\n\n\nArgmax (greedy)\nAlways pick the most likely.\n\nDeterministic.\nOften repetitive / dull.\nBad for chat.\n\n\nSample from p\nSample with original probabilities.\n\nDiverse.\nSometimes wanders into low-probability nonsense.\n\n\nBeam search\nTrack top-k candidate sequences in parallel.\n\nUseful for translation.\nBoring for chat."
+    "text": "We always sample — but how?\nAt each step of generation, the model gives us a distribution p over the next token. To pick one:\n\n\nArgmax (greedy)\nAlways pick the most likely.\n\nDeterministic.\nOften repetitive / dull.\nBad for chat.\n\n\nSample from p\nSample with original probabilities.\n\nDiverse.\nSometimes wanders into low-probability nonsense.\n\n\nBeam search\nTrack top-B candidate sequences in parallel.\n\nUseful for translation.\nBoring for chat."
   },
   {
     "objectID": "lectures/lecture-11-tokenization-refinements.html#temperature",
@@ -1859,28 +1859,28 @@
     "href": "lectures/lecture-11-tokenization-refinements.html#beam-search-for-translation-not-chat",
     "title": "Building your own text-generating AI (4/4)",
     "section": "Beam search — for translation, not chat",
-    "text": "Beam search — for translation, not chat\nThe “find the best whole sentence” approach\n\n\nArgmax picks one token at a time — locally optimal, globally myopic.\nBeam search keeps the top k candidate sequences in parallel, extending each. At the end, return the highest-scoring sequence overall.\n\nk = 5 or 10 is common.\nUsed for translation, summarisation — anywhere there’s a “single best answer.”\n\n\n\nWhy not for chat. Beam search produces fluent but predictable text. The “best” sequence is often the most generic one. For chat, conversation, or creative writing, sampling is better.\nRule of thumb: beam search for one-shot tasks with a verifiable correct answer. Sampling for open-ended generation."
+    "text": "Beam search — for translation, not chat\nThe “find the best whole sentence” approach\n\n\nArgmax picks one token at a time — locally optimal, globally myopic.\nBeam search keeps the top B candidate sequences in parallel, extending each. At the end, return the highest-scoring sequence overall. B is the beam width.\n\nB = 5 or 10 is common.\nUsed for translation, summarisation — anywhere there’s a “single best answer.”\n\n\n\nWhy not for chat. Beam search produces fluent but predictable text.\n\nThe “best” sequence is often generic\nFor chat, conversation, or creative writing, sampling is better (feels more human)\n\nRule of thumb: beam search for one-shot tasks with a verifiable correct answer. Use sampling for open-ended generation."
   },
   {
     "objectID": "lectures/lecture-11-tokenization-refinements.html#top-k-and-top-p-nucleus",
     "href": "lectures/lecture-11-tokenization-refinements.html#top-k-and-top-p-nucleus",
     "title": "Building your own text-generating AI (4/4)",
     "section": "Top-k and top-p (nucleus)",
-    "text": "Top-k and top-p (nucleus)\n\n\nTop-k\nKeep only the k highest-probability tokens; renormalise; sample.\n\nTruncates the long tail of garbage.\nk = 40 or 50 common.\nSame k regardless of model confidence.\n\n\nTop-p (nucleus)\nKeep the smallest set of tokens whose cumulative probability exceeds p; renormalise; sample.\n\nAdapts to model confidence.\np = 0.9 common.\nFew tokens kept when model is confident; many when uncertain.\n\n\n\n\n\n\n\n\nNote\n\n\nCombined with temperature, these give us four knobs on creativity: 1. Argmax / sampling switch. 2. Temperature. 3. Top-k. 4. Top-p.\nIn practice, GPT-style chat models use a low temperature + top-p \\approx 0.9."
+    "text": "Top-k and top-p (nucleus)\nBoth cut tokens out of the distribution, then renormalise — divide by what’s left, so the survivors sum to 1 again — and sample from what remains.\n\n\nTop-k\nKeep only the k highest-probability tokens; renormalise; sample.\n\nTruncates the long tail of garbage.\nk = 40 or 50 common.\nSame k regardless of model confidence.\n\n\nTop-p (nucleus)\nKeep the smallest set of tokens whose cumulative probability exceeds p; renormalise; sample.\n\nAdapts to model confidence.\np = 0.9 common.\nFew tokens kept when model is confident; many when uncertain.\n\n\n\n\n\n\n\n\nNote\n\n\nCombined with temperature, we have four hyperparameters on creativity:\n\nArgmax / sampling switch\nTemperature\nTop-k\nTop-p\n\nIn practice, GPT-style chat models use a low temperature + top-p \\approx 0.9."
   },
   {
     "objectID": "lectures/lecture-11-tokenization-refinements.html#when-top-k-and-top-p-disagree",
     "href": "lectures/lecture-11-tokenization-refinements.html#when-top-k-and-top-p-disagree",
     "title": "Building your own text-generating AI (4/4)",
     "section": "When top-k and top-p disagree",
-    "text": "When top-k and top-p disagree\nTwo next-token distributions over the same six tokens — one from a confident model, one from an uncertain one:\n\n\nPeaked\np = [0.85,\\ 0.06,\\ 0.04,\\ 0.03,\\ 0.01,\\ 0.01]\n\nTop-p, p = 0.7: the first token alone gives 0.85 \\geq 0.7 → keeps 1 token.\nTop-k, k = 3: keeps 3 tokens — including two the model rates at 6% and 4%.\n\n\nFlat\np = [0.25,\\ 0.20,\\ 0.20,\\ 0.15,\\ 0.10,\\ 0.10]\n\nTop-p, p = 0.7: 0.25 + 0.20 + 0.20 = 0.65 &lt; 0.7, so add the fourth → keeps 4 tokens.\nTop-k, k = 3: keeps 3 — cutting a token the model rates at 15%.\n\n\nSame settings, both times. Top-p kept 1 token in one case and 4 in the other."
+    "text": "When top-k and top-p disagree\nTwo next-token distributions over the same six tokens — one from a confident model, one from an uncertain one:\n\n\nPeaked\np = [0.85,\\ 0.06,\\ 0.04,\\ 0.03,\\ 0.01,\\ 0.01]\n\nTop-p, p = 0.7: the first token alone gives 0.85 \\geq 0.7 → keeps 1 token.\nTop-k, k = 3: keeps 3 tokens — including two the model rates at 6% and 4%.\n\n\nFlat\np = [0.25,\\ 0.20,\\ 0.20,\\ 0.15,\\ 0.10,\\ 0.10]\n\nTop-p, p = 0.7: 0.25 + 0.20 + 0.20 = 0.65 &lt; 0.7, so add the fourth → keeps 4 tokens.\nTop-k, k = 3: keeps 3 — cutting a token the model rates at 15%.\n\n\nSame settings, both times. Top-p kept 1 token in one case and 4 in the other.\n\n\n\n\n\n\nTip\n\n\nThe difference in one line: top-p adapts the cut to the model’s confidence; top-k cannot. When the model is sure, top-p gets out of the way. When it is unsure, top-p lets more candidates through."
   },
   {
     "objectID": "lectures/lecture-11-tokenization-refinements.html#after-the-cut-renormalise",
     "href": "lectures/lecture-11-tokenization-refinements.html#after-the-cut-renormalise",
     "title": "Building your own text-generating AI (4/4)",
     "section": "After the cut — renormalise",
-    "text": "After the cut — renormalise\nWhatever survives the cut must sum to 1 again before we sample. Take the flat distribution under top-k, k = 3:\n\n\n\\begin{aligned}\n\\text{kept} &= [0.25,\\ 0.20,\\ 0.20], \\qquad \\text{sum} = 0.65 \\\\\n\\text{renormalised} &= \\left[\\tfrac{0.25}{0.65},\\ \\tfrac{0.20}{0.65},\\ \\tfrac{0.20}{0.65}\\right] \\approx [0.385,\\ 0.308,\\ 0.308]\n\\end{aligned}\n\n\nThen sample from the renormalised distribution as usual.\n\n\n\n\n\n\nTip\n\n\nThe difference in one line: top-p adapts the cut to the model’s confidence; top-k cannot. When the model is sure, top-p gets out of the way. When it is unsure, top-p lets more candidates through."
+    "text": "After the cut — renormalise\nWhatever survives the cut must sum to 1 again before we sample. Take the flat distribution under top-k, k = 3:\n\n\n\\begin{aligned}\n\\text{kept} &= [0.25,\\ 0.20,\\ 0.20], \\qquad \\text{sum} = 0.65 \\\\\n\\text{renormalised} &= \\left[\\tfrac{0.25}{0.65},\\ \\tfrac{0.20}{0.65},\\ \\tfrac{0.20}{0.65}\\right] \\approx [0.385,\\ 0.308,\\ 0.308]\n\\end{aligned}\n\n\nThen sample from the renormalised distribution as usual."
   },
   {
     "objectID": "lectures/lecture-11-tokenization-refinements.html#activity-predict-the-output",
@@ -1901,7 +1901,7 @@
     "href": "lectures/lecture-11-tokenization-refinements.html#a-reflection-on-what-youve-built",
     "title": "Building your own text-generating AI (4/4)",
     "section": "A reflection on what you’ve built",
-    "text": "A reflection on what you’ve built\nThe reveal — sort of\n\nBy end of today’s lab, your tiny GPT will have:\n\nA tokeniser (BPE).\nA token embedding matrix.\nA positional embedding.\nN transformer blocks with multi-head causal attention.\nA softmax + sampler producing one token at a time.\n\nSame skeleton as GPT-4, Claude, Gemini. The differences are scale (you: millions of parameters; them: trillions), data, and post-training.\nYou are no longer treating these models as black boxes."
+    "text": "A reflection on what you’ve built\nThe reveal — sort of\n\nBy end of tomorrow’s lab, your tiny GPT will have:\n\nA proper tokeniser (BPE).\nA token embedding matrix.\nA positional embedding.\nN transformer blocks with multi-head causal attention.\nA softmax + sampler producing one token at a time.\n\nSame skeleton as GPT-4, Claude, Gemini. The differences are scale (you: millions of parameters; them: trillions), data, and post-training.\nYou are no longer treating these models as black boxes."
   },
   {
     "objectID": "lectures/lecture-11-tokenization-refinements.html#pre-training-vs-post-training",
@@ -1915,21 +1915,21 @@
     "href": "lectures/lecture-11-tokenization-refinements.html#rlhf-how-it-works",
     "title": "Building your own text-generating AI (4/4)",
     "section": "RLHF — how it works",
-    "text": "RLHF — how it works\nReinforcement learning from human feedback\n\n\nTake an instruction-tuned model. Generate two responses per prompt.\nA human rater picks the better one.\nTrain a reward model to predict the human’s choice.\nUse that reward model as the reward signal in PPO (a reinforcement learning algorithm) to fine-tune the original LLM.\nThe LLM updates towards generating responses the reward model scores highly.\n\n\n\n\n\n\n\n\nWarning\n\n\nReward hacking is the central problem. The LLM learns to game the reward model — producing responses that look better without being better. Detecting and preventing this is half of modern alignment research."
+    "text": "RLHF — how it works\nReinforcement learning from human feedback\n\n\nTake an instruction-tuned model. Generate two responses per prompt.\nA human rater picks the better one.\nTrain a reward model to predict the human’s choice.\nUse that reward model as the reward signal in PPO (a reinforcement learning algorithm) to fine-tune the original LLM.\nThe LLM updates towards generating responses the reward model scores highly.\n\n\n\n\n\n\n\n\nWarning\n\n\nReward hacking is a critical issue with RLHF. The LLM learns to game the reward model–producing responses that look better without being better.\n\nDetecting and preventing this is a lot of what constitutes “alignment research”"
   },
   {
     "objectID": "lectures/lecture-11-tokenization-refinements.html#reward-hacking-you-get-what-you-reward",
     "href": "lectures/lecture-11-tokenization-refinements.html#reward-hacking-you-get-what-you-reward",
     "title": "Building your own text-generating AI (4/4)",
     "section": "Reward hacking — you get what you reward",
-    "text": "Reward hacking — you get what you reward\nThe model optimises what raters reward. That is not the same as what raters want.\n\nRaters, on average:\n\nfavour longer answers → models get wordy.\nfavour agreement → models get sycophantic — they tell you what you already believe.\nfavour a confident tone → models state guesses as facts.\n\n\n\n\n\n\n\n\nWarning\n\n\nGoodhart’s law: when a measure becomes a target, it stops being a good measure."
+    "text": "Reward hacking — you get what you reward\nThe model optimises what raters reward. That is not the same as what raters want.\n\nRaters, on average:\n\nfavour longer answers → models get wordy.\nfavour agreement → models get sycophantic — they tell you what you already believe.\nfavour a confident tone → models state guesses as facts.\n\nCf. current issues with Opus 5\n\n\n\n\n\n\n\n\n\nWarning\n\n\nGoodhart’s law: when a measure becomes a target, it stops being a good measure."
   },
   {
     "objectID": "lectures/lecture-11-tokenization-refinements.html#reward-hacking-a-miniature",
     "href": "lectures/lecture-11-tokenization-refinements.html#reward-hacking-a-miniature",
     "title": "Building your own text-generating AI (4/4)",
     "section": "Reward hacking — a miniature",
-    "text": "Reward hacking — a miniature\nQ: What is the capital of Australia?\n\n\nAnswer A — hedged, correct\n“I believe it is Canberra — though Sydney and Melbourne are the cities most people guess.”\n\nAnswer B — confident, wrong\n“Sydney is the capital of Australia. As the country’s largest city and its economic centre, Sydney has been the seat of national life since federation.”\n\nA reward model that has learned to favour length and confidence scores B higher. The correct answer loses.\n\nThree partial fixes\n\nBetter rater instructions — tell raters to check facts and not to reward padding.\nPenalising length — subtract a length term from the reward.\nDPO’s implicit reward (next slide) — no separate reward model to over-optimise against; the rater biases stay in the preference data, though."
+    "text": "Reward hacking — a miniature\nQ: What is the capital of Australia?\n\n\nAnswer A — hedged, correct\n“I believe it is Canberra — though Sydney and Melbourne are the cities most people guess.”\n\nAnswer B — confident, wrong\n“Sydney is the capital of Australia. As the country’s largest city and its economic centre, Sydney has been the seat of national life since federation.”\n\nA reward model that has learned to favour length and confidence scores B higher. The correct answer loses.\n\nThree partial fixes\n\nBetter rater instructions — tell raters to check facts and not to reward padding.\nPenalising length — subtract a length term from the reward (a form of indirect regularisation)\nDPO’s implicit reward (next slide) — no separate reward model to over-optimise against; the rater biases stay in the preference data, though."
   },
   {
     "objectID": "lectures/lecture-11-tokenization-refinements.html#dpo-the-simpler-alternative",
@@ -1950,7 +1950,7 @@
     "href": "lectures/lecture-11-tokenization-refinements.html#lost-in-the-middle",
     "title": "Building your own text-generating AI (4/4)",
     "section": "Lost in the middle",
-    "text": "Lost in the middle\nA long window is not the same as a well-used one.\n\nLiu et al. (2024) placed one needed fact at different positions inside a long context and measured whether models answered with it:\n\nFact at the start → high accuracy.\nFact at the end → high accuracy.\nFact in the middle → accuracy dips. The curve is U-shaped.\n\n\n\n\n\n\n\n\nTip\n\n\nDumping every document you own into a huge window underperforms retrieving the right passage and placing it in the prompt. That retrieval idea is the next slide."
+    "text": "Lost in the middle\nA long window is not the same as a well-used one.\n\nLiu et al. (2024) placed one needed fact at different positions inside a long context and measured whether models answered with it:\n\nFact at the start → high accuracy.\nFact at the end → high accuracy.\nFact in the middle → accuracy dips. The curve is U-shaped.\n\n\n\n\n\n\n\n\nRetrieval\n\n\nDumping every document you own into a huge window underperforms retrieving the right passage and placing it in the prompt."
   },
   {
     "objectID": "lectures/lecture-11-tokenization-refinements.html#rag-give-the-model-an-open-book-exam",
@@ -1964,7 +1964,7 @@
     "href": "lectures/lecture-11-tokenization-refinements.html#two-ways-to-make-a-base-model-do-more",
     "title": "Building your own text-generating AI (4/4)",
     "section": "Two ways to make a base model do more",
-    "text": "Two ways to make a base model do more\nBoth bolt onto the model you built — no new architecture\n\n\nReach outward — tools & agents\nGive the model a menu of tools it may invoke: web search, run Python, query a database, call any API you describe.\nThe model decides when to call a tool and what to pass; the output is fed back as context.\nThis is the foundation of the AI agents push of 2024–25 — systems that book travel, write and run code, file pull requests. We are early on this curve.\n\nThink longer — reasoning models\nTeach the model to think out loud before answering — OpenAI’s o1, Claude’s extended thinking, DeepSeek’s R1.\nIt generates hidden “chain-of-thought” tokens, then answers.\nTrained by reinforcement learning on outcomes — rewarded for getting answers right, not for any particular trace. On Olympiad maths and competition coding the gap to prior LLMs is large."
+    "text": "Two ways to make a base model do more\nBoth bolt onto the model you built — no new architecture\n\n\nReach outward — tools & agents\nGive the model a menu of tools it may invoke: web search, run Python, query a database, call any API you describe.\nThe model decides when to call a tool and what to pass; the output is fed back as context.\nThis is the foundation of the AI agents push of 2024–25 — systems that book travel, write and run code, file pull requests\n\nWe can watch as this becomes ever more ubiquitous\n\n\nThink longer — reasoning models\nTeach the model to think out loud before answering — OpenAI’s o1, Claude’s extended thinking, DeepSeek’s R1.\nIt generates hidden “chain-of-thought” tokens, then answers.\nTrained by reinforcement learning on outcomes — rewarded for getting answers right, not for any particular trace.\n\nStarting to make real in-roads on mathematical problems, among others"
   },
   {
     "objectID": "lectures/lecture-11-tokenization-refinements.html#lora-fine-tuning-without-touching-the-base-model",
@@ -1978,28 +1978,28 @@
     "href": "lectures/lecture-11-tokenization-refinements.html#lora-the-arithmetic",
     "title": "Building your own text-generating AI (4/4)",
     "section": "LoRA — the arithmetic",
-    "text": "LoRA — the arithmetic\nTake one 768 \\times 768 weight matrix (GPT-2’s width):\n\n\n\\begin{aligned}\n\\text{full matrix} &: 768 \\times 768 = 589{,}824 \\text{ weights} \\\\\n\\text{LoRA, } r = 8 &: \\underbrace{8 \\times 768}_{\\mathbf{A}} + \\underbrace{768 \\times 8}_{\\mathbf{B}} = 6{,}144 + 6{,}144 = 12{,}288 \\\\\n\\text{ratio} &: 589{,}824 \\div 12{,}288 = 48\\times \\text{ fewer}\n\\end{aligned}\n\n\nNo new biases enter the count — LoRA adds only the two matrices, and the frozen layer keeps its own bias.\nApply this to every attention matrix in the model and the trainable share is typically under 1% of the parameters."
+    "text": "LoRA — the arithmetic\nTake one 768 \\times 768 weight matrix (GPT-2’s width):\n\n\n\\begin{aligned}\n\\text{full matrix} &: 768 \\times 768 = 589{,}824 \\text{ weights} \\\\\n\\text{LoRA, } r = 8 &: \\underbrace{8 \\times 768}_{\\mathbf{A}} + \\underbrace{768 \\times 8}_{\\mathbf{B}} = 6{,}144 + 6{,}144 = 12{,}288 \\\\\n\\text{ratio} &: 589{,}824 \\div 12{,}288 = 48\\times \\text{ fewer}\n\\end{aligned}\n\n\nNo new biases enter the count — LoRA adds only the two matrices, and the frozen layer keeps its own bias.\nApplied to every attention matrix in the model, the trainable share is typically under 1% of the parameters."
   },
   {
     "objectID": "lectures/lecture-11-tokenization-refinements.html#lora-your-turn",
     "href": "lectures/lecture-11-tokenization-refinements.html#lora-your-turn",
     "title": "Building your own text-generating AI (4/4)",
     "section": "LoRA — your turn",
-    "text": "LoRA — your turn\n\nTry it yourself A rank-16 LoRA on a 1{,}024 \\times 1{,}024 matrix. How many trainable parameters, and how many times fewer than training the full matrix?\n\n\n\nAnswer \\mathbf{A}: 16 \\times 1{,}024 = 16{,}384. \\mathbf{B}: 1{,}024 \\times 16 = 16{,}384. Total: 2 \\times 16 \\times 1{,}024 = 32{,}768.\nFull matrix: 1{,}024 \\times 1{,}024 = 1{,}048{,}576. Ratio: 1{,}048{,}576 \\div 32{,}768 = 32.\n\n\n\n\n\n\n\n\nTip\n\n\nWhy people do this: one frozen base model, plus a small adapter file per task. Swap the adapter and you swap the behaviour — no full model copy each time."
+    "text": "LoRA — your turn\n\nTry it yourself A rank-16 LoRA on a 1{,}024 \\times 1{,}024 matrix. How many trainable parameters, and how many times fewer than training the full matrix?\n\n\n\nAnswer \\mathbf{A}: 16 \\times 1{,}024 = 16{,}384. \\mathbf{B}: 1{,}024 \\times 16 = 16{,}384. Total: 2 \\times 16 \\times 1{,}024 = 32{,}768.\nFull matrix: 1{,}024 \\times 1{,}024 = 1{,}048{,}576. Ratio: 1{,}048{,}576 \\div 32{,}768 = 32.\n\n\n\n\n\n\n\nTip\n\n\nWhy people do this: one frozen base model, plus a small adapter file per task. Swap the adapter and you swap the behaviour — no full model copy each time."
   },
   {
     "objectID": "lectures/lecture-11-tokenization-refinements.html#multimodal-extensions",
     "href": "lectures/lecture-11-tokenization-refinements.html#multimodal-extensions",
     "title": "Building your own text-generating AI (4/4)",
     "section": "Multimodal extensions",
-    "text": "Multimodal extensions\nNot just text\n\n\nVision-language models\n\nGPT-4V, Claude 3 Vision, Gemini.\nImages get patchified, embedded, fed into the transformer alongside text tokens.\nSame architecture; one new tokeniser-equivalent for pixels.\n\n\nAudio + video\n\nWhisper for speech-to-text.\nGPT-4o native audio (sub-second latency).\nSora, Veo for video generation.\nAll variations on the transformer architecture.\n\n\n\n\n\n\n\n\nTip\n\n\nThe transformer is modality-agnostic. Anything that can be turned into a sequence of vectors — text, image patches, audio frames, video frames, even amino-acid residues — can be fed through it.\nThis is why “what is a transformer” matters: it is the sequence-modelling primitive underneath all of them."
+    "text": "Multimodal extensions\nNot just text\n\n\nVision-language models\n\nGPT-4V, Claude 3 Vision, Gemini.\nImages get patchified — cut into a grid of squares — then embedded and fed in alongside text tokens.\nSame architecture; one new tokeniser-equivalent for pixels. Next slide.\n\n\nAudio + video\n\nWhisper for speech-to-text.\nGPT-4o native audio (sub-second latency).\nSora, Veo for video generation.\nAll variations on the transformer architecture.\n\n\n\n\n\n\n\n\nThe transformer is modality-agnostic\n\n\nAnything that can be turned into a sequence of vectors — text, image patches, audio frames, video frames, even amino-acid residues — can be fed through it.\nThis is why “what is a transformer” matters: it is the sequence-modelling primitive underneath all of them."
   },
   {
     "objectID": "lectures/lecture-11-tokenization-refinements.html#making-transformers-cheaper-to-run",
     "href": "lectures/lecture-11-tokenization-refinements.html#making-transformers-cheaper-to-run",
     "title": "Building your own text-generating AI (4/4)",
     "section": "Making transformers cheaper to run",
-    "text": "Making transformers cheaper to run\nThe efficiency frontier — same idea, far less compute\n\n\nLonger context, cheaper attention\n\nFlashAttention — memory-efficient tiling. Still O(N^2), just smaller constants. Now standard.\nSparse / sliding attention — attend to a local window; recover global reach by stacking layers (Longformer).\nState-space models (Mamba) — replace attention with a learned recurrence. O(N) in sequence length.\n\n\nSmaller, faster models\n\nQuantisation — lower-precision weights (fp16 → int8 → int4). 4–8× smaller; slight quality loss.\nDistillation — train a small model to mimic a big one (Llama 3.2 1B from Llama 3 70B).\nSpeculative decoding — a small model proposes tokens; the big one verifies in batch. 2–3× faster, no quality loss.\nMixture-of-experts (MoE) — route each token to a few “expert” sub-networks: huge total size, small active cost.\n\n\n\n\n\n\n\n\nTip\n\n\nThe shift since 2023: matching frontier quality at a fraction of the cost. The cheapest API of 2025 outperforms the most expensive API of 2023. This course gives you the vocabulary to read any of these papers without getting lost."
+    "text": "Making transformers cheaper to run\nThe efficiency frontier — same idea, far less compute\n\n\nLonger context, cheaper attention\n\nFlashAttention — memory-efficient tiling. Still O(T^2), just smaller constants. Now standard.\nSparse / sliding attention — attend to a local window; recover global reach by stacking layers (Longformer).\nState-space models (Mamba) — replace attention with a learned recurrence. O(T) in sequence length.\n\n\nSmaller, faster models\n\nQuantisation — lower-precision weights (fp16 → int8 → int4). 4–8× smaller; slight quality loss.\nDistillation — train a small model to mimic a big one (Llama 3.2 1B from Llama 3 70B).\nSpeculative decoding — a small model proposes tokens; the big one verifies in batch. 2–3× faster, no quality loss.\nMixture-of-experts (MoE) — route each token to a few “expert” sub-networks: huge total size, small active cost.\n\n\n\n\n\n\n\n\nTip\n\n\nThe shift since 2023: matching frontier quality at a fraction of the cost. The cheapest API of 2025 outperforms the most expensive API of 2023. This course gives you the vocabulary to read any of these papers without getting lost."
   },
   {
     "objectID": "lectures/lecture-11-tokenization-refinements.html#quantisation-the-memory-ledger",
@@ -2048,7 +2048,7 @@
     "href": "lectures/lecture-11-tokenization-refinements.html#see-you-tomorrow",
     "title": "Building your own text-generating AI (4/4)",
     "section": "See you tomorrow",
-    "text": "See you tomorrow\nLecture 12 — Ethics, limitations, and course recap\n\n\n\n\n\n\nTip\n\n\nTomorrow is the final lecture. It will be lighter on maths and heavier on discussion — including a substantive ethics plenary. Bring your skepticism.\n\n\n\n\n\n\nME324 · AI and Deep Learning · LSE Summer School\n\n\n\n\nLiu, N. F., Lin, K., Hewitt, J., Paranjape, A., Bevilacqua, M., Petroni, F., & Liang, P. (2024). Lost in the middle: How language models use long contexts. Transactions of the Association for Computational Linguistics, 12, 157–173."
+    "text": "See you tomorrow\nLecture 12 — Ethics, limitations, and course recap\n\n\n\nME324 · AI and Deep Learning · LSE Summer School\n\n\n\n\nLiu, N. F., Lin, K., Hewitt, J., Paranjape, A., Bevilacqua, M., Petroni, F., & Liang, P. (2024). Lost in the middle: How language models use long contexts. Transactions of the Association for Computational Linguistics, 12, 157–173."
   },
   {
     "objectID": "exam.html",
@@ -5038,5 +5038,68 @@
     "title": "Building your own text-generating AI (3/4)",
     "section": "See you tomorrow",
     "text": "See you tomorrow\nLecture 11 — Tokenisation & sampling: polish your GPT\n\n\n\nME324 · AI and Deep Learning · LSE Summer School\n\n\n\n\nBender, E. M., Gebru, T., McMillan-Major, A., & Shmitchell, S. (2021). On the dangers of stochastic parrots: Can language models be too big? Proceedings of FAccT.\n\n\nClark, K., Khandelwal, U., Levy, O., & Manning, C. D. (2019). What does BERT look at? An analysis of BERT’s attention. Proceedings of the 2019 ACL Workshop BlackboxNLP: Analyzing and Interpreting Neural Networks for NLP, 276–286.\n\n\nVaswani, A., Shazeer, N., Parmar, N., Uszkoreit, J., Jones, L., Gomez, A. N., Kaiser, Ł., & Polosukhin, I. (2017). Attention is all you need. Advances in Neural Information Processing Systems, 30.\n\n\nVoita, E., Talbot, D., Moiseev, F., Sennrich, R., & Titov, I. (2019). Analyzing multi-head self-attention: Specialized heads do the heavy lifting, the rest can be pruned. Proceedings of the 57th Annual Meeting of the Association for Computational Linguistics, 5797–5808."
+  },
+  {
+    "objectID": "lectures/lecture-11-tokenization-refinements.html#what-is-a-byte",
+    "href": "lectures/lecture-11-tokenization-refinements.html#what-is-a-byte",
+    "title": "Building your own text-generating AI (4/4)",
+    "section": "What is a byte?",
+    "text": "What is a byte?\nThe unit everything else is built from\nA byte is 8 bits. Each bit is 0 or 1, so a byte has 2^8 = 256 possible values — the whole numbers 0 to 255.\n\n\nText is stored as numbers\nA computer has no notion of a letter. It stores a number, and an encoding says which number means which character. The standard is UTF-8.\n\n\n\nCharacter\nStored as\n\n\n\n\nA\n65\n\n\na\n97\n\n\n!\n33\n\n\nspace\n32\n\n\n\n\nThe alphabet is only 256 long\nSo low reaches the computer as 108 111 119.\nYour name, this sentence, every training corpus ever scraped — all of it is a sequence of numbers from 0 to 255.\nThere are 256 of them, and there will never be a 257th.\n\n\n\n\n\n\n\nNote\n\n\nNot every character is one byte — é takes two, an emoji takes four. We’ll come back to that once BPE is running."
+  },
+  {
+    "objectID": "lectures/lecture-11-tokenization-refinements.html#pre-training",
+    "href": "lectures/lecture-11-tokenization-refinements.html#pre-training",
+    "title": "Building your own text-generating AI (4/4)",
+    "section": "Pre-training",
+    "text": "Pre-training\nA frontier model’s full lifecycle\n\n1. Pre-training\nWhat we have built so far.\n\nPredict the next token over trillions of tokens of web text + books + code.\nOutput: a “base model” — fluent, knowledgeable, useless as a chat assistant.\nCost: tens of millions of dollars. Months of compute."
+  },
+  {
+    "objectID": "lectures/lecture-11-tokenization-refinements.html#post-training",
+    "href": "lectures/lecture-11-tokenization-refinements.html#post-training",
+    "title": "Building your own text-generating AI (4/4)",
+    "section": "Post-training",
+    "text": "Post-training\nA frontier model’s full lifecycle (continued)\n\n2. Supervised fine-tuning (SFT) — “instruction tuning”\nContinue training on (prompt, ideal-response) pairs. One example, role tokens included:\n&lt;|user|&gt; Explain a p-value in two sentences. &lt;|assistant|&gt; A p-value is the probability of seeing data at least as extreme as yours if the null hypothesis were true. It is not the probability that the null is true. &lt;|end|&gt;\n\nOutput: a model that follows instructions.\nWhere the pairs come from: paid writers; licensed data; model-generated drafts filtered by humans.\nCost: ~10,000 to ~100,000 examples; a few days of compute.\n\n\n\n3. Preference tuning (RLHF / DPO)\nTrain the model to prefer responses that humans rate higher.\n\nOutput: a model that’s helpful, honest, harmless.\nCost: hundreds of thousands of human preference judgements.\nThis is what makes a model helpful and harmless — and where the question of whose values get instilled begins."
+  },
+  {
+    "objectID": "lectures/lecture-11-tokenization-refinements.html#rag-gives-the-model-an-open-book-exam",
+    "href": "lectures/lecture-11-tokenization-refinements.html#rag-gives-the-model-an-open-book-exam",
+    "title": "Building your own text-generating AI (4/4)",
+    "section": "RAG gives the model an “open-book” exam",
+    "text": "RAG gives the model an “open-book” exam\n≈ 3 min\n\nA base LLM answers from memory alone — and hallucinates when it doesn’t know.\nYou have a database of 10,000 company documents and the ability to embed any document.\n\n\nTry How would you stop the model inventing answers about those 10,000 documents — without retraining it?\n\n\n\nRetrieval-augmented generation (RAG)\n\nEmbed the user’s question (Day 8!).\nSearch the database for the most similar documents.\nInject those documents into the prompt as context.\nThe model answers from the supplied text, not just memory.\n\nUsed by ChatGPT browsing, Perplexity, and most enterprise LLM products. No retraining needed. The hard part is retrieval — getting the right documents into context is itself a hard problem."
+  },
+  {
+    "objectID": "lectures/lecture-11-tokenization-refinements.html#what-does-beam-search-cost",
+    "href": "lectures/lecture-11-tokenization-refinements.html#what-does-beam-search-cost",
+    "title": "Building your own text-generating AI (4/4)",
+    "section": "What does beam search cost?",
+    "text": "What does beam search cost?\nSearching harder is not free\nA beam width of B means B live sequences. Each one needs its own forward pass at every step.\n\n\nPer generated token\n\nB forward passes, not 1.\nB KV caches held in memory — yesterday’s cache, once per beam.\nScore all B \\times V continuations, keep the best B.\n\nWith V \\approx 50{,}000 and B = 5, that last step sorts 250,000 numbers. Nothing, next to five passes through the network.\n\nThe bill\n\nB = 5 → 5× the compute and 5× the KV-cache memory, for every token generated. The weights are shared, so they are not multiplied.\nThe B passes batch together, so on an idle GPU the wall-clock is kinder than 5×. The FLOPs and the memory bandwidth are not.\nWhen you are serving users, the batch is already full. Then it is a straight 5× cut in throughput.\n\n\n\n\n\n\n\n\nTip\n\n\nTranslation pays this happily — outputs are short and there is one right answer. A chat model would pay it on every token of every reply, forever, and get more generic text for the money. Holtzman et al. (2019) made exactly that argument, and proposed top-p instead. That’s the next slide."
+  },
+  {
+    "objectID": "lectures/lecture-11-tokenization-refinements.html#how-does-an-image-become-tokens",
+    "href": "lectures/lecture-11-tokenization-refinements.html#how-does-an-image-become-tokens",
+    "title": "Building your own text-generating AI (4/4)",
+    "section": "How does an image become tokens?",
+    "text": "How does an image become tokens?\nPatchifying — the tokeniser for pixels\nA transformer takes a sequence of vectors. An image isn’t one in the same sense as text, so we build one:\n\n\nCut the image into a grid of fixed-size squares. 16×16 pixels is the standard.\nFlatten each patch — 16 \\times 16 \\times 3 = 768 numbers.\nProject it to the model’s width d with a learned linear layer.\nThat vector is a token.\n\n\nAdd a positional embedding and feed it in.\n\n\n\n\nWhy not one token per pixel?\nA 224×224 image, straight in: T = 50{,}176.\nCut into 16×16 patches: (224/16)^2 = 196 patches, so T = 196.\n256× shorter — and attention is quadratic, so about 65,000× less attention compute.\n\nThe same knob, again\nPatch size does for pixels what tokens-per-word does for text. Bigger patches, shorter sequence, cheaper attention, coarser detail.\nDosovitskiy et al. (2020) — An Image is Worth 16×16 Words. The title is the whole idea."
+  },
+  {
+    "objectID": "lectures/lecture-11-tokenization-refinements.html#how-many-rs-in-strawberry",
+    "href": "lectures/lecture-11-tokenization-refinements.html#how-many-rs-in-strawberry",
+    "title": "Building your own text-generating AI (4/4)",
+    "section": "How many r’s in strawberry?",
+    "text": "How many r’s in strawberry?\nThe failure we saw at the beginning of the course\nAsk a frontier model to count the r’s in “strawberry” and it has, famously, answered two.\n\n\nWhat the model actually receives\nNot s t r a w b e r r y.\nSomething closer to str aw berry — three tokens, three vectors.\nThe letters were gone before the model saw anything. There is no r in its input to count.\n\nSo it answers from memory\nSpelling a token means recalling which characters it stood for, which is a fact about the tokeniser, not about the text.\nThe model answers from what it has read about spelling, rather than by looking.\n\n\n\n\n\n\n\nThe model reasons over tokens, not characters or digits.\n\n\nIt is why spacing the word out — s t r a w b e r r y — often fixes it, why “write code to count them” fixes it every time, and why a reasoning model that spells the word out first gets there too."
+  },
+  {
+    "objectID": "lectures/lecture-11-tokenization-refinements.html#how-does-generation-know-when-to-stop",
+    "href": "lectures/lecture-11-tokenization-refinements.html#how-does-generation-know-when-to-stop",
+    "title": "Building your own text-generating AI (4/4)",
+    "section": "How does generation know when to stop?",
+    "text": "How does generation know when to stop?\nWhen should we stop picking?\n\n\nThe EOS token\nThe vocabulary holds a token meaning “the text ends here”. GPT-2 writes it &lt;|endoftext|&gt;.\n\nIt is added by hand, not built by BPE merges — no byte sequence spells it.\nThe model is trained to predict it, so it is one more entry in the softmax.\nSample it, and generation stops.\n\n\nThe two blunter tools\n\nmax_tokens — a hard ceiling. Your lab sampler’s max_new_tokens is this, and only this.\nStop sequences — the caller names a string (\"\\n\\n\", \"User:\"); generation halts when it appears.\n\nSo a reply ends one of three ways: the model chose to, your budget ran out, or a string matched.\n\n\n\n\n\n\n\nSpecial tokens are also what makes a chat model\n\n\nThe same trick wraps every turn of a conversation in markers the model was trained to recognise — a chat template. It is why an API takes a list of role-tagged messages rather than one string: the tokeniser turns those roles into special tokens before the model reads a word."
+  },
+  {
+    "objectID": "lectures/lecture-11-tokenization-refinements.html#back-to-text-decoding",
+    "href": "lectures/lecture-11-tokenization-refinements.html#back-to-text-decoding",
+    "title": "Building your own text-generating AI (4/4)",
+    "section": "Back to text — decoding",
+    "text": "Back to text — decoding\nThe return trip\nOur sampler emits token IDs. Turning them back into a string is a lookup (with one trap)\n\n\nThe lookup\nEach token ID maps to a byte sequence. Concatenate the bytes for the whole output, then decode once as UTF-8.\nlow er → 108 111 119 101 114 → “lower”.\n\nThe trap\nDon’t decode token by token. One character can span several tokens — é is two bytes, 🤖 is four, and no merge need ever have joined them.\nDecode each token alone and a multi-byte character arrives broken — Python hands you �, the replacement character.\n\nYou will meet this in the lab if you print while you sample.\n\n\n\n\n\n\n\n\nTip\n\n\nBytes in, bytes out. The byte sequence is what round-trips; token boundaries are an implementation detail the text does not respect."
   }
 ]

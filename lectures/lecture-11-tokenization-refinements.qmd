@@ -10,27 +10,6 @@ format:
     smaller: true
 ---
 
-# Show & tell · your GPTs {background-color="#0E1A2B"}
-
-## Plenary · read your GPT aloud
-
-[<span class="pause-cue">≈ 10 min</span> · whole room]{.eyebrow}
-
-Yesterday you each built a tiny GPT and brought away **one generated sample** — the funniest line, or the one that shouldn't have made sense but did.
-
-::: {.try-box}
-[Share with the room]{.try-label}
-
-Read **one line** your model produced. In a sentence or two, tell us:
-
-1. Why you picked it — coherent? funny? eerily plausible?
-2. **One failure mode** you noticed — repetition, invented non-words, losing the thread mid-sentence, confident nonsense.
-:::
-
-::: {.callout-tip}
-Three weeks ago this was a black box. Yesterday *you trained a transformer that produces English.* It is small and it is flawed — and that is exactly what today is about: better **tokens** (Part 1), better **sampling** (Part 2), and a **map of everything that sits between your tiny GPT and ChatGPT** (Part 3).
-:::
-
 ## Warm-up · three questions from last time
 
 [<span class="pause-cue">≈ 5 min</span> · shout it out]{.eyebrow}
@@ -66,7 +45,7 @@ Three weeks ago this was a black box. Yesterday *you trained a transformer that 
 [Word]{.pill-amber}
 
 * Huge vocab (10⁵+).
-* OOV (out-of-vocabulary) is a real failure mode.
+* OOV (out-of-vocabulary) failure mode.
 * Embedding matrix is gigantic.
 * What 1990s/2000s NLP used.
 :::
@@ -82,12 +61,12 @@ Three weeks ago this was a black box. Yesterday *you trained a transformer that 
 
 ## Where compute goes — and why tokenisation matters
 
-For a transformer with width $d$ trained on $T$ tokens at sequence length $L$:
+For a transformer with width $d$ at sequence length $T$ — yesterday's $T$, one position per token:
 
 ::: {.card}
-* Self-attention cost per layer: $\mathcal{O}(L^2 d)$.
-* Feed-forward cost: $\mathcal{O}(L d^2)$.
-* Memory for the attention matrix: $\mathcal{O}(L^2)$.
+* Self-attention cost per layer: $\mathcal{O}(T^2 d)$.
+* Feed-forward cost: $\mathcal{O}(T d^2)$.
+* Memory for the attention matrix: $\mathcal{O}(T^2)$.
 :::
 
 ::: {.callout-tip}
@@ -137,7 +116,9 @@ GPT-4 tokenises numbers **inconsistently**:
 * An *adjacent* year can split into **several** tokens.
 * There's no clean rule — it depends on what was frequent in the training data.
 
-A model that sees `2024` as one atom but `2025` as three pieces has no stable notion of "a year," let alone how to add one. This inconsistency is part of why LLMs are **bad at arithmetic**.
+A model that sees `2024` as one atom but `2025` as three pieces has no stable notion of "a year"
+
+* This inconsistency is part of why LLMs are sometimes **bad at arithmetic**
 :::
 ::: {.column width="50%"}
 [Glitch tokens]{.pill-amber}
@@ -150,7 +131,73 @@ Some tokens appear in the vocabulary but rarely in training data. The model has 
 :::
 
 ::: {.callout-tip}
-**The lesson**: vocabulary is a one-shot decision made before training. Mistakes cascade for the model's whole life. Modern tokenisers (cl100k, o200k) try harder to avoid these.
+# The lesson
+Vocabulary is a one-shot decision made before training. Mistakes persist for the model's lifespan. Modern tokenisers (cl100k, o200k) try harder to avoid these.
+:::
+
+## How many r's in strawberry?
+
+[The failure we saw at the beginning of the course]{.eyebrow}
+
+Ask a frontier model to count the r's in "strawberry" and it has, famously, answered **two**.
+
+::: {.columns}
+::: {.column width="52%"}
+[What the model actually receives]{.pill-amber}
+
+Not `s` `t` `r` `a` `w` `b` `e` `r` `r` `y`.
+
+Something closer to `str` `aw` `berry` — three tokens, three vectors.
+
+The letters were gone before the model saw anything. There is no `r` in its input to count.
+:::
+::: {.column width="48%"}
+[So it answers from memory]{.pill-blue}
+
+Spelling a token means recalling which characters it *stood for*, which is a fact about the tokeniser, not about the text.
+
+The model answers from what it has read *about* spelling, rather than by looking.
+:::
+:::
+
+::: {.callout-tip}
+# The model reasons over tokens, not characters or digits.
+
+It is why spacing the word out — `s t r a w b e r r y` — often fixes it, why "write code to count them" fixes it every time, and why a reasoning model that spells the word out first gets there too.
+:::
+
+## What is a byte?
+
+[The unit everything else is built from]{.eyebrow}
+
+A **byte** is 8 bits. Each bit is 0 or 1, so a byte has $2^8 = 256$ possible values — the whole numbers 0 to 255.
+
+::: {.columns}
+::: {.column width="48%"}
+[Text is stored as numbers]{.pill-blue}
+
+A computer has no notion of a letter. It stores a number, and an **encoding** says which number means which character. The standard is UTF-8.
+
+| Character | Stored as |
+|---|---|
+| `A` | 65 |
+| `a` | 97 |
+| `!` | 33 |
+| *space* | 32 |
+:::
+::: {.column width="52%"}
+[The alphabet is only 256 long]{.pill-green}
+
+So `low` reaches the computer as `108` `111` `119`.
+
+Your name, this sentence, every training corpus ever scraped — all of it is a sequence of numbers from 0 to 255.
+
+There are 256 of them, and there will never be a 257th.
+:::
+:::
+
+::: {.callout-note}
+Not every character is one byte — `é` takes two, an emoji takes four. We'll come back to that once BPE is running.
 :::
 
 ## Byte-pair encoding — the standard
@@ -182,46 +229,44 @@ Repeat until target vocab size (e.g. 50,000):
 ::: {.column width="50%"}
 [Initial state]{.pill-blue}
 
-Single characters. Words become sequences (using `_` for word-end):
+Single characters. Each box is **one token** (`_` marks the word end):
 
-* `l o w _` × 5
-* `l o w e s t _` × 1
-* `n e w e r _` × 5
-* `w i d e r _` × 1
+* `l` `o` `w` `_` ×5
+* `l` `o` `w` `e` `s` `t` `_` ×1
+* `n` `e` `w` `e` `r` `_` ×5
+* `w` `i` `d` `e` `r` `_` ×1
 :::
 ::: {.column width="50%"}
 [Most-frequent pair counts]{.pill-blue}
 
-* `(e, r)` appears 6 times
-* `(l, o)` appears 6 times
-* `(o, w)` appears 6 times
-* `(n, e)` appears 5 times
+* `(e,r)` · `(l,o)` · `(o,w)` · `(r,_)` · `(w,e)` — **6 each**
+* `(n,e)` · `(e,w)` · `(w,_)` — 5 each
 
-(Tie-break by alphabetical order, say.)
+Five pairs tie at the top. Break ties by a fixed rule; here we take `(e,r)`.
 :::
 :::
 
 ::: {.card}
-**Merge `(e, r)` → new token `er`.** Repeat.
+**Merge `(e,r)` → new token [`er`]{.tok-new}.** Repeat.
 :::
 
 ## BPE merges — step by step
 
-Each row applies **exactly one** merge. The cell shows the *full* token sequence of every word afterwards, so you can see what changed:
+Each row applies **exactly one** merge. Every box is one token, and a box like [`er`]{.tok-new} is the token that row's merge just created. Read **down** a column to watch one word collapse:
 
-| Step | Merge | Corpus after this merge |
-|---|---|---|
-| 0 | *(start)* | `l o w _`×5 · `l o w e s t _` · `n e w e r _`×5 · `w i d e r _` |
-| 1 | `(e,r)→er` | `l o w _`×5 · `l o w e s t _` · `n e w er _`×5 · `w i d er _` |
-| 2 | `(er,_)→er_` | `l o w _`×5 · `l o w e s t _` · `n e w er_`×5 · `w i d er_` |
-| 3 | `(l,o)→lo` | `lo w _`×5 · `lo w e s t _` · `n e w er_`×5 · `w i d er_` |
-| 4 | `(lo,w)→low` | `low _`×5 · `low e s t _` · `n e w er_`×5 · `w i d er_` |
-| 5 | `(low,_)→low_` | `low_`×5 · `low e s t _` · `n e w er_`×5 · `w i d er_` |
+| Step | Merge | low ×5 | lowest | newer ×5 | wider |
+|---|---|---|---|---|---|
+| 0 | *(start)* | `l` `o` `w` `_` | `l` `o` `w` `e` `s` `t` `_` | `n` `e` `w` `e` `r` `_` | `w` `i` `d` `e` `r` `_` |
+| 1 | `(e,r)→er` | `l` `o` `w` `_` | `l` `o` `w` `e` `s` `t` `_` | `n` `e` `w` [`er`]{.tok-new} `_` | `w` `i` `d` [`er`]{.tok-new} `_` |
+| 2 | `(er,_)→er_` | `l` `o` `w` `_` | `l` `o` `w` `e` `s` `t` `_` | `n` `e` `w` [`er_`]{.tok-new} | `w` `i` `d` [`er_`]{.tok-new} |
+| 3 | `(l,o)→lo` | [`lo`]{.tok-new} `w` `_` | [`lo`]{.tok-new} `w` `e` `s` `t` `_` | `n` `e` `w` `er_` | `w` `i` `d` `er_` |
+| 4 | `(lo,w)→low` | [`low`]{.tok-new} `_` | [`low`]{.tok-new} `e` `s` `t` `_` | `n` `e` `w` `er_` | `w` `i` `d` `er_` |
+| 5 | `(low,_)→low_` | [`low_`]{.tok-new} | `low` `e` `s` `t` `_` | `n` `e` `w` `er_` | `w` `i` `d` `er_` |
 
 ::: {.card}
-After these five merges the frequent word `low_` is already a **single token**. Keep going and `newer_`, `wider_` collapse too.
+Four boxes down to one: after five merges the frequent word `low_` is a **single token**. Keep going and `newer_`, `wider_` collapse too.
 
-The rare word `lowest_` stays split — `low e s t _` — but it **reuses the `low` piece** it shares with the common word. That sharing is the whole point: the model can spell a word it has barely seen out of pieces it knows well. **No word is ever out-of-vocabulary.**
+The rare word `lowest_` stays split — five boxes — but the first one is `low`, the **same piece** the common word uses. That sharing is the point: the model can spell a word it has barely seen out of pieces it knows well. **No word is ever out-of-vocabulary.**
 :::
 
 ## How modern tokenisers look
@@ -249,7 +294,7 @@ Vocab: ~100,000+.
 
 ## Byte-level BPE — the missing detail
 
-Our worked examples merged **characters**. Run BPE that way at scale and there is a hole:
+Our worked examples merged **characters**. But this won't work for every possible word in our vocabulary:
 
 ::: {.columns}
 ::: {.column width="50%"}
@@ -257,7 +302,7 @@ Our worked examples merged **characters**. Run BPE that way at scale and there i
 
 * Base vocabulary = the characters seen in training.
 * Unicode has ~150,000 characters. No corpus contains them all.
-* Meet a new one at test time — a rare script, a fresh emoji — and the tokeniser has no token for it. The model gets `<unk>`.
+* Meet a new one at test time — a rare script, a fresh emoji — and the tokeniser has no token for it (and so gets assigned `<unk>`).
 :::
 ::: {.column width="50%"}
 [Byte-level BPE — GPT-2's fix]{.pill-green}
@@ -278,7 +323,10 @@ In UTF-8, common Latin characters take one byte each; everything else takes more
 * 🤖 → **four** bytes (`0xF0 0x9F 0xA4 0x96`).
 :::
 
-If 🤖 is rare in the training corpus, no merge ever forms it. The tokeniser hands the model **four single-byte tokens**, and the model has to piece the robot together itself.
+If 🤖 is rare in the training corpus, no merge ever forms it 
+
+* The tokeniser hands the model **four single-byte tokens**
+* The model has to piece the robot together itself
 
 ::: {.try-box}
 [Try it yourself]{.try-label}
@@ -324,37 +372,37 @@ After your three merges, would `"banana"` be a single token or several? What abo
 ## Plenary · answers
 
 ::: {.card}
-[Start]{.eyebrow} `banana_` = `b a n a n a _` (×3) · `ana_` = `a n a _` (×2)
+[Start]{.eyebrow} "banana" = `b` `a` `n` `a` `n` `a` `_` (×3) · "ana" = `a` `n` `a` `_` (×2)
 
 [Initial pair counts]{.eyebrow} `(a,n)` 8 · `(n,a)` 8 · `(a,_)` 5 · `(b,a)` 3.
 
 [Step 1]{.eyebrow} `(a,n)` and `(n,a)` tie at 8 — break ties by a fixed rule; here take **`(n,a) → na`**.
 
-* `banana_` → `b a na na _`
-* `ana_` → `a na _`
+* "banana" → `b` `a` [`na`]{.tok-new} [`na`]{.tok-new} `_`
+* "ana" → `a` [`na`]{.tok-new} `_`
 
 [Step 2]{.eyebrow} Recount: `(a,na)` and `(na,_)` now tie at 5 (top) — fixed rule again takes **`(a,na) → ana`**.
 
-* `banana_` → `b ana na _`
-* `ana_` → `ana _`
+* "banana" → `b` [`ana`]{.tok-new} `na` `_`
+* "ana" → [`ana`]{.tok-new} `_`
 
 [Step 3]{.eyebrow} Recount: `(b,ana)`, `(ana,na)`, `(na,_)` all tie at 3 — fixed rule picks **`(b,ana) → bana`**.
 
-* `banana_` → `bana na _`
-* `ana_` → `ana _`
+* "banana" → [`bana`]{.tok-new} `na` `_`
+* "ana" → `ana` `_`
 :::
 
 ::: {.reveal-box}
 [Reflection]{.reveal-label}
-**`"banana"`** now tokenises as **`bana` + `na`** — two tokens, almost a single one.
+**"banana"** now tokenises as `bana` `na` `_` — three boxes, down from seven.
 
-**`"bandana"`** = `b a n d a n a _`. Apply the *learned* merges in order — `na`, then `ana`, then `bana`:
+**"bandana"** starts as `b` `a` `n` `d` `a` `n` `a` `_`. Apply the *learned* merges in order — `na`, then `ana`, then `bana`:
 
-* `na`: only the final `n a` merges (the first `n` is followed by `d`) → `b a n d a na _`
-* `ana`: the `a na` merges → `b a n d ana _`
+* `na`: only the final `n a` merges (the first `n` is followed by `d`) → `b` `a` `n` `d` `a` [`na`]{.tok-new} `_`
+* `ana`: the `a na` merges → `b` `a` `n` `d` [`ana`]{.tok-new} `_`
 * `bana`: needs `b` next to `ana`, but `b` is followed by `a` → no merge.
 
-Result: **`b` + `a` + `n` + `d` + `ana`**. The model has *never seen* `"bandana"` yet reads it from known pieces.
+Result: `b` `a` `n` `d` `ana` `_`. The model has *never seen* "bandana" yet reads it from known pieces.
 
 This is BPE's guarantee: **no OOV**.
 :::
@@ -386,7 +434,7 @@ Sample with original probabilities.
 ::: {.column width="33%"}
 [Beam search]{.pill-green}
 
-Track top-$k$ candidate sequences in parallel.
+Track top-$B$ candidate sequences in parallel.
 
 * Useful for translation.
 * Boring for chat.
@@ -428,21 +476,55 @@ For technical/factual tasks, lower (≈0.2). For creative writing, higher (~1.2)
 ::: {.column width="55%"}
 **Argmax** picks one token at a time — locally optimal, globally myopic.
 
-**Beam search** keeps the top $k$ candidate *sequences* in parallel, extending each. At the end, return the highest-scoring sequence overall.
+**Beam search** keeps the top $B$ candidate *sequences* in parallel, extending each. At the end, return the highest-scoring sequence overall. $B$ is the **beam width**.
 
-* $k = 5$ or $10$ is common.
+* $B = 5$ or $10$ is common.
 * Used for translation, summarisation — anywhere there's a "single best answer."
 :::
 ::: {.column width="45%"}
 ::: {.card}
-**Why not for chat.** Beam search produces fluent but predictable text. The "best" sequence is often the most generic one. For chat, conversation, or creative writing, sampling is better.
+**Why not for chat.** Beam search produces fluent but predictable text. 
 
-**Rule of thumb**: beam search for one-shot tasks with a verifiable correct answer. Sampling for open-ended generation.
+* The "best" sequence is often generic
+* For chat, conversation, or creative writing, sampling is better (feels more human)
+
+**Rule of thumb**: beam search for one-shot tasks with a verifiable correct answer. Use sampling for open-ended generation.
 :::
 :::
+:::
+
+## What does beam search cost?
+
+[Searching harder is not free]{.eyebrow}
+
+A beam width of $B$ means $B$ live sequences. Each one needs its **own forward pass at every step**.
+
+::: {.columns}
+::: {.column width="50%"}
+[Per generated token]{.pill-amber}
+
+* $B$ forward passes, not 1.
+* $B$ KV caches held in memory — yesterday's cache, once per beam.
+* Score all $B \times V$ continuations, keep the best $B$.
+
+With $V \approx 50{,}000$ and $B = 5$, that last step sorts 250,000 numbers. Nothing, next to five passes through the network.
+:::
+::: {.column width="50%"}
+[The bill]{.pill-blue}
+
+* $B = 5$ → **5× the compute** and **5× the KV-cache memory**, for every token generated. The weights are shared, so they are not multiplied.
+* The $B$ passes batch together, so on an idle GPU the wall-clock is kinder than 5×. The FLOPs and the memory bandwidth are not.
+* When you are serving users, the batch is already full. Then it is a straight **5× cut in throughput**.
+:::
+:::
+
+::: {.callout-tip}
+Translation pays this happily — outputs are short and there is one right answer. A chat model would pay it on every token of every reply, forever, and get *more* generic text for the money. Holtzman et al. (2019) made exactly that argument, and proposed top-p instead. That's the next slide.
 :::
 
 ## Top-k and top-p (nucleus)
+
+Both cut tokens out of the distribution, then **renormalise** — divide by what's left, so the survivors sum to 1 again — and sample from what remains.
 
 ::: {.columns}
 ::: {.column width="50%"}
@@ -466,11 +548,12 @@ Keep the smallest set of tokens whose cumulative probability exceeds $p$; renorm
 :::
 
 ::: {.callout-note}
-Combined with temperature, these give us four knobs on creativity:
-1. Argmax / sampling switch.
-2. Temperature.
-3. Top-k.
-4. Top-p.
+Combined with temperature, we have four hyperparameters on creativity:
+
+1. Argmax / sampling switch
+2. Temperature
+3. Top-k
+4. Top-p
 
 In practice, GPT-style chat models use a low temperature + top-p $\approx 0.9$.
 :::
@@ -500,6 +583,10 @@ $p = [0.25,\ 0.20,\ 0.20,\ 0.15,\ 0.10,\ 0.10]$
 
 Same settings, both times. Top-p kept 1 token in one case and 4 in the other.
 
+::: {.callout-tip}
+The difference in one line: **top-p adapts the cut to the model's confidence; top-k cannot.** When the model is sure, top-p gets out of the way. When it is unsure, top-p lets more candidates through.
+:::
+
 ## After the cut — renormalise
 
 Whatever survives the cut must sum to 1 again before we sample. Take the flat distribution under top-k, $k = 3$:
@@ -515,8 +602,63 @@ $$
 
 Then sample from the renormalised distribution as usual.
 
+## How does generation know when to stop?
+
+[When should we stop picking?]{.eyebrow}
+
+::: {.columns}
+::: {.column width="50%"}
+[The EOS token]{.pill-green}
+
+The vocabulary holds a token meaning *"the text ends here"*. GPT-2 writes it `<|endoftext|>`.
+
+* It is **added by hand**, not built by BPE merges — no byte sequence spells it.
+* The model is trained to predict it, so it is one more entry in the softmax.
+* Sample it, and generation stops.
+:::
+::: {.column width="50%"}
+[The two blunter tools]{.pill-blue}
+
+* **`max_tokens`** — a hard ceiling. Your lab sampler's `max_new_tokens` is this, and only this.
+* **Stop sequences** — the caller names a string (`"\n\n"`, `"User:"`); generation halts when it appears.
+
+So a reply ends one of three ways: the model chose to, your budget ran out, or a string matched.
+:::
+:::
+
 ::: {.callout-tip}
-The difference in one line: **top-p adapts the cut to the model's confidence; top-k cannot.** When the model is sure, top-p gets out of the way. When it is unsure, top-p lets more candidates through.
+# Special tokens are also what makes a chat model
+The same trick wraps every turn of a conversation in markers the model was trained to recognise — a **chat template**. It is why an API takes a list of role-tagged messages rather than one string: the tokeniser turns those roles into special tokens before the model reads a word.
+:::
+
+## Back to text — decoding
+
+[The return trip]{.eyebrow}
+
+Our sampler emits token IDs. Turning them back into a string is a lookup (with one trap)
+
+::: {.columns}
+::: {.column width="50%"}
+[The lookup]{.pill-blue}
+
+Each token ID maps to a **byte sequence**. Concatenate the bytes for the whole output, then decode once as UTF-8.
+
+`low` `er` → `108` `111` `119` `101` `114` → "lower".
+:::
+::: {.column width="50%"}
+[The trap]{.pill-amber}
+
+**Don't decode token by token.** One character can span several tokens — `é` is two bytes, 🤖 is four, and no merge need ever have joined them.
+
+Decode each token alone and a multi-byte character arrives broken — Python hands you `�`, the replacement character. 
+
+* You will meet this in the lab if you print while you sample.
+
+:::
+:::
+
+::: {.callout-tip}
+Bytes in, bytes out. The byte sequence is what round-trips; token boundaries are an implementation detail the text does not respect.
 :::
 
 # Activity · sampling strategies {background-color="#0E1A2B"}
@@ -566,16 +708,16 @@ D: **(ii)** — top-k=1 collapses sampling to argmax regardless of temperature.
 Sampling is **interface design** for LLMs. Different products tune these for different feels — terse + factual, or rambling + creative. The same model produces different "personalities" depending on these knobs.
 :::
 
-# Part 3 · Beyond a base GPT — a map {background-color="#0E1A2B"}
+# Part 3 · Beyond a base GPT {background-color="#0E1A2B"}
 
 ## A reflection on what you've built
 
 [The reveal — sort of]{.reveal-label}
 
 ::: {.card}
-By end of today's lab, your tiny GPT will have:
+By end of tomorrow's lab, your tiny GPT will have:
 
-* A **tokeniser** (BPE).
+* A proper **tokeniser** (BPE).
 * A **token embedding** matrix.
 * A **positional embedding**.
 * $N$ **transformer blocks** with multi-head causal attention.
@@ -586,18 +728,23 @@ By end of today's lab, your tiny GPT will have:
 You are no longer treating these models as black boxes.
 :::
 
-## Pre-training vs post-training
+## Pre-training
 
 [A frontier model's full lifecycle]{.eyebrow}
 
 ::: {.card}
 [1. Pre-training]{.pill-blue}
 
-What you built in this lab. Predict the next token over trillions of tokens of web text + books + code.
+What we have built so far. 
 
+* Predict the next token over trillions of tokens of web text + books + code.
 * Output: a "base model" — fluent, knowledgeable, useless as a chat assistant.
 * Cost: tens of millions of dollars. Months of compute.
+
 :::
+
+## Post-training
+[A frontier model's full lifecycle (continued)]{.eyebrow}
 
 ::: {.card}
 [2. Supervised fine-tuning (SFT) — "instruction tuning"]{.pill}
@@ -634,7 +781,10 @@ Train the model to prefer responses that humans rate higher.
 :::
 
 ::: {.callout-warning}
-**Reward hacking** is the central problem. The LLM learns to game the reward model — producing responses that *look* better without being better. Detecting and preventing this is half of modern alignment research.
+**Reward hacking** is a critical issue with RLHF. The LLM learns to *game* the reward model--producing responses that *look* better without being better. 
+
+* Detecting and preventing this is a lot of what constitutes "alignment research"
+
 :::
 
 ## Reward hacking — you get what you reward
@@ -647,6 +797,9 @@ Raters, on average:
 * favour **longer** answers → models get wordy.
 * favour **agreement** → models get sycophantic — they tell you what you already believe.
 * favour a **confident tone** → models state guesses as facts.
+
+  * Cf. current issues with Opus 5
+  
 :::
 
 ::: {.callout-warning}
@@ -676,7 +829,7 @@ A reward model that has learned to favour length and confidence scores **B highe
 [Three partial fixes]{.eyebrow}
 
 * **Better rater instructions** — tell raters to check facts and not to reward padding.
-* **Penalising length** — subtract a length term from the reward.
+* **Penalising length** — subtract a length term from the reward (a form of indirect regularisation)
 * **DPO's implicit reward** (next slide) — no separate reward model to over-optimise against; the rater biases stay in the preference data, though.
 :::
 
@@ -741,22 +894,23 @@ A long window is not the same as a well-used one.
 :::
 
 ::: {.callout-tip}
-Dumping every document you own into a huge window underperforms **retrieving the right passage** and placing it in the prompt. That retrieval idea is the next slide.
+# Retrieval
+Dumping every document you own into a huge window underperforms **retrieving the right passage** and placing it in the prompt. 
 :::
 
-## RAG — give the model an open-book exam
+## RAG gives the model an "open-book" exam
 
-[<span class="pause-cue">≈ 3 min</span> · think with your neighbour]{.eyebrow}
+[<span class="pause-cue">≈ 3 min</span> ]{.eyebrow}
 
 ::: {.card}
 A base LLM answers from memory alone — and **hallucinates** when it doesn't know.
 
-You have a database of 10,000 company documents and a Day-8 tool: you can **embed** any text into a vector and find the **most similar** documents.
+You have a database of 10,000 company documents and the ability to embed any document.
 :::
 
 ::: {.try-box}
 [Try]{.try-label}
-Using only "embed a question" and "find similar documents", **how would you stop the model inventing answers** about those 10,000 documents — *without retraining it*?
+**How would you stop the model inventing answers** about those 10,000 documents — *without retraining it*?
 :::
 
 ::: {.fragment}
@@ -768,7 +922,7 @@ Using only "embed a question" and "find similar documents", **how would you stop
 3. **Inject** those documents into the prompt as context.
 4. The model answers *from the supplied text*, not just memory.
 
-Used by ChatGPT browsing, Perplexity, and most enterprise LLM products. No retraining needed. **The hard part is retrieval** — getting the *right* documents into context is itself a hard problem, and the source of most RAG failures.
+Used by ChatGPT browsing, Perplexity, and most enterprise LLM products. No retraining needed. **The hard part is retrieval** — getting the *right* documents into context is itself a hard problem.
 :::
 :::
 
@@ -784,7 +938,10 @@ Give the model a **menu of tools** it may invoke: web search, run Python, query 
 
 The model decides *when* to call a tool and *what* to pass; the output is fed back as context.
 
-This is the foundation of the **AI agents** push of 2024–25 — systems that book travel, write and run code, file pull requests. We are early on this curve.
+This is the foundation of the **AI agents** push of 2024–25 — systems that book travel, write and run code, file pull requests
+
+  * We can watch as this becomes ever more ubiquitous
+  
 :::
 ::: {.column width="50%"}
 [Think longer — reasoning models]{.pill-green}
@@ -793,7 +950,10 @@ Teach the model to **think out loud** before answering — OpenAI's **o1**, Clau
 
 It generates hidden "chain-of-thought" tokens, then answers.
 
-Trained by **reinforcement learning on outcomes** — rewarded for getting answers *right*, not for any particular trace. On Olympiad maths and competition coding the gap to prior LLMs is large.
+Trained by **reinforcement learning on outcomes** — rewarded for getting answers *right*, not for any particular trace.
+
+  * Starting to make *real* in-roads on mathematical problems, among others
+  
 :::
 :::
 
@@ -830,7 +990,7 @@ $$
 
 [No new biases enter the count — LoRA adds only the two matrices, and the frozen layer keeps its own bias.]{.muted}
 
-Apply this to every attention matrix in the model and the trainable share is typically **under 1%** of the parameters.
+Applied to every attention matrix in the model, the trainable share is typically **under 1%** of the parameters.
 
 ## LoRA — your turn
 
@@ -846,11 +1006,13 @@ $\mathbf{A}$: $16 \times 1{,}024 = 16{,}384$. $\mathbf{B}$: $1{,}024 \times 16 =
 
 Full matrix: $1{,}024 \times 1{,}024 = 1{,}048{,}576$. Ratio: $1{,}048{,}576 \div 32{,}768 = 32$.
 :::
-:::
 
 ::: {.callout-tip}
 Why people do this: **one frozen base model, plus a small adapter file per task.** Swap the adapter and you swap the behaviour — no full model copy each time.
 :::
+
+:::
+
 
 ## Multimodal extensions
 
@@ -861,8 +1023,8 @@ Why people do this: **one frozen base model, plus a small adapter file per task.
 [Vision-language models]{.pill-blue}
 
 * GPT-4V, Claude 3 Vision, Gemini.
-* Images get patchified, embedded, fed into the transformer alongside text tokens.
-* Same architecture; one new tokeniser-equivalent for pixels.
+* Images get **patchified** — cut into a grid of squares — then embedded and fed in alongside text tokens.
+* Same architecture; one new tokeniser-equivalent for pixels. Next slide.
 :::
 ::: {.column width="50%"}
 [Audio + video]{.pill-blue}
@@ -875,9 +1037,46 @@ Why people do this: **one frozen base model, plus a small adapter file per task.
 :::
 
 ::: {.callout-tip}
-**The transformer is modality-agnostic.** Anything that can be turned into a sequence of vectors — text, image patches, audio frames, video frames, even amino-acid residues — can be fed through it.
+# The transformer is modality-agnostic
+
+Anything that can be turned into a sequence of vectors — text, image patches, audio frames, video frames, even amino-acid residues — can be fed through it.
 
 This is why "what is a transformer" matters: it is the sequence-modelling primitive underneath all of them.
+:::
+
+## How does an image become tokens?
+
+[Patchifying — the tokeniser for pixels]{.eyebrow}
+
+A transformer takes a sequence of vectors. An image isn't one in the same sense as text, so we build one:
+
+::: {.card}
+1. Cut the image into a grid of fixed-size squares. **16×16 pixels** is the standard.
+2. Flatten each patch — $16 \times 16 \times 3 = 768$ numbers.
+3. Project it to the model's width $d$ with a learned linear layer.
+4. That vector is a token. 
+
+  * Add a positional embedding and feed it in.
+  
+:::
+
+::: {.columns}
+::: {.column width="50%"}
+[Why not one token per pixel?]{.pill-amber}
+
+A 224×224 image, straight in: $T = 50{,}176$.
+
+Cut into 16×16 patches: $(224/16)^2 = 196$ patches, so $T = 196$.
+
+**256× shorter** — and attention is quadratic, so about **65,000× less attention compute**.
+:::
+::: {.column width="50%"}
+[The same knob, again]{.pill-green}
+
+Patch size does for pixels what tokens-per-word does for text. Bigger patches, shorter sequence, cheaper attention, coarser detail.
+
+Dosovitskiy et al. (2020) — *An Image is Worth 16×16 Words*. The title is the whole idea.
+:::
 :::
 
 ## Making transformers cheaper to run
@@ -888,9 +1087,9 @@ This is why "what is a transformer" matters: it is the sequence-modelling primit
 ::: {.column width="50%"}
 [Longer context, cheaper attention]{.pill-blue}
 
-* **FlashAttention** — memory-efficient tiling. Still $O(N^2)$, just smaller constants. Now standard.
+* **FlashAttention** — memory-efficient tiling. Still $O(T^2)$, just smaller constants. Now standard.
 * **Sparse / sliding attention** — attend to a local window; recover global reach by stacking layers (Longformer).
-* **State-space models (Mamba)** — replace attention with a learned recurrence. $O(N)$ in sequence length.
+* **State-space models (Mamba)** — replace attention with a learned recurrence. $O(T)$ in sequence length.
 :::
 ::: {.column width="50%"}
 [Smaller, faster models]{.pill-green}
@@ -970,30 +1169,6 @@ Llama 4, Qwen 3, Mistral, DeepSeek, Gemma.
 **For research and reproducibility**, open-weights models are increasingly attractive. For *peak* performance, closed APIs still win. For most applications in 2025+, the open models are *good enough* — and the math of inference cost favours them at scale.
 :::
 
-## A connection to social science — LLMs as instruments
-
-::: {.columns}
-::: {.column width="55%"}
-A growing research area:
-
-* **Annotation at scale.** LLMs labelling political speeches, social-media posts, news articles for sentiment, frame, ideology.
-* **Synthetic respondents.** Argyle et al. (2023): can an LLM impersonate a survey respondent of given demographics?
-* **Construct measurement.** Can we extract continuous measures of ideology, polarisation, frame, from text — at scale?
-* **Translation + corpus analysis** in low-resource languages.
-:::
-::: {.column width="45%"}
-::: {.callout-warning}
-**Open questions in social science:**
-
-* When the LLM gets it wrong, is the error random or systematic?
-* Does the LLM encode the biases of *its* training corpus, contaminating the construct it measures?
-* Should the LLM be considered a measurement *instrument* in the methodological sense?
-
-These are the questions today's social-science methodologists are working on. Now you can join the conversation.
-:::
-:::
-:::
-
 ## Take stock
 
 [<span class="pause-cue">Where you are at the end of Day 11</span>]{.eyebrow}
@@ -1012,7 +1187,7 @@ You can:
 **This is the conceptual core of the modern AI landscape.**
 :::
 
-# Lab brief · today's afternoon {background-color="#0E1A2B"}
+# Lab brief {background-color="#0E1A2B"}
 
 ## Today's lab — 90 minutes
 
@@ -1041,6 +1216,3 @@ A short comparison document:
 
 [Lecture 12 — *Ethics, limitations, and course recap*]{.eyebrow}
 
-::: {.callout-tip}
-**Tomorrow is the final lecture.** It will be lighter on maths and heavier on discussion — including a substantive ethics plenary. Bring your skepticism.
-:::

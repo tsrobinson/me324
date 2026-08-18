@@ -435,6 +435,23 @@ $callout-color-caution:             $me-warn !default;
   padding: 0.05em 0.3em;
   border-radius: 4px;
   font-size: 0.85em;
+  // Programming ligatures are wrong for teaching material: the point is to show
+  // the characters that are actually there. Without this, `<|endoftext|>` renders
+  // as the glyphs ◁endoftext▷, and -> => != would silently become arrows too.
+  font-variant-ligatures: none;
+}
+
+// Token chips — the BPE walk-through gives every token its own inline code span
+// so a token reads as one box rather than as spaced-out letters. `.tok-new`
+// marks the token that row's merge just created, so the change is findable
+// without diffing against the row above. Mustard rather than the accent red:
+// the red is already the colour of every other chip in the table, and a merge
+// is a "look here" cue, not an error. $me-warn at full strength is only 3.3:1
+// on the paper background, so the text is darkened to clear the 4.5:1 floor.
+.reveal .tok-new code {
+  background: rgba($me-warn, 0.20);
+  color: darken($me-warn, 18%);
+  font-weight: 600;
 }
 
 .reveal pre {
