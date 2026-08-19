@@ -1,6 +1,6 @@
 ---
 title: "Ethics, limitations, and course recap"
-subtitle: "Lecture 12 — Where deep learning still breaks, and what to do about it"
+subtitle: "Lecture 12 — Where does deep learning still break? And what to do about it"
 author: "Dr Thomas Robinson"
 date: "2026-08-19"
 date-format: long
@@ -10,36 +10,347 @@ format:
     smaller: true
 ---
 
-# Part 1 · The course in 30 minutes {background-color="#0E1A2B"}
+# The final lecture! {background-color="#0E1A2B"}
 
-## What you can do today that you couldn't three weeks ago
+## How does it all fit together?
 
-::: {.columns}
-::: {.column width="50%"}
-[Week 1]{.pill}
+[Twelve lectures, one diagram]{.eyebrow}
 
-* Define "AI"; situate deep learning historically.
-* Forward-propagate through a perceptron by hand.
-* Read and draw a computational graph.
-* Implement backpropagation in <100 lines of Python.
+```{dot}
+//| fig-height: 3.1
+digraph COURSE {
+  rankdir="LR"; bgcolor="#FBFAF6"; nodesep=0.30; ranksep=0.55;
+  margin="0.25,0.05";
+  // Graphviz sizes boxes with its own font metrics; the browser redraws the
+  // text in Inter, which is wider. The generous node margin is the slack that
+  // keeps labels inside their boxes -- do not trim it.
+  node [fontname="Inter" shape=box style=filled fillcolor="#FBFAF6" color="#0E1A2B" fontcolor="#0E1A2B" penwidth=1.2 margin="0.32,0.15"];
+  edge [arrowsize=0.8 penwidth=1.3 color="#0E1A2B"];
+
+  data [label="your data"];
+  arch [shape=plaintext margin=0 label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="7" BGCOLOR="#F4F1EA" COLOR="#0E1A2B">
+    <TR><TD COLSPAN="2" ALIGN="LEFT" BGCOLOR="#E4DCCB">what goes in the slot</TD></TR>
+    <TR><TD ALIGN="LEFT">L5</TD><TD ALIGN="LEFT">feed-forward</TD></TR>
+    <TR><TD ALIGN="LEFT">L6</TD><TD ALIGN="LEFT">CNN</TD></TR>
+    <TR><TD ALIGN="LEFT">L7</TD><TD ALIGN="LEFT">VAE</TD></TR>
+    <TR><TD ALIGN="LEFT">L8</TD><TD ALIGN="LEFT">text embeddings</TD></TR>
+    <TR><TD ALIGN="LEFT">L9</TD><TD ALIGN="LEFT">RNN</TD></TR>
+    <TR><TD ALIGN="LEFT">L10-11</TD><TD ALIGN="LEFT">transformer</TD></TR>
+  </TABLE>>];
+  model [label="model" fillcolor="#F4F1EA" style="filled,dashed" penwidth=2.2];
+  loss [label="loss"];
+  grad [label="gradients\nL3-L4" fillcolor="#F4F1EA"];
+  step [label="update weights" fillcolor="#1A6FB4" fontcolor="white"];
+
+  { rank=same; data; arch; }
+  data -> arch [style=invis];
+
+  data -> model;
+  arch -> model [style=dashed color="#5C6473"];
+  model -> loss;
+  loss -> grad;
+  grad -> step;
+  step -> model [constraint=false style=dashed color="#C9322B"];
+}
+```
+
+::: {.card}
+* **L1-L4 provides the compute engine.** A computational graph + the chain rule to propagate loss gradients.
+* **L5 built up a full loop.** I.e. the red arrow above — forward pass, backprop, repeat. We haven't changed that loop since.
+* **L6-L11 changed only the configuration of nodes.** Each architecture is a different **model**.
 :::
-::: {.column width="50%"}
-[Week 2]{.pill-blue}
 
-* Train a feed-forward network in PyTorch.
-* Convolve an image; reason about kernels and pooling.
-* Build a CNN classifier on MNIST (≥98%).
-* Build a VAE that samples new MNIST digits.
-* Treat text as data; build a bigram language model.
+## Where does each lecture show up?
 
-[Week 3]{.pill-green}
+[We've built all of this!]{.eyebrow}
 
-* Build a recurrent network (RNN) for sequences.
-* Implement self-attention.
-* Build a tiny GPT from scratch.
-* Swap in BPE and improve sampling.
-:::
-:::
+```{python}
+#| echo: false
+#| fig-width: 12.6
+#| fig-height: 5.66
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib_inline.backend_inline as backend_inline
+import matplotlib.patheffects as pe
+from matplotlib.patches import Circle, FancyArrowPatch, Rectangle, FancyBboxPatch
+
+# SVG keeps the figure vector-sharp when the deck is projected.
+backend_inline.set_matplotlib_formats("svg")
+
+INK, MUTED, RULE, PAPER = "#0E1A2B", "#5C6473", "#D7D2C5", "#FBFAF6"
+PANEL = "#F4F1EA"
+BLUE, RED, GREEN, AMBER = "#1A6FB4", "#C9322B", "#0E9E42", "#DB6803"
+# the skip arcs pass over the column captions; a paper halo keeps them legible
+HALO = [pe.withStroke(linewidth=2.6, foreground=PAPER)]
+
+plt.rcParams.update({
+    "font.family": "sans-serif",
+    "font.sans-serif": ["Inter", "Helvetica Neue", "Arial", "DejaVu Sans"],
+    "text.color": INK,
+})
+
+W, H = 178.0, 80.0
+SP = 40.0                                  # spine centre
+R = 9.5                                   # lens radius
+TOP, BOT = 62.0, 19.0
+LX = [26.0, 68.0, 110.0, 152.0]
+
+FS_T, FS_TAG, FS_M, FS_B, FS_S = 10.5, 10.0, 11.0, 8.2, 8.8
+
+fig, ax = plt.subplots(figsize=(12.6, 5.66))
+fig.patch.set_alpha(0)
+ax.patch.set_alpha(0)
+ax.set_xlim(0, W); ax.set_ylim(0, H); ax.set_aspect("equal"); ax.axis("off")
+
+
+def lens(cx, cy, title, tag, above):
+    ax.add_patch(Circle((cx, cy), R, facecolor=PANEL, edgecolor=INK, lw=1.3,
+                        zorder=3))
+    y1 = cy + R + 1.2 if above else cy - R - 1.6
+    va = "bottom" if above else "top"
+    ax.text(cx, y1, title, ha="center", va=va, fontsize=FS_T,
+            fontweight="bold", zorder=6)
+    ax.text(cx, y1 + 3.8 if above else y1 - 3.8, tag, ha="center", va=va,
+            fontsize=FS_TAG, fontweight="bold", color=RED, zorder=6)
+
+
+def pointer(cx, cy, tx, ty, rr=2.4):
+    """Leader from a lens to a ringed spot on the spine. It leaves the lens
+    vertically into the corridor between the lens row and the spine, then runs
+    straight to the target -- so a long leader never clips a neighbouring lens."""
+    ax.add_patch(Circle((tx, ty), rr, facecolor="none", edgecolor=MUTED,
+                        lw=1.0, zorder=6))
+    above = cy > SP
+    ey = cy - R if above else cy + R
+    wy = SP + 8.6 if above else SP - 8.6
+    ax.plot([cx, cx], [ey, wy], color=MUTED, lw=0.8, ls=(0, (3, 2)), zorder=2)
+    d = max(np.hypot(tx - cx, ty - wy), 1e-6)
+    ux, uy = (tx - cx) / d, (ty - wy) / d
+    ax.plot([cx, tx - ux * rr], [wy, ty - uy * rr],
+            color=MUTED, lw=0.8, ls=(0, (3, 2)), zorder=2)
+
+
+def dots(x, ys, c=BLUE, s=22):
+    ax.scatter([x] * len(ys), ys, s=s, c=c, edgecolors=INK, linewidths=0.55,
+               zorder=4)
+
+
+def link(x0, y0, x1, y1, c=RULE, lw=0.55, z=1, a=1.0):
+    ax.plot([x0, x1], [y0, y1], color=c, lw=lw, zorder=z, alpha=a)
+
+
+def arrow(x0, y0, x1, y1, c=MUTED, lw=1.0, ls="-", ms=7, z=4):
+    ax.add_patch(FancyArrowPatch((x0, y0), (x1, y1), color=c, lw=lw,
+                                 arrowstyle="-|>", mutation_scale=ms,
+                                 linestyle=ls, zorder=z))
+
+
+# ------------------------------------------------------------- the spine ---
+TOKX, EMBX, ATTX, FFX, NRMX, LOGX, SMX, NXTX = 18, 40, 62, 86, 110, 128, 138, 158
+YS = SP + np.array([-4.5, -2.25, 0.0, 2.25, 4.5])
+
+ax.text(4.0, SP + 7.1, "“the cat sat”", fontsize=FS_S + 0.4, style="italic",
+        ha="left", va="center")
+for i, t in enumerate(["the", "cat", "sat"]):
+    x = 11.0 + i * 6.0
+    ax.add_patch(FancyBboxPatch((x - 2.5, SP - 1.4), 5.0, 2.8,
+                                boxstyle="round,pad=0.2,rounding_size=0.45",
+                                facecolor=PANEL, edgecolor=INK, lw=0.75,
+                                zorder=4))
+    ax.text(x, SP, t, ha="center", va="center", fontsize=7.2, zorder=5)
+ax.text(17.0, SP - 4.0, "tokens", fontsize=FS_S - 0.8, color=MUTED,
+        ha="center", va="top")
+arrow(24.5, SP, EMBX - 1.8, SP, MUTED, 0.85, ms=6, z=2)
+
+dots(EMBX, YS)
+ax.text(EMBX, SP + 6.6, "embeddings", fontsize=FS_S - 0.8, color=MUTED,
+        ha="center", path_effects=HALO)
+
+dots(ATTX, YS)
+for i, y0 in enumerate(YS):
+    for j, y1 in enumerate(YS):
+        if j <= i:
+            link(EMBX + 0.7, y1, ATTX - 0.7, y0, RULE, 0.45, a=0.9)
+ax.text(ATTX, SP + 6.6, "self-attention", fontsize=FS_S - 0.8, color=MUTED,
+        ha="center", path_effects=HALO)
+
+dots(FFX, YS)
+for y0 in YS:
+    for y1 in YS:
+        link(ATTX + 0.7, y0, FFX - 0.7, y1, RULE, 0.4, a=0.7)
+ax.text(FFX, SP + 6.6, "feed-forward", fontsize=FS_S - 0.8, color=MUTED,
+        ha="center", path_effects=HALO)
+
+ax.add_patch(Rectangle((NRMX - 0.9, SP - 5.6), 1.8, 11.2, facecolor=AMBER,
+                       edgecolor=INK, lw=0.7, alpha=0.6, zorder=3))
+ax.text(NRMX, SP + 6.6, "norm", fontsize=FS_S - 0.8, color=MUTED, ha="center")
+for y in YS:
+    link(FFX + 0.7, y, NRMX - 1.0, y, RULE, 0.4, a=0.7)
+
+dots(LOGX, YS, c=GREEN)
+for y in YS:
+    link(NRMX + 1.0, y, LOGX - 0.7, y, RULE, 0.4, a=0.7)
+
+# two skip connections, one per sub-layer
+for x0, x1 in [(EMBX, ATTX), (ATTX, FFX)]:
+    ax.add_patch(FancyArrowPatch((x0, YS[-1] + 0.9), (x1, YS[-1] + 0.9),
+                                 connectionstyle="arc3,rad=-0.42", color=BLUE,
+                                 lw=1.4, arrowstyle="-|>", mutation_scale=8,
+                                 zorder=4))
+ax.text((ATTX + NRMX) / 2, SP - 7.5, "one block,  ×12", fontsize=FS_S - 0.8,
+        color=MUTED, ha="center", va="top")
+
+sm = np.array([0.06, 0.10, 0.55, 0.20, 0.09])
+for y, p in zip(YS, sm):
+    ax.add_patch(Rectangle((SMX, y - 0.8), p * 10.0, 1.6, facecolor=GREEN,
+                           edgecolor=INK, lw=0.45, alpha=0.85, zorder=4))
+ax.text(SMX + 2.8, SP - 5.4, "softmax", fontsize=FS_S - 0.8, color=MUTED,
+        ha="center", va="top")
+ax.add_patch(FancyBboxPatch((NXTX - 6.4, SP - 2.0), 12.8, 4.0,
+                            boxstyle="round,pad=0.22,rounding_size=0.5",
+                            facecolor=BLUE, edgecolor=INK, lw=0.85, zorder=4))
+ax.text(NXTX, SP, "the next token", ha="center", va="center", fontsize=7.4,
+        color="white", zorder=5)
+
+# rails
+arrow(4.0, SP + 11.0, NXTX + 7.0, SP + 11.0, GREEN, 1.25, ms=9, z=2)
+ax.text(47.0, SP + 12.1, "forward propagation", fontsize=FS_S, color=GREEN,
+        ha="center", va="bottom")
+arrow(NXTX + 7.0, SP - 10.5, 4.0, SP - 10.5, RED, 1.25, ls=(0, (5, 2)), ms=9,
+      z=2)
+ax.text(89.0, SP - 11.6, "backpropagation", fontsize=FS_S, color=RED,
+        ha="center", va="top")
+
+
+# ------------------------------------------------------------ top lenses ---
+cx, cy = LX[0], TOP                                        # BPE
+lens(cx, cy, "byte pair encoding", "L11", True)
+pointer(cx, cy, 17.0, SP + 1.1, 2.8)
+ax.text(cx, cy + 5.2, "l o w e s t", fontsize=7.4, ha="center", va="center",
+        family="monospace")
+arrow(cx, cy + 4.0, cx, cy + 2.2, MUTED, 0.85, ms=5, z=5)
+ax.text(cx, cy + 0.8, "low   est", fontsize=8.6, ha="center", va="center",
+        family="monospace", fontweight="bold")
+ax.text(cx, cy - 3.4, "merge the\ncommonest pair", fontsize=FS_B, ha="center",
+        va="center", color=MUTED, linespacing=1.35)
+
+cx, cy = LX[1], TOP                                        # attention
+lens(cx, cy, "self-attention", "L10", True)
+pointer(cx, cy, ATTX, SP + 2.7, 2.4)
+ly = cy + np.array([5.6, 2.8, 0.0])
+wts = [[0.95, 0, 0], [0.35, 0.8, 0], [0.25, 0.55, 0.4]]
+for i, y0 in enumerate(ly):
+    for j in range(3):
+        if wts[i][j] > 0:
+            link(cx - 4.2, ly[j], cx + 4.2, y0, RED, 0.3 + wts[i][j] * 1.6,
+                 z=4, a=0.8)
+for y in ly:
+    ax.scatter([cx - 4.6], [y], s=14, c=BLUE, edgecolors=INK, lw=0.45, zorder=5)
+    ax.scatter([cx + 4.6], [y], s=14, c=BLUE, edgecolors=INK, lw=0.45, zorder=5)
+ax.text(cx, cy - 4.0, "query · key · value", fontsize=FS_B + 0.3, ha="center",
+        va="center")
+ax.text(cx, cy - 7.0, "thicker line =\nmore attention", fontsize=FS_B,
+        ha="center", va="center", color=MUTED, linespacing=1.35)
+
+cx, cy = LX[2], TOP                                        # skip connections
+lens(cx, cy, "skip connections", "L10", True)
+pointer(cx, cy, (ATTX + FFX) / 2, SP + 8.2, 2.4)
+ax.scatter([cx - 5.0, cx, cx + 5.0], [cy + 2.0] * 3, s=14, c=BLUE,
+           edgecolors=INK, lw=0.45, zorder=5)
+link(cx - 4.6, cy + 2.0, cx - 0.4, cy + 2.0, MUTED, 0.85, z=4)
+link(cx + 0.4, cy + 2.0, cx + 4.6, cy + 2.0, MUTED, 0.85, z=4)
+ax.add_patch(FancyArrowPatch((cx - 5.0, cy + 2.6), (cx + 5.0, cy + 2.6),
+                             connectionstyle="arc3,rad=-0.55", color=BLUE,
+                             lw=1.25, arrowstyle="-|>", mutation_scale=6,
+                             zorder=5))
+ax.text(cx, cy - 2.4, "$x + F(x)$", fontsize=FS_M, ha="center", va="center")
+ax.text(cx, cy - 6.4, "a short path\nfor gradients", fontsize=FS_B,
+        ha="center", va="center", color=MUTED, linespacing=1.35)
+
+cx, cy = LX[3], TOP                                        # normalisation
+lens(cx, cy, "normalisation", "L5", True)
+pointer(cx, cy, NRMX, SP + 3.6, 2.4)
+raw = np.array([2.9, 0.7, 4.2, 1.5])
+nrm = (raw - raw.mean()) / raw.std()
+for k in range(4):
+    ax.add_patch(Rectangle((cx - 7.2 + k * 1.5, cy + 2.4), 1.1, raw[k] * 0.75,
+                           facecolor=MUTED, edgecolor=INK, lw=0.4, zorder=5))
+    ax.add_patch(Rectangle((cx + 2.4 + k * 1.5, cy + 3.4), 1.1, nrm[k] * 1.15,
+                           facecolor=AMBER, edgecolor=INK, lw=0.4, zorder=5))
+link(cx + 1.9, cy + 3.4, cx + 8.4, cy + 3.4, RULE, 0.65, z=4)
+arrow(cx - 1.4, cy + 4.2, cx + 1.4, cy + 4.2, MUTED, 0.85, ms=5, z=5)
+ax.text(cx, cy - 2.0, r"$(x-\mu)/\sigma$", fontsize=FS_M, ha="center",
+        va="center")
+ax.text(cx, cy - 6.0, "same spread\ninto every layer", fontsize=FS_B,
+        ha="center", va="center", color=MUTED, linespacing=1.35)
+
+
+# --------------------------------------------------------- bottom lenses ---
+cx, cy = LX[0], BOT                                        # embeddings
+lens(cx, cy, "embeddings", "L8", False)
+pointer(cx, cy, EMBX, YS[1], 2.6)
+for r in range(4):
+    for c in range(3):
+        fc = BLUE if r == 1 else "white"
+        ax.add_patch(Rectangle((cx - 3.6 + c * 2.5, cy + 3.6 - r * 1.9), 2.3,
+                               1.7, facecolor=fc, edgecolor=INK, lw=0.4,
+                               alpha=0.85 if r == 1 else 1.0, zorder=5))
+arrow(cx - 7.4, cy + 2.7, cx - 4.2, cy + 2.7, MUTED, 0.85, ms=5, z=5)
+ax.text(cx, cy - 3.6, "one row\nper token", fontsize=FS_B, ha="center",
+        va="center", color=MUTED, linespacing=1.35)
+
+cx, cy = LX[1], BOT                                        # one neuron
+lens(cx, cy, "one neuron", "L2", False)
+pointer(cx, cy, ATTX, YS[1], 2.6)
+iy = cy + np.array([5.4, 3.4, 1.4])
+for y in iy:
+    ax.scatter([cx - 5.8], [y], s=11, c=MUTED, edgecolors=INK, lw=0.35,
+               zorder=5)
+    link(cx - 5.4, y, cx - 1.0, cy + 3.4, RULE, 0.7, z=4)
+ax.scatter([cx - 0.4], [cy + 3.4], s=40, c=BLUE, edgecolors=INK, lw=0.65,
+           zorder=6)
+arrow(cx + 0.9, cy + 3.4, cx + 5.4, cy + 3.4, MUTED, 0.85, ms=5, z=5)
+ax.text(cx, cy - 1.2, r"$\sigma(\mathbf{w}\cdot\mathbf{x}+b)$",
+        fontsize=FS_M - 0.8, ha="center", va="center")
+ax.text(cx, cy - 5.2, "each line is\none weight", fontsize=FS_B, ha="center",
+        va="center", color=MUTED, linespacing=1.35)
+
+cx, cy = LX[2], BOT                             # computational graph + backprop
+lens(cx, cy, "one node, written out", "L3, L4", False)
+pointer(cx, cy, FFX, YS[1], 2.6)
+gx = cx + np.array([-5.2, -1.0, 3.2])
+for x, lab in zip(gx, [r"$\times$", "$+$", r"$\sigma$"]):
+    ax.add_patch(Circle((x, cy + 4.0), 1.7, facecolor="white", edgecolor=INK,
+                        lw=0.75, zorder=5))
+    ax.text(x, cy + 4.0, lab, ha="center", va="center", fontsize=8.0, zorder=6)
+for a, b in zip(gx[:-1], gx[1:]):
+    arrow(a + 1.8, cy + 4.7, b - 1.8, cy + 4.7, GREEN, 0.85, ms=5, z=5)
+    arrow(b - 1.8, cy + 3.3, a + 1.8, cy + 3.3, RED, 0.85, ls=(0, (2.5, 1.5)),
+          ms=5, z=5)
+ax.text(cx, cy - 0.6, r"$\partial L/\partial w$", fontsize=FS_M, ha="center",
+        va="center", color=RED)
+ax.text(cx, cy - 4.6, "forwards to a loss,\nbackwards for grad",
+        fontsize=FS_B, ha="center", va="center", color=MUTED, linespacing=1.35)
+
+
+# ------------------------------------------------- the other three models ---
+bx, bw, bh = 136.0, 36.0, 17.0
+by = BOT - bh / 2
+ax.add_patch(FancyBboxPatch((bx, by), bw, bh,
+                            boxstyle="round,pad=0.35,rounding_size=0.9",
+                            facecolor=PANEL, edgecolor=INK, lw=1.2, zorder=3))
+ax.text(bx + bw / 2, by + bh - 3.0, "the same loop\nalso trained",
+        fontsize=FS_B + 0.6, ha="center", va="center", zorder=5,
+        fontweight="bold", linespacing=1.35)
+for k, (name, tag) in enumerate([("CNN", "L6"), ("VAE", "L7"), ("RNN", "L9")]):
+    yy = by + bh - 8.4 - k * 2.9
+    ax.text(bx + 4.5, yy, name, fontsize=FS_B + 0.4, ha="left", va="center",
+            zorder=5)
+    ax.text(bx + bw - 4.5, yy, tag, fontsize=FS_B + 0.4, ha="right",
+            va="center", color=RED, fontweight="bold", zorder=5)
+
+fig.subplots_adjust(left=0.004, right=0.996, top=0.996, bottom=0.004)
+```
 
 ## Five ideas that connect everything
 
@@ -48,15 +359,11 @@ format:
 
 2. **Differentiability.** Every operation has a known gradient. The chain rule glues them.
 
-3. **Autodiff.** Backpropagation = reverse-mode autodiff. Linear cost in graph size.
+3. **Autodiff.** Backpropagation = reverse-mode autodiff, which has a linear cost in graph size.
 
 4. **Optimisation.** Define a loss. Step against the gradient. Repeat.
 
-5. **Scale.** The same building blocks at $10^4$ parameters and $10^{12}$ parameters. The only thing that changes is what you can express.
-:::
-
-::: {.callout-tip}
-If you remember nothing else from this course, remember these five. They are the **conceptual core** of everything.
+5. **Scale.** Apply the same building blocks with $10^{12}$ parameters and you can express more.
 :::
 
 ## What's *not* in this course
@@ -65,25 +372,25 @@ If you remember nothing else from this course, remember these five. They are the
 
 ::: {.columns}
 ::: {.column width="50%"}
-* Reinforcement learning — RLHF (reinforcement learning from human feedback) and its optimisers, PPO (proximal policy optimisation) and DPO (direct preference optimisation).
-* Graph neural networks.
-* Diffusion models in depth (we sketched).
-* Self-supervised pre-training methods.
-* Multi-modal models (text + image jointly).
-* Long-context architectures (Mamba, RingAttention).
+* Reinforcement learning — RLHF (reinforcement learning from human feedback) and its optimisers, PPO (proximal policy optimisation) and DPO (direct preference optimisation)
+* Graph neural networks
+* Diffusion models in depth (we sketched)
+* Self-supervised pre-training methods
+* Multi-modal models (text + image jointly)
+* Long-context architectures (Mamba, RingAttention)
 :::
 ::: {.column width="50%"}
-* Quantisation, distillation, model compression.
-* Federated learning, privacy-preserving ML.
-* Causal ML and double machine learning.
-* Bayesian deep learning.
-* MoE (mixture of experts).
-* Speculative decoding.
+* Distillation, model compression
+* Federated learning
+* Causal ML and double machine learning
+* Bayesian deep learning
+* MoE (mixture of experts) implementation
+* Speculative decoding
 :::
 :::
 
 ::: {.card}
-Each of these is a course in itself. You now have the foundations to read into any of them.
+Each of these could be a lecture/course in itself, but you have the foundations to read into any of them now.
 :::
 
 # Part 2 · Limitations + ethics {background-color="#0E1A2B"}
@@ -95,7 +402,7 @@ Each of these is a course in itself. You now have the foundations to read into a
 [Data-poor regimes]{.pill-amber}
 
 * Strong supervised performance needs thousands to millions of labelled examples.
-* Many small-data social-science problems work better with classical models.
+* Many small-data social-science problems work better with "classical" models.
 :::
 ::: {.column width="50%"}
 [Long-horizon reasoning]{.pill-amber}
@@ -111,18 +418,23 @@ Each of these is a course in itself. You now have the foundations to read into a
 ::: {.card}
 * **Causal inference from observational data.** Still needs assumptions you encode by hand — DL doesn't substitute for instrumental variables, RCTs, etc.
 
-* **Out-of-distribution generalisation.** Models break when test data diverges from training.
+* **Out-of-distribution generalisation.** Same as any ML model, it will break when the test data diverges from training.
 
-* **Calibrated uncertainty.** "Knowing what they don't know" is hard. Confident hallucinations are everywhere.
+* **Calibrated uncertainty.** "Knowing what they don't know" is hard (we're seeing this at the moment)
 
-* **Anything resembling agency or intent.** A trained model has no goals, no beliefs, no plans. Anthropomorphism is dangerous.
+* **Anything resembling agency or intent.** A trained model has no goals, no beliefs, no plans.
+
+*Anthropomorphising models is dangerous.*
+
 :::
 
 ::: {.callout-warning}
-**LLMs hallucinate by design.** They produce *plausible continuations*, not *true statements*. Treating them as oracles is a category error.
+# **LLMs hallucinate by design.** 
+
+They produce *plausible continuations*, not *true statements*.
 :::
 
-## Environmental impact in detail
+## Environmental impact
 
 [Beyond "AI uses a lot of compute"]{.eyebrow}
 
@@ -132,38 +444,46 @@ Each of these is a course in itself. You now have the foundations to read into a
 
 * GPT-3 training: estimated **552 tonnes CO₂** (one-time cost).
 * GPT-4: estimated 10×–100× more.
-* Frontier models train multiple times per year.
+* Frontier models now train multiple times per year.
 :::
 ::: {.column width="50%"}
 [Inference]{.pill-amber}
 
-* A widely-circulated figure put one ChatGPT query at ~10× a Google search — but **treat this with caution**: it is disputed and rests on a ~2009 search-energy number; more recent estimates put a query much closer to a single search.
+* The "folk number" says one ChatGPT query costs ~10× a Google search — but *treat this with caution*
 * Aggregated across hundreds of millions of users per day, **inference dominates** training in cumulative impact.
-* Data centre water use for cooling is a separately growing concern.
+* Data centre water use for cooling is a separately growing concern
+
+  * And datacentres more generally are an increasingly salient political issue
+  
 :::
 :::
 
 ::: {.callout-warning}
-The footprint of *one* query is small. The footprint of these systems *existing at scale* is not — and it depends on **where** data centres are sited. Moving to renewable-rich regions helps, but is only a partial fix. This is a policy question, not a technical one.
+# One query costs little
+
+The footprint of these systems stems from their use *at scale* and depends on **where** data centres are sited.
+
+* Moving to renewables/non-fossil fuels helps, but this is a policy question we are still figuring out.
 :::
 
 ## Where bias comes from
 
-[Not just "the data"]{.eyebrow}
-
 ::: {.card}
-A non-exhaustive map:
+Some (but not all) of the sources of bias:
 
-1. **Data sampling** — who shows up in the training set, who doesn't.
-2. **Label noise** — when humans encode their own biases as ground truth.
+1. **Data sampling** — what shows up in the training set
+2. **Label noise** — when humans encode their own biases as ground truth
 3. **Construct mismatch** — when the modelled variable is a proxy for what we actually care about (e.g. "creditworthiness" vs "ability to pay").
-4. **Optimisation target** — minimising aggregate error tolerates large subgroup error.
+4. **Optimisation target** — minimising aggregate error can smooth over important subgroup differences
 5. **Deployment context** — a model trained on one population deployed on another.
 6. **Feedback loops** — biased predictions become future training data.
 :::
 
 ::: {.callout-tip}
-**The technical fix can only address (1) and (4).** The rest are governance, methodology, and political problems. The "AI ethics" stack is half computer science, half social science.
+# Technical fixes only address (1) and (4).
+
+The rest are governance, methodology, and political problems -- that's why these companies like hiring social scientists!
+
 :::
 
 ## Bias
@@ -172,7 +492,7 @@ Models reflect their data. Data reflects the world. Both have problems.
 
 ::: {.columns}
 ::: {.column width="50%"}
-[Documented examples]{.pill-amber}
+[Previously discussed examples]{.pill-amber}
 
 * Facial recognition with much higher error rates on dark-skinned faces (Buolamwini & Gebru 2018).
 * Hiring screeners that downweight applicants from women's colleges.
@@ -180,11 +500,12 @@ Models reflect their data. Data reflects the world. Both have problems.
 * LLMs producing racist completions of innocuous prompts.
 :::
 ::: {.column width="50%"}
-[Don't be fooled by]{.pill}
+[Patterns are bias]{.pill}
 
-* "It's just learning patterns" — patterns *are* the bias.
-* Benchmarks that measure narrowly — overall accuracy hides disparate impact.
-* "We removed the protected attributes" — proxies remain.
+* "It's just learning patterns"
+* Benchmarks that measure narrowly can hide disparate impact
+* Proxies remain even after projecting out a dimension
+  
 :::
 :::
 
@@ -221,7 +542,9 @@ Adjust model outputs after training to equalise outcomes across subgroups.
 :::
 
 ::: {.callout-warning}
-**But these are all partial.** The different notions of fairness can also *conflict with one another* — as the Stop & check ahead shows, you sometimes cannot satisfy them all at once.
+# Partial solutions
+Different notions of fairness can *conflict with one another* — you sometimes cannot satisfy them all at once.
+
 :::
 
 ## Case study · the Dutch childcare benefits scandal
@@ -233,69 +556,102 @@ From the mid-2010s, the Dutch tax authority used a risk-scoring model to flag ch
 ::: {.card}
 **What happened**
 
-* **Tens of thousands of families** were wrongly accused of benefit fraud.
-* An accusation meant repaying benefits in full — often **tens of thousands of euros** — with the debt due at once.
-* Families were pushed into debt for years. Some lost homes and jobs over money they never owed.
-* In **January 2021**, the Dutch government resigned over the scandal.
+* **Tens of thousands of families** were wrongly accused of benefit fraud
+* An accusation meant repaying benefits in full with the debt due at once
+
+  *  Often **tens of thousands of euros**
+  
+* Families were pushed into debt, lost homes, and/or jobs over money they didn't owe
+
+* In **January 2021**, the Dutch government resigned over the scandal
 :::
 
-The technology was not exotic: a risk score computed from family features. Every failure in it has a name you learned in this course.
+The technology was not "futuristic" in any sense: 
+
+* A risk score computed from family features
+* Speaks to the various traps and issues we face when building effective DL models
 
 ## Case study · where it broke in our terms
 
 [Four failures, four concepts you already know]{.eyebrow}
 
 ::: {.card}
-1. **The labels were not ground truth.** The model learned from past fraud *investigations*, not convictions. "Flagged before" became "high risk now" — the target variable encoded the old process, mistakes included.
+1. **The labels were not ground truth.** 
 
-2. **Proxies did the work.** Nationality sat in the feature set — the Dutch data-protection authority later ruled its use unlawful — and a low income pushed the score up. The model discriminated on who people were, not on what they had done.
 
-3. **A high score triggered automated distrust.** Flagged families were treated as fraudsters by default: benefits stopped, repayment demanded, no human check on the individual case. The score *was* the decision.
+* The model learned from past fraud *investigations*, not convictions. 
+* "Flagged before" became "high risk now"
 
-4. **The feedback loop never closed.** Appeals took years. The error signal that should have corrected the system — wrongly flagged families winning their cases — arrived too late to change it. In training terms: no gradient ever flowed back.
+2. **Proxies did the work.** 
+
+* Nationality sat in the feature set
+* The Dutch data-protection authority later ruled its use unlawful 
+* Low income also pushed the score up
+
+3. **A high score triggered automatic action** 
+
+* By default, flagged families had benefits stopped, repayment demanded, without any review
+* The score *became* the decision.
+
+4. **The feedback loop never happened.**
+
+* Wrongly flagged families winning their appeals arrived too late to change it. 
+* In training terms, no gradient ever flowed back to keep weights up to date/relevant
+
 :::
 
 ::: {.callout-tip}
-Set this against the *Where bias comes from* map: label noise (2), construct mismatch (3), feedback loops (6) — running at national scale, with the power of the state behind the predictions.
+# Where did the bias come from?
+Label noise (2), construct mismatch (3), feedback loops (6).
 :::
 
 ## Case study · what would have helped
 
-[Read this against the mitigation slide]{.eyebrow}
-
 ::: {.card}
-* **Audit error rates by group.** Aggregate accuracy can look fine while one group carries the errors. A false-positive audit by nationality and income would have surfaced the harm years earlier.
+* **Audit error rates by group.** 
 
-* **Keep a human who can overrule the score.** Not a human who clicks "confirm" — one with the authority, time, and information to say the model is wrong about *this* family.
+  * Aggregate accuracy can look fine while one group carries the errors.
 
-* **Contestability with deadlines.** An appeal that takes years is not an appeal. A binding clock turns "you may object" into an error signal that arrives in time to matter.
+* **Keep a human who can overrule the score.** 
 
-* **Check the model against the world.** The scores were consistent with the training data throughout; the training data was wrong about the world. It is the question this course keeps asking — does the arithmetic match reality, or only the labels?
+  * Need to have the authority, time, and information to say the model is wrong about *this* family
+
+* **Contestability with deadlines.** 
+
+  * Those deadlines have to be set to ensure the model can be updated
+
+* **Check the model against the world.** 
+
+  * The training data was wrong about the world!
+
 :::
 
 ::: {.callout-warning}
-Pre-, in-, and post-processing all apply here. None of them substitutes for the last three items — those fixes are institutional, not technical. Half computer science, half social science.
+# Pre-, in-, and post-processing corrections all apply here
+
+None of them can tackle institutional or social sources of bias (including how the model may have been validated/signed-off)
+
 :::
 
 ## Stop & check — can a model be "fair"?
 
-[<span class="pause-cue">Stop & check</span> · 60 seconds in pairs]{.eyebrow}
+[<span class="pause-cue">Stop & check</span> · 60 seconds]{.eyebrow}
 
 ::: {.try-box}
 [Try]{.try-label}
 A recidivism-risk model is **calibrated**: among everyone it scores "high risk", the same fraction actually reoffend — *regardless of race*. A journalist then shows that, among people who did **not** reoffend, Black defendants were flagged "high risk" far more often than white defendants.
 
-**Is the model broken — or is something deeper going on?**
+**Is the model broken?**
 :::
 
 ::: {.fragment}
 ::: {.reveal-box}
 [The reveal]{.reveal-label}
-This is exactly the **COMPAS** dispute (ProPublica vs. Northpointe, 2016). *Both sides were arithmetically correct.*
+This example is taken from the **COMPAS** dispute (ProPublica vs. Northpointe, 2016). *Both sides made arithmetically correct claims!*
 
-**Chouldechova (2017)** proved why. When the base rate of reoffending differs across groups, **calibration** and **equal false-positive rates** cannot both hold at once (except in trivial cases). You are forced to *choose* which criterion to satisfy.
+When the base rate of reoffending differs across groups, **calibration** and **equal false-positive rates** cannot both hold at once (except in trivial cases). You are forced to *choose* which criterion to satisfy (**Chouldechova 2017**)
 
-That choice is **normative, not technical** — no amount of better engineering makes it go away.
+That choice is **normative** and no amount of engineering makes it go away.
 :::
 :::
 
@@ -495,7 +851,12 @@ $$
 [The state of the art for LLM labels in research]{.eyebrow}
 
 ::: {.card}
-Egami et al. (2023) [@egami2023imperfect] show the sharper version: feeding LLM labels straight into a downstream regression gives **biased coefficients and confidence intervals that don't cover** — at 80–90% accuracy, the range where a researcher would call the labels fine. The bias comes from the errors being *correlated with the thing you are studying*.
+@egami2023imperfect show how important tackling this bias is for inferential research: 
+
+* Feeding LLM labels straight into a downstream regression gives **biased coefficients and confidence intervals** 
+
+* The bias comes from the errors being *correlated with the thing you are studying*.
+
 :::
 
 ::: {.columns}
@@ -512,43 +873,55 @@ Keep a random, hand-coded **gold-standard subset**. Run the model on everything,
 
 * Valid inference **even if the labels are badly biased**.
 * Tighter intervals when the model is good, correct ones when it isn't.
-* The cost is the subset — a few hundred documents, coded properly.
+* The labour cost is relatively small — a few hundred documents, coded properly.
 :::
 :::
 
 ::: {.callout-tip}
-This is the honest answer to "can I use an LLM to code my data?" Yes — as long as you also hand-code enough of it to find out how wrong the model was.
+# "Can I use an LLM to code my data?" 
+Yes, of course! So long as you also hand-code enough of it to find out how wrong the model was.
+
 :::
 
 ## How do you test for harm?
 
-[Capability evaluation, from the other direction]{.eyebrow}
+[Capability evaluation]{.eyebrow}
 
-Accuracy asks *how often is it right*. Safety evaluation asks *what is the worst thing it will do if someone tries*.
+Where accuracy asks *how often is it right*, **safety** evaluation asks *what is the worst thing it will do if someone tries*.
 
 ::: {.columns}
 ::: {.column width="50%"}
 [Red-teaming]{.pill-amber}
 
-People — and now models — attack the system to make it fail.
+People — and now models — attack a system to make it fail.
 
-The UK AI Safety Institute tested five publicly deployed LLMs in **May 2024**: all were highly vulnerable to **basic** jailbreaks, and some produced harmful outputs with no jailbreak attempt at all.
+E.g. the UK AI Safety Institute (AISI) tested 5 public LLMs in **May 2024**
+
+  * All were highly vulnerable to **basic** jailbreaks
+  * Some produced harmful outputs with no jailbreak attempt
+  
 :::
 ::: {.column width="50%"}
-[Dangerous-capability evals]{.pill-amber}
+[Dangerous-capability evaluations]{.pill-amber}
 
-Can it assist a cyber-attack, or with chemical and biological weapons? Can it act on its own over long horizons?
+Some things we should just always check before releasing:
 
-**Human-uplift studies** ask the harder question: does the model make a non-expert *more* capable than a search engine would? That is the counterfactual that matters.
+* Can it assist a cyber-attack, or with chemical and biological weapons? 
+* Can it act on its own over long horizons?
+
+* Does it "uplift" the capability of non-experts beyond the tools they already have?
+
 :::
 :::
 
 ::: {.card}
-Run by the labs themselves — Anthropic's Responsible Scaling Policy, OpenAI's Preparedness Framework, Google DeepMind's Frontier Safety Framework — and by third parties. We come back to who watches the watchers shortly.
+Anthropic's Responsible Scaling Policy, OpenAI's Preparedness Framework, Google DeepMind's Frontier Safety Framework are all *internal* efforts to exercise this caution
 :::
 
 ::: {.callout-warning}
-A failed elicitation is not proof of absence. It shows *this* attempt didn't find the capability. Someone with more time, better prompts, or fine-tuning access may.
+# A failed elicitation is not proof of absence
+
+*This* attempt didn't find the capability, but someone with more time, better prompts, or fine-tuning access may. See [this interesting interview](https://www.theguardian.com/technology/2026/apr/29/meet-the-ai-jailbreakers-i-see-the-worst-things-humanity-has-produced)
 :::
 
 ## Privacy and data extraction
@@ -559,8 +932,8 @@ A failed elicitation is not proof of absence. It shows *this* attempt didn't fin
 ::: {.column width="50%"}
 [Training-data privacy]{.pill-amber}
 
-* LLMs memorise. Specific email addresses, phone numbers, code blocks, personal stories can be recovered from production models via prompt attacks.
-* Carlini et al. (2021): GPT-2 can be made to emit memorised training data with adversarial prompting.
+* With so many parameters, LLMs can memorise. Specific email addresses, anecdotes, and API keys can be recovered from production models via prompt attacks.
+* Carlini et al. (2021): GPT-2 can be made to emit memorised training data
 :::
 ::: {.column width="50%"}
 [Inference-time privacy]{.pill-amber}
@@ -572,31 +945,34 @@ A failed elicitation is not proof of absence. It shows *this* attempt didn't fin
 :::
 
 ::: {.callout-tip}
-For sensitive research data, **never** send identifiable records to a closed API without explicit clearance from your university's research-ethics committee (in the US, an Institutional Review Board, or IRB; health data carries extra rules such as the US HIPAA). Most commercial APIs are *not* GDPR-compliant by default.
+# **Never** send identifiable records to a closed API (without explicit consent and clearance)
+Use your university's research-ethics committee (in the US, an Institutional Review Board, or IRB; health data carries extra rules such as the US HIPAA). Most commercial APIs are *not* GDPR-compliant by default.
 :::
 
 ## AI safety and the existential question
 
-[A debate the field is having loudly]{.eyebrow}
 
 ::: {.columns}
 ::: {.column width="55%"}
-A serious-but-contested concern: as models become more capable, they may pursue goals misaligned with human intent — at scales where mistakes become catastrophic.
+As models become more capable, they may (be able to) pursue goals misaligned with human intent (e.g. hacking a yoga booking system)
 
 * **Mechanistic interpretability** — understand what circuits inside a model do.
 * **Alignment research** — methods to make models do what we want, not what we incentivise.
 * **Evaluations + red-teaming** — test models for dangerous capabilities before release.
 
-Anthropic and Google DeepMind run large internal alignment teams; OpenAI has safety/alignment work too, though its dedicated *Superalignment* team was disbanded in 2024. Independent safety organisations — e.g. Redwood Research, the Alignment Research Center (ARC), and the UK's AI Security Institute — work alongside the labs.
 :::
 ::: {.column width="45%"}
 ::: {.callout-warning}
-**The disagreement is real.** Some serious researchers think this is the most important problem of the century. Others think it's overblown — a distraction from concrete current harms.
+**This is all *very* contested.** Some serious researchers think this is the most important problem of the century. Others think it's overblown.
 
-You don't have to pick a side. You *should* know the debate exists, and have read at least one careful piece from each camp.
+You *should* know the debate exists, and have read at least one careful piece from each camp.
 :::
 :::
 :::
+
+Independent safety organisations — e.g. Redwood Research, the Alignment Research Center (ARC), and the UK's AI Security Institute work alongside labs to provide external safety checks.
+
+* Governments can impose restrictions
 
 ## Governance and regulation
 
@@ -606,16 +982,16 @@ You don't have to pick a side. You *should* know the debate exists, and have rea
 ::: {.column width="50%"}
 [Major recent frameworks]{.pill-blue}
 
-* **EU AI Act** (2024) — risk-tiered regulation; bans on social scoring, "high-risk" categories require audit.
-* **US executive order 14110** (Oct 2023) — set reporting requirements for large models, but was **revoked in Jan 2025**, so US federal requirements are now in flux.
-* **UK AI Safety Institute** (2023, **renamed the AI Security Institute in 2025**) — pre-deployment evaluations.
-* **China's interim measures** (2023) — registration + content controls.
+* **EU AI Act** (2024) — risk-tiered regulation; bans on social scoring, "high-risk" categories require audit
+* **US executive order 14110** (Oct 2023) — set reporting requirements for large models, but was **revoked in Jan 2025**, so US federal requirements are now in flux
+* **UK AI Safety Institute** (2023, **renamed the AI Security Institute in 2025**) — pre-deployment evaluations
+* **China's interim measures** (2023) — registration + content controls
 :::
 ::: {.column width="50%"}
 [Hard open questions]{.pill-amber}
 
 * **Liability**: when an AI makes a harmful decision, who's responsible?
-* **Provenance**: how do we know what generated which content?
+* **Provenance**: how do we know what generated which content? (Cf. watermarking)
 * **Concentration**: does a small number of labs running frontier models pose systemic risk?
 * **Export controls**: should training compute be regulated like nuclear materials?
 :::
@@ -629,75 +1005,81 @@ You don't have to pick a side. You *should* know the debate exists, and have rea
 ::: {.column width="50%"}
 [Studies showing displacement]{.pill-amber}
 
-* **Copywriting + translation**: Hui et al. (2023) found freelance demand for exposed work **fell** after ChatGPT's release (the headline magnitude is metric-dependent, and often smaller than early reports suggested).
-* **Illustration**: 15–30% revenue declines reported by professional illustrators.
-* **Customer support**: large vendors reducing headcount through 2024–25.
+* **Copywriting + translation**: Hui et al. (2023) found freelance demand **fell** after ChatGPT's release — writing jobs on Upwork down **2%**, monthly earnings down **5.2%**.
+* **Illustration**: the same study finds image-related freelancers hit the same way once image models arrived.
+* **Customer support**: widely reported headcount reductions through 2024–25 — trade press, not peer-reviewed evidence.
 :::
 ::: {.column width="50%"}
 [Counter-evidence + complications]{.pill-blue}
 
-* **Demand grows when costs fall** — true historically; uncertain at this speed.
 * **Augmentation > replacement** in many studies (Brynjolfsson, Li & Raymond 2023).
 * **Reskilling** is plausible — but the time horizon for displacement may be shorter than reskilling.
+* Impact may vary more by task than industry (Acemoglu and Restrepo 2019)
 :::
 :::
 
 ::: {.callout-warning}
-**The honest position**: we are early. Aggregate labour-market data lags by 1–3 years. Decisions are being made now — about policy, training, social safety nets — on weak evidence. Whether you build these systems or use them, you have a stake in **how the gains are distributed**.
+# It's too early to discern what's going on
+
+Aggregate labour-market data lags by 1–3 years. Decisions are being made now -- about policy, training, social safety nets -- on scant/weak evidence.
 :::
 
 ## Copyright, consent, provenance
 
-* LLMs and image generators are trained on enormous corpora of human-created work, mostly **without explicit consent** of the creators.
-* Outputs sometimes regurgitate training data verbatim (memorisation).
-* Legal frameworks are still being written. The first major AI-copyright suits arrived **~2022–2023** — the GitHub Copilot class action (Nov 2022), *Getty Images v. Stability AI* and *Andersen v. Stability AI* (Jan 2023), the Authors Guild and *NYT v. OpenAI* (2023) — and many are still working through the courts.
+* LLMs and image generators are trained on enormous corpora of human-created work, mostly **without explicit consent** of the creators
+* Legal frameworks are still being written. 
+
+  * The first major AI-copyright suits arrived **~2022–2023** — the GitHub Copilot class action (Nov 2022, mostly dismissed at present), *Andersen v. Stability AI* (Jan 2023), *Getty Images v. Stability AI* (UK claim Jan 2023, US suit Feb 2023), the Authors Guild and *NYT v. OpenAI* (2023)
+  * Many are still working through the courts.
 * Outputs are themselves often *uncopyrightable* (in the US, at least).
 
 ::: {.callout-warning}
-**Provenance is increasingly a research problem of its own.** How do we track what generated what? How do we attribute when training data is laundered through a model? How do creators opt out?
+# Provenance is increasingly a research *and* policy problem of its own.
+
+How do we track what generated what? How do we attribute when training data is laundered through a model? How do creators opt out?
 :::
 
-# Plenary · an ethics dilemma {background-color="#0E1A2B"}
+<!-- # Plenary · an ethics dilemma {background-color="#0E1A2B"} -->
 
-## Plenary · an ethics dilemma
+<!-- ## Plenary · an ethics dilemma -->
 
-[<span class="pause-cue">≈ 30 min</span> · groups of 4–5]{.eyebrow}
+<!-- [<span class="pause-cue">≈ 30 min</span> · groups of 4–5]{.eyebrow} -->
 
-There are **two** scenarios this time. Read both — your group picks **one**.
+<!-- There are **two** scenarios this time. Read both — your group picks **one**. -->
 
-::: {.card}
-[The scenario]{.eyebrow}
+<!-- ::: {.card} -->
+<!-- [The scenario]{.eyebrow} -->
 
-A national child welfare agency hires your firm to build a deep-learning model to **prioritise** which family-welfare cases caseworkers should investigate first. The agency receives more reports than it can investigate; prioritisation is currently done by overworked staff and is widely felt to be inconsistent.
+<!-- A national child welfare agency hires your firm to build a deep-learning model to **prioritise** which family-welfare cases caseworkers should investigate first. The agency receives more reports than it can investigate; prioritisation is currently done by overworked staff and is widely felt to be inconsistent. -->
 
-The data: 15 years of historical case files, including child outcomes (hospitalisation, court involvement, …) and family features (demographics, address, prior reports, contact with services).
+<!-- The data: 15 years of historical case files, including child outcomes (hospitalisation, court involvement, …) and family features (demographics, address, prior reports, contact with services). -->
 
-[Your team's mandate]{.eyebrow}
+<!-- [Your team's mandate]{.eyebrow} -->
 
-Improve case prioritisation. **All design choices are yours.**
-:::
+<!-- Improve case prioritisation. **All design choices are yours.** -->
+<!-- ::: -->
 
-## Plenary · what to discuss
+<!-- ## Plenary · what to discuss -->
 
-::: {.card}
-[In your group, discuss for 20 minutes]{.eyebrow}
+<!-- ::: {.card} -->
+<!-- [In your group, discuss for 20 minutes]{.eyebrow} -->
 
-1. What **target variable** would you train on — and what does that choice encode about whose outcomes matter?
+<!-- 1. What **target variable** would you train on — and what does that choice encode about whose outcomes matter? -->
 
-2. What features would you **refuse to use**, even if they predict well?
+<!-- 2. What features would you **refuse to use**, even if they predict well? -->
 
-3. How would you **evaluate** the model — and what evaluation would convince you *not* to deploy?
+<!-- 3. How would you **evaluate** the model — and what evaluation would convince you *not* to deploy? -->
 
-4. Who needs to **consent** to this system, and who gets to **contest** it?
+<!-- 4. Who needs to **consent** to this system, and who gets to **contest** it? -->
 
-5. Is there a version of this project you would **refuse to take**?
-:::
+<!-- 5. Is there a version of this project you would **refuse to take**? -->
+<!-- ::: -->
 
-::: {.callout-warning}
-**This is a real situation** (the Allegheny Family Screening Tool is one canonical case). It is not a thought experiment.
-:::
+<!-- ::: {.callout-warning} -->
+<!-- **This is a real situation** (the Allegheny Family Screening Tool is one canonical case). It is not a thought experiment. -->
+<!-- ::: -->
 
-## Plenary · a second dilemma
+## Plenary
 
 ::: {.card}
 [The scenario]{.eyebrow}
@@ -726,10 +1108,10 @@ A research team wants to pretest policy survey questions in places where fieldwo
 This is live research practice, not a hypothetical — Argyle et al. (2023), on your reading list, do a version of it for US public opinion.
 :::
 
-## Plenary · what to discuss (second dilemma)
+## Plenary · what to discuss
 
 ::: {.card}
-[If your group picks this one — same 20 minutes]{.eyebrow}
+[In your group — 20 minutes]{.eyebrow}
 
 1. What is the **quantity being measured** — public opinion, or the model's summary of text written about a group?
 
@@ -747,15 +1129,16 @@ This is live research practice, not a hypothetical — Argyle et al. (2023), on 
 [Some things people often surface in these discussions]{.eyebrow}
 
 ::: {.card}
-* **Target selection is the foundational ethics question.** Training on "investigated and substantiated" replicates past investigation patterns — including their biases. Training on "child harm" requires a definition of harm.
+* **Ask what is being measured before asking whether it works.** A synthetic respondent returns a summary of text written by — and about — people fitting the profile. That is a different quantity from what those people believe.
 
-* **Proxies for race/class are everywhere.** Address, prior agency contact, school district, parents' occupation. "Removing the protected attribute" rarely suffices.
+* **The method is thinnest exactly where you want it most.** Argyle et al. (2023) get their *algorithmic fidelity* on US public opinion, where the training corpus is dense. What about in a conflict zone?
 
-* **Disparate-impact evaluation is non-negotiable.** Subgroup error rates, false-positive rates, magnitudes — not just aggregate accuracy.
+* **Between-group patterns get stamped onto individuals.** LLMs may commit ecological fallacies.
 
-* **Consent and contestation are usually missing.** The families most affected typically have least voice in the design.
+* **Inference is more than just the point estimate.** Estimating what a population believes and supplying CIs is super tricky (maybe impossible?)
 
-* **"Refusal" is a professional option.** Not every project should be built. Especially not by people who didn't realise that until lecture 12.
+* **Validating needs the fieldwork you said you couldn't do.** With no gold standard you cannot bound the bias.
+
 :::
 
 # Part 3 · What next + exam prep {background-color="#0E1A2B"}
@@ -788,51 +1171,47 @@ This is live research practice, not a hypothetical — Argyle et al. (2023), on 
 
 * **Spirling (2023)** in *Nature* — why open-source models matter for research.
 * **Argyle et al. (2023)** — simulating human respondents with LLMs.
-* **Lall & Robinson (2022)** — deep learning for missing-data imputation (MIDAS).
-* **Egami et al. (2023)** — how to put LLM labels in a regression without breaking your standard errors.
+* ⭐️ **Egami et al. (2023)** — how to put LLM labels in a regression without breaking your standard errors.
 :::
 
-## Where AI research is moving — five bets
+## Where is AI research moving?
 
 [For your own next-step planning]{.eyebrow}
 
 ::: {.card}
 1. **Multi-modal everything** — text, image, video, audio in one model. Already here for inputs; outputs are next.
 
-2. **Agents** — tool use, planning, multi-step task completion. Currently bad; rapidly improving.
+2. ⭐️ **Efficiency** — small models that match big ones. Distillation + quantisation + sparse activations.
 
-3. **Reasoning models** — o1, R1 family. RL on outcomes for chain-of-thought.
-
-4. **Efficiency** — small models that match big ones. Distillation + quantisation + sparse activations.
-
-5. **Personalisation** — models that adapt to *you* via short fine-tunes, persistent memory, or context engineering.
+3. **Personalisation** — models that adapt to *you* via short fine-tunes and persistent memory
 :::
 
-::: {.callout-tip}
-Each of these has a 1–2 paper landing per week. You don't need to read all of them. But you should be able to *say what each is* and have a personal take on one.
-:::
+Maybe we'll see *new architectures* or approaches (see LeCun's new work)?
 
 ## How to *use* AI in your own work
 
 [Concrete habits worth forming]{.eyebrow}
 
 ::: {.card}
-1. **Verify before you trust.** Every fact, citation, statistic from an LLM gets a manual check.
-2. **Document your prompts** alongside your code. Treat prompts as part of your methodology.
+1. **Verify** every fact, citation, statistic
+2. **Document your prompts** (for yourself more than anything!)
 3. **Pre-register your evaluations**, and hand-code a gold-standard subset, whenever an LLM is doing measurement for you.
-4. **Disclose** AI use in your publications. Most journals now require this.
-5. **Maintain skill in the underlying task.** If you can't write the code yourself, you can't supervise the LLM that does.
+4. Figure out **disclosure** requirements for your context
+5. **Maintain skills** over the items you delegate, you can't supervise the LLM without them
 :::
 
 ::: {.callout-tip}
-The best researchers using AI in 2026 are not the ones who use it the most. They're the ones who use it *deliberately*, with clear ideas of where it helps and where it lies.
+Even with Claude Fable at our fingertips, the quality of published outputs varies hugely
+
+* This seems to be a product of *how* humans interface with the models
+
 :::
 
 ## Quiz · the whole course in five questions
 
-[<span class="pause-cue">≈ 15 min</span> · whole room]{.eyebrow}
+[<span class="pause-cue">≈ 15 min</span>]{.eyebrow}
 
-Pen and paper — the same equipment as Friday's exam. Three questions here, two on the next slide.
+Pen and paper — the same equipment as Friday's exam.
 
 ::: {.card}
 1. **A forward pass.** Weights $\mathbf{w} = [1, -2]$, bias $b = 0.5$, input $\mathbf{x} = [3, 1]$. Compute $y = \mathbf{w} \cdot \mathbf{x} + b$.
@@ -840,17 +1219,13 @@ Pen and paper — the same equipment as Friday's exam. Three questions here, two
 2. **A parameter count.** A fully-connected layer maps 10 inputs to 4 outputs. How many parameters does it have, biases included?
 
 3. **An output shape.** A 32×32 image goes through one convolutional layer: a 5×5 kernel, stride 1, no padding. What size is the output?
-:::
 
-## Quiz · questions 4 and 5
-
-::: {.card}
 4. **Attention.** In self-attention, each token computes a query, a key, and a value. Give the role of each — one phrase per vector.
 
 5. **Sampling.** You set the generation temperature to 0. What does the model do at each step — and what is one reason you might not want that?
 :::
 
-[Question 1 is week 1; questions 2–3 are week 2; questions 4–5 are week 3. If all five feel routine, you are ready for Friday.]{.muted}
+[Question 1 is week 1; questions 2–3 are week 2; questions 4–5 are week 3.]{.muted}
 
 ## Quiz · answers 1–3
 
@@ -892,15 +1267,15 @@ $\tau = 0$ reduces sampling to **argmax**: at every step the model picks the sin
 One reason not to want that: the text turns repetitive and flat, and a confident wrong answer comes back wrong on every run.
 :::
 
-That's the course: a dot product, a count, a shape, three vectors, and a knob.
+Most of this course is a dot product, a count, a shape, three vectors, and a few scalars as hyperparameters.
 
 ## The final exam
 
 [<span class="pause-cue">Friday 21 August</span>]{.eyebrow}
 
 ::: {.card}
-* **Two hours**, pen and paper. No laptops. No phones. No ChatGPT.
-* **Calculators are allowed.** Bring one.
+* **Two hours**, pen and paper. No laptops. No phones.
+* **Calculators are allowed.**
 * **Forty multiple-choice questions**, **six options** each, exactly one correct.
 * One mark each — marked out of 40, reported as a percentage.
 * **No negative marking.** A blank scores the same as a wrong answer, so **answer every question**.
@@ -931,9 +1306,8 @@ That's the course: a dot product, a count, a shape, three vectors, and a knob.
 ::: {.column width="50%"}
 [Roughly half are **calculations**]{.pill-blue}
 
-A forward pass, a gradient, an output shape, a parameter count, a softmax, a cosine, three steps of BPE. You work it out, then select the number you got.
+E.g. a forward pass, gradient, output shape, parameter count, softmax, cosine, three steps of BPE. You *select* the number you work out.
 
-Any constants you need are printed in the question.
 :::
 ::: {.column width="50%"}
 [The rest are **code and judgement**]{.pill}
@@ -945,26 +1319,25 @@ Or: here is a training curve / a validation result / a research design — what 
 :::
 
 ::: {.callout-warning appearance="simple"}
-**Arithmetic alone will not be enough.** On several questions two options carry the **same number** and differ only in the claim attached to it. Getting the number right is the first half of the work; deciding what it means is the second. Note that **neither** of a matching pair is necessarily right — on some questions both are wrong and the answer is a third option, so judge each claim on its own rather than assuming the pair contains the answer. **Read all six options before you choose.**
+**Arithmetic alone will not be enough.** On several questions two options carry the **same number** but differ in the claim attached to it. 
+
+* Note that **neither** of a matching pair is necessarily right -- on some questions both are wrong and the answer is a third option. **Read all six options before you choose.**
 :::
 
 ::: {.card}
-The paper runs roughly in course order and **gets harder as it goes**. The last few questions are meant to stretch the strongest of you. A handful in the middle — the longer hand-traces — take noticeably more than three minutes: if one is not coming out, **move on and come back**. Banking the quick questions is worth more than finishing any single slow one.
+The paper runs roughly in course order and **gets harder as it goes**. The last few questions are meant to stretch the strongest of you. A handful in the middle — the longer hand-traces — take noticeably more than three minutes. Ration your time and **move on and come back**.
 :::
 
-## How to study tonight
+## How to study
 
 ::: {.card}
 1. Reread the **slides** from each lecture — and skim the **solution cells** of the labs you completed. Both are examinable.
-2. Be able to define every term in the eyebrow labels and pills across all 12 decks.
+2. Be able to define every term across all 12 decks.
 3. Be able to **draw a computation graph** for a small expression and compute its gradient.
-4. Re-derive softmax + cross-entropy on paper.
-5. Sleep.
+4. Calculate softmax + cross-entropy on paper.
+5. Sleep!
 :::
 
-::: {.callout-tip}
-**Don't try to learn anything new tonight.** Consolidate what you already know. The exam tests *understanding*, not last-minute information.
-:::
 
 # A final word {background-color="#0E1A2B"}
 
@@ -972,20 +1345,25 @@ The paper runs roughly in course order and **gets harder as it goes**. The last 
 
 [Three weeks ago, AI was a black box.]{.eyebrow}
 
-Today, you have built every component of one — with your own hands and on paper. That changes how you read papers. How you read news. What you can build. And how you talk about these systems with people who haven't seen inside the box.
+We've gone through *75ish years* of research progress!
+
+* That's some workrate, so you should be pleased to have made it to the end
+* Give it some time to sink in
 
 ::: {.card}
-**Thanks.**
+*Thank you*
 
-To **Kaifang Zhou**, your lab instructor and TA, for running the labs. And to this cohort, for showing up to three hours of lecture and 90 minutes of lab every weekday for three weeks.
+* To **Kaifang Zhou**, for running the labs.
 
-[Stay in touch. Office hours continue through the autumn. Many of you will return for MY475 — see you then.]{.smaller}
+* To *you*, for showing up to three hours of lecture and 90 minutes of lab for the last three weeks!
 
-[**Send me what you build. Send me what breaks.**]{.smaller}
+[Stay in touch.]{.smaller}
+
+* [**Send me what you build and what breaks.**]{.smaller}
 :::
 
 ::: {.callout-tip}
-**Good luck on Friday — and thank you again.** It's been a privilege to teach this cohort.
+**Good luck on Friday — and thank you again.** It's been a privilege to teach you.
 :::
 
 ## References
